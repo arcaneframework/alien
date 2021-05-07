@@ -5,11 +5,7 @@ Welcome to Alien's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   API
-
-   coding-style
-
-   doxygen
+   developer/index
 
    tutorial
 
