@@ -5,9 +5,11 @@ Welcome to Alien's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   developer/index
+   user/index
 
    tutorial
+
+   developer/index
 
 Indices and tables
 ==================

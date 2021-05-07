@@ -7,4 +7,3 @@ Alien developer documentation
     :maxdepth: 2
    API
    coding-style
-   doxygen
