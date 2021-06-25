@@ -327,14 +327,17 @@ InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
       (*solver_setup_function)(solver, par_a, par_rhs, par_x));
   m_status.succeeded = ((*solver_solve_function)(solver, par_a, par_rhs, par_x) == 0);
 
-  checkError("Hypre " + solver_name + " solver GetNumIterations",
-      (*solver_get_num_iterations_function)(solver, &m_status.iteration_count));
-  checkError("Hypre " + solver_name + " solver GetFinalResidual",
-      (*solver_get_final_relative_residual_function)(solver, &m_status.residual));
-
   if (m_status.succeeded) {
-    m_status.succeeded = (m_status.iteration_count < max_it)
+      checkError("Hypre " + solver_name + " solver GetNumIterations",
+                 (*solver_get_num_iterations_function)(solver, &m_status.iteration_count));
+      checkError("Hypre " + solver_name + " solver GetFinalResidual",
+                 (*solver_get_final_relative_residual_function)(solver, &m_status.residual));
+
+      m_status.succeeded = (m_status.iteration_count < max_it)
         || (m_status.succeeded == max_it && m_status.residual <= rtol);
+  } else {
+      // Solver is not converged. Clear Hypre errors for subsequent calls.
+      HYPRE_ClearAllErrors();
   }
 
   checkError(
