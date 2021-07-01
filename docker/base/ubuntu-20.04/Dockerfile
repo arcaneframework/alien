@@ -11,8 +11,7 @@ RUN apt-get update \
     cmake \
     ccache \
     gcc g++ \
-    gdb \
-    clang \
+    ninja-build \
     && apt-get clean
 
 ## Install linear algebra libraries for alien.
