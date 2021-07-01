@@ -37,7 +37,7 @@ jobs:
         message("::set-output name=timestamp::${current_date}")
 
     - name: ccache files
-      uses: actions/cache@v1.1.0
+      uses: actions/cache@v2
       with:
         path: ${{env.CCACHE_DIR}}
         key: alien-ccache-${{ steps.ccache_timestamp.outputs.timestamp }}
