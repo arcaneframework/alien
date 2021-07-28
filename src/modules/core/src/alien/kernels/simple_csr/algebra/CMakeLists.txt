@@ -57,7 +57,7 @@ ELSE (ALIEN_CBLAS_HEADER)
     ENDIF (BLAS_HAVE_CBLAS)
     SET(ALIEN_CBLAS_HEADER "\"${ALIEN_CBLAS_NAME}\"")
     install(
-            FILES ${PROJECT_BINARY_DIR}/modules/core/src/alien/kernels/simple_csr/algebra/${ALIEN_CBLAS_NAME}
+            FILES ${CMAKE_CURRENT_BINARY_DIR}/${ALIEN_CBLAS_NAME}
             DESTINATION ${HEADER_INSTALL_PATH}
     )
 ENDIF (ALIEN_CBLAS_HEADER)
@@ -65,7 +65,7 @@ ENDIF (ALIEN_CBLAS_HEADER)
 CONFIGURE_FILE(CBLAS.h.in CBLAS.h @ONLY)
 
 install(
-        FILES ${PROJECT_BINARY_DIR}/modules/core/src/alien/kernels/simple_csr/algebra/CBLAS.h
+        FILES ${CMAKE_CURRENT_BINARY_DIR}/CBLAS.h
         DESTINATION ${HEADER_INSTALL_PATH}
 )
 
