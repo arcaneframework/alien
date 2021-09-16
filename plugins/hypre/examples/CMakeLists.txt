@@ -36,6 +36,12 @@ target_link_libraries(example_hypre PUBLIC
         Alien::alien_hypre
         Alien::alien_semantic_ref)
 
+add_executable(example_hypre_move hypre_example_solve_move.cpp)
+
+target_link_libraries(example_hypre_move PUBLIC
+        Alien::alien_hypre
+        Alien::alien_semantic_move)
+
 enable_testing()
 include(LoadAlienTest)
 
@@ -45,6 +51,14 @@ alien_test(
     PROCS 4
     COMMAND example_hypre
 )
+
+alien_test(
+        BENCH hypre
+        NAME hypre.example.move
+        PROCS 4
+        COMMAND example_hypre_move
+)
+
 
 #-----------------------------------------------------------
 # Bench recap
