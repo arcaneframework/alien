@@ -1,101 +1,46 @@
-﻿# Copyright 2020 IFPEN-CEA
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# SPDX-License-Identifier: Apache-2.0
+cmake_minimum_required(VERSION 3.7.2)
 
-cmake_minimum_required(VERSION 3.11)
+# For support of VERSION
+cmake_policy(SET CMP0048 NEW)
 
-find_program(CCACHE_PROGRAM ccache)
-if (CCACHE_PROGRAM)
-    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
-endif ()
+file(READ "version" ARCCON_VERSION)
+message(STATUS "ArcconVersion = ${ARCCON_VERSION}")
 
-# MUST be done before call to 'project'
-get_cmake_property(vars CACHE_VARIABLES)
-foreach(var ${vars})
-  get_property(currentHelpString CACHE "${var}" PROPERTY HELPSTRING)
-    if("${currentHelpString}" MATCHES "No help, variable specified on the command line." OR "${currentHelpString}" STREQUAL "")
-        # message("${var} = [${${var}}]  --  ${currentHelpString}") # uncomment to see the variables being processed
-        list(APPEND CL_ARGS "-D${var}=${${var}}")
-    endif()
-endforeach()
+project(Arccon
+  LANGUAGES NONE # No C or C++ !
+  VERSION ${ARCCON_VERSION})
 
-# ----------------------------------------------------------------------------
-# Indique que le projet n'a pas de language
-# Cela est indispensable pour que CMake ne recherche pas les
-# compilateurs avant d'avoir inclus les fichiers de configuration.
-Project(AlienFramework LANGUAGES NONE)
+include(${CMAKE_CURRENT_LIST_DIR}/build-system/ArcconSetInstallDirs.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/build-system/commands/user/installDirectory.cmake)
 
-option(ALIEN_PLUGIN_HYPRE "Whether or not to compile Hypre backend" OFF)
-option(ALIEN_PLUGIN_PETSC "Whether or not to compile PETSc backend" OFF)
-option(ALIEN_PLUGIN_SUPERLU "Whether or not to compile SuperLU backend" OFF)
-option(ALIEN_PLUGIN_TRILINOS "Whether or not to compile Trilinos backend" OFF)
+set(config_install_dir "${CMAKE_INSTALL_DATAROOTDIR}/cmake/${PROJECT_NAME}")
+set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
+set(arccon_install_lib "${CMAKE_INSTALL_LIBDIR}/arccon")
 
-option(ALIEN_FRAMEWORK_EXTERNAL "Use external project instead of merging all projects" OFF)
+arccon_install_directory(NAMES build-system DESTINATION ${arccon_install_lib})
+install(FILES Arccon.cmake loadArccon.cmake Readme.md DESTINATION ${arccon_install_lib})
 
-if (NOT ALIEN_FRAMEWORK_EXTERNAL)
-    # ----------------------------------------------------------------------------
-    # Macro pour positionner la variable 'var_name' dans le cache
-    # avec sa valeur actuelle ou la valeur 'var_value' si elle n'a
-    # pas de valeur.
-    macro(alienframework_set_if_unset var_name var_value var_type description)
-        if (NOT DEFINED ${var_name})
-            set(${var_name} ${var_value})
-        endif ()
-        set(${var_name} ${${var_name}} CACHE BOOL "${description}" FORCE)
-    endmacro()
+#set(PACKAGES_DIR_SYSTEM ${arccon_install_lib}/build-system/packages)
+#set(PACKAGES_DIR_P ${arccon_install_lib}/packages)
+set(MODULE_PATH_SYSTEM ${arccon_install_lib}/build-system)
+set(MODULE_PATH_M ${arccon_install_lib}/build-system/Modules)
 
-    # ----------------------------------------------------------------------------
-    # ----------------------------------------------------------------------------
+set(CMAKE_COMMANDS ${MODULE_PATH_SYSTEM}/commands/commands.cmake)
 
-    # Force l'utilisation de bibliothèques dynamiques
-    set(BUILD_SHARED_LIBS TRUE)
+# Configuration
+set(project_config_version "${generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
+set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
 
-    alienframework_set_if_unset(ARCCON_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/framework/arccon PATH "Arccon root path")
-    alienframework_set_if_unset(ARCCORE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/framework/arccore PATH "Arccore root")
-    alienframework_set_if_unset(ALIEN_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/src PATH "Alien root")
-
-
-    list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMake)
-
-    enable_testing()
-
-
-    set(FRAMEWORK_EXPORT_NAME AlienFrameworkTargets)
-
-    add_subdirectory(src)
-
-    if (ALIEN_PLUGIN_HYPRE)
-        add_subdirectory(plugins/hypre)
-    endif (ALIEN_PLUGIN_HYPRE)
-    if (ALIEN_PLUGIN_PETSC)
-        add_subdirectory(plugins/petsc)
-    endif (ALIEN_PLUGIN_PETSC)
-    if (ALIEN_PLUGIN_SUPERLU)
-        add_subdirectory(plugins/superlu)
-    endif (ALIEN_PLUGIN_SUPERLU)
-    if (ALIEN_PLUGIN_TRILINOS)
-        add_subdirectory(plugins/trilinos)
-    endif (ALIEN_PLUGIN_TRILINOS)
-
-else (NOT ALIEN_FRAMEWORK_EXTERNAL)
-    include(external.cmake)
-endif ()
-
-# ----------------------------------------------------------------------------
-# Local Variables:
-# tab-width: 2
-# indent-tabs-mode: nil
-# coding: utf-8-with-signature
-# End:
+include(CMakePackageConfigHelpers)
+configure_package_config_file(ArcconConfig.cmake.in ${project_config}
+  INSTALL_DESTINATION ${config_install_dir}
+  PATH_VARS
+  MODULE_PATH_SYSTEM MODULE_PATH_M
+  CMAKE_COMMANDS
+  )
+write_basic_package_version_file(
+  ${project_config_version}
+  VERSION ${Arccon_VERSION}
+  COMPATIBILITY SameMajorVersion)
+install(FILES ${project_config_version} ${project_config}
+        DESTINATION ${config_install_dir} )
