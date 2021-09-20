@@ -3,15 +3,16 @@
 Building with move semantic
 ===========================
 
-.. doxygenclass:: Alien::DirectMatrixBuilder
+.. doxygenclass:: Alien::Move::DirectMatrixBuilder
    :project: doxygen_api_docs_movesemantic
    :members:
+   :undoc-members:
 
-.. doxygenclass:: Alien::ProfiledMatrixBuilder
+.. doxygenclass:: Alien::Move::ProfiledMatrixBuilder
    :project: doxygen_api_docs_movesemantic
 
-.. doxygenclass:: Alien::VectorReader
+.. doxygenclass:: Alien::Move::VectorReader
    :project: doxygen_api_docs_movesemantic
 
-.. doxygenclass:: Alien::VectorWriter
+.. doxygenclass:: Alien::Move::VectorWriter
    :project: doxygen_api_docs_movesemantic
