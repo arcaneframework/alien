@@ -56,12 +56,28 @@ Trilinos [trilinos]_ uses something similar but less formalized with its `maps <
 Software design
 ===============
 
-Keep user interface small
--------------------------
+Multiple representations
+------------------------
+
+Alien is mainly a wrapper over external linear algebra libraries. The idea is to not reimplement linear solvers.
+However, we focus on interoperability between libraries and functionalities.
+
+Alien's main idea is to allow dynamic (runtime) change of linear solver implementation. For example, one can try to solve
+a linear system using a fast but not numerically robust algorithm, but yet be able to switch to a slow and robust one
+if the former has failed.
+
+Alien will convert data structures between libraries and deal with the distributed memory aspects.
 
 
-Extend functionalities: add new objects
----------------------------------------
+Stateless objects
+-----------------
+
+To ensure easier of Alien, as well as more robust code, we have chosen to not rely on state for our objects.
+That means that we do not want the user to deal with notions liked, is my matrix correctly finalized before computing with it ?
+
+To enable that idea, we heavily rely on a converter pattern. That means we will have a lot of specific objects, that can only
+perform one task, such as filling in or compute linear expression. To perform different operations, user has to
+*explicitly* convert between types.
 
 
 Coherent APIs
