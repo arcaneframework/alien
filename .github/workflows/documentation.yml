@@ -22,9 +22,9 @@ jobs:
         run:
           cmake --build /build --target alien_doc
 
-      - name: Install rsync 📚
+      - name: Install deploy dependencies 📚
         run: |
-          apt-get update && apt-get install -y rsync
+          apt-get update && apt-get install -y rsync git
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@4.1.5
