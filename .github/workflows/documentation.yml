@@ -20,7 +20,7 @@ jobs:
 
       - name: Build documentation
         run:
-          cmake --build /build alien_doc
+          cmake --build /build --target alien_doc
 
       - name: Install rsync 📚
         run: |
