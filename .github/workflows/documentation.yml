@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   build:
@@ -27,6 +27,7 @@ jobs:
           apt-get update && apt-get install -y rsync git
 
       - name: Deploy Docs
+        if: github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@364c31d33bb99327c77b3a5438a83a357a6729ad # v3.4.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
