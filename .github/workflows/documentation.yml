@@ -23,6 +23,7 @@ jobs:
           cmake --build build --target alien_doc
 
       - name: Install deploy dependencies 📚
+        if: github.ref == 'refs/heads/main'
         run: |
           apt-get update && apt-get install -y rsync git
 
