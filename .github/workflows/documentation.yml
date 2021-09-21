@@ -26,11 +26,10 @@ jobs:
         run: |
           apt-get update && apt-get install -y rsync git
 
-      - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@4.1.5
+      - name: Deploy Docs
+        uses: peaceiris/actions-gh-pages@364c31d33bb99327c77b3a5438a83a357a6729ad # v3.4.0
         with:
-          branch: gh-pages # The branch the action should deploy to.
-          folder: build/alien_doc # The folder the action should deploy.
-          dry-run: true
-          clean: true
-
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./build/alien_doc
+          force_orphan: true
