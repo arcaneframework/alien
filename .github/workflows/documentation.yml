@@ -1,0 +1,36 @@
+name: Documentation
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: sphinx-doc
+    runs-on: ubuntu-latest
+    container: arcaneframework/alien-base:ubuntu20.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Configure CMake
+        run:
+          cmake -B /build -DCMAKE_BUILD_TYPE=Debug -DALIEN_PLUGIN_HYPRE:BOOL=ON -DALIEN_PLUGIN_PETSC:BOOL=ON -G Ninja -DCMAKE_INSTALL_PREFIX=/opt/alien -DALIEN_DEFAULT_OPTIONS:BOOL=ON -DALIENDEV_EMBEDDED:BOOL=ON -DALIEN_GENERATE_DOCUMENTATION:BOOL=ON -DCMAKE_PREFIX_PATH=\"/opt/arccon;/opt/arccore\"
+
+      - name: Build documentation
+        run:
+          cmake --build /build alien_doc
+
+      - name: Install rsync 📚
+        run: |
+          apt-get update && apt-get install -y rsync
+
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@4.1.5
+        with:
+          branch: gh-pages # The branch the action should deploy to.
+          folder: /build/alien_doc # The folder the action should deploy.
+          dry-run: true
+          clean: true
+
