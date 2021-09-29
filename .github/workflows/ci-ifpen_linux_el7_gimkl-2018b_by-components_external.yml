@@ -61,14 +61,12 @@ jobs:
           cmake --install ${{ env.ARCCON_BUILD_DIR }}
       - name: Tar install artifact
         shell: bash
-        run: |
-          tar cf arccon-install-artifact.tar ${{ env.ARCCON_INSTALL_DIR }}
+        run: tar cf arccon-install-artifact.tar ${{ env.ARCCON_INSTALL_DIR }}
       - name: Upload install artifact
         uses: actions/upload-artifact@v2
         with:
           name: arccon-install-artifact
-          path: |
-            arccon-install-artifact.tar
+          path: arccon-install-artifact.tar
           retention-days: 1
 
   arccore-install:
@@ -96,8 +94,7 @@ jobs:
           name: arccon-install-artifact
       - name: Untar arccon install artifact
         shell: bash
-        run: |
-          tar xf arccon-install-artifact.tar -C /
+        run: tar xf arccon-install-artifact.tar -C /
       - name: Configure
         shell: bash
         run: |
@@ -115,25 +112,21 @@ jobs:
           cmake --install ${{ env.ARCCORE_BUILD_DIR }}
       - name: Tar build artifact
         shell: bash
-        run: |
-          tar cf arccore-build-artifact.tar ${{ env.ARCCORE_BUILD_DIR }}
+        run: tar cf arccore-build-artifact.tar ${{ env.ARCCORE_BUILD_DIR }}
       - name: Upload build artifact
         uses: actions/upload-artifact@v2
         with:
           name: arccore-build-artifact
-          path: |
-            arccore-build-artifact.tar
+          path: arccore-build-artifact.tar
           retention-days: 1
       - name: Tar install artifact
         shell: bash
-        run: |
-          tar cf arccore-install-artifact.tar ${{ env.ARCCORE_INSTALL_DIR }}
+        run: tar cf arccore-install-artifact.tar ${{ env.ARCCORE_INSTALL_DIR }}
       - name: Upload install artifact
         uses: actions/upload-artifact@v2
         with:
           name: arccore-install-artifact
-          path: |
-            arccore-install-artifact.tar
+          path: arccore-install-artifact.tar
           retention-days: 1
 
   alien-install:
@@ -160,16 +153,14 @@ jobs:
           name: arccon-install-artifact
       - name: Untar arccon install artifact
         shell: bash
-        run: |
-          tar xf arccon-install-artifact.tar -C /
+        run: tar xf arccon-install-artifact.tar -C /
       - name: Download arccore install artifact
         uses: actions/download-artifact@v2
         with:
           name: arccore-install-artifact
       - name: Untar arccore install artifact
         shell: bash
-        run: |
-          tar xf arccore-install-artifact.tar -C /
+        run: tar xf arccore-install-artifact.tar -C /
       - name: Configure
         shell: bash
         run: |
@@ -187,14 +178,12 @@ jobs:
           cmake --install ${{ env.ALIEN_BUILD_DIR }}
       - name: Tar build artifact
         shell: bash
-        run: |
-          tar cf alien-build-artifact.tar ${{ env.ALIEN_BUILD_DIR }}
+        run: tar cf alien-build-artifact.tar ${{ env.ALIEN_BUILD_DIR }}
       - name: Upload build artifact
         uses: actions/upload-artifact@v2
         with:
           name: alien-build-artifact
-          path: |
-            alien-build-artifact.tar
+          path: alien-build-artifact.tar
           retention-days: 1
 
   arccore-test:
@@ -216,14 +205,20 @@ jobs:
           name: arccore-build-artifact
       - name: Untar arccore build artifact
         shell: bash
-        run: |
-          tar xf arccore-build-artifact.tar -C /
+        run: tar xf arccore-build-artifact.tar -C /
       - name: Test
         shell: bash
         run: |
           source /env.sh
           cd ${{ env.ARCCORE_BUILD_DIR }}
           ctest ${{ env.CT_OPTS }}
+      - name: Upload test artifact
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: arccore-test-artifact
+          path: ${{ env.ARCCORE_BUILD_DIR }}/Testing
+          retention-days: 1
 
   alien-test:
     needs:
@@ -249,19 +244,24 @@ jobs:
           name: alien-build-artifact
       - name: Untar alien build artifact
         shell: bash
-        run: |
-          tar xf alien-build-artifact.tar -C /
+        run: tar xf alien-build-artifact.tar -C /
       - name: Download arccore install artifact
         uses: actions/download-artifact@v2
         with:
           name: arccore-install-artifact
       - name: Untar arccore install artifact
         shell: bash
-        run: |
-          tar xf arccore-install-artifact.tar -C /
+        run: tar xf arccore-install-artifact.tar -C /
       - name: Test
         shell: bash
         run: |
           source /env.sh
           cd ${{ env.ALIEN_BUILD_DIR }}
           ctest ${{ env.CT_OPTS }}
+      - name: Upload test artifact
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: alien-test-artifact
+          path: ${{ env.ALIEN_BUILD_DIR }}/Testing
+          retention-days: 1
