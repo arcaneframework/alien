@@ -1,12 +1,16 @@
-name: ci-ifpen_linux_el7_foss-2018b_by-components_external
+name: IFP Manu Linux El7 Foss/2018b
 
 on:
-  push:
-    branches: [ main, dev/cea, dev/ifpen, dev/ci_ifpen ]
-  pull_request:
-    branches: [ main, dev/cea, dev/ifpen, dev/ci_ifpen ]
   workflow_dispatch:
-    branches: [ main, dev/cea, dev/ifpen, dev/ci_ifpen ]
+    inputs:
+      arccon_branch:
+        description: 'Arccon branch'
+        required: true
+        default: 'main'
+      arccore_branch:
+        description: 'Arccore branch'
+        required: true
+        default: 'main'
 
 env:
   # Arcane
@@ -28,6 +32,7 @@ env:
 
 jobs:
   arccon-install:
+    name: arccon-install-${{ github.event.inputs.arccon_branch }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     container:
@@ -43,7 +48,7 @@ jobs:
         with:
           repository: arcaneframework/arccon
           path: ${{ env.ARCCON_SOURCE_DIR }}
-          ref: main
+          ref: ${{ github.event.inputs.arccon_branch }}
       - name: Configure
         shell: bash
         run: |
@@ -70,6 +75,7 @@ jobs:
           retention-days: 1
 
   arccore-install:
+    name: arccore-install-${{ github.event.inputs.arccore_branch }}
     needs:
       - arccon-install
     runs-on: ubuntu-latest
@@ -87,7 +93,7 @@ jobs:
         with:
           repository: arcaneframework/arccore
           path: ${{ env.ARCCORE_SOURCE_DIR }}
-          ref: main
+          ref: ${{ github.event.inputs.arccore_branch }}
       - name: Download arccon install artifact
         uses: actions/download-artifact@v2
         with:
@@ -130,6 +136,7 @@ jobs:
           retention-days: 1
 
   alien-install:
+    name: alien-install
     needs:
       - arccon-install
       - arccore-install
@@ -187,6 +194,7 @@ jobs:
           retention-days: 1
 
   arccore-test:
+    name: arccore-install-${{ github.event.inputs.arccore_branch }}
     needs:
       - arccore-install
     runs-on: ubuntu-latest
@@ -221,6 +229,7 @@ jobs:
           retention-days: 1
 
   alien-test:
+    name: alien-test
     needs:
       - arccore-install
       - alien-install

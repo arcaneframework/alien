@@ -1,4 +1,4 @@
-name: ci-ifpen_linux_el8_gimkl-2018b_by-components_external
+name: IFP Auto Linux El7 Foss/2018b
 
 on:
   push:
@@ -28,10 +28,11 @@ env:
 
 jobs:
   arccon-install:
+    name: arccon-install
     runs-on: ubuntu-latest
     timeout-minutes: 30
     container:
-      image: ghcr.io/arcaneframework/rockylinux-gimkl-2018b-alien:8-latest
+      image: ghcr.io/arcaneframework/centos-foss-2018b-alien:7-latest
       credentials:
         username: ${{ secrets.ci_ifpen_read_packages_username }}
         password: ${{ secrets.ci_ifpen_read_packages_password }}
@@ -70,12 +71,13 @@ jobs:
           retention-days: 1
 
   arccore-install:
+    name: arccore-install
     needs:
       - arccon-install
     runs-on: ubuntu-latest
     timeout-minutes: 30
     container:
-      image: ghcr.io/arcaneframework/rockylinux-gimkl-2018b-alien:8-latest
+      image: ghcr.io/arcaneframework/centos-foss-2018b-alien:7-latest
       credentials:
         username: ${{ secrets.ci_ifpen_read_packages_username }}
         password: ${{ secrets.ci_ifpen_read_packages_password }}
@@ -130,13 +132,14 @@ jobs:
           retention-days: 1
 
   alien-install:
+    name: alien-install
     needs:
       - arccon-install
       - arccore-install
     runs-on: ubuntu-latest
     timeout-minutes: 60
     container:
-      image: ghcr.io/arcaneframework/rockylinux-gimkl-2018b-alien:8-latest
+      image: ghcr.io/arcaneframework/centos-foss-2018b-alien:7-latest
       credentials:
         username: ${{ secrets.ci_ifpen_read_packages_username }}
         password: ${{ secrets.ci_ifpen_read_packages_password }}
@@ -187,12 +190,13 @@ jobs:
           retention-days: 1
 
   arccore-test:
+    name: arccore-test
     needs:
       - arccore-install
     runs-on: ubuntu-latest
     timeout-minutes: 30
     container:
-      image: ghcr.io/arcaneframework/rockylinux-gimkl-2018b-alien:8-latest
+      image: ghcr.io/arcaneframework/centos-foss-2018b-alien:7-latest
       credentials:
         username: ${{ secrets.ci_ifpen_read_packages_username }}
         password: ${{ secrets.ci_ifpen_read_packages_password }}
@@ -221,13 +225,14 @@ jobs:
           retention-days: 1
 
   alien-test:
+    name: alien-test
     needs:
       - arccore-install
       - alien-install
     runs-on: ubuntu-latest
     timeout-minutes: 180
     container:
-      image: ghcr.io/arcaneframework/rockylinux-gimkl-2018b-alien:8-latest
+      image: ghcr.io/arcaneframework/centos-foss-2018b-alien:7-latest
       credentials:
         username: ${{ secrets.ci_ifpen_read_packages_username }}
         password: ${{ secrets.ci_ifpen_read_packages_password }}
