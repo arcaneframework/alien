@@ -3,12 +3,8 @@ name: IFP Manu Linux El7 Gimkl/2018b
 on:
   workflow_dispatch:
     inputs:
-      arccon_branch:
-        description: 'Arccon branch'
-        required: true
-        default: 'main'
-      arccore_branch:
-        description: 'Arccore branch'
+      arcane_branch:
+        description: 'Arcane branch'
         required: true
         default: 'main'
 
@@ -20,11 +16,11 @@ env:
   # Arccon
   ARCCON_BUILD_DIR: /__w/alien/alien/arccon_build
   ARCCON_INSTALL_DIR: /__w/alien/alien/arccon_install
-  ARCCON_SOURCE_DIR: /__w/alien/alien/arccon
+  ARCCON_SOURCE_DIR: /__w/alien/alien/arcane
   # Arccore
   ARCCORE_BUILD_DIR: /__w/alien/alien/arccore_build
   ARCCORE_INSTALL_DIR: /__w/alien/alien/arccore_install
-  ARCCORE_SOURCE_DIR: /__w/alien/alien/arccore
+  ARCCORE_SOURCE_DIR: /__w/alien/alien/arcane
   # CMake
   CM_BUILD_TYPE: Debug
   # CTest
@@ -32,7 +28,7 @@ env:
 
 jobs:
   arccon-install:
-    name: arccon-install-${{ github.event.inputs.arccon_branch }}
+    name: arccon-install-${{ github.event.inputs.arcane_branch }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     container:
@@ -46,14 +42,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          repository: arcaneframework/arccon
+          repository: arcaneframework/framework
           path: ${{ env.ARCCON_SOURCE_DIR }}
-          ref: ${{ github.event.inputs.arccon_branch }}
+          ref: ${{ github.event.inputs.arcane_branch }}
       - name: Configure
         shell: bash
         run: |
           source /env.sh
-          cmake -S ${{ env.ARCCON_SOURCE_DIR }} -B ${{ env.ARCCON_BUILD_DIR }} -DCMAKE_BUILD_TYPE=${{ env.CM_BUILD_TYPE }} -DCMAKE_INSTALL_PREFIX=${{ env.ARCCON_INSTALL_DIR }}
+          cmake -S ${{ env.ARCCON_SOURCE_DIR }}/arccon -B ${{ env.ARCCON_BUILD_DIR }} -DCMAKE_BUILD_TYPE=${{ env.CM_BUILD_TYPE }} -DCMAKE_INSTALL_PREFIX=${{ env.ARCCON_INSTALL_DIR }}
       - name: Build
         shell: bash
         run: |
@@ -75,7 +71,7 @@ jobs:
           retention-days: 1
 
   arccore-install:
-    name: arccore-install-${{ github.event.inputs.arccore_branch }}
+    name: arccore-install-${{ github.event.inputs.arcane_branch }}
     needs:
       - arccon-install
     runs-on: ubuntu-latest
@@ -91,9 +87,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          repository: arcaneframework/arccore
+          repository: arcaneframework/framework
           path: ${{ env.ARCCORE_SOURCE_DIR }}
-          ref: ${{ github.event.inputs.arccore_branch }}
+          ref: ${{ github.event.inputs.arcane_branch }}
       - name: Download arccon install artifact
         uses: actions/download-artifact@v2
         with:
@@ -105,7 +101,7 @@ jobs:
         shell: bash
         run: |
           source /env.sh
-          cmake -S ${{ env.ARCCORE_SOURCE_DIR }} -B ${{ env.ARCCORE_BUILD_DIR }} -DCMAKE_BUILD_TYPE=${{ env.CM_BUILD_TYPE }} -DCMAKE_INSTALL_PREFIX=${{ env.ARCCORE_INSTALL_DIR }} -DArccon_DIR=${{ env.ARCCON_INSTALL_DIR }}/share/cmake/Arccon -DBUILD_SHARED_LIBS=ON
+          cmake -S ${{ env.ARCCORE_SOURCE_DIR }}/arccore -B ${{ env.ARCCORE_BUILD_DIR }} -DCMAKE_BUILD_TYPE=${{ env.CM_BUILD_TYPE }} -DCMAKE_INSTALL_PREFIX=${{ env.ARCCORE_INSTALL_DIR }} -DArccon_DIR=${{ env.ARCCON_INSTALL_DIR }}/share/cmake/Arccon -DBUILD_SHARED_LIBS=ON
       - name: Build
         shell: bash
         run: |
@@ -194,7 +190,7 @@ jobs:
           retention-days: 1
 
   arccore-test:
-    name: arccore-install-${{ github.event.inputs.arccore_branch }}
+    name: arccore-install-${{ github.event.inputs.arcane_branch }}
     needs:
       - arccore-install
     runs-on: ubuntu-latest
