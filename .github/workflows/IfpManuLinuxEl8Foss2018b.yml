@@ -190,7 +190,7 @@ jobs:
           retention-days: 1
 
   arccore-test:
-    name: arccore-install-${{ github.event.inputs.arcane_branch }}
+    name: arccore-test-${{ github.event.inputs.arcane_branch }}
     needs:
       - arccore-install
     runs-on: ubuntu-latest
