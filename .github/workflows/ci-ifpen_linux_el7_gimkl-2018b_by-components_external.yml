@@ -10,17 +10,17 @@ on:
 
 env:
   # Arcane
-  ALIEN_BUILD_DIR: /__w/framework/framework/alien_build
-  ALIEN_INSTALL_DIR: /__w/framework/framework/alien_install
-  ALIEN_SOURCE_DIR: /__w/framework/framework/alien
+  ALIEN_BUILD_DIR: /__w/alien/alien/alien_build
+  ALIEN_INSTALL_DIR: /__w/alien/alien/alien_install
+  ALIEN_SOURCE_DIR: /__w/alien/alien/alien
   # Arccon
-  ARCCON_BUILD_DIR: /__w/framework/framework/arccon_build
-  ARCCON_INSTALL_DIR: /__w/framework/framework/arccon_install
-  ARCCON_SOURCE_DIR: /__w/framework/framework/arccon
+  ARCCON_BUILD_DIR: /__w/alien/alien/arccon_build
+  ARCCON_INSTALL_DIR: /__w/alien/alien/arccon_install
+  ARCCON_SOURCE_DIR: /__w/alien/alien/arccon
   # Arccore
-  ARCCORE_BUILD_DIR: /__w/framework/framework/arccore_build
-  ARCCORE_INSTALL_DIR: /__w/framework/framework/arccore_install
-  ARCCORE_SOURCE_DIR: /__w/framework/framework/arccore
+  ARCCORE_BUILD_DIR: /__w/alien/alien/arccore_build
+  ARCCORE_INSTALL_DIR: /__w/alien/alien/arccore_install
+  ARCCORE_SOURCE_DIR: /__w/alien/alien/arccore
   # CMake
   CM_BUILD_TYPE: Debug
   # CTest
@@ -228,6 +228,7 @@ jobs:
   alien-test:
     needs:
       - arccore-install
+      - alien-install
     runs-on: ubuntu-latest
     timeout-minutes: 180
     container:
