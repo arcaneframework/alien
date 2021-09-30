@@ -1,15 +1,15 @@
-name: IFP Manu Linux El8 Gimkl/2018b
+name: IFP El8 Foss/2018b
 
 on:
+  push:
+    branches: [ main, dev/cea, dev/ifpen, dev/ci_ifpen ]
+  pull_request:
+    branches: [ main, dev/cea, dev/ifpen, dev/ci_ifpen ]
   workflow_dispatch:
-    inputs:
-      framework_branch:
-        description: 'Framework branch'
-        required: true
-        default: 'main'
+    branches: [ main, dev/cea, dev/ifpen, dev/ci_ifpen ]
 
 env:
-  # Arcane
+  # Alien
   ALIEN_BUILD_DIR: /__w/alien/alien/alien_build
   ALIEN_INSTALL_DIR: /__w/alien/alien/alien_install
   ALIEN_SOURCE_DIR: /__w/alien/alien/alien
@@ -28,11 +28,11 @@ env:
 
 jobs:
   arccon-install:
-    name: arccon-install-${{ github.event.inputs.framework_branch }}
+    name: arccon-install
     runs-on: ubuntu-latest
     timeout-minutes: 30
     container:
-      image: ghcr.io/arcaneframework/rockylinux-gimkl-2018b-alien:8-latest
+      image: ghcr.io/arcaneframework/rockylinux-foss-2018b-alien:8-latest
       credentials:
         username: ${{ secrets.ci_ifpen_read_packages_username }}
         password: ${{ secrets.ci_ifpen_read_packages_password }}
@@ -44,7 +44,7 @@ jobs:
         with:
           repository: arcaneframework/framework
           path: ${{ env.ARCCON_SOURCE_DIR }}
-          ref: ${{ github.event.inputs.framework_branch }}
+          ref: main
       - name: Configure
         shell: bash
         run: |
@@ -71,13 +71,13 @@ jobs:
           retention-days: 1
 
   arccore-install:
-    name: arccore-install-${{ github.event.inputs.framework_branch }}
+    name: arccore-install
     needs:
       - arccon-install
     runs-on: ubuntu-latest
     timeout-minutes: 30
     container:
-      image: ghcr.io/arcaneframework/rockylinux-gimkl-2018b-alien:8-latest
+      image: ghcr.io/arcaneframework/rockylinux-foss-2018b-alien:8-latest
       credentials:
         username: ${{ secrets.ci_ifpen_read_packages_username }}
         password: ${{ secrets.ci_ifpen_read_packages_password }}
@@ -89,7 +89,7 @@ jobs:
         with:
           repository: arcaneframework/framework
           path: ${{ env.ARCCORE_SOURCE_DIR }}
-          ref: ${{ github.event.inputs.framework_branch }}
+          ref: main
       - name: Download arccon install artifact
         uses: actions/download-artifact@v2
         with:
@@ -139,7 +139,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     container:
-      image: ghcr.io/arcaneframework/rockylinux-gimkl-2018b-alien:8-latest
+      image: ghcr.io/arcaneframework/rockylinux-foss-2018b-alien:8-latest
       credentials:
         username: ${{ secrets.ci_ifpen_read_packages_username }}
         password: ${{ secrets.ci_ifpen_read_packages_password }}
@@ -190,13 +190,13 @@ jobs:
           retention-days: 1
 
   arccore-test:
-    name: arccore-test-${{ github.event.inputs.framework_branch }}
+    name: arccore-test
     needs:
       - arccore-install
     runs-on: ubuntu-latest
     timeout-minutes: 30
     container:
-      image: ghcr.io/arcaneframework/rockylinux-gimkl-2018b-alien:8-latest
+      image: ghcr.io/arcaneframework/rockylinux-foss-2018b-alien:8-latest
       credentials:
         username: ${{ secrets.ci_ifpen_read_packages_username }}
         password: ${{ secrets.ci_ifpen_read_packages_password }}
@@ -232,7 +232,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 180
     container:
-      image: ghcr.io/arcaneframework/rockylinux-gimkl-2018b-alien:8-latest
+      image: ghcr.io/arcaneframework/rockylinux-foss-2018b-alien:8-latest
       credentials:
         username: ${{ secrets.ci_ifpen_read_packages_username }}
         password: ${{ secrets.ci_ifpen_read_packages_password }}

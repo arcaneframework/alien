@@ -1,4 +1,4 @@
-name: IFP Auto Linux El7 Gimkl/2018b
+name: IFP El7 Gimkl/2018b
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
     branches: [ main, dev/cea, dev/ifpen, dev/ci_ifpen ]
 
 env:
-  # Arcane
+  # Alien
   ALIEN_BUILD_DIR: /__w/alien/alien/alien_build
   ALIEN_INSTALL_DIR: /__w/alien/alien/alien_install
   ALIEN_SOURCE_DIR: /__w/alien/alien/alien
