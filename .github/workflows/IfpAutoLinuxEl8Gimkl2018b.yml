@@ -16,11 +16,11 @@ env:
   # Arccon
   ARCCON_BUILD_DIR: /__w/alien/alien/arccon_build
   ARCCON_INSTALL_DIR: /__w/alien/alien/arccon_install
-  ARCCON_SOURCE_DIR: /__w/alien/alien/arcane
+  ARCCON_SOURCE_DIR: /__w/alien/alien/arccon
   # Arccore
   ARCCORE_BUILD_DIR: /__w/alien/alien/arccore_build
   ARCCORE_INSTALL_DIR: /__w/alien/alien/arccore_install
-  ARCCORE_SOURCE_DIR: /__w/alien/alien/arcane
+  ARCCORE_SOURCE_DIR: /__w/alien/alien/arccore
   # CMake
   CM_BUILD_TYPE: Debug
   # CTest

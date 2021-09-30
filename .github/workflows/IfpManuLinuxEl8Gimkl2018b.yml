@@ -3,8 +3,8 @@ name: IFP Manu Linux El8 Gimkl/2018b
 on:
   workflow_dispatch:
     inputs:
-      arcane_branch:
-        description: 'Arcane branch'
+      framework_branch:
+        description: 'Framework branch'
         required: true
         default: 'main'
 
@@ -16,11 +16,11 @@ env:
   # Arccon
   ARCCON_BUILD_DIR: /__w/alien/alien/arccon_build
   ARCCON_INSTALL_DIR: /__w/alien/alien/arccon_install
-  ARCCON_SOURCE_DIR: /__w/alien/alien/arcane
+  ARCCON_SOURCE_DIR: /__w/alien/alien/arccon
   # Arccore
   ARCCORE_BUILD_DIR: /__w/alien/alien/arccore_build
   ARCCORE_INSTALL_DIR: /__w/alien/alien/arccore_install
-  ARCCORE_SOURCE_DIR: /__w/alien/alien/arcane
+  ARCCORE_SOURCE_DIR: /__w/alien/alien/arccore
   # CMake
   CM_BUILD_TYPE: Debug
   # CTest
@@ -28,7 +28,7 @@ env:
 
 jobs:
   arccon-install:
-    name: arccon-install-${{ github.event.inputs.arcane_branch }}
+    name: arccon-install-${{ github.event.inputs.framework_branch }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     container:
@@ -44,7 +44,7 @@ jobs:
         with:
           repository: arcaneframework/framework
           path: ${{ env.ARCCON_SOURCE_DIR }}
-          ref: ${{ github.event.inputs.arcane_branch }}
+          ref: ${{ github.event.inputs.framework_branch }}
       - name: Configure
         shell: bash
         run: |
@@ -71,7 +71,7 @@ jobs:
           retention-days: 1
 
   arccore-install:
-    name: arccore-install-${{ github.event.inputs.arcane_branch }}
+    name: arccore-install-${{ github.event.inputs.framework_branch }}
     needs:
       - arccon-install
     runs-on: ubuntu-latest
@@ -89,7 +89,7 @@ jobs:
         with:
           repository: arcaneframework/framework
           path: ${{ env.ARCCORE_SOURCE_DIR }}
-          ref: ${{ github.event.inputs.arcane_branch }}
+          ref: ${{ github.event.inputs.framework_branch }}
       - name: Download arccon install artifact
         uses: actions/download-artifact@v2
         with:
@@ -190,7 +190,7 @@ jobs:
           retention-days: 1
 
   arccore-test:
-    name: arccore-test-${{ github.event.inputs.arcane_branch }}
+    name: arccore-test-${{ github.event.inputs.framework_branch }}
     needs:
       - arccore-install
     runs-on: ubuntu-latest
