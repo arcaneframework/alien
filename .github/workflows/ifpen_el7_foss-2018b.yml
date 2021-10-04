@@ -44,17 +44,14 @@ jobs:
       - name: Configure
         shell: bash
         run: |
-          source /env.sh
           cmake -S ${{ env.ARCCON_SOURCE_DIR }}/arccon -B ${{ env.ARCCON_BUILD_DIR }} -DCMAKE_BUILD_TYPE=${{ env.CM_BUILD_TYPE }} -DCMAKE_INSTALL_PREFIX=${{ env.ARCCON_INSTALL_DIR }}
       - name: Build
         shell: bash
         run: |
-          source /env.sh
           cmake --build ${{ env.ARCCON_BUILD_DIR }}
       - name: Install
         shell: bash
         run: |
-          source /env.sh
           cmake --install ${{ env.ARCCON_BUILD_DIR }}
       - name: Tar install artifact
         shell: bash
@@ -93,17 +90,14 @@ jobs:
       - name: Configure
         shell: bash
         run: |
-          source /env.sh
           cmake -S ${{ env.ARCCORE_SOURCE_DIR }}/arccore -B ${{ env.ARCCORE_BUILD_DIR }} -DCMAKE_BUILD_TYPE=${{ env.CM_BUILD_TYPE }} -DCMAKE_INSTALL_PREFIX=${{ env.ARCCORE_INSTALL_DIR }} -DArccon_DIR=${{ env.ARCCON_INSTALL_DIR }}/share/cmake/Arccon -DBUILD_SHARED_LIBS=ON
       - name: Build
         shell: bash
         run: |
-          source /env.sh
           cmake --build ${{ env.ARCCORE_BUILD_DIR }}
       - name: Install
         shell: bash
         run: |
-          source /env.sh
           cmake --install ${{ env.ARCCORE_BUILD_DIR }}
       - name: Tar build artifact
         shell: bash
@@ -157,17 +151,14 @@ jobs:
       - name: Configure
         shell: bash
         run: |
-          source /env.sh
           cmake -S ${{ env.ALIEN_SOURCE_DIR }} -B ${{ env.ALIEN_BUILD_DIR }} -DCMAKE_BUILD_TYPE=${{ env.CM_BUILD_TYPE }} -DCMAKE_INSTALL_PREFIX=${{ env.ALIEN_INSTALL_DIR }} -DALIENDEV_EMBEDDED=OFF -DArccon_DIR=${{ env.ARCCON_INSTALL_DIR }}/share/cmake/Arccon -DArccore_DIR=${{ env.ARCCORE_INSTALL_DIR }}/lib/cmake/Arccore -DCMAKE_FIND_DEBUG_MODE=1 -DVerbose=ON -DBoost_NO_BOOST_CMAKE=ON -DBUILD_SHARED_LIBS=ON -DALIEN_USE_HDF5=ON -DCMAKE_CXX_FLAGS="-L${EBROOTLIBXML2} -lxml2"
       - name: Build
         shell: bash
         run: |
-          source /env.sh
           cmake --build ${{ env.ALIEN_BUILD_DIR }}
       - name: Install
         shell: bash
         run: |
-          source /env.sh
           cmake --install ${{ env.ALIEN_BUILD_DIR }}
       - name: Tar build artifact
         shell: bash
@@ -200,7 +191,6 @@ jobs:
       - name: Test
         shell: bash
         run: |
-          source /env.sh
           cd ${{ env.ARCCORE_BUILD_DIR }}
           ctest ${{ env.CT_OPTS }}
       - name: Upload test artifact
@@ -244,7 +234,6 @@ jobs:
       - name: Test
         shell: bash
         run: |
-          source /env.sh
           cd ${{ env.ALIEN_BUILD_DIR }}
           ctest ${{ env.CT_OPTS }}
       - name: Upload test artifact
