@@ -56,14 +56,14 @@ jobs:
           }
           - {
             name: "rocky8  foss 2018b release",
-            container: "arcaneframework/rockylinux-foss-2018b-alien:8-latest",
+            container: "ghcr.io/arcaneframework/rockylinux-foss-2018b-alien:8-latest",
             build_type: "RelWithDebInfo",
             build_options: "-DCMAKE_CXX_FLAGS='-L${EBROOTLIBXML2} -lxml2'",
             alien_options: "-DALIEN_DEFAULT_OPTIONS:BOOL=ON -DVerbose=ON -DBoost_NO_BOOST_CMAKE=ON -DBUILD_SHARED_LIBS=ON -DALIEN_USE_HDF5=ON",
           }
           - {
             name: "rocky8 foss 2018b debug",
-            container: "arcaneframework/rockylinux-foss-2018b-alien:8-latest",
+            container: "ghcr.io/arcaneframework/rockylinux-foss-2018b-alien:8-latest",
             build_type: "Debug",
             build_options: "-DENABLE_SANITIZER_ADDRESS:BOOL=ON -DENABLE_SANITIZER_UNDEFINED_BEHAVIOR:BOOL=ON",
             alien_options: "-DALIEN_DEFAULT_OPTIONS:BOOL=ON -DVerbose=ON -DBoost_NO_BOOST_CMAKE=ON -DBUILD_SHARED_LIBS=ON -DALIEN_USE_HDF5=ON",
