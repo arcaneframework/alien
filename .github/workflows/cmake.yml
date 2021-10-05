@@ -31,6 +31,7 @@ jobs:
           - {
             name: "ubuntu20.04 release",
             container: "arcaneframework/alien-base:ubuntu20.04",
+            precommand: "",
             build_type: "RelWithDebInfo",
             build_options: "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache -G Ninja",
             alien_options: "-DALIEN_DEFAULT_OPTIONS:BOOL=ON",
@@ -38,6 +39,7 @@ jobs:
           - {
             name: "ubuntu20.04 debug",
             container: "arcaneframework/alien-base:ubuntu20.04",
+            precommand: "",
             build_type: "Debug",
             build_options: "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache -G Ninja -DENABLE_SANITIZER_ADDRESS:BOOL=ON -DENABLE_SANITIZER_UNDEFINED_BEHAVIOR:BOOL=ON",
             alien_options: "-DALIEN_DEFAULT_OPTIONS:BOOL=ON",
@@ -45,6 +47,7 @@ jobs:
           - {
             name: "ubuntu20.04 debug memory",
             container: "arcaneframework/alien-base:ubuntu20.04",
+            precommand: "",
             build_type: "Debug",
             build_options: "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache -G Ninja -DENABLE_SANITIZER_MEMORY:BOOL=ON",
             alien_options: "-DALIEN_DEFAULT_OPTIONS:BOOL=ON",
@@ -52,6 +55,7 @@ jobs:
           - {
             name: "ubuntu20.04 debug minimal",
             container: "arcaneframework/alien-base:ubuntu20.04",
+            precommand: "",
             build_type: "Debug",
             build_options: "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache -G Ninja",
             alien_options: "-DALIEN_DEFAULT_OPTIONS:BOOL=OFF -DALIENDEV_EMBEDDED=OFF -DCMAKE_PREFIX_PATH=\"/opt/arccon;/opt/arccore\"",
@@ -59,6 +63,7 @@ jobs:
           - {
             name: "rocky8  foss 2018b release",
             container: "ghcr.io/arcaneframework/rockylinux-foss-2018b-alien:8-latest",
+            precommand: ". /env.sh",
             build_type: "RelWithDebInfo",
             build_options: "-DCMAKE_CXX_FLAGS='-L${EBROOTLIBXML2} -lxml2'",
             alien_options: "-DALIEN_DEFAULT_OPTIONS:BOOL=ON -DVerbose=ON -DBoost_NO_BOOST_CMAKE=ON -DBUILD_SHARED_LIBS=ON -DALIEN_USE_HDF5=ON",
@@ -87,12 +92,15 @@ jobs:
       - name: Configure CMake
         # Configure CMake in a 'build' subdirectory. `C MAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
         # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-        run:
+        run: |
+          ${{matrix.config.precommand}}
           cmake -B ${{env.BUILD_DIR}} -DCMAKE_BUILD_TYPE=${{matrix.config.build_type}} -DALIEN_PLUGIN_HYPRE:BOOL=ON -DALIEN_PLUGIN_PETSC:BOOL=ON ${{matrix.config.alien_options}} -DCMAKE_INSTALL_PREFIX=${{env.INSTALL_DIR}} ${{matrix.config.build_options}}
 
       - name: Build
         # Build your program with the given configuration
-        run: cmake --build ${{env.BUILD_DIR}} --config ${{matrix.config.build_type}} -j $(nproc)
+        run: |
+          ${{matrix.config.precommand}}
+          cmake --build ${{env.BUILD_DIR}} --config ${{matrix.config.build_type}} -j $(nproc)
 
 #      - name: ccache status
 #        run: ccache -s
@@ -103,6 +111,7 @@ jobs:
         # OMPI_ALLOW_RUN_AS_ROOT are set in script to allow `act` to work (env section was not working)
         # ASAN_OPTIONS=detect_leaks=0 to disable memory leak detection for now
         run: |
+          ${{matrix.config.precommand}}
           cd ${{env.BUILD_DIR}}
           export OMPI_ALLOW_RUN_AS_ROOT=1
           export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
@@ -111,4 +120,5 @@ jobs:
 
       - name: Install
         run: |
+          ${{matrix.config.precommand}}
           cd ${{env.BUILD_DIR}} && cmake --install ${{env.BUILD_DIR}}
