@@ -38,7 +38,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          repository: ${{ github.repository_owner }}/framework
+          repository: arcaneframework/framework
           path: ${{ env.ARCCON_SOURCE_DIR }}
           ref: main
       - name: Configure
@@ -74,7 +74,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          repository: ${{ github.repository_owner }}/framework
+          repository: arcaneframework/framework
           path: ${{ env.ARCCORE_SOURCE_DIR }}
           ref: main
       - name: Download arccon install artifact
