@@ -8,7 +8,7 @@ on:
 
 env:
   CCACHE_BASEDIR: ${{github.workspace}}
-  CCACHE_DIR: /ccache
+  CCACHE_DIR: /tmp/ccache
   CCACHE_COMPRESS: true
   CCACHE_COMPRESSLEVEL: 6
   CCACHE_MAXSIZE: 400M
