@@ -70,12 +70,9 @@ jobs:
       # Setting up ccache from github cached files
       - name: Prepare ccache timestamp
         id: ccache_timestamp
-        shell: cmake -P {0}
         # Disabled for `act`
         if: ${{ !env.ACT }}
-        run: |
-          string(TIMESTAMP current_date "%Y-%m-%d-%H;%M;%S" UTC)
-          message("::set-output name=timestamp::${current_date}")
+        run: echo "::set-output name=timestamp::$(date +'%Y-%m-%d-%H;%M;%S')"
 
       - name: ccache files
         uses: actions/cache@v2
