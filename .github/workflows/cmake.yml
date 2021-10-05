@@ -61,11 +61,11 @@ jobs:
             alien_options: "-DALIEN_DEFAULT_OPTIONS:BOOL=OFF -DALIENDEV_EMBEDDED=OFF -DCMAKE_PREFIX_PATH=\"/opt/arccon;/opt/arccore\"",
           }
           - {
-            name: "rocky8  foss 2018b release",
-            container: "ghcr.io/arcaneframework/rockylinux-foss-2018b-alien:8-latest",
+            name: "centos7 gimkl 2018b release",
+            container: "ghcr.io/arcaneframework/centos-gimkl-2018b-alien:7-ccache",
             precommand: ". /env.sh",
             build_type: "RelWithDebInfo",
-            build_options: "-DCMAKE_CXX_FLAGS='-L${EBROOTLIBXML2} -lxml2'",
+            build_options: "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_FLAGS='-L${EBROOTLIBXML2} -lxml2'",
             alien_options: "-DALIEN_DEFAULT_OPTIONS:BOOL=ON -DVerbose=ON -DBoost_NO_BOOST_CMAKE=ON -DBUILD_SHARED_LIBS=ON -DALIEN_USE_HDF5=ON",
           }
     steps:
