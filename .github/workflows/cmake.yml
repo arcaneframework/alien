@@ -76,6 +76,14 @@ jobs:
             build_options: "-DCMAKE_CXX_FLAGS='-L${EBROOTLIBXML2} -lxml2'",
             alien_options: "-DALIEN_DEFAULT_OPTIONS:BOOL=ON -DVerbose=ON -DBoost_NO_BOOST_CMAKE=ON -DBUILD_SHARED_LIBS=ON -DALIEN_USE_HDF5=ON",
           }
+          - {
+            name: "rhel8 spack release",
+            container: "ghcr.io/arcaneframework/spack-rhel8:latest",
+            precommand: ". /spack/share/spack/setup-env.sh && spack env activate recipes/envs/alien",
+            build_type: "RelWithDebInfo",
+            build_options: "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache",
+            alien_options: "-DALIEN_DEFAULT_OPTIONS:BOOL=ON -DALIEN_PLUGIN_HYPRE:BOOL=ON -DALIEN_PLUGIN_PETSC:BOOL=ON",
+          }
     steps:
       # Checkout v2 does not include files listed in .gitattributes
       - uses: actions/checkout@v1
