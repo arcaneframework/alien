@@ -62,6 +62,8 @@ option(ALIEN_PLUGIN_HYPRE "Whether or not to compile Hypre backend" OFF)
 option(ALIEN_PLUGIN_PETSC "Whether or not to compile PETSc backend" OFF)
 option(ALIEN_PLUGIN_SUPERLU "Whether or not to compile SuperLU backend" OFF)
 option(ALIEN_PLUGIN_TRILINOS "Whether or not to compile Trilinos backend" OFF)
+option(ALIEN_PLUGIN_GINKGO "Whether or not to compile Ginkgo backend" OFF)
+
 
 option(ALIEN_PLUGIN_GINKGO "Whether or not to compile Ginkgo backend" OFF)
 option(ALIEN_PLUGIN_GINKGO_REF "Whether or not to compile Ginkgo REFERENCE backend" OFF)
@@ -194,6 +196,9 @@ endif (ALIEN_PLUGIN_SUPERLU)
 if (ALIEN_PLUGIN_TRILINOS)
     add_subdirectory(plugins/trilinos)
 endif (ALIEN_PLUGIN_TRILINOS)
+if (ALIEN_PLUGIN_GINKGO)
+    add_subdirectory(plugins/ginkgo)
+endif (ALIEN_PLUGIN_GINKGO)
 
 if (ALIEN_PLUGIN_GINKGO)
     add_subdirectory(plugins/ginkgo)
@@ -204,7 +209,6 @@ if (ALIEN_EXAMPLES)
 endif ()
 
 add_subdirectory(docs)
-
 # ----------------------------------------------------------------------------
 # Local Variables:
 # tab-width: 2
