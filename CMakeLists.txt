@@ -15,7 +15,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 cmake_minimum_required(VERSION 3.11)
-cmake_policy(SET CMP0079 NEW)
 
 # MUST be done before call to 'project'
 get_cmake_property(vars CACHE_VARIABLES)
@@ -42,17 +41,10 @@ Project(Alien
 
 option(ALIEN_COMPONENT_RefSemantic "Whether or not to compile RefSemantic package" ON)
 option(ALIEN_COMPONENT_MoveSemantic "Whether or not to compile MoveSemantic package" ON)
-option(ALIEN_EXAMPLES "Whether or not to compile examples" ON)
 option(ALIEN_UNIT_TESTS "Whether or not to enable unit tests" OFF)
-option(ALIEN_EXPAND_TESTS "Run unit tests one by one" OFF)
 
 option(ALIEN_USE_HDF5 "Enable HDF5 export" OFF)
 option(ALIEN_USE_LIBXML2 "Enable xml export" OFF)
-option(ALIEN_USE_SYCL "Whether or not to compile SYCL backend" OFF)
-option(ALIEN_USE_PERF_TIMER "Whether or not to enable perf timer" OFF)
-option(ALIEN_WANT_AVX "Whether or not to enable avx flags" OFF)
-option(ALIEN_WANT_AVX2 "Whether or not to enable avx2 flags" OFF)
-option(ALIEN_WANT_AVX512 "Whether or not to enable avx512 flags" OFF)
 option(ALIEN_DEFAULT_OPTIONS "Enable best effort to find optional dependencies" ON)
 
 option(ALIEN_GENERATE_DOCUMENTATION "Generate API documentation" OFF)
@@ -67,10 +59,10 @@ option(ALIEN_PLUGIN_GINKGO "Whether or not to compile Ginkgo backend" OFF)
 
 get_filename_component(_fp_framework "framework/CMake" REALPATH)
 if (EXISTS ${_fp_framework})
-    option(ALIENDEV_EMBEDDED "[dev] forbid to compile Arcon and Arccore" ${ALIEN_DEFAULT_OPTIONS})
-else ()
-    set(ALIENDEV_EMBEDDED OFF)
-endif ()
+  option(ALIENDEV_EMBEDDED "[dev] forbid to compile Arcon and Arccore" ${ALIEN_DEFAULT_OPTIONS})
+else()
+  set(ALIENDEV_EMBEDDED OFF)
+endif()
 
 # Make this conditional.
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -91,24 +83,24 @@ include(sanitizers)
 if (ALIENDEV_EMBEDDED)
     if (NOT DEFINED ARCCON_SRC_DIR)
         set(ARCCON_SRC_DIR ${PROJECT_SOURCE_DIR}/framework/arccon)
-    endif ()
+    endif()
 
     if (NOT DEFINED ARCCORE_SRC_DIR)
         set(ARCCORE_SRC_DIR ${PROJECT_SOURCE_DIR}/framework/arccore)
-    endif ()
+    endif()
 
     set(FRAMEWORK_EXPORT_NAME AlienFrameworkTargets)
 
     get_filename_component(_fp_framework "framework/CMake" REALPATH)
     if (EXISTS ${_fp_framework})
         list(APPEND CMAKE_MODULE_PATH ${_fp_framework})
-    endif ()
-else (ALIENDEV_EMBEDDED)
+    endif()
+else(ALIENDEV_EMBEDDED)
     find_package(Arccon REQUIRED)
     list(APPEND CMAKE_MODULE_PATH ${ARCCON_MODULE_PATH})
 
     find_package(Arccore REQUIRED)
-endif ()
+endif()
 
 if (ALIEN_DEFAULT_OPTIONS)
     find_package(HDF5 QUIET)
@@ -134,59 +126,25 @@ if (ALIEN_GENERATE_DOCUMENTATION)
     # For sphinx
     set(DOXYGEN_GENERATE_HTML NO)
     set(DOXYGEN_GENERATE_XML YES)
-endif (ALIEN_GENERATE_DOCUMENTATION)
-
-# Use Arccon functions and macros
-find_package(Arccon REQUIRED)
-list(APPEND CMAKE_MODULE_PATH ${ARCCON_MODULE_PATH})
-
-# use arccon commands otherwise a
-include(${ARCCON_CMAKE_COMMANDS})
-include(ArcconSetInstallDirs)
-
-# ----------------------------------------------------------------------------
-# Configure installation layout.
-# Layout. This works for all platforms:
-#   * <prefix>/lib*/cmake/<PROJECT-NAME>
-#   * <prefix>/lib*/
-#   * <prefix>/include/
-set(config_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
-
-set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
-
-# Configuration
-set(version_config "${generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
-set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
-set(namespace "Alien::")
-
-if(ALIEN_USE_PERF_TIMER)
-  add_definitions(-DALIEN_USE_PERF_TIMER)
-endif()
+endif(ALIEN_GENERATE_DOCUMENTATION)
 
 add_subdirectory(src)
 
 if (ALIEN_PLUGIN_HYPRE)
     add_subdirectory(plugins/hypre)
 endif (ALIEN_PLUGIN_HYPRE)
-
 if (ALIEN_PLUGIN_PETSC)
     add_subdirectory(plugins/petsc)
 endif (ALIEN_PLUGIN_PETSC)
-
 if (ALIEN_PLUGIN_SUPERLU)
     add_subdirectory(plugins/superlu)
 endif (ALIEN_PLUGIN_SUPERLU)
-
 if (ALIEN_PLUGIN_TRILINOS)
     add_subdirectory(plugins/trilinos)
 endif (ALIEN_PLUGIN_TRILINOS)
 if (ALIEN_PLUGIN_GINKGO)
     add_subdirectory(plugins/ginkgo)
 endif (ALIEN_PLUGIN_GINKGO)
-
-if (ALIEN_EXAMPLES)
-    add_subdirectory(examples)
-endif ()
 
 add_subdirectory(docs)
 # ----------------------------------------------------------------------------
