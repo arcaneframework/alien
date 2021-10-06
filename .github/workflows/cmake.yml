@@ -78,8 +78,8 @@ jobs:
           }
           - {
             name: "rhel8 spack release",
-            container: "ghcr.io/arcaneframework/spack-rhel8:20211006",
-            precommand: ". /spack/share/spack/setup-env.sh && spack env activate recipes/envs/alien",
+            container: "ghcr.io/arcaneframework/spack-rhel8:latest",
+            precommand: ". /spack/share/spack/setup-env.sh && spack env activate /recipes/envs/alien",
             build_type: "RelWithDebInfo",
             build_options: "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache",
             alien_options: "-DALIEN_DEFAULT_OPTIONS:BOOL=ON -DALIEN_PLUGIN_HYPRE:BOOL=ON -DALIEN_PLUGIN_PETSC:BOOL=ON",
