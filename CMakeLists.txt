@@ -156,6 +156,7 @@ if (ALIEN_PLUGIN_GINKGO)
 endif (ALIEN_PLUGIN_GINKGO)
 
 add_subdirectory(docs)
+
 # ----------------------------------------------------------------------------
 # Local Variables:
 # tab-width: 2
