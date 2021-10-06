@@ -181,9 +181,7 @@ jobs:
         run: tar xf arccore-build-artifact.tar -C /
       - name: Test
         shell: bash
-        run: |
-          cd ${{ env.ARCCORE_BUILD_DIR }}
-          ctest ${{ env.CT_OPTS }}
+        run: ctest --test-dir ${{ env.ARCCORE_BUILD_DIR }} ${{ env.CT_OPTS }}
       - name: Upload test artifact
         uses: actions/upload-artifact@v2
         if: failure()
@@ -224,9 +222,7 @@ jobs:
         run: tar xf arccore-install-artifact.tar -C /
       - name: Test
         shell: bash
-        run: |
-          cd ${{ env.ALIEN_BUILD_DIR }}
-          ctest ${{ env.CT_OPTS }}
+        run: ctest --test-dir ${{ env.ALIEN_BUILD_DIR }} ${{ env.CT_OPTS }}
       - name: Upload test artifact
         uses: actions/upload-artifact@v2
         if: failure()
