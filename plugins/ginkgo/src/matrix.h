@@ -20,60 +20,31 @@
 
 #include <alien/core/impl/IMatrixImpl.h>
 
-#include <alien/ginkgo/backend.h>
-#include <alien/ginkgo/machine_backend.h>
+//#include <petscmat.h>
 
-#include <ginkgo/core/matrix/csr.hpp>
+namespace Alien::Ginkgo {
+    class Matrix : public IMatrixImpl {
+    public:
+		
+        explicit Matrix(const MultiMatrixImpl *multi_impl);
 
-#include <memory>
+        ~Matrix() override;
 
-namespace Alien::Ginkgo
-{
-class Matrix : public IMatrixImpl
-, public gko::matrix::Csr<double, int>
-{
- public:
-  explicit Matrix(const MultiMatrixImpl* multi_impl);
+    public:
+        void setProfile(int ilower, int iupper, int jlower, int jupper,
+                        [[maybe_unused]] Arccore::ConstArrayView<int> row_sizes);
 
-  ~Matrix() override;
+        void setRowValues(int rows,
+                          Arccore::ConstArrayView<int> cols,
+                          Arccore::ConstArrayView<double> values);
 
- public:
-  void setRowValues(int rows,
-                    Arccore::ConstArrayView<int> cols,
-                    Arccore::ConstArrayView<double>);
+        void assemble();
 
-  void assemble();
+       // Mat internal() const { return m_mat; }
 
-  /* make_shared does not work : loses the pointer to the gko::executor !
-  std::shared_ptr<gko::matrix::Csr<double, int>> internal() const {
-    return std::make_shared<gko::matrix::Csr<double, int>>(*this); }
-  std::shared_ptr<gko::matrix::Csr<double, int>> internal() {
-    return std::make_shared<gko::matrix::Csr<double, int>>(*this); }
-*/
+    private:
+       // Mat m_mat;
+       // MPI_Comm m_comm{};
+    };
 
-  /* QUESTION : Return a shared_ptr ?
-  std::shared_ptr<gko::matrix::Csr<double, int>> & internal() const{
-    return std::shared_ptr<gko::matrix::Csr<double, int>>(this);
-  }
-
-  /*std::shared_ptr<gko::matrix::Csr<double, int>> & internal(){
-    return {this};
-    }
-*/
-
-  /* Return a raw pointer */
-  gko::matrix::Csr<double, int> const* internal() const
-  {
-    return this;
-  }
-
-  gko::matrix::Csr<double, int>* internal()
-  {
-    return this;
-  }
-
- private:
-  gko::matrix_assembly_data<double, int> data;
-};
-
-} // namespace Alien::Ginkgo
+} // namespace Alien::PETSc
