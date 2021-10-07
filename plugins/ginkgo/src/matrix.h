@@ -22,6 +22,7 @@
 
 //#include <petscmat.h>
 
+
 namespace Alien::Ginkgo {
     class Matrix : public IMatrixImpl {
     public:
@@ -47,4 +48,4 @@ namespace Alien::Ginkgo {
        // MPI_Comm m_comm{};
     };
 
-} // namespace Alien::PETSc
+} // namespace Alien::Ginkgo
