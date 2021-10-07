@@ -29,7 +29,7 @@ include(LoadAlienTest)
 alien_test(
         BENCH ginkgo
         NAME ginkgo.default
-        PROCS 1
+        PROCS 2
         COMMAND test_ginkgo
 )
 
