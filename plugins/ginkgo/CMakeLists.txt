@@ -93,9 +93,9 @@ generate_export_header(alien_ginkgo
 
 # Tests
 
-#~ enable_testing()
+enable_testing()
 
-#~ add_subdirectory(test)
+add_subdirectory(test)
 
 # Install
 

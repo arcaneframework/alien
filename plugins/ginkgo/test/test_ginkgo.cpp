@@ -19,159 +19,149 @@
 #include <alien/ginkgo/backend.h>
 #include <alien/ginkgo/options.h>
 
-#include <alien/ref/AlienRefSemantic.h>
 #include <arccore/message_passing_mpi/StandaloneMpiMessagePassingMng.h>
+
 #include <alien/kernels/simple_csr/algebra/SimpleCSRLinearAlgebra.h>
+#include <alien/ref/AlienRefSemantic.h>
 
-int test()
-{
-  auto* pm = Arccore::MessagePassing::Mpi::StandaloneMpiMessagePassingMng::create(MPI_COMM_WORLD);
-  auto* tm = Arccore::arccoreCreateDefaultTraceMng();
+//#include "petscsys.h"
 
-  Alien::setTraceMng(tm);
-  Alien::setVerbosityLevel(Alien::Verbosity::Debug);
+int test() {
+  /*  auto *pm = Arccore::MessagePassing::Mpi::StandaloneMpiMessagePassingMng::create(MPI_COMM_WORLD);
+    auto *tm = Arccore::arccoreCreateDefaultTraceMng();
 
-  auto size = 100;
+    Alien::setTraceMng(tm);
+    Alien::setVerbosityLevel(Alien::Verbosity::Debug);
 
-  tm->info() << "Example Alien :";
-  tm->info() << "Use of scalar builder (RefSemantic API) for Laplacian problem";
-  tm->info() << " => solving linear system Ax = b";
-  tm->info() << " * problem size = " << size;
-  tm->info() << " ";
-  tm->info() << "Start example...";
-  tm->info() << " ";
+    auto size = 100;
 
-  /***
-	 * Matrice A, diagonale
-	 * 2 -1 
-	 * -1 2 -1 
-	 *   -1  2 -1
-	 *      -1  2 -1        
-	 ***/
+    tm->info() << "Example Alien :";
+    tm->info() << "Use of scalar builder (RefSemantic API) for Laplacian problem";
+    tm->info() << " => solving linear system Ax = b";
+    tm->info() << " * problem size = " << size;
+    tm->info() << " ";
+    tm->info() << "Start example...";
+    tm->info() << " ";
 
-  Alien::Matrix A(size, size, pm);
+    Alien::Matrix A(size, size, pm);
 
-  // Distribution
-  const auto& dist = A.distribution();
-  int offset = dist.rowOffset();
-  int lsize = dist.localRowSize();
-  int gsize = dist.globalRowSize();
+    // Distributions calculée
+    const auto &dist = A.distribution();
+    int offset = dist.rowOffset();
+    int lsize = dist.localRowSize();
+    int gsize = dist.globalRowSize();
 
-  /* seq : 0, 100, 100 */
-  /* 2 mpi :
-     * - 0/50/100
-     * - 50/50/100
-     */
+    tm->info() << "offset: " << offset;
 
-  // Remplissage avec builder
-  tm->info() << "build matrix with direct matrix builder";
-  {
-    Alien::DirectMatrixBuilder builder(A, Alien::DirectMatrixOptions::eResetValues); // par defaut, la matrice est symétrique ? et stockage CSR et distribution par lignes
-    builder.reserve(3); // Réservation de 3 coefficients par ligne
-    builder.allocate(); // Allocation de l'espace mémoire réservé
+    tm->info() << "build matrix with direct matrix builder";
+    {
+        Alien::DirectMatrixBuilder builder(A, Alien::DirectMatrixOptions::eResetValues);
+        builder.reserve(3); // Réservation de 3 coefficients par ligne
+        builder.allocate(); // Allocation de l'espace mémoire réservé
 
-    for (int irow = offset; irow < offset + lsize; ++irow) {
-      builder(irow, irow) = 2.;
-      if (irow - 1 >= 0)
-        builder(irow, irow - 1) = -1.;
-      if (irow + 1 < gsize)
-        builder(irow, irow + 1) = -1.;
+        for (int irow = offset; irow < offset + lsize; ++irow) {
+            builder(irow, irow) = 2.;
+            if (irow - 1 >= 0)
+                builder(irow, irow - 1) = -1.;
+            if (irow + 1 < gsize)
+                builder(irow, irow + 1) = -1.;
+        }
     }
-  }
 
-  /**
-	 *  Vecteur xe (ones)
-	 ********************************************/
+    tm->info() << "* xe = 1";
 
-  tm->info() << "* xe = 1";
-  Alien::Vector xe = Alien::ones(size, pm);
-  tm->info() << "=> Vector Distribution : " << xe.distribution();
+    Alien::Vector xe = Alien::ones(size, pm);
 
-  /**
-	 *  Vecteur b = A * xe 
-	 ********************************************/
-  tm->info() << "* b = A * xe";
-  Alien::Vector b(size, pm);
-  //Alien::SimpleCSRLinearAlgebra algebra;
+    tm->info() << "=> Vector Distribution : " << xe.distribution();
 
-  Alien::Ginkgo::LinearAlgebra algebra;
-  algebra.mult(A, xe, b);
+    tm->info() << "* b = A * xe";
 
-  /**
-	 *  Calcul x, tq : Ax = b 
-	 ********************************************/
-  tm->info() << "* Calcul de x, tel que  :  A x = b";
+    Alien::Vector b(size, pm);
 
-  Alien::Vector x(size, pm);
+    //Alien::PETSc::LinearAlgebra algebra;
+    Alien::SimpleCSRLinearAlgebra algebra;
 
-  Alien::Ginkgo::Options options;
-  options.numIterationsMax(100);
-  options.stopCriteriaValue(1e-10);
-  options.preconditioner(Alien::Ginkgo::OptionTypes::Jacobi);
-  options.solver(Alien::Ginkgo::OptionTypes::CG);
-  auto solver = Alien::Ginkgo::LinearSolver(options);
-  solver.solve(A, b, x);
+    algebra.mult(A, xe, b);
 
-  /**
-	 *  Calcul du résidu ||Ax - b|| ~ 0
-	 ********************************************/
-  tm->info() << "* r = Ax - b";
+    Alien::Vector x(size, pm);
 
-  Alien::Vector r(size, pm);
-  Alien::Vector tmp(size, pm);
+    tm->info() << "* x = A^-1 b";
 
-  tm->info() << "t = Ax";
-  algebra.mult(A, x, tmp);
+    Alien::PETSc::Options options;
+    options.numIterationsMax(100);
+    options.stopCriteriaValue(1e-10);
+    options.preconditioner(Alien::PETSc::OptionTypes::Jacobi);
+    options.solver(Alien::PETSc::OptionTypes::BiCGstab); //CG
+    //
+    auto solver = Alien::PETSc::LinearSolver(options);
+    //auto solver = Alien::PETSc::LinearSolver();
 
-  tm->info() << "r = t";
-  algebra.copy(tmp, r);
+    solver.solve(A, b, x);
 
-  tm->info() << "r -= b"; // r = r + (-1 * b)
-  algebra.axpy(-1., b, r);
+    tm->info() << "* r = Ax - b";
 
-  auto norm = algebra.norm2(r);
-  tm->info() << " => ||r|| = " << norm;
+    Alien::Vector r(size, pm);
 
-  /**
-	 *  Calcul de ||x -xe|| ~ 0
-	 ********************************************/
+    {
+        Alien::Vector tmp(size, pm);
+        tm->info() << "t = Ax";
+        algebra.mult(A, x, tmp);
+        tm->info() << "r = t";
+        algebra.copy(tmp, r);
+        tm->info() << "r -= b";
+        algebra.axpy(-1., b, r);
+    }
 
-  tm->info() << "* r = || x - xe ||";
+    auto norm = algebra.norm2(r);
 
-  tm->info() << "r = x";
-  algebra.copy(x, r);
-  tm->info() << "r -= xe";
-  algebra.axpy(-1., xe, r);
-  tm->info() << " => ||r|| = " << norm;
+    tm->info() << " => ||r|| = " << norm;
 
-  tm->info() << " ";
-  tm->info() << "... example finished !!!";
+    tm->info() << "* r = || x - xe ||";
 
-  return 0;
+    {
+        tm->info() << "r = x";
+        algebra.copy(x, r);
+        tm->info() << "r -= xe";
+        algebra.axpy(-1., xe, r);
+    }
+
+    tm->info() << " => ||r|| = " << norm;
+
+    tm->info() << " ";
+    tm->info() << "... example finished !!!";*/
+
+    return 0;
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char **argv) {
 
-  MPI_Init(&argc, &argv);
-  auto ret = 0;
+    MPI_Init(&argc, &argv);/*
 
-  try {
-    ret = test();
-  }
-  catch (const Arccore::Exception& ex) {
-    std::cerr << "Exception: " << ex << '\n';
-    ret = 3;
-  }
-  catch (const std::exception& ex) {
-    std::cerr << "** A standard exception occured: " << ex.what() << ".\n";
-    ret = 2;
-  }
-  catch (...) {
-    std::cerr << "** An unknown exception has occured...\n";
-    ret = 1;
-  }
+    PetscErrorCode ierr;
+    ierr = PetscInitialize(&argc, &argv, (char *) nullptr, "");
+    if (ierr)
+        return ierr;*/
 
-  MPI_Finalize();
-  return ret;
+    auto ret = 0;
+/*
+    try {
+        ret = test();
+    } catch (const Arccore::Exception &ex) {
+        std::cerr << "Exception: " << ex << '\n';
+        ret = 3;
+    } catch (const std::exception &ex) {
+        std::cerr << "** A standard exception occured: " << ex.what() << ".\n";
+        ret = 2;
+    } catch (...) {
+        std::cerr << "** An unknown exception has occured...\n";
+        ret = 1;
+    }
+
+    ierr = PetscFinalize();
+    if (ierr)
+        return ierr;*/
+
+    MPI_Finalize();
+
+    return ret;
 }
