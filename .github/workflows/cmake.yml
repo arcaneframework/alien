@@ -73,7 +73,7 @@ jobs:
             container: "ghcr.io/arcaneframework/rockylinux-gimkl-2018b-alien:8-latest",
             precommand: ". /env.sh",
             build_type: "RelWithDebInfo",
-            build_options: "-DCMAKE_CXX_FLAGS='-L${EBROOTLIBXML2} -lxml2'",
+            build_options: "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_FLAGS='-L${EBROOTLIBXML2} -lxml2'",
             alien_options: "-DALIEN_DEFAULT_OPTIONS:BOOL=ON -DVerbose=ON -DBoost_NO_BOOST_CMAKE=ON -DBUILD_SHARED_LIBS=ON -DALIEN_USE_HDF5=ON",
           }
           - {
