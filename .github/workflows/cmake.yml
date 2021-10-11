@@ -78,7 +78,7 @@ jobs:
           }
           - {
             name: "rhel8 spack release",
-            container: "ghcr.io/arcaneframework/spack-rhel8:20211006",
+            container: "ghcr.io/arcaneframework/spack-rhel8:latest",
             precommand: ". /spack/share/spack/setup-env.sh && spack env activate /recipes/envs/alien",
             build_type: "RelWithDebInfo",
             build_options: "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache",
