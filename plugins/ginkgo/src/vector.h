@@ -18,48 +18,36 @@
 
 #pragma once
 
-#include <memory>
 #include <alien/core/impl/IVectorImpl.h>
 
 //#include <petscvec.h>
-#include <ginkgo/core/matrix/dense.hpp>
 
-namespace Alien::Ginkgo
-{
+namespace Alien::Ginkgo {
 
-class Vector : public IVectorImpl
-, public gko::matrix::Dense<double>
-{
- public:
-  explicit Vector(const MultiVectorImpl* multi_impl);
+    class Vector : public IVectorImpl {
+    public:
+        explicit Vector(const MultiVectorImpl *multi_impl);
 
-  ~Vector() override;
+        ~Vector() override;
 
- public:
-  void setProfile(int ilower, int iupper);
+    public:
+        void setProfile(int ilower, int iupper);
 
-  void setValues(Arccore::ConstArrayView<double> values);
+        void setValues(Arccore::ConstArrayView<double> values);
 
-  void getValues(Arccore::ArrayView<double> values) const;
+        void getValues(Arccore::ArrayView<double> values) const;
 
-  void assemble();
+        void assemble();
 
-  // version using raw pointers
-  gko::matrix::Dense<double> const* internal() const
-  {
-    return this;
-  }
+       // Vec internal() { return m_vec; }
 
-  gko::matrix::Dense<double>* internal()
-  {
-    return this;
-  }
+        // Vec internal() const { return m_vec; }
 
- private:
-  // Vec m_vec;
-  // MPI_Comm m_comm;
-  gko::matrix_assembly_data<double> data;
-  //Arccore::UniqueArray<Arccore::Integer> m_rows;
-};
+    private:
+       // Vec m_vec;
+       // MPI_Comm m_comm;
+
+        Arccore::UniqueArray<Arccore::Integer> m_rows;
+    };
 
 } // namespace Alien::Ginkgo

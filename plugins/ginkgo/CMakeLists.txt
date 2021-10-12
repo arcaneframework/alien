@@ -50,6 +50,8 @@ find_package(Alien REQUIRED)
 
 find_package(Ginkgo REQUIRED)
 
+message("GINKGO----------------------------------------")
+message("GINKGO :" ${GINKGO_INCLUDE_DIRS})
 find_package(Boost REQUIRED) # For boost::timer.
 
 # ----------------------------------------------------------------------------
@@ -57,12 +59,12 @@ find_package(Boost REQUIRED) # For boost::timer.
 
 add_library(alien_ginkgo
         #~ include/alien/petsc/backend.h
-        #~ src/matrix.h
+        src/matrix.h
         src/matrix.cpp
-        #~ src/vector.h
-        #~ src/vector.cpp
-        #~ src/petsc_linear_algebra.cpp
-        #~ src/petsc_linear_solver.cpp
+        src/vector.h
+        src/vector.cpp
+        src/ginkgo_linear_algebra.cpp
+        src/ginkgo_linear_solver.cpp
         #~ src/converters/simplecsr_to_petsc_matrix.cpp
         #~ src/converters/simplecsr_to_petsc_vector.cpp
         #~ src/converters/petsc_to_simplecsr_vector.cpp
@@ -80,6 +82,7 @@ target_link_libraries(alien_ginkgo PUBLIC
 target_include_directories(alien_ginkgo PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
+        $<BUILD_INTERFACE:${GINKGO_INCLUDE_DIRS}/..>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         )
 

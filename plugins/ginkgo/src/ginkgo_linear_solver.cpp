@@ -16,280 +16,203 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "ginkgo_linear_solver.h"
+#include "matrix.h"
+#include "vector.h"
 
-bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
-{
-  // preconditioner's choice
-  int prec;
-  switch (m_options.preconditioner()) {
-  case OptionTypes::Jacobi:
-    prec = 1;
-    break;
-  case OptionTypes::NoPC:
-    prec = 0;
-    break;
-  default:
-    alien_fatal([&] { cout() << "Undefined Ginkgo preconditioner option"; });
-    break;
-  }
+#include <boost/timer.hpp>
 
-  // get the executor from the Matrix A
-  auto exec = A.internal()->get_executor();
+//#include <petscksp.h>
 
-  // Prepare the stopping criteria
-  const double threshold{ m_options.stopCriteriaValue() };
-  const unsigned long max_iters = static_cast<unsigned int>(m_options.numIterationsMax());
+#include <arccore/message_passing_mpi/MpiMessagePassingMng.h>
 
-  auto iter_stop = gko::stop::Iteration::build()
-                   .with_max_iters(max_iters)
-                   .on(exec);
+#include <alien/expression/solver/SolverStater.h>
+#include <alien/core/backend/LinearSolverT.h>
 
-  //auto res_stop = gko::stop::RelativeResidualNorm<>::build() // relative (to ||b||) norm
-  auto res_stop = gko::stop::AbsoluteResidualNorm<>::build() // absolute norm
-                  .with_tolerance(threshold)
-                  .on(exec);
+#include <alien/ginkgo/backend.h>
+#include <alien/ginkgo/options.h>
+#include <alien/ginkgo/export.h>
 
-  // Add Convergence logger
-  std::shared_ptr<const gko::log::Convergence<double>> conv_logger = gko::log::Convergence<double>::create(exec);
-  iter_stop->add_logger(conv_logger);
-  res_stop->add_logger(conv_logger);
+namespace Alien {
+    // Compile PetscLinearSolver.
+    template
+    class ALIEN_GINKGO_EXPORT LinearSolver<BackEnd::tag::ginkgo>;
 
-  // init timer
-  std::chrono::nanoseconds time(0);
+} // namespace Alien
 
-  /// --- Find a better way to switch solver ...
-  switch (m_options.solver()) {
-  case OptionTypes::CG:
-    solve_CG(A, b, x, prec, iter_stop, res_stop, exec, time);
-    break;
-  case OptionTypes::GMRES:
-    solve_GMRES(A, b, x, prec, iter_stop, res_stop, exec, time);
-    break;
-  case OptionTypes::BICG:
-    solve_BICG(A, b, x, prec, iter_stop, res_stop, exec, time);
-    break;
-  case OptionTypes::BICGSTAB:
-    solve_BICGSTAB(A, b, x, prec, iter_stop, res_stop, exec, time);
-    break;
-  default:
-    alien_fatal([&] {
-      cout() << "Undefined solver option";
-    });
-    break;
-  }
+namespace Alien::Ginkgo {
+    class InternalLinearSolver
+            : public IInternalLinearSolver<Matrix, Vector>, public ObjectWithTrace {
+    public:
+        typedef SolverStatus Status;
 
-  // Get nb iterations + final residual
-  auto num_iters = conv_logger->get_num_iterations();
-  auto residual_norm = conv_logger->get_residual_norm();
-  auto vec_res_norm = reinterpret_cast<const gko::matrix::Dense<double>*>(residual_norm);
-  auto res = vec_res_norm->get_const_values()[0];
+        InternalLinearSolver();
 
-  // Print infos
-  std::cout << "===== SOLVER  RUN INFORMATION ===== " << std::endl;
-  std::cout << "Ginkgo Executor : " << Alien::Ginkgo::ginkgo_executor::target_machine << std::endl;
-  display_solver_infos(m_options.solver(), m_options.preconditioner());
-  std::cout << "Stop criteria Value : " << m_options.stopCriteriaValue() << std::endl;
-  std::cout << "Solver has converged : " << conv_logger->has_converged() << std::endl;
-  std::cout << "Nb iterations : " << num_iters << std::endl;
-  std::cout << "Residual norm : " << res << std::endl;
+        explicit InternalLinearSolver(const Options &options);
 
-  std::cout << "Execution time [ms]: " << static_cast<double>(time.count()) / 10e6 << std::endl;
-  std::cout << "Execution time [s]: " << static_cast<double>(time.count()) / 10e9 << std::endl;
-  std::cout << "Iterations per time [s]: " << num_iters / (static_cast<double>(time.count()) / 10e9) << std::endl;
-  std::cout << "=================================== " << std::endl;
+        ~InternalLinearSolver() override = default;
 
-  // update solver status
-  m_status.residual = res;
-  m_status.iteration_count = num_iters;
-  m_status.succeeded = conv_logger->has_converged();
+    public:
+        // Nothing to do
+        void updateParallelMng(
+                Arccore::MessagePassing::IMessagePassingMng *pm) override {}
 
-  // update solver infos
-  m_total_iter_num += m_status.iteration_count;
-  ++m_solve_num;
-  m_total_solve_time += static_cast<double>(time.count()) / 10e9;
+        bool solve(const Matrix &A, const Vector &b, Vector &x) override;
 
-  return m_status.succeeded;
-}
+        bool hasParallelSupport() const override { return true; }
 
-void InternalLinearSolver::solve_CG(const Matrix& A, const Vector& b, Vector& x, const int& prec, stop_iter_type& iter_stop, stop_res_type& res_stop, exec_type& exec, std::chrono::nanoseconds& time)
-{
+        //! Etat du solveur
+        const Status &getStatus() const override;
 
-  auto solver_factory =
-  gko::solver::Cg<double>::build()
-  .with_criteria(
-  gko::share(iter_stop),
-  gko::share(res_stop))
-  .on(exec);
+        const SolverStat &getSolverStat() const override { return m_stat; }
 
-  // make a shared pointer on the matrix A, make_shared does not work : loses the pointer to the gko::executor !
-  auto pA = std::shared_ptr<const gko::matrix::Csr<double, int>>(A.internal(), [](auto* p) {});
+        std::shared_ptr<ILinearAlgebra> algebra() const override;
 
-  // generate the solver
-  auto solver = solver_factory->generate(pA);
+    private:
+        Status m_status;
 
-  // generate and set the preconditioner
-  if (prec == 1) {
-    using Preconditioner = typename gko::preconditioner::Jacobi<double>;
-    std::shared_ptr<Preconditioner> new_prec = Preconditioner::build().on(exec)->generate(pA);
-    solver->set_preconditioner(new_prec);
-  }
+        Arccore::Real m_init_time{0.0};
+        Arccore::Real m_total_solve_time{0.0};
+        Arccore::Integer m_solve_num{0};
+        Arccore::Integer m_total_iter_num{0};
 
-  // solve with timing
-  auto tic = std::chrono::steady_clock::now();
-  solver->apply(lend(b.internal()), lend(x.internal()));
-  auto toc = std::chrono::steady_clock::now();
-  time += std::chrono::duration_cast<std::chrono::nanoseconds>(toc - tic);
-}
+        SolverStat m_stat;
+		Options m_options;
 
-void InternalLinearSolver::solve_GMRES(const Matrix& A, const Vector& b, Vector& x, const int& prec, stop_iter_type& iter_stop, stop_res_type& res_stop, exec_type& exec, std::chrono::nanoseconds& time)
-{
+    private:
+        void checkError(const Arccore::String &msg, int ierr,
+                        int skipError = 0) const;
+    };
 
-  auto solver_factory =
-  gko::solver::Gmres<double>::build()
-  .with_criteria(
-  gko::share(iter_stop),
-  gko::share(res_stop))
-  .on(exec);
+    InternalLinearSolver::InternalLinearSolver() {
+        boost::timer tinit;
+        m_init_time += tinit.elapsed();
+    }
 
-  // make a shared pointer on the matrix A, make_shared does not work : loses the pointer to the gko::executor !
-  auto pA = std::shared_ptr<const gko::matrix::Csr<double, int>>(A.internal(), [](auto* p) {});
+    InternalLinearSolver::InternalLinearSolver(const Options &options)
+            : m_options(options) {
+        boost::timer tinit;
+        m_init_time += tinit.elapsed();
+    }
 
-  // generate the solver
-  auto solver = solver_factory->generate(pA);
+    void InternalLinearSolver::checkError(const Arccore::String &msg, int ierr, int skipError) const {
+        if (ierr != 0 and (ierr & ~skipError) != 0) {
+            alien_fatal([&] {
+                cout() << msg << " failed. [code=" << ierr << "]";
+                //CHKERRQ(ierr); // warning car macro qui appelle fx qui retourne un int
+            });
+        }
+    }
 
-  // generate and set the preconditioner
-  if (prec == 1) {
-    using Preconditioner = typename gko::preconditioner::Jacobi<double>;
-    std::shared_ptr<Preconditioner> new_prec = Preconditioner::build().on(exec)->generate(pA);
-    solver->set_preconditioner(new_prec);
-  }
+   /* bool InternalLinearSolver::solve(const Matrix &A, const Vector &b, Vector &x) {
+        // Macro "pratique" en attendant de trouver mieux
+        boost::timer tsolve;
 
-  // solve with timing
-  auto tic = std::chrono::steady_clock::now();
-  solver->apply(lend(b.internal()), lend(x.internal()));
-  auto toc = std::chrono::steady_clock::now();
-  time += std::chrono::duration_cast<std::chrono::nanoseconds>(toc - tic);
-}
+        int output_level = m_options.verbose() ? 1 : 0;
 
-void InternalLinearSolver::solve_BICG(const Matrix& A, const Vector& b, Vector& x, const int& prec, stop_iter_type& iter_stop, stop_res_type& res_stop, exec_type& exec, std::chrono::nanoseconds& time)
-{
+        // failback if no MPI comm already defined.
+        MPI_Comm comm = MPI_COMM_WORLD;
+        auto *mpi_comm_mng = dynamic_cast<Arccore::MessagePassing::Mpi::MpiMessagePassingMng *>(A.distribution().parallelMng());
+        if (mpi_comm_mng)
+            comm = *(mpi_comm_mng->getMPIComm());
 
-  auto solver_factory =
-  gko::solver::Bicg<double>::build()
-  .with_criteria(
-  gko::share(iter_stop),
-  gko::share(res_stop))
-  .on(exec);
+        // solver's choice
+        // Liste à compléter (dans options.h), on met lesquels ?
+        std::string solver_name = "undefined";
+        switch (m_options.solver()) {
+            case OptionTypes::GMRES:
+                solver_name = "gmres";
+                break;
+            case OptionTypes::CG:
+                solver_name = "cg";
+                break;
+            case OptionTypes::BiCG:
+                solver_name = "bicg";
+                break;
+            case OptionTypes::BiCGstab:
+                solver_name = "bcgs";
+                break;
+            default:
+                alien_fatal([&] {
+                    cout() << "Undefined solver option";
+                });
+                break;
+        }
 
-  // make a shared pointer on the matrix A, make_shared does not work : loses the pointer to the gko::executor !
-  auto pA = std::shared_ptr<const gko::matrix::Csr<double, int>>(A.internal(), [](auto* p) {});
+        // preconditioner's choice
+        // Liste à compléter (dans options.h), on met lesquels ?
+        std::string precond_name = "undefined";
+        switch (m_options.preconditioner()) {
+            case OptionTypes::Jacobi:
+                precond_name = "jacobi";
+                break;
+            case OptionTypes::NoPC:
+                precond_name = "none";
+                break;
+            default:
+                alien_fatal([&] { cout() << "Undefined Ginkgo preconditioner option"; });
+                break;
+        }
 
-  // generate the solver
-  auto solver = solver_factory->generate(pA);
+        // Get options and configure solver + preconditioner
+        KSP solver;
+        checkError("PETSc create solver", KSPCreate(comm, &solver));
+        checkError("PETSc set solver type",
+                   KSPSetType(solver, solver_name.c_str()));
+        checkError("PETSc set Operators",
+                   KSPSetOperators(solver, A.internal(), A.internal()));
+        // Here the matrix that defines the linear system also serves as the
+        // preconditioning matrix
 
-  // generate and set the preconditioner
-  if (prec == 1) {
-    using Preconditioner = typename gko::preconditioner::Jacobi<double>;
-    std::shared_ptr<Preconditioner> new_prec = Preconditioner::build().on(exec)->generate(pA);
-    solver->set_preconditioner(new_prec);
-  }
+        PC preconditioner;
+        checkError("PETSc get the preconditioner",
+                   KSPGetPC(solver, &preconditioner));
+        int max_it = m_options.numIterationsMax();
+        double rtol = m_options.stopCriteriaValue();
+        checkError("PETSc set the preconditioner",
+                   PCSetType(preconditioner,
+                             precond_name.c_str())); // petsc prend un char *
+        checkError(
+                "PETSc set tolerances",
+                KSPSetTolerances(solver, rtol, PETSC_DEFAULT, PETSC_DEFAULT, max_it));
 
-  // solve with timing
-  auto tic = std::chrono::steady_clock::now();
-  solver->apply(lend(b.internal()), lend(x.internal()));
-  auto toc = std::chrono::steady_clock::now();
-  time += std::chrono::duration_cast<std::chrono::nanoseconds>(toc - tic);
-}
+        // solve
+        m_status.succeeded = (KSPSolve(solver, b.internal(), x.internal()) == 0);
 
-void InternalLinearSolver::solve_BICGSTAB(const Matrix& A, const Vector& b, Vector& x, const int& prec, stop_iter_type& iter_stop, stop_res_type& res_stop, exec_type& exec, std::chrono::nanoseconds& time)
-{
-  auto solver_factory =
-  gko::solver::Bicgstab<double>::build()
-  .with_criteria(
-  gko::share(iter_stop),
-  gko::share(res_stop))
-  .on(exec);
+        // get nb iterations + final residual
+        checkError("PETSc get iteration number", KSPGetIterationNumber(solver, &m_status.iteration_count));
+        checkError("PETSc get residual norm", KSPGetResidualNorm(solver, &m_status.residual));
 
-  // make a shared pointer on the matrix A, make_shared does not work : loses the pointer to the gko::executor !
-  auto pA = std::shared_ptr<const gko::matrix::Csr<double, int>>(A.internal(), [](auto* p) {});
+        // destroy solver + pc
+        checkError("PETSc destroy solver context", KSPDestroy(&solver)); // includes a call to PCDestroy
 
-  // generate the solver
-  auto solver = solver_factory->generate(pA);
+        // update the counters
+        ++m_solve_num;
+        m_total_iter_num += m_status.iteration_count;
+        m_total_solve_time += tsolve.elapsed();
 
-  // generate and set the preconditioner
-  if (prec == 1) {
-    using Preconditioner = typename gko::preconditioner::Jacobi<double>;
-    std::shared_ptr<Preconditioner> new_prec = Preconditioner::build().on(exec)->generate(pA);
-    solver->set_preconditioner(new_prec);
-  }
+        return m_status.succeeded;
+    }*/
 
-  // solve with timing
-  auto tic = std::chrono::steady_clock::now();
-  solver->apply(lend(b.internal()), lend(x.internal()));
-  auto toc = std::chrono::steady_clock::now();
-  time += std::chrono::duration_cast<std::chrono::nanoseconds>(toc - tic);
-}
+    const Alien::SolverStatus &
+    InternalLinearSolver::getStatus() const {
+        return m_status;
+    }
 
-void InternalLinearSolver::display_solver_infos(const Alien::Ginkgo::OptionTypes::eSolver& solver, const Alien::Ginkgo::OptionTypes::ePreconditioner& prec)
-{
-  std::cout << "Solver : ";
-  switch (solver) {
-  case OptionTypes::CG:
-    std::cout << "CG" << std::endl;
-    break;
-  case OptionTypes::GMRES:
-    std::cout << "GMRES" << std::endl;
-    break;
-  case OptionTypes::BICG:
-    std::cout << "BICG" << std::endl;
-    break;
-  case OptionTypes::BICGSTAB:
-    std::cout << "BICGSTAB" << std::endl;
-    break;
-  default:
-    std::cout << "undefined !" << std::endl;
-    break;
-  }
+    ALIEN_GINKGO_EXPORT
+    std::shared_ptr<ILinearAlgebra>
+    InternalLinearSolver::algebra() const {
+        return std::make_shared<LinearAlgebra>();
+    }
 
-  std::cout << "Preconditioner : ";
-  switch (prec) {
-  case OptionTypes::Jacobi:
-    std::cout << "Jacobi" << std::endl;
-    break;
-  case OptionTypes::NoPC:
-    std::cout << "No preconditioner" << std::endl;
-    break;
-  default:
-    std::cout << "undefined !" << std::endl;
-    break;
-  }
-}
+    ALIEN_GINKGO_EXPORT
+    IInternalLinearSolver<Matrix, Vector> *
+    InternalLinearSolverFactory(const Options &options) {
+        return new InternalLinearSolver(options);
+    }
 
-const Alien::SolverStatus&
-InternalLinearSolver::getStatus() const
-{
-  return m_status;
-}
-
-ALIEN_GINKGO_EXPORT
-std::shared_ptr<ILinearAlgebra>
-InternalLinearSolver::algebra() const
-{
-  return std::make_shared<LinearAlgebra>();
-}
-
-ALIEN_GINKGO_EXPORT
-IInternalLinearSolver<Matrix, Vector>*
-InternalLinearSolverFactory(const Options& options)
-{
-  return new InternalLinearSolver(options);
-}
-
-ALIEN_GINKGO_EXPORT
-IInternalLinearSolver<Matrix, Vector>*
-InternalLinearSolverFactory()
-{
-  return new InternalLinearSolver();
-}
+    ALIEN_GINKGO_EXPORT
+    IInternalLinearSolver<Matrix, Vector> *
+    InternalLinearSolverFactory() {
+        return new InternalLinearSolver();
+    }
 } // namespace Alien::Ginkgo
