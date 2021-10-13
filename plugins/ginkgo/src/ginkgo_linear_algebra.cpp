@@ -69,68 +69,74 @@ namespace Alien::Ginkgo {
                            Vector &w) const override;
     };
 
-   /* Arccore::Real
+    Arccore::Real
     InternalLinearAlgebra::norm0(const Vector &vx ALIEN_UNUSED_PARAM) const {
-        throw Arccore::NotImplementedException(A_FUNCINFO, "PetscLinearAlgebra::norm0 not implemented");
+   //     throw Arccore::NotImplementedException(A_FUNCINFO, "PetscLinearAlgebra::norm0 not implemented");
+		return{};
     }
 
     Arccore::Real
     InternalLinearAlgebra::norm1(const Vector &vx) const {
-        PetscScalar norm;
-        VecNorm(vx.internal(), NORM_1, &norm);
-        return static_cast<Arccore::Real>(norm);
+        //~ PetscScalar norm;
+        //~ VecNorm(vx.internal(), NORM_1, &norm);
+        //~ return static_cast<Arccore::Real>(norm);
+        return{};
+        
     }
 
     Arccore::Real
     InternalLinearAlgebra::norm2(const Vector &vx) const {
-        PetscScalar norm;
-        VecNorm(vx.internal(), NORM_2, &norm);
-        return static_cast<Arccore::Real>(norm);
+        //~ PetscScalar norm;
+        //~ VecNorm(vx.internal(), NORM_2, &norm);
+        //~ return static_cast<Arccore::Real>(norm);
+        return{};
     }
 
     void InternalLinearAlgebra::mult(const Matrix &ma, const Vector &vx, Vector &vr) const {
-        MatMult(ma.internal(), vx.internal(), vr.internal());
+        //~ MatMult(ma.internal(), vx.internal(), vr.internal());
     }
 
     void InternalLinearAlgebra::axpy(
             Arccore::Real alpha, const Vector &vx, Vector &vr) const {
-        VecAXPY(vr.internal(), alpha, vx.internal()); //  vr = alpha.vx + vr
+        //~ VecAXPY(vr.internal(), alpha, vx.internal()); //  vr = alpha.vx + vr
     }
 
     void InternalLinearAlgebra::copy(const Vector &vx, Vector &vr ) const {
-        VecCopy(vx.internal(), vr.internal());
+        //~ VecCopy(vx.internal(), vr.internal());
     }
 
     Arccore::Real
     InternalLinearAlgebra::dot(const Vector &vx, const Vector &vy) const {
-        PetscScalar dot_prod;
-        VecDot(vx.internal(), vy.internal(), &dot_prod);
-        return static_cast<Arccore::Real>(dot_prod);
+        //~ PetscScalar dot_prod;
+        //~ VecDot(vx.internal(), vy.internal(), &dot_prod);
+        //~ return static_cast<Arccore::Real>(dot_prod);
+        return{};
     }
 
     void InternalLinearAlgebra::diagonal(Matrix const &m ALIEN_UNUSED_PARAM, Vector &v ALIEN_UNUSED_PARAM) const {
-        MatGetDiagonal(m.internal(), v.internal());
+        //~ MatGetDiagonal(m.internal(), v.internal());
+       // return{};
     }
 
     void InternalLinearAlgebra::reciprocal(Vector &v ALIEN_UNUSED_PARAM) const {
-        VecReciprocal(v.internal());
+        //~ VecReciprocal(v.internal());
     }
 
     void InternalLinearAlgebra::aypx(
             Arccore::Real alpha, Vector &y, const Vector &x) const {
-        VecAYPX(y.internal(), alpha, x.internal()); // y = x + alpha y
+        //~ VecAYPX(y.internal(), alpha, x.internal()); // y = x + alpha y
     }
 
     void InternalLinearAlgebra::pointwiseMult(
             const Vector &x, const Vector &y, Vector &w) const {
-        VecPointwiseMult(
-                w.internal(), x.internal(),
-                y.internal()); // Computes the componentwise multiplication w = x*y.
+        //VecPointwiseMult(
+                //~ w.internal(), x.internal(),
+                //~ y.internal()); // Computes the componentwise multiplication w = x*y.
     }
 
     void InternalLinearAlgebra::scal(Arccore::Real alpha, Vector &x) const {
-        VecScale(x.internal(), alpha);
-    }*/
+     //   VecScale(x.internal(), alpha);
+    }
 
     ALIEN_GINKGO_EXPORT
     IInternalLinearAlgebra<Ginkgo::Matrix, Ginkgo::Vector> *
