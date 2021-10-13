@@ -103,7 +103,7 @@ int test() {
     Alien::Vector b(size, pm);
     //Alien::PETSc::LinearAlgebra algebra;
     //Alien::SimpleCSRLinearAlgebra algebra;
-    //Alien::Ginkgo::LinearAlgebra algebra;
+    Alien::Ginkgo::LinearAlgebra algebra;
     
     
     //algebra.mult(A, xe, b);
