@@ -33,7 +33,7 @@
 #include <alien/ginkgo/export.h>
 
 namespace Alien {
-    // Compile PetscLinearSolver.
+    // Compile GinkgoLinearSolver.
     template
     class ALIEN_GINKGO_EXPORT LinearSolver<BackEnd::tag::ginkgo>;
 
@@ -103,7 +103,7 @@ namespace Alien::Ginkgo {
         }
     }
 
-   /* bool InternalLinearSolver::solve(const Matrix &A, const Vector &b, Vector &x) {
+    bool InternalLinearSolver::solve(const Matrix &A, const Vector &b, Vector &x) {
         // Macro "pratique" en attendant de trouver mieux
         boost::timer tsolve;
 
@@ -114,7 +114,7 @@ namespace Alien::Ginkgo {
         auto *mpi_comm_mng = dynamic_cast<Arccore::MessagePassing::Mpi::MpiMessagePassingMng *>(A.distribution().parallelMng());
         if (mpi_comm_mng)
             comm = *(mpi_comm_mng->getMPIComm());
-
+/*
         // solver's choice
         // Liste à compléter (dans options.h), on met lesquels ?
         std::string solver_name = "undefined";
@@ -190,8 +190,9 @@ namespace Alien::Ginkgo {
         m_total_iter_num += m_status.iteration_count;
         m_total_solve_time += tsolve.elapsed();
 
-        return m_status.succeeded;
-    }*/
+        return m_status.succeeded;*/
+        return {};
+    }
 
     const Alien::SolverStatus &
     InternalLinearSolver::getStatus() const {
