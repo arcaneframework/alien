@@ -24,9 +24,6 @@
 #include <alien/kernels/simple_csr/algebra/SimpleCSRLinearAlgebra.h>
 
 
-
-
-
 int test() {
     auto *pm = Arccore::MessagePassing::Mpi::StandaloneMpiMessagePassingMng::create(MPI_COMM_WORLD);
     auto *tm = Arccore::arccoreCreateDefaultTraceMng();
@@ -49,7 +46,8 @@ int test() {
 	 * 2 -1 
 	 * -1 2 -1 
 	 *   -1  2 -1
-	 *      -1  2 -1        ***/
+	 *      -1  2 -1        
+	 ***/
 	 
     Alien::Matrix A(size, size, pm);
 
@@ -106,7 +104,7 @@ int test() {
     Alien::Ginkgo::LinearAlgebra algebra;
     
     
-    //algebra.mult(A, xe, b);
+    algebra.mult(A, xe, b);
     /** => Ici appel à Ginkgo **/
     
 
