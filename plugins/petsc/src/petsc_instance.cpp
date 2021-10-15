@@ -1,5 +1,5 @@
 /*
-* Copyright 2020 IFPEN-CEA
+* Copyright 2021 IFPEN-CEA
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ void petsc_init_if_needed()
   int argc = 0;
   char** args = {};
   PetscInitialize(&argc, &args, PETSC_NULL, PETSC_NULL);
+
+  // TODO: know when to call PetscFinalize
 }
 
 } // namespace Alien::PETSc
