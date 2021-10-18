@@ -50,6 +50,7 @@ include(${ARCCON_CMAKE_COMMANDS})
 find_package(Arccore REQUIRED)
 
 find_package(Alien REQUIRED)
+find_package(MPI REQUIRED)
 
 find_package(PETSc REQUIRED)
 
@@ -78,6 +79,7 @@ target_link_libraries(alien_petsc PUBLIC
         )
 
 target_link_libraries(alien_petsc PRIVATE
+        MPI::MPI_CXX
         arccon::PETSc
         )
 

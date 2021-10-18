@@ -52,6 +52,8 @@ find_package(Arccore REQUIRED)
 
 find_package(Alien REQUIRED)
 
+find_package(MPI REQUIRED)
+
 find_package(Hypre REQUIRED)
 
 # ----------------------------------------------------------------------------
@@ -80,6 +82,7 @@ target_link_libraries(alien_hypre PUBLIC
         )
 
 target_link_libraries(alien_hypre PRIVATE
+        MPI::MPI_CXX
         arccon::Hypre
         )
 
