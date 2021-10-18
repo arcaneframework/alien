@@ -53,7 +53,6 @@ find_package(Arccore REQUIRED)
 find_package(Alien REQUIRED)
 
 find_package(Hypre REQUIRED)
-find_package(Boost REQUIRED) # For boost::timer.
 
 # ----------------------------------------------------------------------------
 # ----------------------------------------------------------------------------
@@ -82,7 +81,7 @@ target_link_libraries(alien_hypre PUBLIC
 
 target_link_libraries(alien_hypre PRIVATE
         arccon::Hypre
-        Boost::boost)
+        )
 
 target_include_directories(alien_hypre PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>

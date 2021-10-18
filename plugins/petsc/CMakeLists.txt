@@ -52,7 +52,6 @@ find_package(Arccore REQUIRED)
 find_package(Alien REQUIRED)
 
 find_package(PETSc REQUIRED)
-find_package(Boost REQUIRED) # For boost::timer.
 
 # ----------------------------------------------------------------------------
 # ----------------------------------------------------------------------------
@@ -80,7 +79,7 @@ target_link_libraries(alien_petsc PUBLIC
 
 target_link_libraries(alien_petsc PRIVATE
         arccon::PETSc
-        Boost::boost)
+        )
 
 target_include_directories(alien_petsc PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
