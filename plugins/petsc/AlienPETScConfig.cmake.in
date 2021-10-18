@@ -6,7 +6,6 @@ find_dependency(Arccon)
 # Add FindPackage from Arccon
 list(APPEND CMAKE_MODULE_PATH ${ARCCON_MODULE_PATH})
 
-find_dependency(Arccore)
 find_dependency(Alien)
 
 # Remove FindPackage Arccon paths

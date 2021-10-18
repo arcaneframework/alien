@@ -71,15 +71,15 @@ add_library(alien_petsc
         src/petsc_instance.cpp src/petsc_instance.h)
 
 target_link_libraries(alien_petsc PUBLIC
-        Arccore::arccore_trace
-        Arccore::arccore_collections
-        Arccore::arccore_base
-        Arccore::arccore_message_passing_mpi
         Alien::alien_core
         )
 
 target_link_libraries(alien_petsc PRIVATE
         MPI::MPI_CXX
+        Arccore::arccore_trace
+        Arccore::arccore_collections
+        Arccore::arccore_base
+        Arccore::arccore_message_passing_mpi
         arccon::PETSc
         )
 

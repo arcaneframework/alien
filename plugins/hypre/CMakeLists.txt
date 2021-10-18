@@ -74,15 +74,15 @@ add_library(alien_hypre
         )
 
 target_link_libraries(alien_hypre PUBLIC
-        Arccore::arccore_trace
-        Arccore::arccore_collections
-        Arccore::arccore_base
-        Arccore::arccore_message_passing_mpi
         Alien::alien_core
         )
 
 target_link_libraries(alien_hypre PRIVATE
         MPI::MPI_CXX
+        Arccore::arccore_trace
+        Arccore::arccore_collections
+        Arccore::arccore_base
+        Arccore::arccore_message_passing_mpi
         arccon::Hypre
         )
 
