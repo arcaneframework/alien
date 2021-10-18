@@ -12,6 +12,7 @@ find_dependency(Arccon)
 list(APPEND CMAKE_MODULE_PATH ${ARCCON_MODULE_PATH})
 find_dependency(Arccore)
 
+find_dependency(BLAS)
 find_dependency(Boost)
 
 # Remove FindPackage Arccon paths
