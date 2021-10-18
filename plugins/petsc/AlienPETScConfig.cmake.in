@@ -9,7 +9,6 @@ list(APPEND CMAKE_MODULE_PATH ${ARCCON_MODULE_PATH})
 find_dependency(Arccore)
 find_dependency(Alien)
 find_dependency(MPI)
-find_dependency(PETSc)
 
 # Remove FindPackage Arccon paths
 list(REMOVE_AT CMAKE_MODULE_PATH -1)

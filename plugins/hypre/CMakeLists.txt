@@ -78,8 +78,11 @@ target_link_libraries(alien_hypre PUBLIC
         Arccore::arccore_base
         Arccore::arccore_message_passing_mpi
         Alien::alien_core
-        arccon::Hypre
         )
+
+target_link_libraries(alien_hypre PRIVATE
+        arccon::Hypre
+        Boost::boost)
 
 target_include_directories(alien_hypre PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>

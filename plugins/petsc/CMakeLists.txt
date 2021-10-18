@@ -76,8 +76,11 @@ target_link_libraries(alien_petsc PUBLIC
         Arccore::arccore_base
         Arccore::arccore_message_passing_mpi
         Alien::alien_core
-        arccon::PETSc
         )
+
+target_link_libraries(alien_petsc PRIVATE
+        arccon::PETSc
+        Boost::boost)
 
 target_include_directories(alien_petsc PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
