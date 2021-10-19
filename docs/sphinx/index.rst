@@ -13,6 +13,8 @@ Welcome to Alien's documentation!
    
    sycl/index
 
+   plugin/index
+
 Indices and tables
 ==================
 
