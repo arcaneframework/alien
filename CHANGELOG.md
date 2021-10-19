@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 **Changes:**
 
 - install tutorials and examples sources
+- init sphinx plugin documentation
 
 ## 1.1.0
 

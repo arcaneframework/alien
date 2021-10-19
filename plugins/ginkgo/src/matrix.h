@@ -20,8 +20,9 @@
 
 #include <alien/core/impl/IMatrixImpl.h>
 
-//#include <petscmat.h>
 
+//#include <petscmat.h>
+#include <ginkgo/core/matrix/csr.hpp>
 
 namespace Alien::Ginkgo {
     class Matrix : public IMatrixImpl {

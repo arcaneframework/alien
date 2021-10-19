@@ -11,6 +11,8 @@ Welcome to Alien's documentation!
 
    developer/index
 
+   plugin/index
+
 Indices and tables
 ==================
 

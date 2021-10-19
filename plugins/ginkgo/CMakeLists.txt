@@ -58,7 +58,6 @@ find_package(Boost REQUIRED) # For boost::timer.
 # ----------------------------------------------------------------------------
 
 add_library(alien_ginkgo
-        #~ include/alien/petsc/backend.h
         src/matrix.h
         src/matrix.cpp
         src/vector.h

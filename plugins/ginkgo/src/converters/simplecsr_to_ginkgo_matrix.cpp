@@ -54,7 +54,7 @@ void SimpleCSR_to_Ginkgo_MatrixConverter::convert(const IMatrixImpl *sourceImpl,
     const auto &v = cast<Alien::SimpleCSRMatrix<Arccore::Real>>(sourceImpl, sourceBackend());
     auto &v2 = cast<Alien::Ginkgo::Matrix>(targetImpl, targetBackend());
 
-    /*alien_debug([&] {
+    alien_debug([&] {
         cout() << "Converting Alien::SimpleCSRMatrix: " << &v << " to Ginkgo::Matrix " << &v2;
     });
 
@@ -63,12 +63,16 @@ void SimpleCSR_to_Ginkgo_MatrixConverter::convert(const IMatrixImpl *sourceImpl,
     else if (targetImpl->vblock())
         throw Arccore::FatalErrorException(A_FUNCINFO, "Block sizes are variable - builds not yet implemented");
     else
-        _build(v, v2);*/
+        _build(v, v2);
 }
 
 void SimpleCSR_to_Ginkgo_MatrixConverter::_build(const Alien::SimpleCSRMatrix<Arccore::Real> &sourceImpl,
                                                 Alien::Ginkgo::Matrix &targetImpl) const {
-    /*const auto &dist = sourceImpl.distribution();
+    alien_debug([&] {
+        cout() << "------------ _build";
+    });	
+													
+    const auto &dist = sourceImpl.distribution();
     const auto &profile = sourceImpl.getCSRProfile();
     const auto localSize = profile.getNRow();
     const auto localOffset = dist.rowOffset();
@@ -85,6 +89,8 @@ void SimpleCSR_to_Ginkgo_MatrixConverter::_build(const Alien::SimpleCSRMatrix<Ar
                << "[" << jlower << ":" << jupper << "]";
     });
 
+    
+    /*
     auto sizes = Arccore::UniqueArray<int>(localSize);
     for (auto row = 0; row < localSize; ++row) {
         sizes[row] = profile.getRowSize(row);
@@ -106,7 +112,12 @@ void SimpleCSR_to_Ginkgo_MatrixConverter::_build(const Alien::SimpleCSRMatrix<Ar
 }
 
 void SimpleCSR_to_Ginkgo_MatrixConverter::_buildBlock(const Alien::SimpleCSRMatrix<Arccore::Real> &sourceImpl,
-                                                     Alien::Ginkgo::Matrix &targetImpl) const {/*
+                                                     Alien::Ginkgo::Matrix &targetImpl) const {
+    alien_debug([&] {
+        cout() << "------------ _buildBlock";
+    });	
+    
+/*
   const auto& dist = sourceImpl.distribution();
   const auto& profile = sourceImpl.getCSRProfile();
   const auto localSize = profile.getNRow();
