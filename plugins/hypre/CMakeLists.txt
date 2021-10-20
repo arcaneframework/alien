@@ -101,7 +101,7 @@ generate_export_header(alien_hypre
         )
 
 # Examples
-
+set(ALIEN_BENCHMARK ON)
 add_subdirectory(examples)
 
 # Tests
