@@ -138,3 +138,9 @@ jobs:
         run: |
           ${{matrix.config.precommand}}
           cd ${{env.BUILD_DIR}} && cmake --install ${{env.BUILD_DIR}}
+
+      - name: TestInstall
+        run: |
+          ${{matrix.config.precommand}}
+          cmake -B ${{env.BUILD_DIR}}/hypre -DCMAKE_BUILD_TYPE=${{matrix.config.build_type}} -DCMAKE_PREFIX_PATH=${{env.INSTALL_DIR}} plugins/hypre/examples
+          cmake --build ${{env.BUILD_DIR}}/hypre
