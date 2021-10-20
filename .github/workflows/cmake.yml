@@ -149,11 +149,5 @@ jobs:
       - name: TestInstallHypre
         run: |
           ${{matrix.config.precommand}}
-          cmake -B ${{env.BUILD_DIR}}/hypre -DCMAKE_BUILD_TYPE=${{matrix.config.build_type}} -DCMAKE_PREFIX_PATH=${{env.INSTALL_DIR}} plugins/hypre/examples
+          cmake -B ${{env.BUILD_DIR}}/hypre -DCMAKE_BUILD_TYPE=${{matrix.config.build_type}} -DCMAKE_PREFIX_PATH=${{env.INSTALL_DIR}} ${{env.INSTALL_DIR}}/share/doc/Alien/examples/hypre
           cmake --build ${{env.BUILD_DIR}}/hypre
-
-      - name: TestInstallPETSc
-        run: |
-          ${{matrix.config.precommand}}
-          cmake -B ${{env.BUILD_DIR}}/petsc -DCMAKE_BUILD_TYPE=${{matrix.config.build_type}} -DCMAKE_PREFIX_PATH=${{env.INSTALL_DIR}} plugins/petsc/examples
-          cmake --build ${{env.BUILD_DIR}}/petsc

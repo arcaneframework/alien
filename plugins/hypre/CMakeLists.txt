@@ -151,6 +151,6 @@ install(FILES "${project_config}"
         DESTINATION "${config_install_dir}"
         )
 
-install(DIRECTORY examples DESTINATION ${CMAKE_INSTALL_DOCDIR})
+install(DIRECTORY examples DESTINATION ${CMAKE_INSTALL_DOCDIR}/hypre)
 # ----------------------------------------------------------------------------
 # ----------------------------------------------------------------------------
