@@ -28,7 +28,6 @@ cmake_policy(SET CMP0074 NEW)
 project(AlienHypreExample VERSION 1.0 LANGUAGES CXX)
 
 find_package(Alien REQUIRED)
-find_package(AlienHypre REQUIRED)
 
 add_executable(example_hypre hypre_example_solve.cpp)
 
