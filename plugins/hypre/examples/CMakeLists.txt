@@ -32,13 +32,13 @@ find_package(Alien REQUIRED)
 add_executable(example_hypre hypre_example_solve.cpp)
 
 target_link_libraries(example_hypre PUBLIC
-        Alien::alien_hypre
+        Alien::hypre_wrapper
         Alien::alien_semantic_ref)
 
 add_executable(example_hypre_move hypre_example_solve_move.cpp)
 
 target_link_libraries(example_hypre_move PUBLIC
-        Alien::alien_hypre
+        Alien::hypre_wrapper
         Alien::alien_semantic_move)
 
 if (ALIEN_BENCHMARK)

@@ -7,7 +7,7 @@ find_package(PETSc REQUIRED)
 # ----------------------------------------------------------------------------
 # ----------------------------------------------------------------------------
 
-add_library(alien_petsc
+add_library(petsc_wrapper
         include/alien/petsc/backend.h
         src/matrix.h
         src/matrix.cpp
@@ -20,11 +20,11 @@ add_library(alien_petsc
         src/converters/petsc_to_simplecsr_vector.cpp
         src/petsc_instance.cpp src/petsc_instance.h)
 
-target_link_libraries(alien_petsc PUBLIC
+target_link_libraries(petsc_wrapper PUBLIC
         Alien::alien_core
         )
 
-target_link_libraries(alien_petsc PRIVATE
+target_link_libraries(petsc_wrapper PRIVATE
         MPI::MPI_CXX
         Arccore::arccore_trace
         Arccore::arccore_collections
@@ -33,17 +33,18 @@ target_link_libraries(alien_petsc PRIVATE
         arccon::PETSc
         )
 
-target_include_directories(alien_petsc PUBLIC
+target_include_directories(petsc_wrapper PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         )
 
-add_library(Alien::alien_petsc ALIAS alien_petsc)
+add_library(Alien::petsc_wrapper ALIAS petsc_wrapper)
 
 include(GenerateExportHeader)
 
-generate_export_header(alien_petsc
+generate_export_header(petsc_wrapper
+        BASE_NAME ALIEN_PETSC
         EXPORT_FILE_NAME include/alien/petsc/export.h
         )
 
@@ -63,7 +64,7 @@ install(DIRECTORY include/alien/petsc
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/alien
         )
 
-install(TARGETS alien_petsc EXPORT ${ALIENPETSC_EXPORT_TARGET}
+install(TARGETS petsc_wrapper EXPORT ${ALIENPETSC_EXPORT_TARGET}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         )
