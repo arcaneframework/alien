@@ -114,6 +114,7 @@ jobs:
 
       - name: Build
         # Build your program with the given configuration
+        uses: ammaraskar/gcc-problem-matcher@master
         run: |
           ${{matrix.config.precommand}}
           cmake --build ${{env.BUILD_DIR}} --config ${{matrix.config.build_type}} -j $(nproc)
