@@ -24,7 +24,7 @@
 
 namespace Alien
 {
-
+//! ReverseIndexer based on a HashTable
 class ALIEN_EXPORT DoKReverseIndexer : public IReverseIndexer
 {
  public:

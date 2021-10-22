@@ -22,7 +22,7 @@
 
 namespace Alien
 {
-
+//! Reverse indexer: associates an Index (i,j) to an offset
 class IReverseIndexer
 {
  public:
@@ -32,7 +32,14 @@ class IReverseIndexer
  public:
   virtual ~IReverseIndexer() {}
 
+  //! Returns the Index (i,j) corresponding to an offset
+  //! \param off
+  //! \return Index (i,j), FIXME: not found ?
   virtual Index operator[](Offset off) const = 0;
+
+  //! Registers a offset and its corresponding index
+  //! \param off
+  //! \param i
   virtual void record(Offset off, Index i) = 0;
 
   virtual Arccore::Int32 size() const = 0;

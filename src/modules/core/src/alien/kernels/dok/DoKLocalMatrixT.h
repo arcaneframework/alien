@@ -28,6 +28,8 @@
 namespace Alien
 {
 
+//! Matrix storage using Dictionary Of Keys
+//! \tparam NNZValue Scalar type of the non-zeros of the matrix
 template <typename NNZValue>
 class DoKLocalMatrixT
 {
@@ -66,6 +68,10 @@ class DoKLocalMatrixT
 
   void setMaxNnz(Integer size) { _reallocate(size); }
 
+  //! Set a non-zero in the matrix
+  //! \param i
+  //! \param j
+  //! \param val
   void set(Int32 i, Int32 j, const NNZValue& val)
   {
     auto offset = m_indexer->create(i, j, m_offset);
@@ -77,6 +83,7 @@ class DoKLocalMatrixT
     }
   }
 
+  //! Group non-zeros according to indexer
   void compact()
   {
     UniqueArray<ILocalMatrixIndexer::Renumbering> perm(m_offset);
