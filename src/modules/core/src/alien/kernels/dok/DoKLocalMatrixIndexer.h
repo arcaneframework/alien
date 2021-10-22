@@ -42,7 +42,7 @@ class ALIEN_EXPORT DoKLocalMatrixIndexer : public ILocalMatrixIndexer
   DoKLocalMatrixIndexer& operator=(DoKLocalMatrixIndexer&& src) = default;
 
   void associate(Integer i, Integer j, Offset offset) override;
-  Offset find(Integer i, Integer j) override;
+  std::optional<Offset> find(Integer i, Integer j) override;
   Offset create(Integer i, Integer j, Offset& tentative_offset) override;
 
   IReverseIndexer* sort(ArrayView<Renumbering> perm) override;

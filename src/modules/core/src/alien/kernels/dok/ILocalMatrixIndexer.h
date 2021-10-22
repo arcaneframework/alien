@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <unordered_map>
 #include <utility>
+#include <optional>
 
 namespace Alien
 {
@@ -52,8 +53,8 @@ class ILocalMatrixIndexer
   //! Finds the offset associated with a matrix position (i,j)
   //! \param i
   //! \param j
-  //! \return offset if found, -1 else
-  virtual Offset find(Integer i, Integer j) = 0;
+  //! \return offset if found
+  virtual std::optional<Offset> find(Integer i, Integer j) = 0;
 
   //! Creates a new offset for matrix position (i,j)
   //! \param i

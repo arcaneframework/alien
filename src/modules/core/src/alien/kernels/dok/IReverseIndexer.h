@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <optional>
+
 #include <alien/utils/Precomp.h>
 
 namespace Alien
@@ -34,8 +36,8 @@ class IReverseIndexer
 
   //! Returns the Index (i,j) corresponding to an offset
   //! \param off
-  //! \return Index (i,j), FIXME: not found ?
-  virtual Index operator[](Offset off) const = 0;
+  //! \return Index (i,j)
+  virtual std::optional<Index> operator[](Offset off) const = 0;
 
   //! Registers a offset and its corresponding index
   //! \param off

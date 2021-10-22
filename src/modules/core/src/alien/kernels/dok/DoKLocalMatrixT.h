@@ -106,12 +106,15 @@ class DoKLocalMatrixT
       this->compact();
 
     std::cout << "Number of elements: " << m_values.size() << "\n";
-    for (int i = 0; i < m_r_indexer->size(); ++i)
+    for (int i = 0; i < m_r_indexer->size(); ++i) {
+      auto index = (*m_r_indexer)[i];
+      auto offset = m_indexer->find(index.value().first, index.value().second);
       std::cout
-      << "( " << (*m_r_indexer)[i].first << " , " << (*m_r_indexer)[i].second << " ) "
+      << "( " << index.value().first << " , " << index.value().second << " ) "
       << " = "
-      << m_values[m_indexer->find((*m_r_indexer)[i].first, (*m_r_indexer)[i].second)]
+      << m_values[offset.value()]
       << "\n";
+    }
   }
 
  private:
