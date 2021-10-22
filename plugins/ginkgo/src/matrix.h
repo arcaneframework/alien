@@ -25,7 +25,7 @@
 #include <ginkgo/core/matrix/csr.hpp>
 
 namespace Alien::Ginkgo {
-    class Matrix : public IMatrixImpl {
+class Matrix : public IMatrixImpl, public gko::matrix::Csr<double,int> {
     public:
 		
         explicit Matrix(const MultiMatrixImpl *multi_impl);
@@ -33,20 +33,30 @@ namespace Alien::Ginkgo {
         ~Matrix() override;
 
     public:
-        void setProfile(int ilower, int iupper, int jlower, int jupper,
-                        [[maybe_unused]] Arccore::ConstArrayView<int> row_sizes);
+       /* void setProfile(int ilower, int iupper, int jlower, int jupper,
+                        [[maybe_unused]] Arccore::ConstArrayView<int> row_sizes);*/
 
         void setRowValues(int rows,
                           Arccore::ConstArrayView<int> cols,
-                          Arccore::ConstArrayView<double> values);
+                          Arccore::ConstArrayView<double> );
 
         void assemble();
 
-       // Mat internal() const { return m_mat; }
+       // void setDataHolder(int rows, int cols);
+//       gko::matrix::Csr<double,int> const & internal() const { return *reinterpret_cast<const gko::matrix::Csr<double,int>*>(this); }
+       gko::matrix::Csr<double,int> const & internal() const { return *this; }
+       //gko::matrix::Csr<double,int> & internal()  { return *this; }
+
 
     private:
-       // Mat m_mat;
-       // MPI_Comm m_comm{};
+     /*using ValueType = double;
+     using IndexType = int;
+     using mtx = gko::matrix::Csr<ValueType, IndexType>;
+     mtx m_mat;*/
+        // MPI_Comm m_comm{};
+
+     gko::matrix_assembly_data<double, int> data;
+
     };
 
 } // namespace Alien::Ginkgo

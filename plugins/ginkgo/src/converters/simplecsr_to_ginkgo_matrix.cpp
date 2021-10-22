@@ -68,13 +68,13 @@ void SimpleCSR_to_Ginkgo_MatrixConverter::convert(const IMatrixImpl *sourceImpl,
 
 void SimpleCSR_to_Ginkgo_MatrixConverter::_build(const Alien::SimpleCSRMatrix<Arccore::Real> &sourceImpl,
                                                 Alien::Ginkgo::Matrix &targetImpl) const {
-    alien_debug([&] {
-        cout() << "------------ _build";
-    });	
-													
+
     const auto &dist = sourceImpl.distribution();
     const auto &profile = sourceImpl.getCSRProfile();
+
+    // nb rows
     const auto localSize = profile.getNRow();
+
     const auto localOffset = dist.rowOffset();
 
     const auto ilower = localOffset;
@@ -82,40 +82,38 @@ void SimpleCSR_to_Ginkgo_MatrixConverter::_build(const Alien::SimpleCSRMatrix<Ar
     const auto jlower = ilower;
     const auto jupper = iupper;
 
-    alien_debug([&] {
-        cout() << "Matrix range : "
-               << "[" << ilower << ":" << iupper << "]"
-               << "x"
-               << "[" << jlower << ":" << jupper << "]";
-    });
-
-    
-    /*
-    auto sizes = Arccore::UniqueArray<int>(localSize);
+    // crée un tableau sizes, contenant pour chaque ligne, le nb nnz
+    /*auto sizes = Arccore::UniqueArray<int>(localSize);
     for (auto row = 0; row < localSize; ++row) {
         sizes[row] = profile.getRowSize(row);
-    }
+    }*/
 
-    targetImpl.setProfile(ilower, iupper, jlower, jupper, sizes);
+//    targetImpl.setProfile(ilower, iupper, jlower, jupper, sizes);
 
     auto values = sourceImpl.internal().getValues();
     auto cols = profile.getCols();
     auto icount = 0;
+
+    // for each row
     for (auto irow = 0; irow < localSize; ++irow) {
         const auto row = localOffset + irow;
+
+        // get nb of values in this row
         const auto ncols = profile.getRowSize(irow);
+
+        // set values in the target matrix, with the row id, and arrays of col ids and values
         targetImpl.setRowValues(row, cols.subConstView(icount, ncols), values.subConstView(icount, ncols));
         icount += ncols;
     }
 
-    targetImpl.assemble();*/
+    targetImpl.assemble();
 }
 
 void SimpleCSR_to_Ginkgo_MatrixConverter::_buildBlock(const Alien::SimpleCSRMatrix<Arccore::Real> &sourceImpl,
                                                      Alien::Ginkgo::Matrix &targetImpl) const {
     alien_debug([&] {
         cout() << "------------ _buildBlock";
-    });	
+    });
     
 /*
   const auto& dist = sourceImpl.distribution();

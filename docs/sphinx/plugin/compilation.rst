@@ -18,7 +18,7 @@ Compilation
 
 
 - Write an *alien/plugin/plugin_name/CMakeLists.txt* using another plugin's CMakeLists.txt file as a template:
-	- you may need to write a findSolver.cmake file:
+	- you may need to write a findSolver.cmake file, which should be located in the alien/framework/arccon/build-system/Modules folder:
 
 .. code-block:: cmake
 	
