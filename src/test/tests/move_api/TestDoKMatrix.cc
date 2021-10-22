@@ -48,7 +48,7 @@ TEST(TestDoKMatrix, MultiImplConverter)
   auto first = mdist.rowOffset();
   auto last = first + mdist.localRowSize();
 
-  if ( first <= 0 && 0 < last)
+  if (first <= 0 && 0 < last)
     builder(0, 0) = -1.;
   if (first <= 1 && 1 < last)
     builder(1, 1) = -2.;
@@ -66,10 +66,7 @@ TEST(TestDoKMatrix, MultiImplConverter)
 
   A = builder.release();
 
-
-
   Alien::MultiMatrixImpl* multiA = A.impl();
   const Alien::DoKMatrix& dok_a = multiA->get<Alien::BackEnd::tag::DoK>();
   dok_a.backend();
 }
-
