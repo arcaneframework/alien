@@ -18,7 +18,7 @@
 
 #include <gtest/gtest.h>
 
-#include "../../../modules/refsemantic/include/alien/ref/AlienRefSemantic.h"
+#include <alien/ref/AlienRefSemantic.h>
 
 #include <Environment.h>
 
