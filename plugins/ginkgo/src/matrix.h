@@ -23,39 +23,34 @@
 //#include <petscmat.h>
 
 
-namespace Alien::Ginkgo {
-class Matrix : public IMatrixImpl, public gko::matrix::Csr<double,int> {
-    public:
-		
-        explicit Matrix(const MultiMatrixImpl *multi_impl);
+namespace Alien::Ginkgo
+{
+class Matrix : public IMatrixImpl
+, public gko::matrix::Csr<double, int>
+{
+ public:
+  explicit Matrix(const MultiMatrixImpl* multi_impl);
 
-        ~Matrix() override;
+  ~Matrix() override;
 
-    public:
-       /* void setProfile(int ilower, int iupper, int jlower, int jupper,
+ public:
+  /* void setProfile(int ilower, int iupper, int jlower, int jupper,
                         [[maybe_unused]] Arccore::ConstArrayView<int> row_sizes);*/
 
-        void setRowValues(int rows,
-                          Arccore::ConstArrayView<int> cols,
-                          Arccore::ConstArrayView<double> );
+  void setRowValues(int rows,
+                    Arccore::ConstArrayView<int> cols,
+                    Arccore::ConstArrayView<double>);
 
-        void assemble();
+  void assemble();
 
-       // void setDataHolder(int rows, int cols);
-//       gko::matrix::Csr<double,int> const & internal() const { return *reinterpret_cast<const gko::matrix::Csr<double,int>*>(this); }
-       gko::matrix::Csr<double,int> const & internal() const { return *this; }
-       //gko::matrix::Csr<double,int> & internal()  { return *this; }
+  gko::matrix::Csr<double, int> const& internal() const { return *this; }
 
-
-    private:
-     /*using ValueType = double;
+ private:
+  /*using ValueType = double;
      using IndexType = int;
      using mtx = gko::matrix::Csr<ValueType, IndexType>;
      mtx m_mat;*/
-        // MPI_Comm m_comm{};
-
-     gko::matrix_assembly_data<double, int> data;
-
-    };
+  gko::matrix_assembly_data<double, int> data;
+};
 
 } // namespace Alien::Ginkgo

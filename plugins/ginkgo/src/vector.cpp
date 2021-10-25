@@ -19,36 +19,48 @@
 #include "vector.h"
 
 #include <alien/ginkgo/backend.h>
+#include <alien/core/impl/MultiVectorImpl.h>
 
-#include <arccore/message_passing_mpi/MpiMessagePassingMng.h>
-
+//#include <arccore/message_passing_mpi/MpiMessagePassingMng.h>
 //#include <petscvec.h>
 
-namespace Alien::Ginkgo {
-    Vector::Vector(const MultiVectorImpl *multi_impl)
-            : IVectorImpl(multi_impl, AlgebraTraits<BackEnd::tag::ginkgo>::name())/*, m_vec(nullptr)*/ {
-    /*    auto block_size = 1;
+namespace Alien::Ginkgo
+{
+Vector::Vector(const MultiVectorImpl* multi_impl)
+: IVectorImpl(multi_impl, AlgebraTraits<BackEnd::tag::ginkgo>::name())
+, gko::matrix::Dense<double>(
+  gko::ReferenceExecutor::create(),
+  gko::dim<2>(multi_impl->space().size(), 1))
+, data(gko::dim<2>{ (multi_impl->space().size(), 1) })
+{
+  /*auto block_size = 1;
         const auto *block = this->block();
         if (block)
             block_size *= block->size();
         else if (this->vblock())
-            throw Arccore::FatalErrorException(A_FUNCINFO, "Not implemented yet");
+            throw Arccore::FatalErrorException(A_FUNCINFO, "Not implemented yet");*/
 
-        const auto localOffset = distribution().offset();
+  /*const auto localOffset = distribution().offset();
         const auto localSize = distribution().localSize();
         const auto ilower = localOffset * block_size;
-        const auto iupper = ilower + localSize * block_size - 1;
+        const auto iupper = ilower + localSize * block_size - 1;*/
 
-        setProfile(ilower, iupper);*/
-    }
+  alien_debug([&] {
+    cout() << "Vector size : "
+           << multi_impl->space().size();
+  });
+  //setProfile(ilower, iupper);
+}
 
-    Vector::~Vector() {
-        /*if (m_vec)
+Vector::~Vector()
+{
+  /*if (m_vec)
             VecDestroy(&m_vec);*/
-    }
+}
 
-    void Vector::setProfile(int ilower, int iupper) {
-        /*if (m_vec)
+void Vector::setProfile(int ilower, int iupper)
+{
+  /*if (m_vec)
             VecDestroy(&m_vec);
 
         auto *pm = dynamic_cast<Arccore::MessagePassing::Mpi::MpiMessagePassingMng *>(distribution().parallelMng());
@@ -66,30 +78,31 @@ namespace Alien::Ginkgo {
         m_rows.resize(iupper - ilower + 1);
         for (int i = 0; i < m_rows.size(); ++i)
             m_rows[i] = ilower + i;*/
-    }
+}
 
-    void Vector::setValues(Arccore::ConstArrayView<double> values) {
-        /*auto ierr = VecSetValues(m_vec, m_rows.size(), m_rows.data(), values.data(), INSERT_VALUES);
+void Vector::setValues(Arccore::ConstArrayView<double> values)
+{
+  auto ncols = values.size();
 
-        if (ierr) {
-            throw Arccore::FatalErrorException(A_FUNCINFO, "PETSc Vector set values failed");
-        }*/
-    }
+  //      std::clog << "[NM==========================CALL to  setValues ==============, with : " << ncols << " values.\n";
 
-    void Vector::getValues(Arccore::ArrayView<double> values) const {
-        /*auto ierr = VecGetValues(m_vec, m_rows.size(), m_rows.data(), values.data());
+  for (auto icol = 0; icol < ncols; ++icol) {
+    //        std::clog << "data.add_value icol : " << icol << " - value : " << values[icol] << "\n";
+    data.add_value(0, icol, values[icol]);
+  }
+}
+
+void Vector::getValues(Arccore::ArrayView<double> values) const
+{
+  /*auto ierr = VecGetValues(m_vec, m_rows.size(), m_rows.data(), values.data());
 
         if (ierr) {
             throw Arccore::FatalErrorException(A_FUNCINFO, "PETSc Vector get values failed");
         }*/
-    }
+}
 
-    void Vector::assemble() {
-        /*auto ierr = VecAssemblyBegin(m_vec);
-        ierr |= VecAssemblyEnd(m_vec);
-
-        if (ierr) {
-            throw Arccore::FatalErrorException(A_FUNCINFO, "PETSc Vector assembling failed");
-        }*/
-    }
+void Vector::assemble()
+{
+  this->read(data);
+}
 } // namespace Alien::Ginkgo
