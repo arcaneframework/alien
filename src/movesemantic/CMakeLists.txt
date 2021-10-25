@@ -75,7 +75,7 @@ install(DIRECTORY alien/move
         )
 
 install(
-        FILES ${CMAKE_CURRENT_BINARY_DIR}/include/alien/move/AlienMoveSemanticExport.h
+        FILES ${CMAKE_CURRENT_BINARY_DIR}/alien/move/AlienMoveSemanticExport.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/alien/move/
 )
 

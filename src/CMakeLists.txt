@@ -38,7 +38,7 @@ configure_file(
 
 install(
         FILES ${PROJECT_BINARY_DIR}/alien/AlienConfig.h
-        DESTINATION include/alien
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/alien
 )
 
 # ----------------------------------------------------------------------------
