@@ -73,7 +73,7 @@ void Matrix::setRowValues(int row, Arccore::ConstArrayView<int> cols, Arccore::C
     throw Arccore::FatalErrorException(A_FUNCINFO, "sizes are not equal");
   }
 
-  std::clog << "[NM==========================CALL to  setRowValues ==============, row : " << row << "\n";
+  //std::clog << "[NM==========================CALL to  setRowValues ==============, row : " << row << "\n";
 
   for (auto icol = 0; icol < ncols; ++icol) {
     //std::clog << "data.add_value : row : " << row << " icol : " << cols[icol] << " - value : " << values[icol] << "\n";
