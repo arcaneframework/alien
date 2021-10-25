@@ -116,4 +116,6 @@ install(
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/alien/ref
 )
 
-add_subdirectory(tests)
+if (ALIEN_UNIT_TESTS)
+    add_subdirectory(tests)
+endif (ALIEN_UNIT_TESTS)

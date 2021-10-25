@@ -54,7 +54,7 @@ endif ()
 
 if (ALIEN_UNIT_TESTS)
     enable_testing()
-    add_subdirectory(test)
+    add_subdirectory(test_framework)
 endif ()
 
 
@@ -96,6 +96,7 @@ install(EXPORT ${ALIEN_EXPORT_TARGET}
 
 install(FILES ../CMake/LoadAlienTest.cmake
         DESTINATION ${config_install_dir})
+
 
 # ----------------------------------------------------------------------------
 # ----------------------------------------------------------------------------

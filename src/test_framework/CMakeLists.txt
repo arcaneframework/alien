@@ -29,4 +29,4 @@ generate_export_header(alien_test_framework
 
 target_include_directories(alien_test_framework PUBLIC
         ${CMAKE_CURRENT_BINARY_DIR}
-        ${CMAKE_CURRENT_SOURCE_DIR})
+        .)

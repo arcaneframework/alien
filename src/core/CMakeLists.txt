@@ -164,4 +164,6 @@ add_library(Alien::alien_core ALIAS alien_core)
 
 enable_sanitizers(alien_core)
 
-add_subdirectory(tests)
+if (ALIEN_UNIT_TESTS)
+    add_subdirectory(tests)
+endif (ALIEN_UNIT_TESTS)
