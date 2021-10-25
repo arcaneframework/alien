@@ -15,26 +15,26 @@
 # SPDX-License-Identifier: Apache-2.0
 
 set(alien_semantic_public_header
-        include/alien/move/handlers/block/BlockVectorReader.h
-        include/alien/move/handlers/block/BlockVectorWriter.h
-        include/alien/move/handlers/scalar/VectorReader.h
-        include/alien/move/handlers/scalar/VectorWriter.h
-        include/alien/move/AlienMoveSemantic.h
-        include/alien/move/AlienMoveSemanticPrecomp.h
-        include/alien/move/handlers/block/ProfiledBlockMatrixBuilder.h
-        include/alien/move/handlers/scalar/DirectMatrixBuilder.h
-        include/alien/move/handlers/scalar/MatrixProfiler.h
-        include/alien/move/handlers/scalar/ProfiledMatrixBuilder.h
-        include/alien/move/handlers/sub_matrix/Extraction.h
-        include/alien/move/data/MatrixData.h
-        include/alien/move/data/VectorData.h
+        alien/move/handlers/block/BlockVectorReader.h
+        alien/move/handlers/block/BlockVectorWriter.h
+        alien/move/handlers/scalar/VectorReader.h
+        alien/move/handlers/scalar/VectorWriter.h
+        alien/move/AlienMoveSemantic.h
+        alien/move/AlienMoveSemanticPrecomp.h
+        alien/move/handlers/block/ProfiledBlockMatrixBuilder.h
+        alien/move/handlers/scalar/DirectMatrixBuilder.h
+        alien/move/handlers/scalar/MatrixProfiler.h
+        alien/move/handlers/scalar/ProfiledMatrixBuilder.h
+        alien/move/handlers/sub_matrix/Extraction.h
+        alien/move/data/MatrixData.h
+        alien/move/data/VectorData.h
         )
 
 add_library(alien_semantic_move
         ${alien_semantic_public_header}
-        src/Extraction.cc
-        src/MatrixData.cc
-        src/VectorData.cc
+        alien/move/handlers/sub_matrix/Extraction.cc
+        alien/move/data/MatrixData.cc
+        alien/move/data/VectorData.cc
         )
 
 if (ALIEN_GENERATE_DOCUMENTATION)
@@ -49,15 +49,14 @@ endif (ALIEN_GENERATE_DOCUMENTATION)
 target_link_libraries(alien_semantic_move PUBLIC alien_core)
 
 target_include_directories(alien_semantic_move PUBLIC
-        $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
 generate_export_header(alien_semantic_move
         BASE_NAME alien_semantic_move
         EXPORT_MACRO_NAME ALIEN_MOVESEMANTIC_EXPORT
-        EXPORT_FILE_NAME include/alien/move/AlienMoveSemanticExport.h
+        EXPORT_FILE_NAME alien/move/AlienMoveSemanticExport.h
         STATIC_DEFINE ${PROJECT_NAME}_BUILT_AS_STATIC
         )
 
@@ -70,7 +69,7 @@ add_library(Alien::alien_semantic_move ALIAS alien_semantic_move)
 
 enable_sanitizers(alien_semantic_move)
 
-install(DIRECTORY include/alien/move
+install(DIRECTORY alien/move
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/alien
         )
 
@@ -78,3 +77,5 @@ install(
         FILES ${CMAKE_CURRENT_BINARY_DIR}/include/alien/move/AlienMoveSemanticExport.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/alien/move/
 )
+
+add_subdirectory(tests)

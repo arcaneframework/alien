@@ -16,9 +16,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <alien/move/handlers/sub_matrix/Extraction.h>
+#include "Extraction.h"
 
 #include <algorithm>
+
 #include <alien/kernels/simple_csr/CSRStructInfo.h>
 #include <alien/kernels/simple_csr/SimpleCSRMatrix.h>
 #include <alien/move/handlers/scalar/DirectMatrixBuilder.h>

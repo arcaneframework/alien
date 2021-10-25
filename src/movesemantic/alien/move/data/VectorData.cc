@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <alien/move/data/VectorData.h>
+#include "VectorData.h"
 
 #include <alien/core/block/Block.h>
 #include <alien/core/block/VBlock.h>
