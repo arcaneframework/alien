@@ -23,100 +23,95 @@
 #include <arccore/message_passing_mpi/StandaloneMpiMessagePassingMng.h>
 #include <alien/kernels/simple_csr/algebra/SimpleCSRLinearAlgebra.h>
 
+int test()
+{
+  auto* pm = Arccore::MessagePassing::Mpi::StandaloneMpiMessagePassingMng::create(MPI_COMM_WORLD);
+  auto* tm = Arccore::arccoreCreateDefaultTraceMng();
 
-int test() {
-    auto *pm = Arccore::MessagePassing::Mpi::StandaloneMpiMessagePassingMng::create(MPI_COMM_WORLD);
-    auto *tm = Arccore::arccoreCreateDefaultTraceMng();
+  Alien::setTraceMng(tm);
+  Alien::setVerbosityLevel(Alien::Verbosity::Debug);
 
-    Alien::setTraceMng(tm);
-    Alien::setVerbosityLevel(Alien::Verbosity::Debug);
+  auto size = 100;
 
-    auto size = 100;
+  tm->info() << "Example Alien :";
+  tm->info() << "Use of scalar builder (RefSemantic API) for Laplacian problem";
+  tm->info() << " => solving linear system Ax = b";
+  tm->info() << " * problem size = " << size;
+  tm->info() << " ";
+  tm->info() << "Start example...";
+  tm->info() << " ";
 
-    tm->info() << "Example Alien :";
-    tm->info() << "Use of scalar builder (RefSemantic API) for Laplacian problem";
-    tm->info() << " => solving linear system Ax = b";
-    tm->info() << " * problem size = " << size;
-    tm->info() << " ";
-    tm->info() << "Start example...";
-    tm->info() << " ";
-
-	/***
+  /***
 	 * Matrice A, diagonale
 	 * 2 -1 
 	 * -1 2 -1 
 	 *   -1  2 -1
 	 *      -1  2 -1        
 	 ***/
-	 
-    Alien::Matrix A(size, size, pm);
 
-    // Distribution 
-    const auto &dist = A.distribution();
-    int offset = dist.rowOffset();
-    int lsize = dist.localRowSize();
-    int gsize = dist.globalRowSize();
+  Alien::Matrix A(size, size, pm);
 
-    tm->info() << "offset: " << offset;
-    tm->info() << "lsize: " << lsize;
-    tm->info() << "gsize: " << gsize;
+  // Distribution
+  const auto& dist = A.distribution();
+  int offset = dist.rowOffset();
+  int lsize = dist.localRowSize();
+  int gsize = dist.globalRowSize();
 
-    /* seq : 0, 100, 100 */
-    /* 2 mpi :
+  tm->info() << "offset: " << offset;
+  tm->info() << "lsize: " << lsize;
+  tm->info() << "gsize: " << gsize;
+
+  /* seq : 0, 100, 100 */
+  /* 2 mpi :
      * - 0/50/100
      * - 50/50/100
      */
-	
-	// Remplissage avec builder
-    tm->info() << "build matrix with direct matrix builder";
-    {
-        Alien::DirectMatrixBuilder builder(A, Alien::DirectMatrixOptions::eResetValues); // par defaut, la matrice est symétrique ? et stockage CSR et distribution par lignes
-        builder.reserve(3); // Réservation de 3 coefficients par ligne
-        builder.allocate(); // Allocation de l'espace mémoire réservé
 
-        for (int irow = offset; irow < offset + lsize; ++irow) {
-            builder(irow, irow) = 2.;
-            if (irow - 1 >= 0)
-                builder(irow, irow - 1) = -1.;
-            if (irow + 1 < gsize)
-                builder(irow, irow + 1) = -1.;
-        }
+  // Remplissage avec builder
+  tm->info() << "build matrix with direct matrix builder";
+  {
+    Alien::DirectMatrixBuilder builder(A, Alien::DirectMatrixOptions::eResetValues); // par defaut, la matrice est symétrique ? et stockage CSR et distribution par lignes
+    builder.reserve(3); // Réservation de 3 coefficients par ligne
+    builder.allocate(); // Allocation de l'espace mémoire réservé
+
+    for (int irow = offset; irow < offset + lsize; ++irow) {
+      builder(irow, irow) = 2.;
+      if (irow - 1 >= 0)
+        builder(irow, irow - 1) = -1.;
+      if (irow + 1 < gsize)
+        builder(irow, irow + 1) = -1.;
     }
-    
-    
-	/**
+  }
+
+  /**
 	 *  Vecteur xe (ones)
 	 ********************************************/
-	 
-    tm->info() << "* xe = 1";
-    Alien::Vector xe = Alien::ones(size, pm);    
-    tm->info() << "=> Vector Distribution : " << xe.distribution();
-    
-    
-	/**
+
+  tm->info() << "* xe = 1";
+  Alien::Vector xe = Alien::ones(size, pm);
+  tm->info() << "=> Vector Distribution : " << xe.distribution();
+
+  /**
 	 *  Vecteur b = A * xe 
-	 ********************************************/    
-    tm->info() << "* b = A * xe";
+	 ********************************************/
+  tm->info() << "* b = A * xe";
 
-    Alien::Vector b(size, pm);
-    //Alien::PETSc::LinearAlgebra algebra;
-    //Alien::SimpleCSRLinearAlgebra algebra;
-    Alien::Ginkgo::LinearAlgebra algebra;
-    
-    
-    algebra.mult(A, xe, b);
-    /** => Ici appel à Ginkgo **/
-    
+  Alien::Vector b(size, pm);
+  //Alien::PETSc::LinearAlgebra algebra;
+  //Alien::SimpleCSRLinearAlgebra algebra;
+  Alien::Ginkgo::LinearAlgebra algebra;
 
+  algebra.mult(A, xe, b);
+  /** => Ici appel à Ginkgo **/
 
-	/**
+  /**
 	 *  Calcul x, tq : Ax = b 
 	 ********************************************/
-    /*tm->info() << "* Calcul de x, tel que  :  A x = b";
+  tm->info() << "* Calcul de x, tel que  :  A x = b";
 
-    Alien::Vector x(size, pm);
+  Alien::Vector x(size, pm);
 
-    /*Alien::PETSc::Options options;
+  /*Alien::PETSc::Options options;
     options.numIterationsMax(100);
     options.stopCriteriaValue(1e-10);
     options.preconditioner(Alien::PETSc::OptionTypes::Jacobi);
@@ -129,7 +124,7 @@ int test() {
 	/**
 	 *  Calcul du résidu ||Ax - b|| ~ 0
 	 ********************************************/
-    /*tm->info() << "* r = Ax - b";
+  /*tm->info() << "* r = Ax - b";
 
     Alien::Vector r(size, pm);
 	Alien::Vector tmp(size, pm);
@@ -150,7 +145,7 @@ int test() {
 	 *  Calcul de ||x -xe|| ~ 0
 	 ********************************************/
 
-    /*tm->info() << "* r = || x - xe ||";
+  /*tm->info() << "* r = || x - xe ||";
 
 	tm->info() << "r = x";
 	algebra.copy(x, r);
@@ -162,27 +157,31 @@ int test() {
     tm->info() << " ";
     tm->info() << "... example finished !!!";*/
 
-    return 0;
+  return 0;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv)
+{
 
-	MPI_Init(&argc, &argv);
-    auto ret = 0;
+  MPI_Init(&argc, &argv);
+  auto ret = 0;
 
-    try {
-        ret = test();
-    } catch (const Arccore::Exception &ex) {
-        std::cerr << "Exception: " << ex << '\n';
-        ret = 3;
-    } catch (const std::exception &ex) {
-        std::cerr << "** A standard exception occured: " << ex.what() << ".\n";
-        ret = 2;
-    } catch (...) {
-        std::cerr << "** An unknown exception has occured...\n";
-        ret = 1;
-    }
+  try {
+    ret = test();
+  }
+  catch (const Arccore::Exception& ex) {
+    std::cerr << "Exception: " << ex << '\n';
+    ret = 3;
+  }
+  catch (const std::exception& ex) {
+    std::cerr << "** A standard exception occured: " << ex.what() << ".\n";
+    ret = 2;
+  }
+  catch (...) {
+    std::cerr << "** An unknown exception has occured...\n";
+    ret = 1;
+  }
 
-	MPI_Finalize();
-    return ret;
+  MPI_Finalize();
+  return ret;
 }

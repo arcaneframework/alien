@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <memory>
 #include <alien/core/impl/IVectorImpl.h>
 
 //#include <petscvec.h>
@@ -43,9 +44,21 @@ class Vector : public IVectorImpl
 
   void assemble();
 
-  // Vec internal() { return m_vec; }
+  /*using vec = gko::matrix::Dense<double>;
+  std::shared_ptr<vec> internal() { return std::make_shared<vec>(*this);}
+  std::shared_ptr<vec> internal() const { return std::make_shared<vec>(*this);}*/
 
-  // Vec internal() const { return m_vec; }
+  gko::matrix::Dense<double> const* internal() const
+  {
+    return this;
+  }
+  gko::matrix::Dense<double>* internal()
+  {
+    return this;
+  }
+
+  /*gko::matrix::Dense<double> internal() { return *this; }
+  gko::matrix::Dense<double> internal() const { return *this; }*/
 
  private:
   // Vec m_vec;
