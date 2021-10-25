@@ -15,55 +15,55 @@
 # SPDX-License-Identifier: Apache-2.0
 
 add_library(alien_semantic_ref
-        include/alien/ref/AlienImportExport.h
-        include/alien/ref/AlienRefSemantic.h
-        include/alien/ref/AlienRefSemanticPrecomp.h
-        src/block/BlockMatrix.cc
-        include/alien/ref/data/block/BlockMatrix.h
-        src/block/BlockVector.cc
-        include/alien/ref/data/block/BlockVector.h
-        src/block/VBlockMatrix.cc
-        include/alien/ref/data/block/VBlockMatrix.h
-        src/block/VBlockVector.cc
-        include/alien/ref/data/block/VBlockVector.h
-        src/scalar/Matrix.cc
-        include/alien/ref/data/scalar/Matrix.h
-        src/scalar/RedistributedMatrix.cc
-        include/alien/ref/data/scalar/RedistributedMatrix.h
-        src/scalar/RedistributedVector.cc
-        include/alien/ref/data/scalar/RedistributedVector.h
-        src/scalar/Vector.cc
-        include/alien/ref/data/scalar/Vector.h
-        src/functional/Ones.cc
-        include/alien/ref/functional/Ones.h
-        src/functional/Zeros.cc
-        include/alien/ref/functional/Zeros.h
-        include/alien/ref/handlers/block/ProfiledBlockMatrixBuilder.h
-        include/alien/ref/handlers/profiler/MatrixProfiler.h
-        include/alien/ref/handlers/scalar/DirectMatrixBuilder.h
-        include/alien/ref/handlers/scalar/ProfiledMatrixBuilder.h
-        src/stream/StreamMatrixBuilder.cc
-        include/alien/ref/handlers/stream/StreamMatrixBuilder.h
-        include/alien/ref/handlers/stream/StreamMatrixBuilderInserter.h
-        include/alien/ref/handlers/stream/StreamMatrixBuilderInserterT.h
-        include/alien/ref/handlers/stream/StreamMatrixBuilderT.h
-        src/stream/StreamVBlockMatrixBuilder.cc
-        include/alien/ref/handlers/stream/StreamVBlockMatrixBuilder.h
-        include/alien/ref/handlers/stream/StreamVBlockMatrixBuilderInserter.h
-        include/alien/ref/handlers/stream/StreamVBlockMatrixBuilderInserterT.h
-        include/alien/ref/handlers/stream/StreamVBlockMatrixBuilderT.h
-        include/alien/ref/handlers/block/BlockVectorReader.h
-        include/alien/ref/handlers/block/BlockVectorWriter.h
-        include/alien/ref/handlers/block/VBlockVectorReader.h
-        include/alien/ref/handlers/block/VBlockVectorWriter.h
-        include/alien/ref/handlers/scalar/VectorReader.h
-        include/alien/ref/handlers/scalar/VectorWriter.h
-        include/alien/ref/import_export/SystemInfo.h
-        src/import_export/SystemReader.cc
-        include/alien/ref/import_export/SystemReader.h
-        src/import_export/SystemWriter.cc
-        include/alien/ref/import_export/SystemWriter.h
-        src/import_export/HDF5Tools.h)
+        alien/ref/AlienImportExport.h
+        alien/ref/AlienRefSemantic.h
+        alien/ref/AlienRefSemanticPrecomp.h
+        alien/ref/data/block/BlockMatrix.cc
+        alien/ref/data/block/BlockMatrix.h
+        alien/ref/data/block/BlockVector.cc
+        alien/ref/data/block/BlockVector.h
+        alien/ref/data/block/VBlockMatrix.cc
+        alien/ref/data/block/VBlockMatrix.h
+        alien/ref/data/block/VBlockVector.cc
+        alien/ref/data/block/VBlockVector.h
+        alien/ref/data/scalar/Matrix.cc
+        alien/ref/data/scalar/Matrix.h
+        alien/ref/data/scalar/RedistributedMatrix.cc
+        alien/ref/data/scalar/RedistributedMatrix.h
+        alien/ref/data/scalar/RedistributedVector.cc
+        alien/ref/data/scalar/RedistributedVector.h
+        alien/ref/data/scalar/Vector.cc
+        alien/ref/data/scalar/Vector.h
+        alien/ref/functional/Ones.cc
+        alien/ref/functional/Ones.h
+        alien/ref/functional/Zeros.cc
+        alien/ref/functional/Zeros.h
+        alien/ref/handlers/block/ProfiledBlockMatrixBuilder.h
+        alien/ref/handlers/profiler/MatrixProfiler.h
+        alien/ref/handlers/scalar/DirectMatrixBuilder.h
+        alien/ref/handlers/scalar/ProfiledMatrixBuilder.h
+        alien/ref/handlers/stream/StreamMatrixBuilder.cc
+        alien/ref/handlers/stream/StreamMatrixBuilder.h
+        alien/ref/handlers/stream/StreamMatrixBuilderInserter.h
+        alien/ref/handlers/stream/StreamMatrixBuilderInserterT.h
+        alien/ref/handlers/stream/StreamMatrixBuilderT.h
+        alien/ref/handlers/stream/StreamVBlockMatrixBuilder.cc
+        alien/ref/handlers/stream/StreamVBlockMatrixBuilder.h
+        alien/ref/handlers/stream/StreamVBlockMatrixBuilderInserter.h
+        alien/ref/handlers/stream/StreamVBlockMatrixBuilderInserterT.h
+        alien/ref/handlers/stream/StreamVBlockMatrixBuilderT.h
+        alien/ref/handlers/block/BlockVectorReader.h
+        alien/ref/handlers/block/BlockVectorWriter.h
+        alien/ref/handlers/block/VBlockVectorReader.h
+        alien/ref/handlers/block/VBlockVectorWriter.h
+        alien/ref/handlers/scalar/VectorReader.h
+        alien/ref/handlers/scalar/VectorWriter.h
+        alien/ref/import_export/SystemInfo.h
+        alien/ref/import_export/SystemReader.cc
+        alien/ref/import_export/SystemReader.h
+        alien/ref/import_export/SystemWriter.cc
+        alien/ref/import_export/SystemWriter.h
+        alien/ref/import_export/HDF5Tools.h)
 
 if (ALIEN_USE_LIBXML2)
     find_package(LibXml2 REQUIRED)
@@ -79,7 +79,7 @@ endif ()
 
 if (ALIEN_MV_EXPR)
     target_sources(alien_semantic_ref PRIVATE
-            include/alien/ref/mv_expr/MVExpr.h
+            alien/ref/mv_expr/MVExpr.h
             )
     #TODO: check C++ features.
 endif ()
@@ -87,15 +87,14 @@ endif ()
 target_link_libraries(alien_semantic_ref PUBLIC alien_core)
 
 target_include_directories(alien_semantic_ref PUBLIC
-        $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
 generate_export_header(alien_semantic_ref
         BASE_NAME alien_semantic_ref
         EXPORT_MACRO_NAME ALIEN_REFSEMANTIC_EXPORT
-        EXPORT_FILE_NAME include/alien/ref/AlienRefExport.h
+        EXPORT_FILE_NAME alien/ref/AlienRefExport.h
         STATIC_DEFINE ${PROJECT_NAME}_BUILT_AS_STATIC
         )
 
@@ -108,7 +107,7 @@ add_library(Alien::alien_semantic_ref ALIAS alien_semantic_ref)
 
 enable_sanitizers(alien_semantic_ref)
 
-install(DIRECTORY include/alien/ref
+install(DIRECTORY alien/ref
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/alien/
         )
 
@@ -116,3 +115,5 @@ install(
         FILES ${CMAKE_CURRENT_BINARY_DIR}/include/alien/ref/AlienRefExport.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/alien/ref
 )
+
+add_subdirectory(tests)

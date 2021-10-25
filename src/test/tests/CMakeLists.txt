@@ -16,7 +16,3 @@
 
 add_subdirectory(framework)
 
-if (ALIEN_COMPONENT_RefSemantic)
-    add_subdirectory(ref_api)
-endif ()
-
