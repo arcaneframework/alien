@@ -23,19 +23,20 @@
 
 #include <arccore/message_passing_mpi/MpiMessagePassingMng.h>
 #include <iostream>
-namespace Alien::Ginkgo {
+namespace Alien::Ginkgo
+{
 
-    Matrix::Matrix(const MultiMatrixImpl *multi_impl)
-            : IMatrixImpl(multi_impl, AlgebraTraits<BackEnd::tag::ginkgo>::name())
-            , gko::matrix::Csr<double, int>(
-                gko::ReferenceExecutor::create(),
-                gko::dim<2>(multi_impl->rowSpace().size(),multi_impl->colSpace().size()))
-            , data(gko::dim<2>{(multi_impl->rowSpace().size(),multi_impl->colSpace().size())})
-    {
-        const auto &row_space = multi_impl->rowSpace();
-        const auto &col_space = multi_impl->colSpace();
+Matrix::Matrix(const MultiMatrixImpl* multi_impl)
+: IMatrixImpl(multi_impl, AlgebraTraits<BackEnd::tag::ginkgo>::name())
+, gko::matrix::Csr<double, int>(
+  gko::ReferenceExecutor::create(),
+  gko::dim<2>(multi_impl->rowSpace().size(), multi_impl->colSpace().size()))
+, data(gko::dim<2>{ (multi_impl->rowSpace().size(), multi_impl->colSpace().size()) })
+{
+  const auto& row_space = multi_impl->rowSpace();
+  const auto& col_space = multi_impl->colSpace();
 
-       /* alien_debug([&] {
+  /* alien_debug([&] {
           cout() << "[NM========================================\n"
                  << "row_space.size() "
                  << " : " << row_space.size()
@@ -44,39 +45,40 @@ namespace Alien::Ginkgo {
                  << "\n=========================================================NM]";
         });*/
 
-        // Checks that the matrix is square
-        if (row_space.size() != col_space.size())
-            throw Arccore::FatalErrorException("Matrix must be square");
-    }
+  // Checks that the matrix is square
+  if (row_space.size() != col_space.size())
+    throw Arccore::FatalErrorException("Matrix must be square");
+}
 
-    Matrix::~Matrix() {
-    /*    if (m_mat)
+Matrix::~Matrix()
+{
+  /*    if (m_mat)
             MatDestroy(&m_mat);           */
-    }
+}
 
-    /*void Matrix::setProfile(
+/*void Matrix::setProfile(
             int ilower, int iupper, int jlower, int jupper,
             [[maybe_unused]] Arccore::ConstArrayView<int> row_sizes) {
     }*/
 
-    void Matrix::assemble() {
-        this->read(data);
-    }
+void Matrix::assemble()
+{
+  this->read(data);
+}
 
-    void Matrix::setRowValues(int row, Arccore::ConstArrayView<int> cols, Arccore::ConstArrayView<double> values) {
-        auto ncols = cols.size();
-        if (ncols != values.size()) {
-            throw Arccore::FatalErrorException(A_FUNCINFO, "sizes are not equal");
-        }
+void Matrix::setRowValues(int row, Arccore::ConstArrayView<int> cols, Arccore::ConstArrayView<double> values)
+{
+  auto ncols = cols.size();
+  if (ncols != values.size()) {
+    throw Arccore::FatalErrorException(A_FUNCINFO, "sizes are not equal");
+  }
 
+  std::clog << "[NM==========================CALL to  setRowValues ==============, row : " << row << "\n";
 
-        std::clog << "[NM==========================CALL to  setRowValues ==============, row : " << row << "\n";
-
-
-        for (auto icol = 0; icol < ncols; ++icol) {
-          std::clog << "data.add_value : row : " << row << " icol : " << cols[icol] << " - value : " << values[icol] << "\n";
-          data.add_value(row, cols[icol], values[icol]);
-        }
-    }
+  for (auto icol = 0; icol < ncols; ++icol) {
+    //std::clog << "data.add_value : row : " << row << " icol : " << cols[icol] << " - value : " << values[icol] << "\n";
+    data.add_value(row, cols[icol], values[icol]);
+  }
+}
 
 } // namespace Alien::Ginkgo
