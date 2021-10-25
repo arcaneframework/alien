@@ -15,7 +15,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 add_subdirectory(framework)
-add_subdirectory(unit)
 
 if (ALIEN_COMPONENT_MoveSemantic)
     add_subdirectory(move_api)

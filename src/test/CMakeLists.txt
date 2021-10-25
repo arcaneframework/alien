@@ -14,15 +14,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-include(LoadAlienTest)
 
-find_package(MPI REQUIRED)
-
-#-----------------------------------------------------------
-# Tests
-#-----------------------------------------------------------
-
-find_package(GTest REQUIRED)
 
 add_subdirectory(tests)
 

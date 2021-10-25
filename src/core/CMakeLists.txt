@@ -163,3 +163,5 @@ install(
 add_library(Alien::alien_core ALIAS alien_core)
 
 enable_sanitizers(alien_core)
+
+add_subdirectory(tests)
