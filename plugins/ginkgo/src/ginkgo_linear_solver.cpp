@@ -32,89 +32,96 @@
 #include <alien/ginkgo/options.h>
 #include <alien/ginkgo/export.h>
 
-namespace Alien {
-    // Compile GinkgoLinearSolver.
-    template
-    class ALIEN_GINKGO_EXPORT LinearSolver<BackEnd::tag::ginkgo>;
+namespace Alien
+{
+// Compile GinkgoLinearSolver.
+template class ALIEN_GINKGO_EXPORT LinearSolver<BackEnd::tag::ginkgo>;
 
 } // namespace Alien
 
-namespace Alien::Ginkgo {
-    class InternalLinearSolver
-            : public IInternalLinearSolver<Matrix, Vector>, public ObjectWithTrace {
-    public:
-        typedef SolverStatus Status;
+namespace Alien::Ginkgo
+{
+class InternalLinearSolver
+: public IInternalLinearSolver<Matrix, Vector>
+, public ObjectWithTrace
+{
+ public:
+  typedef SolverStatus Status;
 
-        InternalLinearSolver();
+  InternalLinearSolver();
 
-        explicit InternalLinearSolver(const Options &options);
+  explicit InternalLinearSolver(const Options& options);
 
-        ~InternalLinearSolver() override = default;
+  ~InternalLinearSolver() override = default;
 
-    public:
-        // Nothing to do
-        void updateParallelMng(
-                Arccore::MessagePassing::IMessagePassingMng *pm) override {}
+ public:
+  // Nothing to do
+  void updateParallelMng(
+  Arccore::MessagePassing::IMessagePassingMng* pm) override {}
 
-        bool solve(const Matrix &A, const Vector &b, Vector &x) override;
+  bool solve(const Matrix& A, const Vector& b, Vector& x) override;
 
-        bool hasParallelSupport() const override { return true; }
+  bool hasParallelSupport() const override { return true; }
 
-        //! Etat du solveur
-        const Status &getStatus() const override;
+  //! Etat du solveur
+  const Status& getStatus() const override;
 
-        const SolverStat &getSolverStat() const override { return m_stat; }
+  const SolverStat& getSolverStat() const override { return m_stat; }
 
-        std::shared_ptr<ILinearAlgebra> algebra() const override;
+  std::shared_ptr<ILinearAlgebra> algebra() const override;
 
-    private:
-        Status m_status;
+ private:
+  Status m_status;
 
-        Arccore::Real m_init_time{0.0};
-        Arccore::Real m_total_solve_time{0.0};
-        Arccore::Integer m_solve_num{0};
-        Arccore::Integer m_total_iter_num{0};
+  Arccore::Real m_init_time{ 0.0 };
+  Arccore::Real m_total_solve_time{ 0.0 };
+  Arccore::Integer m_solve_num{ 0 };
+  Arccore::Integer m_total_iter_num{ 0 };
 
-        SolverStat m_stat;
-		Options m_options;
+  SolverStat m_stat;
+  Options m_options;
 
-    private:
-        void checkError(const Arccore::String &msg, int ierr,
-                        int skipError = 0) const;
-    };
+ private:
+  void checkError(const Arccore::String& msg, int ierr,
+                  int skipError = 0) const;
+};
 
-    InternalLinearSolver::InternalLinearSolver() {
-        boost::timer tinit;
-        m_init_time += tinit.elapsed();
-    }
+InternalLinearSolver::InternalLinearSolver()
+{
+  boost::timer tinit;
+  m_init_time += tinit.elapsed();
+}
 
-    InternalLinearSolver::InternalLinearSolver(const Options &options)
-            : m_options(options) {
-        boost::timer tinit;
-        m_init_time += tinit.elapsed();
-    }
+InternalLinearSolver::InternalLinearSolver(const Options& options)
+: m_options(options)
+{
+  boost::timer tinit;
+  m_init_time += tinit.elapsed();
+}
 
-    void InternalLinearSolver::checkError(const Arccore::String &msg, int ierr, int skipError) const {
-        if (ierr != 0 and (ierr & ~skipError) != 0) {
-            alien_fatal([&] {
-                cout() << msg << " failed. [code=" << ierr << "]";
-                //CHKERRQ(ierr); // warning car macro qui appelle fx qui retourne un int
-            });
-        }
-    }
+void InternalLinearSolver::checkError(const Arccore::String& msg, int ierr, int skipError) const
+{
+  if (ierr != 0 and (ierr & ~skipError) != 0) {
+    alien_fatal([&] {
+      cout() << msg << " failed. [code=" << ierr << "]";
+      //CHKERRQ(ierr); // warning car macro qui appelle fx qui retourne un int
+    });
+  }
+}
 
-    bool InternalLinearSolver::solve(const Matrix &A, const Vector &b, Vector &x) {
-        // Macro "pratique" en attendant de trouver mieux
-        boost::timer tsolve;
+bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
+{
+  // Macro "pratique" en attendant de trouver mieux
+  boost::timer tsolve;
 
-        int output_level = m_options.verbose() ? 1 : 0;
+  int output_level = m_options.verbose() ? 1 : 0;
 
-        // failback if no MPI comm already defined.
-        MPI_Comm comm = MPI_COMM_WORLD;
-        auto *mpi_comm_mng = dynamic_cast<Arccore::MessagePassing::Mpi::MpiMessagePassingMng *>(A.distribution().parallelMng());
-        if (mpi_comm_mng)
-            comm = *(mpi_comm_mng->getMPIComm());
-/*
+  // failback if no MPI comm already defined.
+  MPI_Comm comm = MPI_COMM_WORLD;
+  auto* mpi_comm_mng = dynamic_cast<Arccore::MessagePassing::Mpi::MpiMessagePassingMng*>(A.distribution().parallelMng());
+  if (mpi_comm_mng)
+    comm = *(mpi_comm_mng->getMPIComm());
+  /*
         // solver's choice
         // Liste à compléter (dans options.h), on met lesquels ?
         std::string solver_name = "undefined";
@@ -191,29 +198,33 @@ namespace Alien::Ginkgo {
         m_total_solve_time += tsolve.elapsed();
 
         return m_status.succeeded;*/
-        return {};
-    }
+  return {};
+}
 
-    const Alien::SolverStatus &
-    InternalLinearSolver::getStatus() const {
-        return m_status;
-    }
+const Alien::SolverStatus&
+InternalLinearSolver::getStatus() const
+{
+  return m_status;
+}
 
-    ALIEN_GINKGO_EXPORT
-    std::shared_ptr<ILinearAlgebra>
-    InternalLinearSolver::algebra() const {
-        return std::make_shared<LinearAlgebra>();
-    }
+ALIEN_GINKGO_EXPORT
+std::shared_ptr<ILinearAlgebra>
+InternalLinearSolver::algebra() const
+{
+  return std::make_shared<LinearAlgebra>();
+}
 
-    ALIEN_GINKGO_EXPORT
-    IInternalLinearSolver<Matrix, Vector> *
-    InternalLinearSolverFactory(const Options &options) {
-        return new InternalLinearSolver(options);
-    }
+ALIEN_GINKGO_EXPORT
+IInternalLinearSolver<Matrix, Vector>*
+InternalLinearSolverFactory(const Options& options)
+{
+  return new InternalLinearSolver(options);
+}
 
-    ALIEN_GINKGO_EXPORT
-    IInternalLinearSolver<Matrix, Vector> *
-    InternalLinearSolverFactory() {
-        return new InternalLinearSolver();
-    }
+ALIEN_GINKGO_EXPORT
+IInternalLinearSolver<Matrix, Vector>*
+InternalLinearSolverFactory()
+{
+  return new InternalLinearSolver();
+}
 } // namespace Alien::Ginkgo

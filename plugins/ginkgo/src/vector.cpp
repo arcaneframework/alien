@@ -31,7 +31,7 @@ Vector::Vector(const MultiVectorImpl* multi_impl)
 , gko::matrix::Dense<double>(
   gko::ReferenceExecutor::create(),
   gko::dim<2>(multi_impl->space().size(), 1))
-, data(gko::dim<2>{ (multi_impl->space().size(), 1) })
+, data(gko::dim<2>(multi_impl->space().size(), 1))
 {
   /*auto block_size = 1;
         const auto *block = this->block();
@@ -48,6 +48,9 @@ Vector::Vector(const MultiVectorImpl* multi_impl)
   alien_debug([&] {
     cout() << "Vector size : "
            << multi_impl->space().size();
+    cout() << "data size : "
+           << data.get_size()[0]
+           << " - " << data.get_size()[1];
   });
   //setProfile(ilower, iupper);
 }
@@ -84,12 +87,14 @@ void Vector::setValues(Arccore::ConstArrayView<double> values)
 {
   auto ncols = values.size();
 
-  //      std::clog << "[NM==========================CALL to  setValues ==============, with : " << ncols << " values.\n";
+  std::clog << "[NM==========================CALL to  setValues ==============, with : " << ncols << " values.\n";
 
   for (auto icol = 0; icol < ncols; ++icol) {
-    //        std::clog << "data.add_value icol : " << icol << " - value : " << values[icol] << "\n";
+    std::clog << "data.add_value icol : " << icol << " - value : " << values[icol] << "\n";
     data.add_value(0, icol, values[icol]);
   }
+  std::clog << "[NM==========================data size==============, with : " << data.get_size()[0] << "-" << data.get_size()[1]
+            << "\n";
 }
 
 void Vector::getValues(Arccore::ArrayView<double> values) const

@@ -17,7 +17,7 @@
  */
 
 #pragma once
-
+#include <memory>
 #include <alien/core/impl/IMatrixImpl.h>
 
 //#include <petscmat.h>
@@ -43,7 +43,25 @@ class Matrix : public IMatrixImpl
 
   void assemble();
 
+  /*
   gko::matrix::Csr<double, int> const& internal() const { return *this; }
+  gko::matrix::Csr<double, int> internal()  { return *this; }
+  */
+  /*
+  std::shared_ptr<gko::matrix::Csr<double, int>> internal() const {
+    return std::make_shared<gko::matrix::Csr<double, int>>(*this); }
+  std::shared_ptr<gko::matrix::Csr<double, int>> internal() {
+    return std::make_shared<gko::matrix::Csr<double, int>>(*this); }
+*/
+  gko::matrix::Csr<double, int> const* internal() const
+  {
+    return this;
+  }
+
+  gko::matrix::Csr<double, int>* internal()
+  {
+    return this;
+  }
 
  private:
   /*using ValueType = double;
