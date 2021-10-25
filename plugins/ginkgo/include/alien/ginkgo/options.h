@@ -22,50 +22,58 @@
 #include <arccore/base/ArccoreGlobal.h>
 #include <arccore/base/FatalErrorException.h>
 
-namespace Alien::Ginkgo {
-    struct OptionTypes {
-        enum eSolver {
-            CG,
-            GMRES,
-            BiCG,
-            BiCGstab
-        };
+namespace Alien::Ginkgo
+{
+struct OptionTypes
+{
+  enum eSolver
+  {
+    CG,
+    GMRES,
+    BiCG,
+    BiCGstab
+  };
 
-        enum ePreconditioner {
-            Jacobi,
-            NoPC,
-        };
-    };
+  enum ePreconditioner
+  {
+    Jacobi,
+    NoPC,
+  };
+};
 
-    struct Options {
-        Arccore::Integer numIterationsMax_ = 100;
+struct Options
+{
+  Arccore::Integer numIterationsMax_ = 100;
 
-        Arccore::Integer numIterationsMax() const { return numIterationsMax_; }
+  Arccore::Integer numIterationsMax() const { return numIterationsMax_; }
 
-        Options &numIterationsMax(Arccore::Integer n) {
-            numIterationsMax_ = n;
-            return *this;
-        }
+  Options& numIterationsMax(Arccore::Integer n)
+  {
+    numIterationsMax_ = n;
+    return *this;
+  }
 
-        Arccore::Real stopCriteriaValue_ = 1.e-10;
+  Arccore::Real stopCriteriaValue_ = 1.e-10;
 
-        Arccore::Real stopCriteriaValue() const { return stopCriteriaValue_; }
+  Arccore::Real stopCriteriaValue() const { return stopCriteriaValue_; }
 
-        Options &stopCriteriaValue(Arccore::Real n) {
-            stopCriteriaValue_ = n;
-            return *this;
-        }
+  Options& stopCriteriaValue(Arccore::Real n)
+  {
+    stopCriteriaValue_ = n;
+    return *this;
+  }
 
-        bool verbose_ = false;
+  bool verbose_ = false;
 
-        bool verbose() const { return verbose_; }
+  bool verbose() const { return verbose_; }
 
-        Options &verbose(bool n) {
-            verbose_ = n;
-            return *this;
-        }
+  Options& verbose(bool n)
+  {
+    verbose_ = n;
+    return *this;
+  }
 
-       /* Alien::PETSc::OptionTypes::eSolver solver_ = Alien::PETSc::OptionTypes::GMRES;
+  /* Alien::PETSc::OptionTypes::eSolver solver_ = Alien::PETSc::OptionTypes::GMRES;
 
         Alien::PETSc::OptionTypes::eSolver solver() const { return solver_; }
 
@@ -82,9 +90,9 @@ namespace Alien::Ginkgo {
             preconditioner_ = n;
             return *this;
         }*/
-    };
+};
 
-    /*class OptionsUtils {
+/*class OptionsUtils {
     public:
         static OptionTypes::eSolver stringToSolverEnum(const std::string &solver_s) {
             if (solver_s.compare("cg") == 0)
