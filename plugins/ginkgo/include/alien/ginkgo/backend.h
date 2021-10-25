@@ -22,56 +22,64 @@
 #include <alien/core/backend/LinearSolver.h>
 #include <alien/core/backend/LinearAlgebra.h>
 
-namespace Alien::Ginkgo {
+namespace Alien::Ginkgo
+{
 // Forward declarations
-    class Matrix;
+class Matrix;
 
-    class Vector;
+class Vector;
 
-    class Options;
+class Options;
 
-    extern IInternalLinearSolver<Matrix, Vector> *InternalLinearSolverFactory(const Options &options);
+extern IInternalLinearSolver<Matrix, Vector>* InternalLinearSolverFactory(const Options& options);
 
-    extern IInternalLinearSolver<Matrix, Vector> *InternalLinearSolverFactory();
+extern IInternalLinearSolver<Matrix, Vector>* InternalLinearSolverFactory();
 
-    extern IInternalLinearAlgebra<Matrix, Vector> *InternalLinearAlgebraFactory();
+extern IInternalLinearAlgebra<Matrix, Vector>* InternalLinearAlgebraFactory();
 } // namespace Alien::Ginkgo
 
-namespace Alien::BackEnd::tag {
-    struct ginkgo {
-    };
+namespace Alien::BackEnd::tag
+{
+struct ginkgo
+{
+};
 } // namespace Alien::BackEnd::tag
 
-namespace Alien {
-    template<>
-    struct AlgebraTraits<BackEnd::tag::ginkgo> {
-        // types
-        using matrix_type = Ginkgo::Matrix;
-        using vector_type = Ginkgo::Vector;
-        using options_type = Ginkgo::Options;
-        using algebra_type = IInternalLinearAlgebra<matrix_type, vector_type>;
-        using solver_type = IInternalLinearSolver<matrix_type, vector_type>;
+namespace Alien
+{
+template <>
+struct AlgebraTraits<BackEnd::tag::ginkgo>
+{
+  // types
+  using matrix_type = Ginkgo::Matrix;
+  using vector_type = Ginkgo::Vector;
+  using options_type = Ginkgo::Options;
+  using algebra_type = IInternalLinearAlgebra<matrix_type, vector_type>;
+  using solver_type = IInternalLinearSolver<matrix_type, vector_type>;
 
-        // factory to build algebra
-        static auto algebra_factory() {
-            return Ginkgo::InternalLinearAlgebraFactory();
-        }
+  // factory to build algebra
+  static auto algebra_factory()
+  {
+    return Ginkgo::InternalLinearAlgebraFactory();
+  }
 
-        // factories to build solver
-        static auto solver_factory(const options_type &options) {
-            return Ginkgo::InternalLinearSolverFactory(options);
-        }
+  // factories to build solver
+  static auto solver_factory(const options_type& options)
+  {
+    return Ginkgo::InternalLinearSolverFactory(options);
+  }
 
-        // factories to build default solver
-        static auto solver_factory() { return Ginkgo::InternalLinearSolverFactory(); }
+  // factories to build default solver
+  static auto solver_factory() { return Ginkgo::InternalLinearSolverFactory(); }
 
-        static BackEndId name() { return "ginkgo"; }
-    };
+  static BackEndId name() { return "ginkgo"; }
+};
 
 } // namespace Alien
 
 // user interface
-namespace Alien::Ginkgo {
-    using LinearSolver = Alien::LinearSolver<BackEnd::tag::ginkgo>;
-    using LinearAlgebra = Alien::LinearAlgebra<BackEnd::tag::ginkgo>;
+namespace Alien::Ginkgo
+{
+using LinearSolver = Alien::LinearSolver<BackEnd::tag::ginkgo>;
+using LinearAlgebra = Alien::LinearAlgebra<BackEnd::tag::ginkgo>;
 } // namespace Alien::Ginkgo

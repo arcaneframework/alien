@@ -68,10 +68,13 @@ void SimpleCSR_to_Ginkgo_MatrixConverter::convert(const IMatrixImpl *sourceImpl,
 
 void SimpleCSR_to_Ginkgo_MatrixConverter::_build(const Alien::SimpleCSRMatrix<Arccore::Real> &sourceImpl,
                                                 Alien::Ginkgo::Matrix &targetImpl) const {
-   											
+
     const auto &dist = sourceImpl.distribution();
     const auto &profile = sourceImpl.getCSRProfile();
+
+    // nb rows
     const auto localSize = profile.getNRow();
+
     const auto localOffset = dist.rowOffset();
 
     const auto ilower = localOffset;
@@ -109,6 +112,8 @@ void SimpleCSR_to_Ginkgo_MatrixConverter::_build(const Alien::SimpleCSRMatrix<Ar
 void SimpleCSR_to_Ginkgo_MatrixConverter::_buildBlock(const Alien::SimpleCSRMatrix<Arccore::Real> &sourceImpl,
                                                      Alien::Ginkgo::Matrix &targetImpl) const {
 
+    
+/*
   const auto& dist = sourceImpl.distribution();
   const auto& profile = sourceImpl.getCSRProfile();
   const auto localSize = profile.getNRow();
