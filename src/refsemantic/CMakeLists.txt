@@ -113,7 +113,7 @@ install(DIRECTORY alien/ref
         )
 
 install(
-        FILES ${CMAKE_CURRENT_BINARY_DIR}/include/alien/ref/AlienRefExport.h
+        FILES ${CMAKE_CURRENT_BINARY_DIR}/alien/ref/AlienRefExport.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/alien/ref
 )
 
