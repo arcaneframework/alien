@@ -216,7 +216,7 @@ jobs:
           path: ${{ env.ARCCORE_BUILD_DIR }}/Testing
           retention-days: 1
 
-  alien-test:
+  .alien-test:
     name: alien-test
     needs:
       - arccore-install
