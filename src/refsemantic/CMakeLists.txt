@@ -109,6 +109,7 @@ enable_sanitizers(alien_semantic_ref)
 
 install(DIRECTORY alien/ref
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/alien/
+        FILES_MATCHING PATTERN "*.h"
         )
 
 install(

@@ -71,6 +71,7 @@ enable_sanitizers(alien_semantic_move)
 
 install(DIRECTORY alien/move
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/alien
+        FILES_MATCHING PATTERN "*.h"
         )
 
 install(
