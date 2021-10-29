@@ -44,21 +44,17 @@ class Vector : public IVectorImpl
 
   void assemble();
 
-  /*using vec = gko::matrix::Dense<double>;
-  std::shared_ptr<vec> internal() { return std::make_shared<vec>(*this);}
-  std::shared_ptr<vec> internal() const { return std::make_shared<vec>(*this);}*/
-
+  // version using raw pointers
   gko::matrix::Dense<double> const* internal() const
   {
     return this;
   }
+
   gko::matrix::Dense<double>* internal()
   {
     return this;
   }
 
-  /*gko::matrix::Dense<double> internal() { return *this; }
-  gko::matrix::Dense<double> internal() const { return *this; }*/
 
  private:
   // Vec m_vec;
