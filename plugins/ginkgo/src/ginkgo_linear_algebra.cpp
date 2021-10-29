@@ -103,8 +103,17 @@ void InternalLinearAlgebra::mult(const Matrix& ma, const Vector& vx, Vector& vr)
   std::clog << "vr : " << vr.space().size();
   std::clog << "g vx : " << vx.internal()->get_size()[0] << " - " << vx.internal()->get_size()[1] << "\n" ;
   std::clog << "g vx : " << vx.internal()->get_size()[0] << " - " << vx.internal()->get_size()[1] << "\n" ;*/
+  /*printf("matrix a pointer : %x\n",ma.internal());
+  printf("vector b pointer : %x\n",vx.internal());
+  printf("vector r pointer : %x\n",vr.internal());*/
   ma.internal()->apply(lend(vx.internal()), lend(vr.internal()));
-  //std::clog << "matmult\n";
+  /*std::clog << "matmult\n";
+  for (int i=0; i<vx.internal()->get_size()[0]; i++)
+    std::cout << "vx : " << i << " value : " << vx.internal()->get_const_values()[i] << "\n";
+
+  for (int i=0; i<vr.internal()->get_size()[0]; i++)
+    std::cout << "vr : " << i << " value : " << vr.internal()->get_values()[i] <<"\n";*/
+
 }
 
 void InternalLinearAlgebra::axpy(

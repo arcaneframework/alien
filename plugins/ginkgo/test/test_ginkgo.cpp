@@ -95,14 +95,11 @@ int test()
 	 *  Vecteur b = A * xe 
 	 ********************************************/
   tm->info() << "* b = A * xe";
-
   Alien::Vector b(size, pm);
-  //Alien::PETSc::LinearAlgebra algebra;
   //Alien::SimpleCSRLinearAlgebra algebra;
-  Alien::Ginkgo::LinearAlgebra algebra;
 
+  Alien::Ginkgo::LinearAlgebra algebra;
   algebra.mult(A, xe, b);
-  /** => Ici appel à Ginkgo **/
 
   /**
 	 *  Calcul x, tq : Ax = b 
@@ -111,16 +108,15 @@ int test()
 
   Alien::Vector x(size, pm);
 
-  /*Alien::PETSc::Options options;
-    options.numIterationsMax(100);
-    options.stopCriteriaValue(1e-10);
-    options.preconditioner(Alien::PETSc::OptionTypes::Jacobi);
-    options.solver(Alien::PETSc::OptionTypes::BiCGstab);
-    
-    
-    auto solver = Alien::PETSc::LinearSolver(options);
-    solver.solve(A, b, x);
+  Alien::Ginkgo::Options options;
+  options.numIterationsMax(100);
+  options.stopCriteriaValue(1e-100);
+  options.preconditioner(Alien::Ginkgo::OptionTypes::Jacobi);
+  options.solver(Alien::Ginkgo::OptionTypes::CG);
+  auto solver = Alien::Ginkgo::LinearSolver(options);
+  solver.solve(A, b,x);
 
+/*
 	/**
 	 *  Calcul du résidu ||Ax - b|| ~ 0
 	 ********************************************/
