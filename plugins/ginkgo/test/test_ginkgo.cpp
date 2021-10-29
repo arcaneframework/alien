@@ -101,10 +101,13 @@ int test()
   Alien::Ginkgo::LinearAlgebra algebra;
   algebra.mult(A, xe, b);
 
+  b.space().
+
   /**
 	 *  Calcul x, tq : Ax = b 
 	 ********************************************/
-  tm->info() << "* Calcul de x, tel que  :  A x = b";
+  tm->info()
+  << "* Calcul de x, tel que  :  A x = b";
 
   Alien::Vector x(size, pm);
 
@@ -114,9 +117,9 @@ int test()
   options.preconditioner(Alien::Ginkgo::OptionTypes::Jacobi);
   options.solver(Alien::Ginkgo::OptionTypes::CG);
   auto solver = Alien::Ginkgo::LinearSolver(options);
-  solver.solve(A, b,x);
+  solver.solve(A, b, x);
 
-/*
+  /*
 	/**
 	 *  Calcul du résidu ||Ax - b|| ~ 0
 	 ********************************************/

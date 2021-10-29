@@ -55,7 +55,6 @@ class Vector : public IVectorImpl
     return this;
   }
 
-
  private:
   // Vec m_vec;
   // MPI_Comm m_comm;

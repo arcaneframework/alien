@@ -29,9 +29,9 @@ struct OptionTypes
   enum eSolver
   {
     CG,
-   // GMRES,
-   // BiCG,
-   // BiCGstab
+    // GMRES,
+    // BiCG,
+    // BiCGstab
   };
 
   enum ePreconditioner
@@ -49,7 +49,6 @@ struct Options
   bool verbose_ = false;
   Alien::Ginkgo::OptionTypes::eSolver solver_ = Alien::Ginkgo::OptionTypes::CG;
   Alien::Ginkgo::OptionTypes::ePreconditioner preconditioner_ = Alien::Ginkgo::OptionTypes::Jacobi;
-
 
   // methods
   Arccore::Integer numIterationsMax() const { return numIterationsMax_; }
@@ -74,16 +73,17 @@ struct Options
   }
 
   Alien::Ginkgo::OptionTypes::eSolver solver() const { return solver_; }
-  Options &solver(Alien::Ginkgo::OptionTypes::eSolver n) {
-      solver_ = n;
-      return *this;
+  Options& solver(Alien::Ginkgo::OptionTypes::eSolver n)
+  {
+    solver_ = n;
+    return *this;
   }
 
-
   Alien::Ginkgo::OptionTypes::ePreconditioner preconditioner() const { return preconditioner_; }
-  Options &preconditioner(Alien::Ginkgo::OptionTypes::ePreconditioner n) {
-      preconditioner_ = n;
-      return *this;
+  Options& preconditioner(Alien::Ginkgo::OptionTypes::ePreconditioner n)
+  {
+    preconditioner_ = n;
+    return *this;
   }
 };
 } // namespace Alien::Ginkgo

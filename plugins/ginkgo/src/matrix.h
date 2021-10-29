@@ -43,7 +43,7 @@ class Matrix : public IMatrixImpl
 
   void assemble();
 
-/* make_shared does not work : loses the pointer to the gko::executor !
+  /* make_shared does not work : loses the pointer to the gko::executor !
   std::shared_ptr<gko::matrix::Csr<double, int>> internal() const {
     return std::make_shared<gko::matrix::Csr<double, int>>(*this); }
   std::shared_ptr<gko::matrix::Csr<double, int>> internal() {
@@ -61,11 +61,13 @@ class Matrix : public IMatrixImpl
 */
 
   /* Return a raw pointer */
-  gko::matrix::Csr<double, int> const* internal() const{
+  gko::matrix::Csr<double, int> const* internal() const
+  {
     return this;
   }
 
-  gko::matrix::Csr<double, int>* internal(){
+  gko::matrix::Csr<double, int>* internal()
+  {
     return this;
   }
 
