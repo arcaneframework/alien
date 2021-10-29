@@ -30,8 +30,8 @@ Vector::Vector(const MultiVectorImpl* multi_impl)
 : IVectorImpl(multi_impl, AlgebraTraits<BackEnd::tag::ginkgo>::name())
 , gko::matrix::Dense<double>(
   gko::ReferenceExecutor::create(),
-  gko::dim<2>( multi_impl->space().size(),1))
-, data(gko::dim<2>(multi_impl->space().size(),1))
+  gko::dim<2>(multi_impl->space().size(), 1))
+, data(gko::dim<2>(multi_impl->space().size(), 1))
 {
   alien_debug([&] {
     cout() << "Vector size : "
@@ -61,7 +61,7 @@ void Vector::setValues(Arccore::ConstArrayView<double> values)
   for (auto icol = 0; icol < ncols; ++icol) {
     //std::clog << "data.add_value icol : " << icol << " - value : " << values[icol] << "\n";
     //data.add_value(0, icol, values[icol]);
-    data.add_value(icol,0,values[icol]);
+    data.add_value(icol, 0, values[icol]);
   }
   //std::clog << "[NM==========================data contains ==============, with : " << data.get_size()[0] << " rows - " << data.get_size()[1] << " cols \n";
 
@@ -96,6 +96,5 @@ void Vector::assemble()
   for (int i = 0;  i < 10; i++) {
       std::cout << vals[i] << " ";
   }*/
-
 }
 } // namespace Alien::Ginkgo
