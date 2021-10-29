@@ -141,8 +141,6 @@ void InternalLinearAlgebra::mult(const Matrix& ma, const Vector& vx, Vector& vr)
     std::cout << vxVal[i] <<" ";
   }*/
 
-
-
   ma.internal()->apply(lend(vx.internal()), lend(vr.internal()));
 
   //check data in vector vx
@@ -152,7 +150,6 @@ void InternalLinearAlgebra::mult(const Matrix& ma, const Vector& vx, Vector& vr)
   {
     std::cout << vrVal[i] <<" ";
   }*/
-
 }
 
 void InternalLinearAlgebra::axpy(
