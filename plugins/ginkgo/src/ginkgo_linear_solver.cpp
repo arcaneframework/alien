@@ -158,12 +158,13 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
                 break;
         }
 
+        /*
         std::clog << "--------------------- solve -------------------\n";
         std::clog << "--------------------- numIterationsMax -------------------" << m_options.numIterationsMax() << "\n";
         std::clog << "--------------------- stopCriteriaValue -------------------" << m_options.stopCriteriaValue() << "\n";
         std::clog << "--------------------- precond_name -------------------" << precond_name << "\n";
         std::clog << "--------------------- solver_name -------------------" << solver_name << "\n";
-
+        */
 
         // Parameter the solver factory
         const double reduction_factor{m_options.stopCriteriaValue()};
@@ -175,10 +176,6 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
             gko::stop::Iteration::build().with_max_iters(m_options.numIterationsMax()).on(exec),
             gko::stop::ResidualNorm<double>::build().with_reduction_factor(reduction_factor).on(exec))
           .on(exec);
-
-        // Generate the solver
-        //auto solver = solver_factory->generate(share(A.internal()));
-        // printf("---matrix a pointer : %x\n",A.internal());
 
         auto p = std::shared_ptr<const gko::matrix::Csr<double,int>>(A.internal(),[](auto * p){ std::cout << " do not delete !" << std::endl;});
         auto solver = solver_factory->generate(share(p));
