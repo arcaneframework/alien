@@ -103,16 +103,55 @@ void InternalLinearAlgebra::mult(const Matrix& ma, const Vector& vx, Vector& vr)
   std::clog << "vr : " << vr.space().size();
   std::clog << "g vx : " << vx.internal()->get_size()[0] << " - " << vx.internal()->get_size()[1] << "\n" ;
   std::clog << "g vx : " << vx.internal()->get_size()[0] << " - " << vx.internal()->get_size()[1] << "\n" ;*/
-  /*printf("matrix a pointer : %x\n",ma.internal());
-  printf("vector b pointer : %x\n",vx.internal());
-  printf("vector r pointer : %x\n",vr.internal());*/
-  ma.internal()->apply(lend(vx.internal()), lend(vr.internal()));
-  /*std::clog << "matmult\n";
-  for (int i=0; i<vx.internal()->get_size()[0]; i++)
-    std::cout << "vx : " << i << " value : " << vx.internal()->get_const_values()[i] << "\n";
 
-  for (int i=0; i<vr.internal()->get_size()[0]; i++)
-    std::cout << "vr : " << i << " value : " << vr.internal()->get_values()[i] <<"\n";*/
+  /* Debug MATRIX */
+  /*std::cout << "=== MATMULT : DEBUG ma " << std::endl;
+  std::cout << "=== MATMULT : DEBUG ma get num stored elements : " << ma.get_num_stored_elements() << std::endl;
+  std::cout << "=== MATMULT : DEBUG ma size L x C : " << ma.get_size()[0] << " x " << ma.get_size()[1] << std::endl;
+  std::cout << "=== MATMULT : Affichage ligne par ligne  : " << std::endl;
+  int nRows = ma.get_size()[0] ;
+  int nCols = ma.get_size()[1] ;
+
+  auto vals = ma.get_const_values();
+  auto cols = ma.get_const_col_idxs();
+  auto rows = ma.get_const_row_ptrs();
+
+  // check data in matrix ma
+  for (int i = 0; i<nRows; i++)
+  {
+    int nbValuesRow = rows[i+1] - rows[i];
+    std::cout << "row : " << i << " - nbValues : " << nbValuesRow << " || ";
+    for (int j =0; j<nbValuesRow; j++)
+    {
+      std::cout << vals[rows[i]+j] <<" ";
+    }
+    std::cout <<" cols : ";
+    for (int j =0; j<nbValuesRow; j++)
+    {
+      std::cout << cols[rows[i]+j] << " ";
+    }
+    std::cout << "\n";
+  }
+
+  //check data in vector vx
+  std::cout << "=== MATMULT : DEBUG VX size L x C : " << vx.get_size()[0] << " x " << vx.get_size()[1] << std::endl;
+  auto vxVal = vx.get_const_values();
+  for (int i =0; i<vx.get_size()[0]; i++)
+  {
+    std::cout << vxVal[i] <<" ";
+  }*/
+
+
+
+  ma.internal()->apply(lend(vx.internal()), lend(vr.internal()));
+
+  //check data in vector vx
+  /*std::cout << "\n=== MATMULT : DEBUG VR size L x C : " << vr.get_size()[0] << " x " << vr.get_size()[1] << std::endl;
+  auto vrVal = vr.get_const_values();
+  for (int i =0; i<vr.get_size()[0]; i++)
+  {
+    std::cout << vrVal[i] <<" ";
+  }*/
 
 }
 
