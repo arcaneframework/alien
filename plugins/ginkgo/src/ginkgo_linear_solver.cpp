@@ -122,43 +122,43 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
 
   int output_level = m_options.verbose() ? 1 : 0;
 
-        // solver's choice
-        std::string solver_name = "undefined";
-        switch (m_options.solver()) {
-            /*case OptionTypes::GMRES:
+  // solver's choice
+  std::string solver_name = "undefined";
+  switch (m_options.solver()) {
+  /*case OptionTypes::GMRES:
                 solver_name = "gmres";
                 break;*/
-            case OptionTypes::CG:
-                solver_name = "cg";
-                break;
-            /*case OptionTypes::BiCG:
+  case OptionTypes::CG:
+    solver_name = "cg";
+    break;
+  /*case OptionTypes::BiCG:
                 solver_name = "bicg";
                 break;
             case OptionTypes::BiCGstab:
                 solver_name = "bcgs";
                 break;*/
-            default:
-                alien_fatal([&] {
-                    cout() << "Undefined solver option";
-                });
-                break;
-        }
+  default:
+    alien_fatal([&] {
+      cout() << "Undefined solver option";
+    });
+    break;
+  }
 
-        // preconditioner's choice
-        std::string precond_name = "undefined";
-        switch (m_options.preconditioner()) {
-            case OptionTypes::Jacobi:
-                precond_name = "jacobi";
-                break;
-            case OptionTypes::NoPC:
-                precond_name = "none";
-                break;
-            default:
-                alien_fatal([&] { cout() << "Undefined Ginkgo preconditioner option"; });
-                break;
-        }
+  // preconditioner's choice
+  std::string precond_name = "undefined";
+  switch (m_options.preconditioner()) {
+  case OptionTypes::Jacobi:
+    precond_name = "jacobi";
+    break;
+  case OptionTypes::NoPC:
+    precond_name = "none";
+    break;
+  default:
+    alien_fatal([&] { cout() << "Undefined Ginkgo preconditioner option"; });
+    break;
+  }
 
-        /*
+  /*
         std::clog << "--------------------- solve -------------------\n";
         std::clog << "--------------------- numIterationsMax -------------------" << m_options.numIterationsMax() << "\n";
         std::clog << "--------------------- stopCriteriaValue -------------------" << m_options.stopCriteriaValue() << "\n";
@@ -166,24 +166,24 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
         std::clog << "--------------------- solver_name -------------------" << solver_name << "\n";
         */
 
-        // Parameter the solver factory
-        const double reduction_factor{m_options.stopCriteriaValue()};
-        using cg = gko::solver::Cg<double>;
-        auto exec = gko::ReferenceExecutor::create();
+  // Parameter the solver factory
+  const double reduction_factor{ m_options.stopCriteriaValue() };
+  using cg = gko::solver::Cg<double>;
+  auto exec = gko::ReferenceExecutor::create();
 
-        auto solver_factory =
-          cg::build().with_criteria(
-            gko::stop::Iteration::build().with_max_iters(m_options.numIterationsMax()).on(exec),
-            gko::stop::ResidualNorm<double>::build().with_reduction_factor(reduction_factor).on(exec))
-          .on(exec);
+  auto solver_factory =
+  cg::build().with_criteria(
+             gko::stop::Iteration::build().with_max_iters(m_options.numIterationsMax()).on(exec),
+             gko::stop::ResidualNorm<double>::build().with_reduction_factor(reduction_factor).on(exec))
+  .on(exec);
 
-        auto p = std::shared_ptr<const gko::matrix::Csr<double,int>>(A.internal(),[](auto * p){ std::cout << " do not delete !" << std::endl;});
-        auto solver = solver_factory->generate(share(p));
-        solver->apply(lend(b.internal()), lend(x.internal()));
+  auto p = std::shared_ptr<const gko::matrix::Csr<double, int>>(A.internal(), [](auto* p) { std::cout << " do not delete !" << std::endl; });
+  auto solver = solver_factory->generate(share(p));
+  solver->apply(lend(b.internal()), lend(x.internal()));
 
-        std::cout << "------------------------ end solver ok ------------ " << std::endl;
+  std::cout << "------------------------ end solver ok ------------ " << std::endl;
 
-       /*
+  /*
         // get nb iterations + final residual
         checkError("PETSc get iteration number", KSPGetIterationNumber(solver, &m_status.iteration_count));
         checkError("PETSc get residual norm", KSPGetResidualNorm(solver, &m_status.residual));
