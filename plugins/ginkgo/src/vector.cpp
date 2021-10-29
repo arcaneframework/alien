@@ -30,29 +30,16 @@ Vector::Vector(const MultiVectorImpl* multi_impl)
 : IVectorImpl(multi_impl, AlgebraTraits<BackEnd::tag::ginkgo>::name())
 , gko::matrix::Dense<double>(
   gko::ReferenceExecutor::create(),
-  gko::dim<2>(multi_impl->space().size(), 1))
-, data(gko::dim<2>(multi_impl->space().size(), 1))
+  gko::dim<2>( multi_impl->space().size(),1))
+, data(gko::dim<2>(multi_impl->space().size(),1))
 {
-  /*auto block_size = 1;
-        const auto *block = this->block();
-        if (block)
-            block_size *= block->size();
-        else if (this->vblock())
-            throw Arccore::FatalErrorException(A_FUNCINFO, "Not implemented yet");*/
-
-  /*const auto localOffset = distribution().offset();
-        const auto localSize = distribution().localSize();
-        const auto ilower = localOffset * block_size;
-        const auto iupper = ilower + localSize * block_size - 1;*/
-
   alien_debug([&] {
     cout() << "Vector size : "
            << multi_impl->space().size();
     cout() << "data size : "
-           << data.get_size()[0]
-           << " - " << data.get_size()[1];
+           << data.get_size()[0] << "row "
+           << " - " << data.get_size()[0] << " cols";
   });
-  //setProfile(ilower, iupper);
 }
 
 Vector::~Vector()
@@ -63,38 +50,25 @@ Vector::~Vector()
 
 void Vector::setProfile(int ilower, int iupper)
 {
-  /*if (m_vec)
-            VecDestroy(&m_vec);
-
-        auto *pm = dynamic_cast<Arccore::MessagePassing::Mpi::MpiMessagePassingMng *>(distribution().parallelMng());
-        m_comm = pm ? (*pm->getMPIComm()) : MPI_COMM_WORLD;
-
-        // -- B Vector --
-        auto ierr = VecCreate(m_comm, &m_vec);
-        ierr |= VecSetType(m_vec, VECMPI);
-        ierr |= VecSetSizes(m_vec, iupper - ilower + 1, PETSC_DECIDE);
-
-        if (ierr) {
-            throw Arccore::FatalErrorException(A_FUNCINFO, "PETSc Vector Initialisation failed");
-        }
-
-        m_rows.resize(iupper - ilower + 1);
-        for (int i = 0; i < m_rows.size(); ++i)
-            m_rows[i] = ilower + i;*/
 }
 
 void Vector::setValues(Arccore::ConstArrayView<double> values)
 {
   auto ncols = values.size();
 
-  std::clog << "[NM==========================CALL to  setValues ==============, with : " << ncols << " values.\n";
+  //std::clog << "[NM==========================CALL to  setValues ============== with : " << ncols << " values.\n";
 
   for (auto icol = 0; icol < ncols; ++icol) {
-    std::clog << "data.add_value icol : " << icol << " - value : " << values[icol] << "\n";
-    data.add_value(0, icol, values[icol]);
+    //std::clog << "data.add_value icol : " << icol << " - value : " << values[icol] << "\n";
+    //data.add_value(0, icol, values[icol]);
+    data.add_value(icol,0,values[icol]);
   }
-  std::clog << "[NM==========================data size==============, with : " << data.get_size()[0] << "-" << data.get_size()[1]
-            << "\n";
+  //std::clog << "[NM==========================data contains ==============, with : " << data.get_size()[0] << " rows - " << data.get_size()[1] << " cols \n";
+
+  /*for (int i =0; i<data.get_size()[0]; i++)
+  {
+    std::cout << data.get_value(i,0) <<" ";
+  }*/
 }
 
 void Vector::getValues(Arccore::ArrayView<double> values) const
@@ -109,5 +83,19 @@ void Vector::getValues(Arccore::ArrayView<double> values) const
 void Vector::assemble()
 {
   this->read(data);
+
+  /*std::cout << "\n------------ data contains : -----------------" << std::endl;
+  for (int i = 0; i<data.get_size()[0]; i++) {
+    std::cout << data.get_value(i, 0) << " ";
+  }
+  std::cout << "\n------------ gko::matrix::Dense contains : -----------------" << std::endl;
+
+  std::cout << "num stored elements : " << this->get_num_stored_elements() << "\n";
+  auto vals = this->get_values();
+
+  for (int i = 0;  i < 10; i++) {
+      std::cout << vals[i] << " ";
+  }*/
+
 }
 } // namespace Alien::Ginkgo
