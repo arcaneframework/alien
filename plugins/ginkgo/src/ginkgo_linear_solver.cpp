@@ -32,6 +32,12 @@
 #include <alien/ginkgo/options.h>
 #include <alien/ginkgo/export.h>
 
+#include <core/solver/cg.hpp>
+#include <core/stop/iteration.hpp>
+#include <core/stop/residual_norm.hpp>
+
+#include <memory>
+
 namespace Alien
 {
 // Compile GinkgoLinearSolver.
@@ -116,28 +122,21 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
 
   int output_level = m_options.verbose() ? 1 : 0;
 
-  // failback if no MPI comm already defined.
-  MPI_Comm comm = MPI_COMM_WORLD;
-  auto* mpi_comm_mng = dynamic_cast<Arccore::MessagePassing::Mpi::MpiMessagePassingMng*>(A.distribution().parallelMng());
-  if (mpi_comm_mng)
-    comm = *(mpi_comm_mng->getMPIComm());
-  /*
         // solver's choice
-        // Liste à compléter (dans options.h), on met lesquels ?
         std::string solver_name = "undefined";
         switch (m_options.solver()) {
-            case OptionTypes::GMRES:
+            /*case OptionTypes::GMRES:
                 solver_name = "gmres";
-                break;
+                break;*/
             case OptionTypes::CG:
                 solver_name = "cg";
                 break;
-            case OptionTypes::BiCG:
+            /*case OptionTypes::BiCG:
                 solver_name = "bicg";
                 break;
             case OptionTypes::BiCGstab:
                 solver_name = "bcgs";
-                break;
+                break;*/
             default:
                 alien_fatal([&] {
                     cout() << "Undefined solver option";
@@ -146,7 +145,6 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
         }
 
         // preconditioner's choice
-        // Liste à compléter (dans options.h), on met lesquels ?
         std::string precond_name = "undefined";
         switch (m_options.preconditioner()) {
             case OptionTypes::Jacobi:
@@ -160,37 +158,42 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
                 break;
         }
 
-        // Get options and configure solver + preconditioner
-        KSP solver;
-        checkError("PETSc create solver", KSPCreate(comm, &solver));
-        checkError("PETSc set solver type",
-                   KSPSetType(solver, solver_name.c_str()));
-        checkError("PETSc set Operators",
-                   KSPSetOperators(solver, A.internal(), A.internal()));
-        // Here the matrix that defines the linear system also serves as the
-        // preconditioning matrix
+        std::clog << "--------------------- solve -------------------\n";
+        std::clog << "--------------------- numIterationsMax -------------------" << m_options.numIterationsMax() << "\n";
+        std::clog << "--------------------- stopCriteriaValue -------------------" << m_options.stopCriteriaValue() << "\n";
+        std::clog << "--------------------- precond_name -------------------" << precond_name << "\n";
+        std::clog << "--------------------- solver_name -------------------" << solver_name << "\n";
 
-        PC preconditioner;
-        checkError("PETSc get the preconditioner",
-                   KSPGetPC(solver, &preconditioner));
-        int max_it = m_options.numIterationsMax();
-        double rtol = m_options.stopCriteriaValue();
-        checkError("PETSc set the preconditioner",
-                   PCSetType(preconditioner,
-                             precond_name.c_str())); // petsc prend un char *
-        checkError(
-                "PETSc set tolerances",
-                KSPSetTolerances(solver, rtol, PETSC_DEFAULT, PETSC_DEFAULT, max_it));
 
-        // solve
-        m_status.succeeded = (KSPSolve(solver, b.internal(), x.internal()) == 0);
+        // Parameter the solver factory
+        const double reduction_factor{m_options.stopCriteriaValue()};
+        using cg = gko::solver::Cg<double>;
+        auto exec = gko::ReferenceExecutor::create();
 
+        auto solver_factory =
+          cg::build().with_criteria(
+            gko::stop::Iteration::build().with_max_iters(m_options.numIterationsMax()).on(exec),
+            gko::stop::ResidualNorm<double>::build().with_reduction_factor(reduction_factor).on(exec))
+          .on(exec);
+
+        // Generate the solver
+        //auto solver = solver_factory->generate(share(A.internal()));
+        // printf("---matrix a pointer : %x\n",A.internal());
+
+        auto p = std::shared_ptr<const gko::matrix::Csr<double,int>>(A.internal(),[](auto * p){ std::cout << " do not delete !" << std::endl;});
+        auto solver = solver_factory->generate(share(p));
+        solver->apply(lend(b.internal()), lend(x.internal()));
+
+        std::cout << "------------------------ end solver ok ------------ " << std::endl;
+
+       /*
         // get nb iterations + final residual
         checkError("PETSc get iteration number", KSPGetIterationNumber(solver, &m_status.iteration_count));
         checkError("PETSc get residual norm", KSPGetResidualNorm(solver, &m_status.residual));
 
         // destroy solver + pc
         checkError("PETSc destroy solver context", KSPDestroy(&solver)); // includes a call to PCDestroy
+
 
         // update the counters
         ++m_solve_num;
