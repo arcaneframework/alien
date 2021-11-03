@@ -18,13 +18,13 @@
 
 #pragma once
 
-#include "../../core/impl/IMatrixImpl.h"
-#include "../../core/impl/MultiMatrixImpl.h"
+#include <alien/core/impl/IMatrixImpl.h>
+#include <alien/core/impl/MultiMatrixImpl.h>
 
-#include "DoKDistributor.h"
-#include "DoKLocalMatrixT.h"
+#include <alien/kernels/dok/DoKDistributor.h>
+#include <alien/kernels/dok/DoKLocalMatrixT.h>
 
-#include "../redistributor/Redistributor.h"
+#include <alien/kernels/redistributor/Redistributor.h>
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
