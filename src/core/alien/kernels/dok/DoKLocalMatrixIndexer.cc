@@ -56,11 +56,9 @@ DoKLocalMatrixIndexer::create(
 Integer i, Integer j, DoKLocalMatrixIndexer::Offset& tentative_offset)
 {
   auto o = find(i, j);
-  Offset ret = o.value_or(0);
-  if (o) {
-    associate(i, j, tentative_offset);
-    ret = tentative_offset;
-    tentative_offset++;
+  Offset ret = o.value_or(tentative_offset++);
+  if (!o.has_value()) {
+    associate(i, j, ret);
   }
   return ret;
 }
