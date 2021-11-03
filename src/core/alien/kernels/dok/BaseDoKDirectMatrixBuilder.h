@@ -16,8 +16,8 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef ALIEN_DOKDIRECTMATRIXBUILDER_H
-#define ALIEN_DOKDIRECTMATRIXBUILDER_H
+#ifndef ALIEN_BASEDOKDIRECTMATRIXBUILDER_H
+#define ALIEN_BASEDOKDIRECTMATRIXBUILDER_H
 
 #include <alien/utils/Precomp.h>
 
@@ -37,7 +37,7 @@ namespace Common
    *
    * This data structure is not compressed like CSR, allowing easy insertion of values.
    */
-  class ALIEN_EXPORT DoKDirectMatrixBuilder
+  class ALIEN_EXPORT BaseDoKDirectMatrixBuilder
   {
    public:
     /*!
@@ -45,8 +45,8 @@ namespace Common
      * @param self the multi-representation handler. It is locked during the life of this object.
      */
     // FIXME: This should be implemented with move-semantic.
-    explicit DoKDirectMatrixBuilder(IMatrix& self);
-    ~DoKDirectMatrixBuilder();
+    explicit BaseDoKDirectMatrixBuilder(IMatrix& self);
+    ~BaseDoKDirectMatrixBuilder();
 
     /*!
      * Add a contribution to a non-zero. Will create the non-zero if needed.
@@ -87,4 +87,4 @@ namespace Common
 
 } // namespace Common
 } // namespace Alien
-#endif //ALIEN_DOKDIRECTMATRIXBUILDER_H
+#endif //ALIEN_BASEDOKDIRECTMATRIXBUILDER_H

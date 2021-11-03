@@ -28,7 +28,7 @@ set(alien_semantic_public_header
         alien/move/handlers/sub_matrix/Extraction.h
         alien/move/data/MatrixData.h
         alien/move/data/VectorData.h
-        )
+        alien/move/handlers/scalar/DoKDirectMatrixBuilder.h)
 
 add_library(alien_semantic_move
         ${alien_semantic_public_header}

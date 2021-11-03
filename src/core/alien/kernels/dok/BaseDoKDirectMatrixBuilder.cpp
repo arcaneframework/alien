@@ -16,7 +16,7 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "DoKDirectMatrixBuilder.h"
+#include "BaseDoKDirectMatrixBuilder.h"
 
 #include <alien/core/impl/MultiMatrixImpl.h>
 #include <alien/data/IMatrix.h>
@@ -27,31 +27,31 @@
 namespace Alien
 {
 
-Common::DoKDirectMatrixBuilder::DoKDirectMatrixBuilder(Alien::IMatrix& self)
+Common::BaseDoKDirectMatrixBuilder::BaseDoKDirectMatrixBuilder(Alien::IMatrix& self)
 : m_matrix(self)
 {
   m_matrix.impl()->lock();
   m_impl = &m_matrix.impl()->get<BackEnd::tag::DoK>(true);
 }
 
-Common::DoKDirectMatrixBuilder::~DoKDirectMatrixBuilder()
+Common::BaseDoKDirectMatrixBuilder::~BaseDoKDirectMatrixBuilder()
 {
   assemble();
 }
 
-std::optional<Real> Common::DoKDirectMatrixBuilder::addData(Arccore::Integer row, Arccore::Integer col, Arccore::Real value)
+std::optional<Real> Common::BaseDoKDirectMatrixBuilder::addData(Arccore::Integer row, Arccore::Integer col, Arccore::Real value)
 {
   m_impl->setMatrixValue(row, col, value);
   return std::optional<Real>(value);
 }
 
-std::optional<Real> Common::DoKDirectMatrixBuilder::setData(Arccore::Integer row, Arccore::Integer col, Arccore::Real value)
+std::optional<Real> Common::BaseDoKDirectMatrixBuilder::setData(Arccore::Integer row, Arccore::Integer col, Arccore::Real value)
 {
   m_impl->setMatrixValue(row, col, value);
   return std::optional<Real>(value);
 }
 
-bool Common::DoKDirectMatrixBuilder::assemble()
+bool Common::BaseDoKDirectMatrixBuilder::assemble()
 {
   m_impl->assemble();
   m_matrix.impl()->unlock();
