@@ -21,7 +21,7 @@ add_executable(move.gtest.mpi
         main.cpp
         TestIndexManager.cc
         TestDoKMatrix.cc
-        TestDoKDirectMatrixBuilder.cc
+        TestDoKMatrixBuilder.cc
         )
 
 add_executable(move.gtest.seq main.cpp

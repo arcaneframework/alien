@@ -31,9 +31,9 @@
 #include <Environment.h>
 #include <alien/core/backend/LinearAlgebra.h>
 
-TEST(TestDoKDirectBuilder, Functional)
+TEST(TestDoKMatrixBuilder, Functional)
 {
-  Alien::Space row_space(3, "RowSpace");
+  Alien::Space row_space(5, "RowSpace");
   Alien::Space col_space(4, "ColSpace");
   Alien::MatrixDistribution mdist(
   row_space, col_space, AlienTest::Environment::parallelMng());
@@ -43,12 +43,12 @@ TEST(TestDoKDirectBuilder, Functional)
   ASSERT_EQ(A.colSpace(), col_space);
   {
     auto builder = Alien::Move::DoKDirectMatrixBuilder(std::move(A));
-    builder.addData(0, 0, 1.);
-    builder.addData(1, 1, 1.);
-    builder.addData(2, 2, 1.);
-    builder.addData(2, 3, 1.);
+    ASSERT_TRUE(builder.addData(0, 0, 1.));
+    ASSERT_TRUE(builder.addData(1, 1, 1.));
+    ASSERT_TRUE(builder.addData(2, 2, 1.));
+    ASSERT_TRUE(builder.addData(2, 3, 1.));
     A = builder.release();
-    builder.addData(3, 3, 1.);
+    ASSERT_FALSE(builder.addData(3, 3, 1.));
   }
   // check with spmv
   Alien::LinearAlgebra<Alien::BackEnd::tag::simplecsr> Alg(vdist.parallelMng());
