@@ -1,6 +1,10 @@
 name: Coverity Scan
 
-on: workflow_dispatch
+on:
+  schedule:
+    # Run each day, from Monday to Friday at 6am
+    - cron: "0 6 * * 1-5"
+  workflow_dispatch:
 
 jobs:
   build:
