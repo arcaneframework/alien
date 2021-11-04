@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  SPDX-License-Identifier: Apache-2.0
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 #include <arccore/message_passing_mpi/MpiMessagePassingMng.h>
@@ -27,7 +27,6 @@
 
 #include "hypre_matrix.h"
 #include "hypre_vector.h"
-
 
 namespace Alien::Hypre
 {
@@ -80,4 +79,4 @@ class InternalLinearSolver : public IInternalLinearSolver<Matrix, Vector>
  private:
   void checkError(const Arccore::String& msg, int ierr, int skipError = 0) const;
 };
-}
+} // namespace Alien::Hypre

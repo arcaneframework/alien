@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 IFPEN-CEA
+ * Copyright 2021 IFPEN-CEA
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
  */
 
 #include "hypre_linear_solver.h"
-
 
 #include <HYPRE_parcsr_ls.h>
 #include <HYPRE_parcsr_mv.h>
