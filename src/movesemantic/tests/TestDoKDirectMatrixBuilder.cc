@@ -31,7 +31,7 @@
 #include <Environment.h>
 #include <alien/core/backend/LinearAlgebra.h>
 
-TEST(TestDoKMatrixBuilder, Functional)
+TEST(TestDoKDirectMatrixBuilder, Fill)
 {
   Alien::Space row_space(5, "RowSpace");
   Alien::Space col_space(4, "ColSpace");
@@ -49,29 +49,5 @@ TEST(TestDoKMatrixBuilder, Functional)
     ASSERT_TRUE(builder.contribute(2, 3, 1.));
     A = builder.release();
     ASSERT_FALSE(builder.contribute(3, 3, 1.));
-  }
-  // check with spmv
-  Alien::LinearAlgebra<Alien::BackEnd::tag::simplecsr> Alg(vdist.parallelMng());
-  Alien::Move::VectorData X(vdist);
-  {
-    Alien::Move::LocalVectorWriter writer(std::move(X));
-    writer[0] = 1.;
-    writer[1] = 2.;
-    writer[2] = 3.;
-    writer[3] = 4.;
-    X = writer.release();
-  }
-  Alien::VectorDistribution vdist2(row_space, AlienTest::Environment::parallelMng());
-  Alien::Move::VectorData R(vdist2);
-  Alg.mult(A, X, R);
-  {
-    Alien::Move::LocalVectorReader reader(std::move(R));
-    std::cout << reader[0] << std::endl;
-    std::cout << reader[1] << std::endl;
-    std::cout << reader[2] << std::endl;
-
-    ASSERT_EQ(reader[0], 1.);
-    ASSERT_EQ(reader[1], 2.);
-    ASSERT_EQ(reader[2], 7.);
   }
 }
