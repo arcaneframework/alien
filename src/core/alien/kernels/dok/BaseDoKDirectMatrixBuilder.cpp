@@ -41,11 +41,10 @@ Common::BaseDoKDirectMatrixBuilder::~BaseDoKDirectMatrixBuilder()
 
 std::optional<Real> Common::BaseDoKDirectMatrixBuilder::contribute(Arccore::Integer row, Arccore::Integer col, Arccore::Real value)
 {
-  m_impl->setNNZ(row, col, value);
-  return std::optional<Real>(value);
+  return std::optional<Real>(m_impl->addNNZ(row, col, value));
 }
 
-std::optional<Real> Common::BaseDoKDirectMatrixBuilder::set_nnz(Arccore::Integer row, Arccore::Integer col, Arccore::Real value)
+std::optional<Real> Common::BaseDoKDirectMatrixBuilder::setNNZ(Arccore::Integer row, Arccore::Integer col, Arccore::Real value)
 {
   m_impl->setNNZ(row, col, value);
   return std::optional<Real>(value);

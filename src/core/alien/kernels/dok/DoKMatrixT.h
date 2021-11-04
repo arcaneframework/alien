@@ -63,6 +63,16 @@ class DoKMatrix : public IMatrixImpl
     return true;
   }
 
+  //! Set value of a matrix element, creating it if it does not exist yet.
+  //! \param row id of the row in the matrix
+  //! \param col id of the column in the matrix
+  //! \param value value of this non-zero
+  //! \return
+  ValueType addNNZ(Int32 row, Int32 col, const ValueType& value)
+  {
+    return m_data.add(row, col, value);
+  }
+
   //! Dispatch matrix elements
   void assemble() { _distribute(); }
 

@@ -43,8 +43,14 @@ TEST(TestDoKDirectMatrixBuilder, Fill)
   ASSERT_EQ(A.colSpace(), col_space);
   {
     auto builder = Alien::Move::DoKDirectMatrixBuilder(std::move(A));
+
+    // With DokDirectMatrixBuilder, this code is valid for all ranks.
+    // We can fill non-local non-zeros.
     ASSERT_TRUE(builder.contribute(0, 0, 1.));
     ASSERT_TRUE(builder.contribute(1, 1, 1.));
+    auto out = builder.contribute(1,1,2.);
+    ASSERT_TRUE(out);
+    ASSERT_EQ(out.value(), 3.);
     ASSERT_TRUE(builder.contribute(2, 2, 1.));
     ASSERT_TRUE(builder.contribute(2, 3, 1.));
     A = builder.release();
