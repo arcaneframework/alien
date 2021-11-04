@@ -48,7 +48,7 @@ TEST(TestDoKDirectMatrixBuilder, Fill)
     // We can fill non-local non-zeros.
     ASSERT_TRUE(builder.contribute(0, 0, 1.));
     ASSERT_TRUE(builder.contribute(1, 1, 1.));
-    auto out = builder.contribute(1,1,2.);
+    auto out = builder.contribute(1, 1, 2.);
     ASSERT_TRUE(out);
     ASSERT_EQ(out.value(), 3.);
     ASSERT_TRUE(builder.contribute(2, 2, 1.));

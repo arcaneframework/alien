@@ -123,7 +123,8 @@ class DoKLocalMatrixT
     m_values.resize(size);
   }
 
-  ILocalMatrixIndexer::Offset findOffset(Int32 i, Int32 j) {
+  ILocalMatrixIndexer::Offset findOffset(Int32 i, Int32 j)
+  {
     auto offset = m_indexer->create(i, j, m_offset);
     if (offset == (Integer)m_values.size()) {
       m_values.add(0.);
