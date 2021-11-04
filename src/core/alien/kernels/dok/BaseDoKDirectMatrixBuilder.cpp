@@ -39,15 +39,15 @@ Common::BaseDoKDirectMatrixBuilder::~BaseDoKDirectMatrixBuilder()
   assemble();
 }
 
-std::optional<Real> Common::BaseDoKDirectMatrixBuilder::addData(Arccore::Integer row, Arccore::Integer col, Arccore::Real value)
+std::optional<Real> Common::BaseDoKDirectMatrixBuilder::contribute(Arccore::Integer row, Arccore::Integer col, Arccore::Real value)
 {
-  m_impl->setMatrixValue(row, col, value);
+  m_impl->setNNZ(row, col, value);
   return std::optional<Real>(value);
 }
 
-std::optional<Real> Common::BaseDoKDirectMatrixBuilder::setData(Arccore::Integer row, Arccore::Integer col, Arccore::Real value)
+std::optional<Real> Common::BaseDoKDirectMatrixBuilder::set_nnz(Arccore::Integer row, Arccore::Integer col, Arccore::Real value)
 {
-  m_impl->setMatrixValue(row, col, value);
+  m_impl->setNNZ(row, col, value);
   return std::optional<Real>(value);
 }
 

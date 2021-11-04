@@ -57,19 +57,19 @@ namespace Common
      * @param value of the contribution
      * @return a value if insertion is ok
      */
-    std::optional<Real> addData(Integer row, Integer col, Real value);
+    std::optional<Real> contribute(Integer row, Integer col, Real value);
 
     /*!
      * Set a value to a non-zero. Will create the non-zero if needed.
      * Non-zero does not have to be local, but behavior for gathering non-local non-zero is undefined.
-     * It is not possible to choose between 2 setData from different processes.
+     * It is not possible to choose between 2 setNNZ from different processes.
      *
      * @param row
      * @param col
      * @param value of the contribution
      * @return a value if insertion is ok
      */
-    std::optional<Real> setData(Integer row, Integer col, Real value);
+    std::optional<Real> set_nnz(Integer row, Integer col, Real value);
 
     /*!
      * Sort and compact data.

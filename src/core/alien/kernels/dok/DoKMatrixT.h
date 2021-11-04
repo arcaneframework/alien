@@ -57,7 +57,7 @@ class DoKMatrix : public IMatrixImpl
   //! \param col id of the column in the matrix
   //! \param value value of this non-zero
   //! \return
-  bool setMatrixValue(Int32 row, Int32 col, const ValueType& value)
+  bool setNNZ(Int32 row, Int32 col, const ValueType& value)
   {
     m_data.set(row, col, value);
     return true;

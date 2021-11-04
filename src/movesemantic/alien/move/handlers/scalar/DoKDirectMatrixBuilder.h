@@ -45,13 +45,13 @@ class ALIEN_MOVESEMANTIC_EXPORT DoKDirectMatrixBuilder
   DoKDirectMatrixBuilder(DoKDirectMatrixBuilder&&) = delete;
   DoKDirectMatrixBuilder& operator=(DoKDirectMatrixBuilder&&) = delete;
 
-  std::optional<Arccore::Real> addData(Arccore::Integer row, Arccore::Integer col, Arccore::Real value)
+  std::optional<Arccore::Real> contribute(Arccore::Integer row, Arccore::Integer col, Arccore::Real value)
   {
     if (!m_builder) {
       return std::nullopt;
     }
 
-    return m_builder->addData(row, col, value);
+    return m_builder->contribute(row, col, value);
   }
 
   MatrixData&& release()

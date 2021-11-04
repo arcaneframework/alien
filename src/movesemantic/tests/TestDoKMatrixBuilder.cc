@@ -43,12 +43,12 @@ TEST(TestDoKMatrixBuilder, Functional)
   ASSERT_EQ(A.colSpace(), col_space);
   {
     auto builder = Alien::Move::DoKDirectMatrixBuilder(std::move(A));
-    ASSERT_TRUE(builder.addData(0, 0, 1.));
-    ASSERT_TRUE(builder.addData(1, 1, 1.));
-    ASSERT_TRUE(builder.addData(2, 2, 1.));
-    ASSERT_TRUE(builder.addData(2, 3, 1.));
+    ASSERT_TRUE(builder.contribute(0, 0, 1.));
+    ASSERT_TRUE(builder.contribute(1, 1, 1.));
+    ASSERT_TRUE(builder.contribute(2, 2, 1.));
+    ASSERT_TRUE(builder.contribute(2, 3, 1.));
     A = builder.release();
-    ASSERT_FALSE(builder.addData(3, 3, 1.));
+    ASSERT_FALSE(builder.contribute(3, 3, 1.));
   }
   // check with spmv
   Alien::LinearAlgebra<Alien::BackEnd::tag::simplecsr> Alg(vdist.parallelMng());
