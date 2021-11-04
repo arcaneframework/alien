@@ -25,9 +25,9 @@ jobs:
 
       - name: Set up coverity
         run: |
-          wget --no-verbose https://scan.coverity.com/download/linux64 \
-            --post-data "token=${COV_TOKEN}&project=arcaneframework%2Falien" \
-            -O coverity_tool.tgz
+          curl https://scan.coverity.com/download/linux64 \
+            --data "token=${COV_TOKEN}&project=arcaneframework%2Falien" \
+            -o coverity_tool.tgz
           mkdir coverity-tool
           tar -xzf coverity-tool.tar.gz --strip 1 -C coverity-tool
         shell: bash
