@@ -32,11 +32,11 @@ jobs:
           mkdir coverity-tool
           curl https://scan.coverity.com/download/linux64 -o coverity-tool/md5-new \
             -s --data "token=$COV_TOKEN&project=arcaneframework%2Falien&md5=1"
-          echo "::set-output name=md5::$(cat coverity-tool/md5)"
+          echo "::set-output name=md5::$(cat coverity-tool/md5-new)"
         env:
           COV_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
 
-      - name: ccache files
+      - name: restore cached files
         uses: actions/cache@v2
         # Disabled for `act`
         if: ${{ !env.ACT }}
