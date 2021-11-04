@@ -32,7 +32,7 @@ jobs:
           tar -xzf coverity-tool.tar.gz --strip 1 -C coverity-tool
         shell: bash
         env:
-          TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+          COV_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
 
       - name: Build with coverity
         # Build, using cov-build and cov-int directory as output (mandatory)
