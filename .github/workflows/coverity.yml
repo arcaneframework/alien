@@ -61,7 +61,6 @@ jobs:
         shell: bash
         env:
           COV_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
-
       - name: Build with coverity
         # Build, using cov-build and cov-int directory as output (mandatory)
         run: |
