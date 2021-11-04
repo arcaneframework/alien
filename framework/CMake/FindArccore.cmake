@@ -10,5 +10,6 @@ endif()
 
 # add directory only once !
 if (NOT TARGET arccore_full)
+  set (ARCCORE_WANT_TEST OFF)
   add_subdirectory(${ARCCORE_SRC_DIR} arccore)
 endif(NOT TARGET arccore_full)
