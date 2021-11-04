@@ -23,12 +23,37 @@ jobs:
           cmake -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DALIEN_DEFAULT_OPTIONS:BOOL=ON -DALIEN_PLUGIN_HYPRE:BOOL=ON -DALIEN_PLUGIN_PETSC:BOOL=ON
 
-      - name: Set up coverity
+      # Setting up ccache from github cached files
+      - name: Prepare coverity
+        id: coverity-hash
+        # Disabled for `act`
+        if: ${{ !env.ACT }}
         run: |
           mkdir coverity-tool
-          curl https://scan.coverity.com/download/linux64 \
-            --data "token=${COV_TOKEN}&project=arcaneframework%2Falien" \
-            | tar xz -C coverity-tool --strip-components=1
+          curl https://scan.coverity.com/download/linux64 -o coverity-tool/md5-new \
+            -s --data "token=$COV_TOKEN&project=arcaneframework%2Falien&md5=1"
+          echo "::set-output name=md5::$(cat coverity-tool/md5)"
+        env:
+          COV_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+
+      - name: ccache files
+        uses: actions/cache@v2
+        # Disabled for `act`
+        if: ${{ !env.ACT }}
+        with:
+          path: coverity-tool
+          key: coverity-linux-${{ steps.coverity-hash.outputs.md5 }}
+
+      - name: Set up coverity
+        run: |
+          if cmp -s coverity-tool/md5-new coverity-tool/md5 ; then
+            echo "running from cache"
+          else
+            curl --silent https://scan.coverity.com/download/linux64 \
+              --data "token=${COV_TOKEN}&project=arcaneframework%2Falien" \
+              | tar xz -C coverity-tool --strip-components=1
+          fi
+          cp coverity-tool/md5-new coverity-tool/md5
         shell: bash
         env:
           COV_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
@@ -36,7 +61,7 @@ jobs:
       - name: Build with coverity
         # Build, using cov-build and cov-int directory as output (mandatory)
         run: |
-          export PATH="${PWD}/cov-analysis/bin:${PATH}"
+          export PATH="${PWD}/coverity-tool/bin:${PATH}"
           cov-build --dir cov-int make -C build -j $(nproc)
         shell: bash
 
