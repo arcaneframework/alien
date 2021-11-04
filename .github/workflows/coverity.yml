@@ -25,11 +25,10 @@ jobs:
 
       - name: Set up coverity
         run: |
+          mkdir coverity-tool
           curl https://scan.coverity.com/download/linux64 \
             --data "token=${COV_TOKEN}&project=arcaneframework%2Falien" \
-            -o coverity_tool.tgz
-          mkdir coverity-tool
-          tar -xzf coverity-tool.tar.gz --strip 1 -C coverity-tool
+            | tar xz -C coverity-tool --strip-components=1
         shell: bash
         env:
           COV_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
