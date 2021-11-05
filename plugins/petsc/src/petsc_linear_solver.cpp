@@ -87,12 +87,17 @@ class InternalLinearSolver
 };
 
 InternalLinearSolver::InternalLinearSolver()
+: m_status()
+, m_stat()
+, m_options()
 {
   petsc_init_if_needed();
 }
 
 InternalLinearSolver::InternalLinearSolver(const Options& options)
-: m_options(options)
+: m_status()
+, m_stat()
+, m_options(options)
 {
   petsc_init_if_needed();
 }
