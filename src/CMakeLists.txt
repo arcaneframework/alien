@@ -33,7 +33,7 @@ endif ()
 
 if (${CMAKE_CXX_STANDARD} GREATER_EQUAL "17")
     set(ALIEN_UNUSED_PARAM "[[maybe_unused]]")
-endif()
+endif ()
 
 configure_file(
         AlienConfig.h.in

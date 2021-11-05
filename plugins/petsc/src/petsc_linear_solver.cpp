@@ -56,8 +56,8 @@ class InternalLinearSolver
 
  public:
   // Nothing to do
-  void updateParallelMng( ALIEN_UNUSED_PARAM
-  Arccore::MessagePassing::IMessagePassingMng* pm) override {}
+  void updateParallelMng(ALIEN_UNUSED_PARAM
+                         Arccore::MessagePassing::IMessagePassingMng* pm) override {}
 
   bool solve(const Matrix& A, const Vector& b, Vector& x) override;
 
