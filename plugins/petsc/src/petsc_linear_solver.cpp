@@ -102,7 +102,7 @@ void InternalLinearSolver::checkError(const Arccore::String& msg, int ierr, int 
   if (ierr != 0 and (ierr & ~skipError) != 0) {
     alien_fatal([&] {
       cout() << msg << " failed. [code=" << ierr << "]";
-      CHKERRQ(ierr); // warning car macro qui appelle fx qui retourne un int
+      CHKERRV(ierr);
     });
   }
 }
