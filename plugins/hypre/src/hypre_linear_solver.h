@@ -52,7 +52,7 @@ class InternalLinearSolver : public IInternalLinearSolver<Matrix, Vector>
 
  public:
   // Nothing to do
-  void updateParallelMng(Arccore::MessagePassing::IMessagePassingMng* pm) {}
+  void updateParallelMng(ALIEN_UNUSED_PARAM Arccore::MessagePassing::IMessagePassingMng* pm) {}
 
   bool solve(const Matrix& A, const Vector& b, Vector& x);
 

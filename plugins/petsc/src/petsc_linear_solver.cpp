@@ -56,7 +56,7 @@ class InternalLinearSolver
 
  public:
   // Nothing to do
-  void updateParallelMng(
+  void updateParallelMng( ALIEN_UNUSED_PARAM
   Arccore::MessagePassing::IMessagePassingMng* pm) override {}
 
   bool solve(const Matrix& A, const Vector& b, Vector& x) override;
@@ -116,7 +116,7 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
 {
   auto tsolve = MPI_Wtime();
 
-  int output_level = m_options.verbose() ? 1 : 0;
+  ALIEN_UNUSED_PARAM int output_level = m_options.verbose() ? 1 : 0;
 
   // failback if no MPI comm already defined.
   MPI_Comm comm = MPI_COMM_WORLD;
