@@ -31,10 +31,6 @@ if (NOT ALIEN_EXPORT_TARGET)
     set(ALIEN_EXPORT_TARGET ${PROJECT_NAME}Targets)
 endif ()
 
-if (${CMAKE_CXX_STANDARD} GREATER_EQUAL "17")
-    set(ALIEN_UNUSED_PARAM "[[maybe_unused]]")
-endif ()
-
 configure_file(
         AlienConfig.h.in
         ${PROJECT_BINARY_DIR}/alien/AlienConfig.h

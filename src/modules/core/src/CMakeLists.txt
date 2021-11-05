@@ -120,6 +120,7 @@ target_link_libraries(alien_core PUBLIC
         alien_kernel_simplecsr)
 target_link_libraries(alien_core PUBLIC alien_index_manager)
 
+set_property(TARGET alien_core PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(alien_core PUBLIC
         Arccore::arccore_trace
