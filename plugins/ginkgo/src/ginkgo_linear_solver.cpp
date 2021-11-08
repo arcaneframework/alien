@@ -21,8 +21,6 @@
 
 #include <boost/timer.hpp>
 
-//#include <petscksp.h>
-
 #include <arccore/message_passing_mpi/MpiMessagePassingMng.h>
 
 #include <alien/expression/solver/SolverStater.h>
@@ -37,6 +35,7 @@
 #include <core/stop/residual_norm.hpp>
 
 #include <memory>
+#include <core/log/convergence.hpp>
 
 namespace Alien
 {
@@ -158,47 +157,50 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
     break;
   }
 
-  /*
-        std::clog << "--------------------- solve -------------------\n";
-        std::clog << "--------------------- numIterationsMax -------------------" << m_options.numIterationsMax() << "\n";
-        std::clog << "--------------------- stopCriteriaValue -------------------" << m_options.stopCriteriaValue() << "\n";
-        std::clog << "--------------------- precond_name -------------------" << precond_name << "\n";
-        std::clog << "--------------------- solver_name -------------------" << solver_name << "\n";
-        */
-
   // Parameter the solver factory
   const double reduction_factor{ m_options.stopCriteriaValue() };
   using cg = gko::solver::Cg<double>;
   auto exec = gko::ReferenceExecutor::create();
 
+  // Prepare the stopping criteria
+  auto iter_stop = gko::stop::Iteration::build().with_max_iters(m_options.numIterationsMax()).on(exec);
+  auto res_stop = gko::stop::ResidualNorm<double>::build().with_reduction_factor(reduction_factor).on(exec);
+
+  // Prepare logger
+  std::shared_ptr<const gko::log::Convergence<double>> logger = gko::log::Convergence<double>::create(exec);
+  iter_stop->add_logger(logger);
+  res_stop->add_logger(logger);
+
+
+
   auto solver_factory =
-  cg::build().with_criteria(
-             gko::stop::Iteration::build().with_max_iters(m_options.numIterationsMax()).on(exec),
-             gko::stop::ResidualNorm<double>::build().with_reduction_factor(reduction_factor).on(exec))
+  cg::build().with_criteria(gko::share(iter_stop), gko::share(res_stop))
+             /*gko::stop::Iteration::build().with_max_iters(m_options.numIterationsMax()).on(exec),
+             gko::stop::ResidualNorm<double>::build().with_reduction_factor(reduction_factor).on(exec))*/
   .on(exec);
 
-  auto p = std::shared_ptr<const gko::matrix::Csr<double, int>>(A.internal(), [](auto* p) { std::cout << " do not delete !" << std::endl; });
+  /* make_shared does not work : loses the pointer to the gko::executor ! */
+  auto p = std::shared_ptr<const gko::matrix::Csr<double, int>>(A.internal(), [](auto* p) { std::cout << " Did not delete the shared_pointer ! " << std::endl; });
   auto solver = solver_factory->generate(share(p));
+
   solver->apply(lend(b.internal()), lend(x.internal()));
 
-  std::cout << "------------------------ end solver ok ------------ " << std::endl;
+  // get nb iterations + final residual
+  auto num_iters = logger->get_num_iterations();
+  auto residual_norm = logger->get_residual_norm();
+  auto vec_res_norm = reinterpret_cast<const gko::matrix::Dense<double>*>(residual_norm) ;
+  auto res = vec_res_norm->get_const_values()[0];
 
-  /*
-        // get nb iterations + final residual
-        checkError("PETSc get iteration number", KSPGetIterationNumber(solver, &m_status.iteration_count));
-        checkError("PETSc get residual norm", KSPGetResidualNorm(solver, &m_status.residual));
+  // Print infos
+  std::cout << "Solver has converged : " << logger->has_converged() << std::endl;
+  std::cout << "Nb iterations : " << num_iters << std::endl;
+  std::cout << "Residual norm : " << res << std::endl;
 
-        // destroy solver + pc
-        checkError("PETSc destroy solver context", KSPDestroy(&solver)); // includes a call to PCDestroy
+  // update the counters
+  ++m_solve_num;
+  m_total_iter_num += num_iters;
+  m_total_solve_time += tsolve.elapsed();
 
-
-        // update the counters
-        ++m_solve_num;
-        m_total_iter_num += m_status.iteration_count;
-        m_total_solve_time += tsolve.elapsed();
-
-        return m_status.succeeded;*/
-  return {};
 }
 
 const Alien::SolverStatus&
