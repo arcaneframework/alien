@@ -46,10 +46,6 @@ void SimpleCSR_to_Ginkgo_VectorConverter::convert(const Alien::IVectorImpl* sour
   const auto& v = cast<Alien::SimpleCSRVector<Arccore::Real>>(sourceImpl, sourceBackend());
   auto& v2 = cast<Alien::Ginkgo::Vector>(targetImpl, targetBackend());
 
-  alien_debug([&] {
-    cout() << "Converting Alien::SimpleCSRVector: " << &v << " to Ginkgo::Vector " << &v2;
-  });
-
   auto block_size = 1;
   const auto* block = v2.block();
   if (v2.block())
