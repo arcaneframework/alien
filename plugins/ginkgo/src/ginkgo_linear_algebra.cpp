@@ -72,20 +72,16 @@ class ALIEN_GINKGO_EXPORT InternalLinearAlgebra
                      Vector& w) const override;
 };
 
-// Fix : Return value ?
 Arccore::Real
 InternalLinearAlgebra::norm0(const Vector& vx ALIEN_UNUSED_PARAM) const
 {
   throw Arccore::NotImplementedException(A_FUNCINFO, "GinkgoLinearAlgebra::norm0 not implemented");
-  return {};
 }
 
-// Fix : Return value ?
 Arccore::Real
 InternalLinearAlgebra::norm1(const Vector& vx) const
 {
   throw Arccore::NotImplementedException(A_FUNCINFO, "GinkgoLinearAlgebra::norm1 not implemented");
-  return {};
 }
 
 Arccore::Real
@@ -93,11 +89,8 @@ InternalLinearAlgebra::norm2(const Vector& vx) const
 {
   using vec = gko::matrix::Dense<double>;
   auto exec = vx.internal()->get_executor();
-  // Fix : find a better way to create the res matrix without initializing it with a dumb value !
-  auto mtx_res = gko::initialize<vec>({15000.0}, exec);
-
-  vx.internal()->compute_norm2(mtx_res.get());
-
+  auto mtx_res = gko::initialize<vec>({1.0}, exec);
+  vx.internal()->compute_norm2(gko::lend(mtx_res.get()));
   return mtx_res->get_values()[0];
 }
 
@@ -109,18 +102,11 @@ void InternalLinearAlgebra::mult(const Matrix& ma, const Vector& vx, Vector& vr)
 void InternalLinearAlgebra::axpy(
 Arccore::Real alpha, const Vector& vx, Vector& vr) const
 {
-  /* Ginkgo's add_scaled method :
-   * Adds `b` scaled by `alpha` to the matrix (aka: BLAS axpy).
-   * @param alpha  If alpha is 1x1 Dense matrix, the entire matrix is scaled by alpha. [...]
-   * @param b  a matrix of the same dimension as this */
-
   using vec = gko::matrix::Dense<double>;
   auto exec = vx.internal()->get_executor();
   auto mtx_alpha = gko::initialize<vec>({alpha}, exec);
-
   vr.internal()->add_scaled(mtx_alpha.get(), vx.internal());
 }
-
 
 void InternalLinearAlgebra::copy(const Vector& vx, Vector& vr) const
 {
