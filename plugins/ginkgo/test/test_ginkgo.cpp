@@ -108,7 +108,7 @@ int test()
 
   Alien::Ginkgo::Options options;
   options.numIterationsMax(100);
-  options.stopCriteriaValue(1e-100);
+  options.stopCriteriaValue(1e-10);
   options.preconditioner(Alien::Ginkgo::OptionTypes::Jacobi);
   options.solver(Alien::Ginkgo::OptionTypes::CG);
   auto solver = Alien::Ginkgo::LinearSolver(options);
