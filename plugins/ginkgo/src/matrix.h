@@ -34,8 +34,6 @@ class Matrix : public IMatrixImpl
   ~Matrix() override;
 
  public:
-  /* void setProfile(int ilower, int iupper, int jlower, int jupper,
-                        [[maybe_unused]] Arccore::ConstArrayView<int> row_sizes);*/
 
   void setRowValues(int rows,
                     Arccore::ConstArrayView<int> cols,
@@ -61,21 +59,15 @@ class Matrix : public IMatrixImpl
 */
 
   /* Return a raw pointer */
-  gko::matrix::Csr<double, int> const* internal() const
-  {
+  gko::matrix::Csr<double, int> const* internal() const{
     return this;
   }
 
-  gko::matrix::Csr<double, int>* internal()
-  {
+  gko::matrix::Csr<double, int>* internal(){
     return this;
   }
 
  private:
-  /*using ValueType = double;
-     using IndexType = int;
-     using mtx = gko::matrix::Csr<ValueType, IndexType>;
-     mtx m_mat;*/
   gko::matrix_assembly_data<double, int> data;
 };
 
