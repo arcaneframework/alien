@@ -72,95 +72,59 @@ class ALIEN_GINKGO_EXPORT InternalLinearAlgebra
                      Vector& w) const override;
 };
 
+// Fix : Return value ?
 Arccore::Real
 InternalLinearAlgebra::norm0(const Vector& vx ALIEN_UNUSED_PARAM) const
 {
-  //     throw Arccore::NotImplementedException(A_FUNCINFO, "PetscLinearAlgebra::norm0 not implemented");
+  throw Arccore::NotImplementedException(A_FUNCINFO, "GinkgoLinearAlgebra::norm0 not implemented");
   return {};
 }
 
+// Fix : Return value ?
 Arccore::Real
 InternalLinearAlgebra::norm1(const Vector& vx) const
 {
-  //~ PetscScalar norm;
-  //~ VecNorm(vx.internal(), NORM_1, &norm);
-  //~ return static_cast<Arccore::Real>(norm);
+  throw Arccore::NotImplementedException(A_FUNCINFO, "GinkgoLinearAlgebra::norm1 not implemented");
   return {};
 }
 
 Arccore::Real
 InternalLinearAlgebra::norm2(const Vector& vx) const
 {
-  //~ PetscScalar norm;
-  //~ VecNorm(vx.internal(), NORM_2, &norm);
-  //~ return static_cast<Arccore::Real>(norm);
-  return {};
+  using vec = gko::matrix::Dense<double>;
+  auto exec = vx.internal()->get_executor();
+  // Fix : find a better way to create the res matrix without initializing it with a dumb value !
+  auto mtx_res = gko::initialize<vec>({15000.0}, exec);
+
+  vx.internal()->compute_norm2(mtx_res.get());
+
+  return mtx_res->get_values()[0];
 }
 
 void InternalLinearAlgebra::mult(const Matrix& ma, const Vector& vx, Vector& vr) const
 {
-  /*std::clog << "vx : " << vx.space().size();
-  std::clog << "vr : " << vr.space().size();
-  std::clog << "g vx : " << vx.internal()->get_size()[0] << " - " << vx.internal()->get_size()[1] << "\n" ;
-  std::clog << "g vx : " << vx.internal()->get_size()[0] << " - " << vx.internal()->get_size()[1] << "\n" ;*/
-
-  /* Debug MATRIX */
-  /*std::cout << "=== MATMULT : DEBUG ma " << std::endl;
-  std::cout << "=== MATMULT : DEBUG ma get num stored elements : " << ma.get_num_stored_elements() << std::endl;
-  std::cout << "=== MATMULT : DEBUG ma size L x C : " << ma.get_size()[0] << " x " << ma.get_size()[1] << std::endl;
-  std::cout << "=== MATMULT : Affichage ligne par ligne  : " << std::endl;
-  int nRows = ma.get_size()[0] ;
-  int nCols = ma.get_size()[1] ;
-
-  auto vals = ma.get_const_values();
-  auto cols = ma.get_const_col_idxs();
-  auto rows = ma.get_const_row_ptrs();
-
-  // check data in matrix ma
-  for (int i = 0; i<nRows; i++)
-  {
-    int nbValuesRow = rows[i+1] - rows[i];
-    std::cout << "row : " << i << " - nbValues : " << nbValuesRow << " || ";
-    for (int j =0; j<nbValuesRow; j++)
-    {
-      std::cout << vals[rows[i]+j] <<" ";
-    }
-    std::cout <<" cols : ";
-    for (int j =0; j<nbValuesRow; j++)
-    {
-      std::cout << cols[rows[i]+j] << " ";
-    }
-    std::cout << "\n";
-  }
-
-  //check data in vector vx
-  std::cout << "=== MATMULT : DEBUG VX size L x C : " << vx.get_size()[0] << " x " << vx.get_size()[1] << std::endl;
-  auto vxVal = vx.get_const_values();
-  for (int i =0; i<vx.get_size()[0]; i++)
-  {
-    std::cout << vxVal[i] <<" ";
-  }*/
-
   ma.internal()->apply(lend(vx.internal()), lend(vr.internal()));
-
-  //check data in vector vx
-  /*std::cout << "\n=== MATMULT : DEBUG VR size L x C : " << vr.get_size()[0] << " x " << vr.get_size()[1] << std::endl;
-  auto vrVal = vr.get_const_values();
-  for (int i =0; i<vr.get_size()[0]; i++)
-  {
-    std::cout << vrVal[i] <<" ";
-  }*/
 }
 
 void InternalLinearAlgebra::axpy(
 Arccore::Real alpha, const Vector& vx, Vector& vr) const
 {
-  //~ VecAXPY(vr.internal(), alpha, vx.internal()); //  vr = alpha.vx + vr
+  /* Ginkgo's add_scaled method :
+   * Adds `b` scaled by `alpha` to the matrix (aka: BLAS axpy).
+   * @param alpha  If alpha is 1x1 Dense matrix, the entire matrix is scaled by alpha. [...]
+   * @param b  a matrix of the same dimension as this */
+
+  using vec = gko::matrix::Dense<double>;
+  auto exec = vx.internal()->get_executor();
+  auto mtx_alpha = gko::initialize<vec>({alpha}, exec);
+
+  vr.internal()->add_scaled(mtx_alpha.get(), vx.internal());
 }
+
 
 void InternalLinearAlgebra::copy(const Vector& vx, Vector& vr) const
 {
-  //~ VecCopy(vx.internal(), vr.internal());
+  vr.internal()->copy_from(vx.internal());
 }
 
 Arccore::Real
