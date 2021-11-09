@@ -28,13 +28,15 @@ set(alien_semantic_public_header
         alien/move/handlers/sub_matrix/Extraction.h
         alien/move/data/MatrixData.h
         alien/move/data/VectorData.h
-        alien/move/handlers/scalar/DoKDirectMatrixBuilder.h)
+        alien/move/handlers/scalar/DoKDirectMatrixBuilder.h
+        alien/move/handlers/scalar/MatrixMarketReader.h)
 
 add_library(alien_semantic_move
         ${alien_semantic_public_header}
         alien/move/handlers/sub_matrix/Extraction.cc
         alien/move/data/MatrixData.cc
         alien/move/data/VectorData.cc
+        alien/move/handlers/scalar/MatrixMarketReader.cc
         )
 
 if (ALIEN_GENERATE_DOCUMENTATION)
