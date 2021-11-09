@@ -19,8 +19,6 @@
 #include "MatrixMarketReader.h"
 
 #include <fstream>
-#include <ios>
-#include <string>
 #include <algorithm>
 #include <cctype>
 
@@ -39,7 +37,7 @@ namespace
   class MMReader
   {
    public:
-    MMReader(std::ifstream& fstream)
+    explicit MMReader(std::ifstream& fstream)
     {
       read_banner(fstream);
     }
@@ -69,8 +67,12 @@ namespace
           tolower(scalar);
           tolower(symmetry);
 
-          if ("pattern" != scalar) {
-            throw Arccore::FatalErrorException("MatrixMarketReader", " pattern not supported");
+          if ("coordinate" != format) {
+            throw Arccore::FatalErrorException("MatrixMarketReader", "format array not supported");
+          }
+
+          if ("real" != scalar) {
+            throw Arccore::FatalErrorException("MatrixMarketReader", "pattern not supported, only scalar is available");
           }
 
           if ("general" == symmetry) {
@@ -97,7 +99,7 @@ namespace
       return true;
     }
 
-    bool read_values(std::istream& fstream, DoKDirectMatrixBuilder& builder)
+    bool read_values(std::istream& fstream, DoKDirectMatrixBuilder& builder) const
     {
       std::string line;
       while (std::getline(fstream, line)) {
@@ -120,10 +122,10 @@ namespace
     }
 
    private:
-    int m_rows;
-    int m_cols;
-    int m_nnz;
-    bool m_symmetric;
+    int m_rows{};
+    int m_cols{};
+    int m_nnz{};
+    bool m_symmetric{};
   };
 } // namespace
 
