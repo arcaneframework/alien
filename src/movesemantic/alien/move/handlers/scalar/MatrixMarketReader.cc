@@ -16,13 +16,18 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "MatrixMarketReader.h"
-
 #include <fstream>
 #include <algorithm>
 #include <cctype>
 
 #include <arccore/base/FatalErrorException.h>
+#include <arccore/message_passing/IMessagePassingMng.h>
+
+#include <alien/data/Space.h>
+#include <alien/distribution/MatrixDistribution.h>
+
+#include <alien/move/data/MatrixData.h>
+#include <alien/move/handlers/scalar/DoKDirectMatrixBuilder.h>
 
 namespace Alien::Move
 {
@@ -34,112 +39,160 @@ namespace
     std::transform(str.begin(), str.end(), str.begin(), ::tolower);
   }
 
-  class MMReader
+  class MatrixDescription
   {
    public:
-    explicit MMReader(std::ifstream& fstream)
+    MatrixDescription() = default;
+
+    explicit MatrixDescription(Arccore::Span<Arccore::Integer> src)
     {
-      read_banner(fstream);
-    }
-
-    bool read_banner(std::istream& fstream)
-    {
-      std::string line;
-      while (std::getline(fstream, line)) {
-
-        if ('%' == line[0] && '%' == line[1]) {
-
-          std::string _; // junk
-          std::string format; // (coordinate, array)
-          std::string scalar; // (pattern, real, complex, integer)
-          std::string symmetry; // (general, symmetric, skew-symmetric, hermitian)
-
-          // get matrix kind
-          std::stringstream ss;
-          ss << line;
-          ss >> _; // skip '%%MatrixMarket
-          ss >> _; // skip matrix
-          ss >> format;
-          ss >> scalar;
-          ss >> symmetry;
-
-          tolower(format);
-          tolower(scalar);
-          tolower(symmetry);
-
-          if ("coordinate" != format) {
-            throw Arccore::FatalErrorException("MatrixMarketReader", "format array not supported");
-          }
-
-          if ("real" != scalar) {
-            throw Arccore::FatalErrorException("MatrixMarketReader", "pattern not supported, only scalar is available");
-          }
-
-          if ("general" == symmetry) {
-            m_symmetric = false;
-          }
-          else {
-            m_symmetric = true;
-          }
-        }
-        else if ('%' == line[0]) {
-          // skip comment
-          continue;
-        }
-        else {
-          //first line is matrix size, then done with banner
-          std::stringstream ss;
-          ss << line;
-          ss >> m_rows;
-          ss >> m_cols;
-          ss >> m_nnz;
-          break;
-        }
+      if (src.size() != 4) {
+        throw Arccore::FatalErrorException("Matrix Descriptor", "Cannot deserialize array");
       }
-      return true;
+      n_rows = src[0];
+      n_cols = src[1];
+      n_nnz = src[2];
+      symmetric = (src[3] == 0);
     }
 
-    bool read_values(std::istream& fstream, DoKDirectMatrixBuilder& builder) const
+    Arccore::UniqueArray<Arccore::Integer> to_array()
     {
-      std::string line;
-      while (std::getline(fstream, line)) {
+      Arccore::UniqueArray<Arccore::Integer> array(4);
+      array[0] = n_rows;
+      array[1] = n_cols;
+      array[2] = n_nnz;
+      array[3] = (symmetric) ? 0 : 1;
+      return array;
+    }
 
-        if ('%' == line[0]) {
-          continue;
-        }
+    int n_rows{ 0 };
+    int n_cols{ 0 };
+    int n_nnz{ 0 };
+    bool symmetric{ true };
+  };
 
-        int row, col;
-        double value;
+  std::optional<MatrixDescription> readBanner(std::istream& fstream)
+  {
+    std::string line;
+
+    MatrixDescription out;
+
+    while (std::getline(fstream, line)) {
+
+      if ('%' == line[0] && '%' == line[1]) {
+
+        std::string _; // junk
+        std::string format; // (coordinate, array)
+        std::string scalar; // (pattern, real, complex, integer)
+        std::string symmetry; // (general, symmetric, skew-symmetric, hermitian)
+
+        // get matrix kind
         std::stringstream ss;
         ss << line;
-        ss >> row >> col >> value;
-        builder.contribute(row, col, value);
-        if (m_symmetric) {
-          builder.contribute(col, row, value);
+        ss >> _; // skip '%%MatrixMarket
+        ss >> _; // skip matrix
+        ss >> format;
+        ss >> scalar;
+        ss >> symmetry;
+
+        tolower(format);
+        tolower(scalar);
+        tolower(symmetry);
+
+        if ("coordinate" != format) {
+          return std::nullopt;
+          // throw Arccore::FatalErrorException("MatrixMarketReader", "format array not supported");
+        }
+
+        if ("real" != scalar) {
+          return std::nullopt;
+          // throw Arccore::FatalErrorException("MatrixMarketReader", "pattern not supported, only scalar is available");
+        }
+
+        if ("general" == symmetry) {
+          out.symmetric = false;
+        }
+        else {
+          out.symmetric = true;
         }
       }
-      return true;
-    }
+      else if ('%' == line[0]) {
+        // skip comment
+        continue;
+      }
+      else {
+        //first line is matrix size, then done with banner
+        std::stringstream ss;
+        ss << line;
 
-   private:
-    int m_rows{};
-    int m_cols{};
-    int m_nnz{};
-    bool m_symmetric{};
-  };
+        ss >> out.n_rows;
+        ss >> out.n_cols;
+        ss >> out.n_nnz;
+        break;
+      }
+    }
+    return std::make_optional(out);
+  }
+
+  bool readValues(std::istream& fstream, DoKDirectMatrixBuilder& builder, bool symmetric)
+  {
+    std::string line;
+    while (std::getline(fstream, line)) {
+
+      if ('%' == line[0]) {
+        continue;
+      }
+
+      int row, col;
+      double value;
+      std::stringstream ss;
+      ss << line;
+      ss >> row >> col >> value;
+      builder.contribute(row, col, value);
+      if (symmetric) {
+        builder.contribute(col, row, value);
+      }
+    }
+    return true;
+  }
+
+  MatrixData createMatrixData(MatrixDescription desc, Arccore::MessagePassing::IMessagePassingMng* pm)
+  {
+    Alien::Space row_space(desc.n_rows, "RowSpace");
+    Alien::Space col_space(desc.n_cols, "ColSpace");
+    Alien::MatrixDistribution dist(
+    row_space, col_space, pm);
+    return Alien::Move::MatrixData(dist);
+  }
+
 } // namespace
 
-MatrixMarketReader::MatrixMarketReader(MatrixData&& src)
-: m_builder(std::move(src))
+MatrixData ALIEN_MOVESEMANTIC_EXPORT
+readFromMatrixMarket(Arccore::MessagePassing::IMessagePassingMng* pm, const std::string& filename)
 {
+  if (pm->commRank() == 0) { // Only rank 0 read the file
+    auto stream = std::ifstream(filename);
+    if (!stream) {
+      throw Arccore::FatalErrorException("readFromMatrixMarket", "Unable to read file");
+    }
+    auto desc = readBanner(stream);
+    if (!desc) {
+      throw Arccore::FatalErrorException("readFromMatrixMarket", "Invalid header");
+    }
+    auto ser_desc = desc.value().to_array();
+    Arccore::MessagePassing::mpBroadcast(pm, ser_desc, 0);
+    DoKDirectMatrixBuilder builder(createMatrixData(desc.value(), pm));
+    readValues(stream, builder, desc->symmetric);
+    return builder.release();
+  }
+  else {
+    // Receive description description from rank 0
+    Arccore::UniqueArray<Arccore::Integer> ser_desc(4);
+    Arccore::MessagePassing::mpBroadcast(pm, ser_desc, 0);
+    MatrixDescription desc(ser_desc);
+    DoKDirectMatrixBuilder builder(createMatrixData(desc, pm));
+    return builder.release();
+  }
 }
 
-MatrixData&& MatrixMarketReader::read(std::string filename)
-{
-  auto fstream = std::ifstream(filename);
-  MMReader reader(fstream);
-  reader.read_values(fstream, m_builder);
-  fstream.close();
-  return m_builder.release();
-}
 } // namespace Alien::Move

@@ -29,7 +29,7 @@ set(alien_semantic_public_header
         alien/move/data/MatrixData.h
         alien/move/data/VectorData.h
         alien/move/handlers/scalar/DoKDirectMatrixBuilder.h
-        alien/move/handlers/scalar/MatrixMarketReader.h)
+        )
 
 add_library(alien_semantic_move
         ${alien_semantic_public_header}

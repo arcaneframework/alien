@@ -23,19 +23,12 @@
 #include <alien/distribution/VectorDistribution.h>
 
 #include <alien/move/data/MatrixData.h>
-#include <alien/move/handlers/scalar/MatrixMarketReader.h>
 
 #include <Environment.h>
 
 TEST(TestMatrixMarket, Functional)
 {
-  Alien::Space row_space(25, "RowSpace");
-  Alien::Space col_space(25, "ColSpace");
-  Alien::MatrixDistribution mdist(
-  row_space, col_space, AlienTest::Environment::parallelMng());
-  Alien::Move::MatrixData A(mdist);
-  {
-    Alien::Move::MatrixMarketReader reader(std::move(A));
-    A = reader.read("simple.mtx");
-  }
+  auto mat = Alien::Move::readFromMatrixMarket(AlienTest::Environment::parallelMng(), "simple.mtx");
+  ASSERT_EQ(mat.rowSpace().size(), 25);
+  ASSERT_EQ(mat.colSpace().size(), 25);
 }
