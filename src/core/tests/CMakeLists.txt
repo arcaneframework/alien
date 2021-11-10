@@ -51,7 +51,7 @@ target_link_libraries(core.gtest.mpi
 if (ALIEN_EXPAND_TESTS)
     gtest_discover_tests(core.gtest.seq TEST_PREFIX "core." TEST_SUFFIX ".seq")
     gtest_discover_tests(core.gtest.mpi TEST_PREFIX "core." TEST_SUFFIX ".seq")
-else(ALIEN_EXPAND_TESTS)
+else (ALIEN_EXPAND_TESTS)
     alien_test(
             BENCH core
             NAME "seq"
@@ -62,7 +62,7 @@ else(ALIEN_EXPAND_TESTS)
             NAME "mpi"
             COMMAND core.gtest.mpi
     )
-endif(ALIEN_EXPAND_TESTS)
+endif (ALIEN_EXPAND_TESTS)
 
 alien_test(
         BENCH core

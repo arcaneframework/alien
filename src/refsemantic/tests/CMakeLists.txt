@@ -58,18 +58,18 @@ target_link_libraries(ref.gtest.seq PRIVATE
 if (ALIEN_EXPAND_TESTS)
     gtest_discover_tests(ref.gtest.seq TEST_PREFIX "ref." TEST_SUFFIX ".seq")
     gtest_discover_tests(ref.gtest.mpi TEST_PREFIX "ref." TEST_SUFFIX ".seq")
-else(ALIEN_EXPAND_TESTS)
+else (ALIEN_EXPAND_TESTS)
     alien_test(
-        BENCH ref
-        NAME "seq"
-        COMMAND ref.gtest.seq
+            BENCH ref
+            NAME "seq"
+            COMMAND ref.gtest.seq
     )
     alien_test(
             BENCH ref
             NAME "mpi"
             COMMAND ref.gtest.mpi
     )
-endif(ALIEN_EXPAND_TESTS)
+endif (ALIEN_EXPAND_TESTS)
 
 alien_test(
         BENCH ref

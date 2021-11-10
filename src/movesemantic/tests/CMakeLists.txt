@@ -27,7 +27,7 @@ add_executable(move.gtest.seq main.cpp
         TestVector.cc
         TestVectorBuilder.cc
         TestMatrixDirectBuilder.cc
-)
+        )
 
 target_link_libraries(move.gtest.mpi PRIVATE
         GTest::GTest
@@ -47,7 +47,7 @@ target_link_libraries(move.gtest.seq PRIVATE
 if (ALIEN_EXPAND_TESTS)
     gtest_discover_tests(move.gtest.seq TEST_PmoveIX "move." TEST_SUFFIX ".seq")
     gtest_discover_tests(move.gtest.mpi TEST_PmoveIX "move." TEST_SUFFIX ".seq")
-else(ALIEN_EXPAND_TESTS)
+else (ALIEN_EXPAND_TESTS)
     alien_test(
             BENCH move
             NAME "seq"
@@ -58,7 +58,7 @@ else(ALIEN_EXPAND_TESTS)
             NAME "mpi"
             COMMAND move.gtest.mpi
     )
-endif(ALIEN_EXPAND_TESTS)
+endif (ALIEN_EXPAND_TESTS)
 
 alien_test(
         BENCH move
