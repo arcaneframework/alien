@@ -18,6 +18,8 @@
 
 #include <gtest/gtest.h>
 
+#include <mpi.h>
+
 #include <Environment.h>
 
 #include <alien/data/Universe.h>
@@ -27,6 +29,15 @@ int main(int argc, char** argv)
   ::testing::InitGoogleTest(&argc, argv);
 
   AlienTest::Environment::initialize(argc, argv);
+
+  int my_rank;
+  ::MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+  if (my_rank != 0) {
+    auto& listener = ::testing::UnitTest::GetInstance()->listeners();
+    auto output_printer = listener.default_result_printer();
+    listener.Release(output_printer);
+    delete output_printer;
+  }
 
   Alien::setTraceMng(AlienTest::Environment::traceMng());
   Alien::setVerbosityLevel(Alien::Verbosity::Debug);

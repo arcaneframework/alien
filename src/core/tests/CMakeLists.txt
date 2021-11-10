@@ -48,6 +48,8 @@ target_link_libraries(core.gtest.mpi
         arcconpkg_MPI
         )
 
+set_property(TARGET core.gtest.mpi PROPERTY CROSSCOMPILING_EMULATOR "${MPIEXEC_EXECUTABLE};${MPIEXEC_NUMPROC_FLAG};2")
+
 if (ALIEN_EXPAND_TESTS)
     gtest_discover_tests(core.gtest.seq TEST_PREFIX "core." TEST_SUFFIX ".seq")
     gtest_discover_tests(core.gtest.mpi TEST_PREFIX "core." TEST_SUFFIX ".seq")
