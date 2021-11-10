@@ -22,7 +22,7 @@ find_package(GTest REQUIRED)
 # tests with GTest
 
 add_executable(core.gtest.seq main.cpp
-        TestSpace.cc TestAlienInclude.cc)
+        TestSpace.cc TestAlienInclude.cc TestSpacePartition.cc)
 
 add_executable(core.gtest.mpi main.cpp
         TestBackEnds.cc
@@ -30,7 +30,6 @@ add_executable(core.gtest.mpi main.cpp
         TestCompositeSpace.cc
         TestUniverse.cc
         TestDistribution.cc
-        TestSpacePartition.cc
         TestDoKMatrix.cc
         TestRedistributor.cc
         )
