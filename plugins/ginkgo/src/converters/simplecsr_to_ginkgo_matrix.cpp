@@ -108,7 +108,7 @@ void SimpleCSR_to_Ginkgo_MatrixConverter::_build(const Alien::SimpleCSRMatrix<Ar
 void SimpleCSR_to_Ginkgo_MatrixConverter::_buildBlock(const Alien::SimpleCSRMatrix<Arccore::Real>& sourceImpl,
                                                       Alien::Ginkgo::Matrix& targetImpl) const
 {
-    /*
+  /*
   const auto& dist = sourceImpl.distribution();
   const auto& profile = sourceImpl.getCSRProfile();
   const auto localSize = profile.getNRow();
