@@ -171,11 +171,9 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   iter_stop->add_logger(logger);
   res_stop->add_logger(logger);
 
-
-
   auto solver_factory =
   cg::build().with_criteria(gko::share(iter_stop), gko::share(res_stop))
-             /*gko::stop::Iteration::build().with_max_iters(m_options.numIterationsMax()).on(exec),
+  /*gko::stop::Iteration::build().with_max_iters(m_options.numIterationsMax()).on(exec),
              gko::stop::ResidualNorm<double>::build().with_reduction_factor(reduction_factor).on(exec))*/
   .on(exec);
 
@@ -188,7 +186,7 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   // get nb iterations + final residual
   auto num_iters = logger->get_num_iterations();
   auto residual_norm = logger->get_residual_norm();
-  auto vec_res_norm = reinterpret_cast<const gko::matrix::Dense<double>*>(residual_norm) ;
+  auto vec_res_norm = reinterpret_cast<const gko::matrix::Dense<double>*>(residual_norm);
   auto res = vec_res_norm->get_const_values()[0];
 
   // Print infos
@@ -200,7 +198,6 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   ++m_solve_num;
   m_total_iter_num += num_iters;
   m_total_solve_time += tsolve.elapsed();
-
 }
 
 const Alien::SolverStatus&

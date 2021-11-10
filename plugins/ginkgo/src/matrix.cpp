@@ -40,9 +40,10 @@ Matrix::Matrix(const MultiMatrixImpl* multi_impl)
     throw Arccore::FatalErrorException("Matrix must be square");
 }
 
-Matrix::~Matrix(){}
+Matrix::~Matrix() {}
 
-void Matrix::assemble(){
+void Matrix::assemble()
+{
   this->read(data);
 }
 
