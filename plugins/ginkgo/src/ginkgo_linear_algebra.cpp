@@ -89,7 +89,7 @@ InternalLinearAlgebra::norm2(const Vector& vx) const
 {
   using vec = gko::matrix::Dense<double>;
   auto exec = vx.internal()->get_executor();
-  auto mtx_res = gko::initialize<vec>({1.0}, exec);
+  auto mtx_res = gko::initialize<vec>({ 1.0 }, exec);
   vx.internal()->compute_norm2(gko::lend(mtx_res.get()));
   return mtx_res->get_values()[0];
 }
@@ -104,7 +104,7 @@ Arccore::Real alpha, const Vector& vx, Vector& vr) const
 {
   using vec = gko::matrix::Dense<double>;
   auto exec = vx.internal()->get_executor();
-  auto mtx_alpha = gko::initialize<vec>({alpha}, exec);
+  auto mtx_alpha = gko::initialize<vec>({ alpha }, exec);
   vr.internal()->add_scaled(mtx_alpha.get(), vx.internal());
 }
 
