@@ -55,18 +55,28 @@ target_link_libraries(ref.gtest.seq PRIVATE
         alien_test_framework
         )
 
-
-alien_test(
+if (ALIEN_EXPAND_TESTS)
+    gtest_discover_tests(ref.gtest.seq TEST_PREFIX "ref." TEST_SUFFIX ".seq")
+    gtest_discover_tests(ref.gtest.mpi TEST_PREFIX "ref." TEST_SUFFIX ".seq")
+else(ALIEN_EXPAND_TESTS)
+    alien_test(
         BENCH ref
         NAME "seq"
         COMMAND ref.gtest.seq
-)
+    )
+    alien_test(
+            BENCH ref
+            NAME "mpi"
+            COMMAND ref.gtest.mpi
+    )
+endif(ALIEN_EXPAND_TESTS)
 
 alien_test(
         BENCH ref
         NAME "mpi"
         PROCS 4
         COMMAND ref.gtest.mpi
+        PARALLEL_ONLY
 )
 
 

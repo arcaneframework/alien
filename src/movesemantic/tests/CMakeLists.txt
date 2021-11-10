@@ -44,15 +44,26 @@ target_link_libraries(move.gtest.seq PRIVATE
         alien_test_framework
         )
 
-alien_test(
-        BENCH move
-        NAME "seq"
-        COMMAND move.gtest.seq
-)
+if (ALIEN_EXPAND_TESTS)
+    gtest_discover_tests(move.gtest.seq TEST_PmoveIX "move." TEST_SUFFIX ".seq")
+    gtest_discover_tests(move.gtest.mpi TEST_PmoveIX "move." TEST_SUFFIX ".seq")
+else(ALIEN_EXPAND_TESTS)
+    alien_test(
+            BENCH move
+            NAME "seq"
+            COMMAND move.gtest.seq
+    )
+    alien_test(
+            BENCH move
+            NAME "mpi"
+            COMMAND move.gtest.mpi
+    )
+endif(ALIEN_EXPAND_TESTS)
 
 alien_test(
         BENCH move
         NAME "mpi"
         PROCS 4
         COMMAND move.gtest.mpi
+        PARALLEL_ONLY
 )
