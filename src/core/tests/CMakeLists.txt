@@ -21,53 +21,43 @@ find_package(GTest REQUIRED)
 
 # tests with GTest
 
-set(SEQ_TEST_LIST
-        Space
-        AlienInclude
+add_executable(core.gtest.seq main.cpp
+        TestSpace.cc TestAlienInclude.cc)
+
+add_executable(core.gtest.mpi main.cpp
+        TestBackEnds.cc
+        TestTimestamp.cc
+        TestCompositeSpace.cc
+        TestUniverse.cc
+        TestDistribution.cc
+        TestSpacePartition.cc
+        TestDoKMatrix.cc
+        TestRedistributor.cc
         )
 
-set(PARALLEL_TEST_LIST
-        BackEnds
-        Timestamp
-        CompositeSpace
-        Universe
-        Distribution
-        SpacePartition
-        DoKMatrix
-        Redistributor
-        )
-
-add_executable(gtest.unitary main.cpp)
-
-foreach (test_name ${SEQ_TEST_LIST})
-    target_sources(gtest.unitary PRIVATE Test${test_name}.cc)
-endforeach ()
-
-foreach (test_name ${PARALLEL_TEST_LIST})
-    target_sources(gtest.unitary PRIVATE Test${test_name}.cc)
-endforeach ()
-
-target_link_libraries(gtest.unitary
-        PRIVATE GTest::GTest
-        PRIVATE Alien::alien_core
+target_link_libraries(core.gtest.seq
+        PUBLIC GTest::GTest
+        PUBLIC Alien::alien_core
         alien_test_framework
+        arcconpkg_MPI
         )
 
-foreach (test_name ${SEQ_TEST_LIST})
-    alien_test(
-            BENCH gtest
-            NAME ${test_name}
-            COMMAND gtest.unitary
-            OPTIONS --gtest_filter=Test${test_name}*
-    )
-endforeach ()
+target_link_libraries(core.gtest.mpi
+        PUBLIC GTest::GTest
+        PUBLIC Alien::alien_core
+        alien_test_framework
+        arcconpkg_MPI
+        )
 
-foreach (test_name ${PARALLEL_TEST_LIST})
-    alien_test(
-            BENCH gtest
-            NAME ${test_name}
-            PROCS 2
-            COMMAND gtest.unitary
-            OPTIONS --gtest_filter=Test${test_name}*
+alien_test(
+        BENCH core
+        NAME "seq"
+        COMMAND core.gtest.seq
     )
-endforeach ()
+
+alien_test(
+        BENCH core
+        NAME "mpi"
+        PROCS 2
+        COMMAND core.gtest.mpi
+)
