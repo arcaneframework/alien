@@ -97,12 +97,10 @@ int test()
   Alien::Ginkgo::LinearAlgebra algebra;
   algebra.mult(A, xe, b);
 
-
   /**
 	 *  Calcul x, tq : Ax = b 
 	 ********************************************/
-  tm->info()  << "* Calcul de x, tel que  :  A x = b";
-
+  tm->info() << "* Calcul de x, tel que  :  A x = b";
 
   Alien::Vector x(size, pm);
 
@@ -114,40 +112,38 @@ int test()
   auto solver = Alien::Ginkgo::LinearSolver(options);
   solver.solve(A, b, x);
 
-
-	/**
+  /**
 	 *  Calcul du résidu ||Ax - b|| ~ 0
 	 ********************************************/
   tm->info() << "* r = Ax - b";
 
   Alien::Vector r(size, pm);
-	Alien::Vector tmp(size, pm);
-	
-	tm->info() << "t = Ax";
-	algebra.mult(A, x, tmp);
-	
-	tm->info() << "r = t";
-	algebra.copy(tmp, r);
-	
-	tm->info() << "r -= b"; // r = r + (-1 * b)
-	algebra.axpy(-1., b, r);
+  Alien::Vector tmp(size, pm);
+
+  tm->info() << "t = Ax";
+  algebra.mult(A, x, tmp);
+
+  tm->info() << "r = t";
+  algebra.copy(tmp, r);
+
+  tm->info() << "r -= b"; // r = r + (-1 * b)
+  algebra.axpy(-1., b, r);
 
   auto norm = algebra.norm2(r);
   tm->info() << " => ||r|| = " << norm;
 
-	/**
+  /**
 	 *  Calcul de ||x -xe|| ~ 0
 	 ********************************************/
 
   tm->info() << "* r = || x - xe ||";
 
-	tm->info() << "r = x";
-	algebra.copy(x, r);
-	tm->info() << "r -= xe";
-	algebra.axpy(-1., xe, r);
+  tm->info() << "r = x";
+  algebra.copy(x, r);
+  tm->info() << "r -= xe";
+  algebra.axpy(-1., xe, r);
   tm->info() << " => ||r|| = " << norm;
-    
-    
+
   tm->info() << " ";
   tm->info() << "... example finished !!!";
 
