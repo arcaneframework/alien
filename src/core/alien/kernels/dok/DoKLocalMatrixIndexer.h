@@ -19,9 +19,11 @@
 #pragma once
 
 #include <algorithm>
-#include "ILocalMatrixIndexer.h"
-#include "../../utils/Precomp.h"
 #include <unordered_map>
+
+#include <alien/utils/Precomp.h>
+
+#include <alien/kernels/dok/ILocalMatrixIndexer.h>
 
 namespace Alien
 {
