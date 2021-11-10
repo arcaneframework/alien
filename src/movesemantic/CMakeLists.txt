@@ -36,7 +36,7 @@ add_library(alien_semantic_move
         alien/move/handlers/sub_matrix/Extraction.cc
         alien/move/data/MatrixData.cc
         alien/move/data/VectorData.cc
-        alien/move/handlers/scalar/MatrixMarketReader.cc
+        alien/move/impl/MatrixMarketReader.cc
         )
 
 if (ALIEN_GENERATE_DOCUMENTATION)
