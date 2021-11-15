@@ -65,6 +65,11 @@ namespace
       return array;
     }
 
+    static constexpr size_t serializedSize()
+    {
+      return 4;
+    }
+
     int n_rows{ 0 };
     int n_cols{ 0 };
     int n_nnz{ 0 };
@@ -148,9 +153,9 @@ namespace
       std::stringstream ss;
       ss << line;
       ss >> row >> col >> value;
-      builder.contribute(row, col, value);
+      builder.contribute(row - 1, col - 1, value);
       if (symmetric) {
-        builder.contribute(col, row, value);
+        builder.contribute(col - 1, row - 1, value);
       }
     }
     return true;
@@ -187,7 +192,7 @@ readFromMatrixMarket(Arccore::MessagePassing::IMessagePassingMng* pm, const std:
   }
   else {
     // Receive description description from rank 0
-    Arccore::UniqueArray<Arccore::Integer> ser_desc(4);
+    Arccore::UniqueArray<Arccore::Integer> ser_desc(MatrixDescription::serializedSize());
     Arccore::MessagePassing::mpBroadcast(pm, ser_desc, 0);
     MatrixDescription desc(ser_desc);
     DoKDirectMatrixBuilder builder(createMatrixData(desc, pm));
