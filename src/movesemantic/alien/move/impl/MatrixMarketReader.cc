@@ -154,7 +154,7 @@ namespace
       ss << line;
       ss >> row >> col >> value;
       builder.contribute(row - 1, col - 1, value);
-      if (symmetric) {
+      if (symmetric && row != col) {
         builder.contribute(col - 1, row - 1, value);
       }
     }
