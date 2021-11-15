@@ -41,6 +41,7 @@ target_link_libraries(mm_driver_hypre PUBLIC
         Alien::alien_semantic_move)
 
 configure_file(msc00726.mtx msc00726.mtx COPYONLY)
+configure_file(mesh1em6.mtx mesh1em6.mtx COPYONLY)
 
 if (ALIEN_BENCHMARK)
     enable_testing()

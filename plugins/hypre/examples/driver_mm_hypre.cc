@@ -105,7 +105,7 @@ int main(int argc, char** argv)
   auto ret = 0;
 
   try {
-    ret = test("msc00726.mtx");
+    ret = test("mesh1em6.mtx");
   }
   catch (const Arccore::Exception& ex) {
     std::cerr << "Exception: " << ex << '\n';
