@@ -34,6 +34,14 @@ target_link_libraries(example_hypre_move PUBLIC
         Alien::hypre_wrapper
         Alien::alien_semantic_move)
 
+add_executable(mm_driver_hypre driver_mm_hypre.cc)
+
+target_link_libraries(mm_driver_hypre PUBLIC
+        Alien::hypre_wrapper
+        Alien::alien_semantic_move)
+
+configure_file(msc00726.mtx msc00726.mtx COPYONLY)
+
 if (ALIEN_BENCHMARK)
     enable_testing()
     include(LoadAlienTest)
@@ -52,6 +60,12 @@ if (ALIEN_BENCHMARK)
             COMMAND example_hypre_move
     )
 
+    alien_test(
+            BENCH hypre
+            NAME hypre.matrixmarket
+            PROCS 4
+            COMMAND mm_driver_hypre
+    )
     #-----------------------------------------------------------
     # Bench recap
     #-----------------------------------------------------------
