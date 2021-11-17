@@ -1,77 +1,64 @@
-# Alien
+﻿[//]: <> (Comment: -*- coding: utf-8-with-signature -*-)
 
-All Alien world into one git repository.
-This repository aims at easing development by compiling together Alien's core, its high level dependencies and its plugins.
+# Arccore
 
-## How to use ?
+<img src="https://www.cea.fr/PublishingImages/cea.jpg" height="50" align="right" />
+<img src="https://www.ifpenergiesnouvelles.fr/sites/ifpen.fr/files/logo_ifpen_2.jpg" height="50" align="right"/>
 
-Simply clone this repository.
+Written by CEA/IFPEN and Contributors
 
-```shell script
-git clone https://github.com/arcaneframework/alien.git
-cd alien
-```
+(C) Copyright 2000-2021- CEA/IFPEN. All rights reserved.
 
-After, you can run CMake (at least version 3.15).
-```shell script
-mkdir build && cd build
-cmake ..
-```
+All content is the property of the respective authors or their employers.
 
-Useful CMake options:
-- ALIEN_FRAMEWORK_EXTERNAL, compile each subproject separately, OFF by default
-- ALIEN_PLUGIN_HYPRE, whether Hypre plugin is compiled, OFF by default
-- ALIEN_PLUGIN_SUPERLU, whether SuperLUDist plugin is compiled, OFF by default
-- ALIEN_USE_HDF5, whether HDF5 support is enabled, OFF by default.
+For more information regarding authorship of content, please consult the listed source code repository logs.
 
-We can mention also other generic CMake options :
-- CMAKE_EXE_LINKER_FLAGS="-Wl,--no-as-needed", useful on debian based linux distribution (like ubuntu), 
-as without linker drops libraries that are not explicitly referenced, breaking our plugin interface.
-- CMAKE_VERBOSE_MAKEFILE=ON
+## Introduction
 
-## Requirements
+Ce dépôt contient les sources de **Arccore**.
 
-Alien requires a recent build environment:
- - recent CMake (>= 3.15)
- - C++ compiler that supports C++-14 (gcc, llvm/clang, intel)
- - MPI
- - boost, at least with timer and program options components enabled
- - glib2
- - BLAS
- - Google Tests, for unit tests.
- 
- On Ubuntu-20.04, installing this package is sufficient:
- ```shell script
-apt-get install build-essential cmake gcc g++ gdb \
-        libhypre-dev libsuperlu-dist-dev \
-        libboost-dev libboost-program-options-dev libgtest-dev libglib2.0-dev
-```
+### Pré-requis
 
-For GoogleTest, one must finish installation by running:
-```shell script
-cd $(mktemp -d) && cmake /usr/src/googletest && cmake --build . --target install
-```
+Un compilateur supportant le C++17:
 
-## How it works ?
+- GCC 7+
+- Clang 6+
+- Visual Studio 2019 (version 16.8+)
 
-This repository contains several other repositories, needed for Alien. 
-It contains the following subdirectories:
- - framework: from Arcane, these subdirectories are synchronized by `git subtree`
-   + arccon,  which contains our build system, based on CMake;
-   + arccore, which contains base features on which Alien is built, mainly Array and ParallelManager;
- - src, the main repository for linear algebra,
- - plugins, with different plugins for Alien, to call Hypre or SuperLU external libraries.
+Les outils et bibliothèques suivants sont optionnels mais fortement recommandés:
 
-## For developers
+- MPI (implémentation MPI 3.1 nécessaire)
 
-To update `arccore` and `arccon`, use `git subtree`.
+### Compilation
 
-For example, to upgrade `arccore` to last commit of branch `main` of `framework` repository, run:
-```shell script
-cd ..
-git clone git@github.com:arcaneframework/framework
-cd framework
-git subtree split -P arccore -b arccore
-cd ../alien
-git subtree pull --prefix=framework/arccore --squash ../framework arccore
-```
+La compilation de Arccore nécessite d'avoir une version de
+ [CMake](https://cmake.org) supérieure à `3.13`. La compilation se
+ fait obligatoirement dans un répertoire distinct de celui des
+ sources. On note `${SOURCE_DIR}` le répertoire contenant les sources
+ et `${BUILD_DIR}` le répertoire de compilation.
+
+~~~{.sh}
+mkdir ${BUILD_DIR}
+cd ${BUILD_DIR}
+cmake -S ${SOURCE_DIR} -DCMAKE_INSTALL_PREFIX=${INSTALL_PATH} ...
+cmake --build ${BUILD_DIR}
+cmake --build ${BUILD_DIR} --target install
+~~~
+
+Par défaut, l'installation se fait dans `/usr/local` si l'option `CMAKE_INSTALL_PREFIX` n'est
+pas spécifiée.
+
+Il est possible de positioner la variable CMake `ARCCORE_BUILD_MODE`
+avec l'une des valeurs suivantes:
+
+- `Debug`: active les macros d'afficahge `debug()` et le mode
+  vérification (mode 'check'). Dans ce mode, les macros
+  `ARCCORE_DEBUG` et `ARCCORE_CHECK` sont définies.
+- `Check`: active le mode vérification, dans lequel on vérifie
+  notamment les débordements de tableau. Dans ce mode, la macro
+  `ARCCORE_CHECK` est définie
+- `Release`: mode sans vérification ni message de débug.
+
+La valeur par défaut de `ARCCORE_BUILD_MODE` est `Debug` si
+`CMAKE_BUILD_TYPE` vaut `Debug`. Sinon, la valeur par défaut est
+`Release`.
