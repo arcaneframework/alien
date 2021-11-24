@@ -10,6 +10,10 @@ env:
   ALIEN_BUILD_DIR: /__w/alien/alien/alien_build
   ALIEN_INSTALL_DIR: /__w/alien/alien/alien_install
   ALIEN_SOURCE_DIR: /__w/alien/alien/alien
+  # AlienLegacy
+  ALIENLEGACY_BUILD_DIR: /__w/alien/alien/alienlegacy_build
+  ALIENLEGACY_INSTALL_DIR: /__w/alien/alien/alienlegacy_install
+  ALIENLEGACY_SOURCE_DIR: /__w/alien/alien/alienlegacy
   # Arccon
   ARCCON_BUILD_DIR: /__w/alien/alien/arccon_build
   ARCCON_INSTALL_DIR: /__w/alien/alien/arccon_install
@@ -18,6 +22,14 @@ env:
   ARCCORE_BUILD_DIR: /__w/alien/alien/arccore_build
   ARCCORE_INSTALL_DIR: /__w/alien/alien/arccore_install
   ARCCORE_SOURCE_DIR: /__w/alien/alien/arccore
+  # Dependencies
+  DEPENDENCIES_BUILD_DIR: /__w/alien/alien/dependencies_build
+  DEPENDENCIES_INSTALL_DIR: /__w/alien/alien/dependencies_install
+  DEPENDENCIES_SOURCE_DIR: /__w/alien/alien/dependencies
+  # Axlstar
+  AXLSTAR_BUILD_DIR: /__w/alien/alien/axlstar_build
+  AXLSTAR_INSTALL_DIR: /__w/alien/alien/axlstar_install
+  AXLSTAR_SOURCE_DIR: /__w/alien/alien/axlstar
   # ccache
   CC_KEY_PREFIX: ifpen-el7-foss-2018b
   CCACHE_COMPRESS: true
