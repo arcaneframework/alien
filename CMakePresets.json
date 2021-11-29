@@ -14,6 +14,33 @@
             "warnings": {
                 "uninitialized": true
             }
+        },
+        {
+            "name": "full",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/full",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "ALIEN_DEFAULT_OPTIONS": "ON",
+                "ALIENDEV_EMBEDDED": "ON",
+                "ALIEN_PLUGIN_HYPRE": "ON",
+                "ALIEN_PLUGIN_PETSC": "ON",
+                "ALIEN_UNIT_TESTS": "ON"
+            }
+        },
+        {
+            "name": "minimal-ccache",
+            "inherits": "minimal",
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER_LAUNCHER": "ccache"
+            }
+        },
+        {
+            "name": "full-ccache",
+            "inherits": "full",
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER_LAUNCHER": "ccache"
+            }
         }
     ],
     "buildPresets": [
