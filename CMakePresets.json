@@ -1,0 +1,25 @@
+{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "minimal",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/minimal",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfos",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "ALIEN_DEFAULT_OPTIONS": "OFF",
+                "ALIENDEV_EMBEDDED": "ON"
+            },
+            "warnings": {
+                "uninitialized": true
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "minimal",
+            "configurePreset": "minimal"
+        }
+    ]
+}
