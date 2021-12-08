@@ -20,10 +20,13 @@ add_subdirectory(alien/kernels/composite)
 add_subdirectory(alien/kernels/dok)
 add_subdirectory(alien/kernels/redistributor)
 add_subdirectory(alien/kernels/simple_csr)
-add_subdirectory(alien/kernels/sycl)
 add_subdirectory(alien/index_manager)
 
-find_package(hipSYCL CONFIG REQUIRED)
+IF(ALIEN_USE_SYCL)
+  find_package(hipSYCL CONFIG REQUIRED)
+  add_subdirectory(alien/kernels/sycl)
+endif()
+
 
 add_library(alien_core
         alien/Alien.h
@@ -120,15 +123,19 @@ target_link_libraries(alien_core PUBLIC
                       alien_kernel_dok
                       alien_kernel_composite
                       alien_kernel_redistributor
-                      alien_kernel_simplecsr
-                      alien_kernel_sycl)
-                      
+                      alien_kernel_simplecsr)
+
+
 target_link_libraries(alien_core PUBLIC alien_index_manager)
 
 set_property(TARGET alien_core PROPERTY CXX_STANDARD 17)
 
-target_compile_options(alien_core PRIVATE "--gcc-toolchain=${GCCCORE_ROOT}")
-add_sycl_to_target(TARGET alien_core)
+IF(ALIEN_USE_SYCL)
+  target_link_libraries(alien_core PUBLIC alien_kernel_sycl)
+  target_compile_options(alien_core PRIVATE "--gcc-toolchain=${GCCCORE_ROOT}")
+  add_sycl_to_target(TARGET alien_core)
+ENDIF()
+
 
 target_link_libraries(alien_core PUBLIC
                       Arccore::arccore_trace

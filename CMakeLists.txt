@@ -47,6 +47,7 @@ option(ALIEN_EXPAND_TESTS "Run unit tests one by one" OFF)
 
 option(ALIEN_USE_HDF5 "Enable HDF5 export" OFF)
 option(ALIEN_USE_LIBXML2 "Enable xml export" OFF)
+option(ALIEN_USE_SYCL "Whether or not to compile SYCL backend" OFF)
 option(ALIEN_DEFAULT_OPTIONS "Enable best effort to find optional dependencies" ON)
 
 option(ALIEN_GENERATE_DOCUMENTATION "Generate API documentation" OFF)
@@ -56,7 +57,6 @@ option(ALIEN_PLUGIN_HYPRE "Whether or not to compile Hypre backend" OFF)
 option(ALIEN_PLUGIN_PETSC "Whether or not to compile PETSc backend" OFF)
 option(ALIEN_PLUGIN_SUPERLU "Whether or not to compile SuperLU backend" OFF)
 option(ALIEN_PLUGIN_TRILINOS "Whether or not to compile Trilinos backend" OFF)
-option(ALIEN_PLUGIN_SYCL "Whether or not to compile SYCL backend" OFF)
 
 get_filename_component(_fp_framework "framework/CMake" REALPATH)
 if (EXISTS ${_fp_framework})
@@ -170,10 +170,6 @@ endif (ALIEN_PLUGIN_SUPERLU)
 if (ALIEN_PLUGIN_TRILINOS)
     add_subdirectory(plugins/trilinos)
 endif (ALIEN_PLUGIN_TRILINOS)
-
-if (ALIEN_PLUGIN_SYCL)
-    add_subdirectory(plugins/sycl/src)
-endif (ALIEN_PLUGIN_SYCL)
 
 if (ALIEN_EXAMPLES)
     add_subdirectory(examples)

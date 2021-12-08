@@ -39,11 +39,13 @@
 #include <alien/kernels/simple_csr/algebra/SimpleCSRLinearAlgebra.h>
 #include <alien/kernels/simple_csr/algebra/SimpleCSRInternalLinearAlgebra.h>
 
+#ifdef ALIEN_USE_SYCL
 #include <alien/kernels/sycl/SYCLPrecomp.h>
 #include <alien/kernels/sycl/data/SYCLBEllPackMatrix.h>
 #include <alien/kernels/sycl/data/SYCLVector.h>
 #include <alien/kernels/sycl/algebra/SYCLLinearAlgebra.h>
 #include <alien/kernels/sycl/algebra/SYCLInternalLinearAlgebra.h>
+#endif
 
 #include <alien/expression/krylov/BiCGStab.h>
 #include <alien/expression/krylov/DiagPreconditioner.h>
@@ -467,8 +469,12 @@ int main(int argc, char** argv)
   }
   if(kernel.compare("sycl")==0)
   {
+#ifdef ALIEN_USE_SYCL
     Alien::SYCLInternalLinearAlgebra alg;
     run(alg) ;
+#else
+    trace_mng->info()<<"SYCL BackEnd not available";
+#endif
   }
 
   timer.printInfo() ;

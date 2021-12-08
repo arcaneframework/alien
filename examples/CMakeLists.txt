@@ -18,6 +18,7 @@ find_package(MPI REQUIRED)
 find_package(GTest REQUIRED)
 find_package(Boost COMPONENTS program_options)
 
+if(ALIEN_USE_SYCL)
 add_executable(sycl_example.exe test_sycl.cpp)
 
 target_link_libraries(sycl_example.exe PUBLIC
@@ -25,11 +26,14 @@ target_link_libraries(sycl_example.exe PUBLIC
                       Alien::alien_semantic_ref
                       arcconpkg_MPI
                       ${Boost_LIBRARIES})
-
+endif()
 
 
 add_executable(krylov_example.exe test_krylov.cpp)
-
+if(ALIEN_USE_SYCL)
+  target_compile_definitions(krylov_example.exe PUBLIC -DALIEN_USE_SYCL)
+endif()
+ 
 target_link_libraries(krylov_example.exe PUBLIC
                       Alien::alien_core
                       Alien::alien_semantic_ref
