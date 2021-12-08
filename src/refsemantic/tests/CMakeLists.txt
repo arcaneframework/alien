@@ -34,11 +34,10 @@ add_executable(ref.gtest.seq main.cpp
         TestCompositeMatrix.cc
         TestBlockMatrix.cc
         TestVBlockMatrix.cc
-        TestRedistributor.cc)
+        TestRedistributor.cc
+        TestMVExpr.cc
+        TestMVSYCL.cc)
 
-if (ALIEN_MV_EXPR)
-    target_sources(ref.gtest.seq TestMVExpr.cc)
-endif ()
 
 target_link_libraries(ref.gtest.mpi PRIVATE
         GTest::GTest

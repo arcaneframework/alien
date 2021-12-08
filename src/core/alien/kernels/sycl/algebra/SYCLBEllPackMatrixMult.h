@@ -16,39 +16,33 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/*
-
-
-
-*/
-
 #pragma once
 
-#include <alien/kernels/simple_csr/SimpleCSRMatrix.h>
-#include <alien/kernels/simple_csr/SimpleCSRPrecomp.h>
-#include <alien/kernels/simple_csr/SimpleCSRVector.h>
+#include <alien/kernels/sycl/SYCLPrecomp.h>
+#include <alien/kernels/sycl/data/SYCLBEllPackMatrix.h>
+#include <alien/kernels/sycl/data/SYCLVector.h>
 
-namespace Alien::SimpleCSRInternal
+namespace Alien::SYCLInternal
 {
 
-/*@! Classe amie de SimpleCSRMatrix pour externaliser plus rapidement (mais moins
+/*@! Classe amie de SYCLMatrix pour externaliser plus rapidement (mais moins
  * proprement)
  * le produit matrice vecteur */
 template <typename ValueT>
-class SimpleCSRMatrixMultT
+class SYCLBEllPackMatrixMultT
 {
  public:
   //! Template parameter
   typedef ValueT ValueType;
-  typedef SimpleCSRMatrix<ValueType> MatrixType;
-  typedef SimpleCSRVector<ValueType> VectorType;
+  typedef SYCLBEllPackMatrix<ValueType> MatrixType;
+  typedef SYCLVector<ValueType> VectorType;
 
  public:
   //! Constructeur de la classe
-  SimpleCSRMatrixMultT(const MatrixType& matrix);
+  SYCLBEllPackMatrixMultT(const MatrixType& matrix);
 
   //! Destructeur de la classe
-  virtual ~SimpleCSRMatrixMultT() {}
+  virtual ~SYCLBEllPackMatrixMultT() {}
 
  public:
   //! Matrix vector product
@@ -56,7 +50,6 @@ class SimpleCSRMatrixMultT
   void mult(const UniqueArray<Real>& x, UniqueArray<Real>& y) const;
 
   void computeInvDiag(VectorType& y) const;
-
  private:
   void _parallelMult(const VectorType& x, VectorType& y) const;
   void _parallelMult(const UniqueArray<Real>& x, UniqueArray<Real>& y) const;
@@ -64,18 +57,10 @@ class SimpleCSRMatrixMultT
   void _seqMult(const VectorType& x, VectorType& y) const;
   void _seqMult(const UniqueArray<Real>& x, UniqueArray<Real>& y) const;
 
-  void _parallelMultBlock(const VectorType& x, VectorType& y) const;
-
-  void _seqMultBlock(const VectorType& x, VectorType& y) const;
-
-  void _parallelMultVariableBlock(const VectorType& x, VectorType& y) const;
-
-  void _seqMultVariableBlock(const VectorType& x, VectorType& y) const;
-
  private:
   const MatrixType& m_matrix_impl;
 };
 
-} // namespace Alien::SimpleCSRInternal
+} // namespace Alien::SYCLInternal
 
-#include "SimpleCSRMatrixMultT.h"
+#include "SYCLBEllPackMatrixMultT.h"

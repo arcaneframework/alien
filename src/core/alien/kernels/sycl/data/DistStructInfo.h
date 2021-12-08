@@ -18,25 +18,19 @@
 
 #pragma once
 
-#include "alien/distribution/MatrixDistribution.h"
-#include "SendRecvOp.h" // FIXME: remove
-#include "SimpleCSRPrecomp.h"
 #include <cstdlib>
 #include <unordered_set>
 
-namespace Alien
-{
+#include "alien/distribution/MatrixDistribution.h"
+#include "alien/kernels/sycl/SYCLPrecomp.h"
+#include "alien/kernels/sycl/data/SendRecvOp.h"
 
-class VBlock;
-
-}
 
 /*---------------------------------------------------------------------------*/
 
-namespace Alien::SimpleCSRInternal
+namespace Alien::SYCLInternal
 {
-
-class CSRStructInfo;
+class BaseBEllPackStructInfo;
 
 /*---------------------------------------------------------------------------*/
 
@@ -55,13 +49,20 @@ class ALIEN_EXPORT DistStructInfo
     return *this;
   }
 
-  void compute(Integer nproc, ConstArrayView<Integer> offset, Integer my_rank,
-               IMessagePassingMng* parallel_mng, const CSRStructInfo& profile,
+  void compute(Integer nproc,
+               ConstArrayView<Integer> offset,
+               Integer my_rank,
+               IMessagePassingMng* parallel_mng,
+               const BaseBEllPackStructInfo& profile,
                ITraceMng* trace = NULL);
 
-  void compute(Integer nproc, ConstArrayView<Integer> offset, Integer my_rank,
-               IMessagePassingMng* parallel_mng, const CSRStructInfo& profile,
-               const VBlock* block_sizes, const MatrixDistribution& dist, ITraceMng* trace = NULL);
+  void compute(Integer nproc,
+               ConstArrayView<Integer> offset,
+               Integer my_rank,
+               IMessagePassingMng* parallel_mng,
+               const BaseBEllPackStructInfo& profile,
+               const VBlock* block_sizes,
+               const MatrixDistribution& dist, ITraceMng* trace = NULL);
 
   Integer domainId(Integer nproc, ConstArrayView<Integer> offset, Integer id)
   {
@@ -94,6 +95,6 @@ class ALIEN_EXPORT DistStructInfo
 
 /*---------------------------------------------------------------------------*/
 
-} // namespace Alien::SimpleCSRInternal
+} // namespace Alien::SYCLInternal
 
 /*---------------------------------------------------------------------------*/

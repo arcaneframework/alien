@@ -41,6 +41,7 @@ Project(Alien
 
 option(ALIEN_COMPONENT_RefSemantic "Whether or not to compile RefSemantic package" ON)
 option(ALIEN_COMPONENT_MoveSemantic "Whether or not to compile MoveSemantic package" ON)
+option(ALIEN_EXAMPLES "Whether or not to compile examples" ON)
 option(ALIEN_UNIT_TESTS "Whether or not to enable unit tests" OFF)
 option(ALIEN_EXPAND_TESTS "Run unit tests one by one" OFF)
 
@@ -55,6 +56,7 @@ option(ALIEN_PLUGIN_HYPRE "Whether or not to compile Hypre backend" OFF)
 option(ALIEN_PLUGIN_PETSC "Whether or not to compile PETSc backend" OFF)
 option(ALIEN_PLUGIN_SUPERLU "Whether or not to compile SuperLU backend" OFF)
 option(ALIEN_PLUGIN_TRILINOS "Whether or not to compile Trilinos backend" OFF)
+option(ALIEN_PLUGIN_SYCL "Whether or not to compile SYCL backend" OFF)
 
 get_filename_component(_fp_framework "framework/CMake" REALPATH)
 if (EXISTS ${_fp_framework})
@@ -156,15 +158,26 @@ add_subdirectory(src)
 if (ALIEN_PLUGIN_HYPRE)
     add_subdirectory(plugins/hypre)
 endif (ALIEN_PLUGIN_HYPRE)
+
 if (ALIEN_PLUGIN_PETSC)
     add_subdirectory(plugins/petsc)
 endif (ALIEN_PLUGIN_PETSC)
+
 if (ALIEN_PLUGIN_SUPERLU)
     add_subdirectory(plugins/superlu)
 endif (ALIEN_PLUGIN_SUPERLU)
+
 if (ALIEN_PLUGIN_TRILINOS)
     add_subdirectory(plugins/trilinos)
 endif (ALIEN_PLUGIN_TRILINOS)
+
+if (ALIEN_PLUGIN_SYCL)
+    add_subdirectory(plugins/sycl/src)
+endif (ALIEN_PLUGIN_SYCL)
+
+if (ALIEN_EXAMPLES)
+    add_subdirectory(examples)
+endif ()
 
 add_subdirectory(docs)
 

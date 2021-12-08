@@ -66,6 +66,21 @@ SimpleCSRInternalLinearAlgebra::~SimpleCSRInternalLinearAlgebra() {}
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
+SimpleCSRInternalLinearAlgebra::ResourceType const&
+SimpleCSRInternalLinearAlgebra::resource(Matrix const& A) {
+  return A.distribution().rowDistribution() ;
+}
+
+void SimpleCSRInternalLinearAlgebra::allocate(ResourceType const& distribution,Vector& v)
+{
+  v.init(distribution,true) ;
+}
+
+void SimpleCSRInternalLinearAlgebra::free(Vector& v)
+{
+  v.clear() ;
+}
+
 
 Real SimpleCSRInternalLinearAlgebra::norm0(const CSRVector& vx ALIEN_UNUSED_PARAM) const
 {
@@ -96,6 +111,13 @@ void SimpleCSRInternalLinearAlgebra::mult(
 const CSRMatrix& ma, const CSRVector& vx, CSRVector& vr) const
 {
   Internal::SimpleCSRMatrixMultT<Real>(ma).mult(vx, vr);
+}
+
+
+void SimpleCSRInternalLinearAlgebra::computeInvDiag(
+const CSRMatrix& ma, CSRVector& vr) const
+{
+  Internal::SimpleCSRMatrixMultT<Real>(ma).computeInvDiag(vr);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -131,10 +153,9 @@ Real SimpleCSRInternalLinearAlgebra::dot(const CSRVector& vx, const CSRVector& v
 
 /*---------------------------------------------------------------------------*/
 
-void SimpleCSRInternalLinearAlgebra::scal(Real alpha ALIEN_UNUSED_PARAM, CSRVector& x ALIEN_UNUSED_PARAM) const
+void SimpleCSRInternalLinearAlgebra::scal(Real alpha, CSRVector& vx) const
 {
-  throw NotImplementedException(
-  A_FUNCINFO, "SimpleCSRLinearAlgebra::aypx not implemented");
+  CBLASMPIKernel::scal(vx.distribution(), alpha, vx);
 }
 
 void SimpleCSRInternalLinearAlgebra::diagonal(
@@ -150,11 +171,16 @@ void SimpleCSRInternalLinearAlgebra::reciprocal(CSRVector& x ALIEN_UNUSED_PARAM)
   A_FUNCINFO, "SimpleCSRLinearAlgebra::aypx not implemented");
 }
 
-void SimpleCSRInternalLinearAlgebra::pointwiseMult(const CSRVector& x ALIEN_UNUSED_PARAM,
-                                                   const CSRVector& y ALIEN_UNUSED_PARAM, CSRVector& w ALIEN_UNUSED_PARAM) const
+void SimpleCSRInternalLinearAlgebra::pointwiseMult(const CSRVector& vx,
+                                                   const CSRVector& vy,
+                                                   CSRVector& vz) const
 {
-  throw NotImplementedException(
-  A_FUNCINFO, "SimpleCSRLinearAlgebra::aypx not implemented");
+  CBLASMPIKernel::pointwiseMult(vx.distribution(), vx,vy,vz);
+}
+
+void SimpleCSRInternalLinearAlgebra::assign(CSRVector& vx, Real alpha) const
+{
+  CBLASMPIKernel::assign(vx.distribution(), alpha, vx);
 }
 
 SimpleCSRInternalLinearAlgebraExpr::SimpleCSRInternalLinearAlgebraExpr()

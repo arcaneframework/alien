@@ -22,25 +22,25 @@
 
 #include <alien/core/backend/IInternalLinearAlgebraExprT.h>
 #include <alien/core/backend/IInternalLinearAlgebraT.h>
-#include <alien/kernels/simple_csr/SimpleCSRBackEnd.h>
-
-#include <alien/distribution/VectorDistribution.h>
-#include <alien/distribution/MatrixDistribution.h>
+#include <alien/kernels/sycl/SYCLBackEnd.h>
 
 #include <alien/utils/ExceptionUtils.h>
-
 /*---------------------------------------------------------------------------*/
 
 namespace Alien
 {
+  namespace SYCLInternal {
+    class KernelInternal ;
+  }
 
-typedef AlgebraTraits<BackEnd::tag::simplecsr>::matrix_type CSRMatrix;
-typedef AlgebraTraits<BackEnd::tag::simplecsr>::vector_type CSRVector;
+typedef AlgebraTraits<BackEnd::tag::sycl>::matrix_type SYCLMatrixType;
+typedef AlgebraTraits<BackEnd::tag::sycl>::vector_type SYCLVectorType;
 
-class ALIEN_EXPORT SimpleCSRInternalLinearAlgebra : public IInternalLinearAlgebra<CSRMatrix, CSRVector>
+class ALIEN_EXPORT SYCLInternalLinearAlgebra : public IInternalLinearAlgebra<SYCLMatrixType, SYCLVectorType>
 {
  public:
-  typedef BackEnd::tag::simplecsr BackEndType ;
+
+  typedef BackEnd::tag::sycl BackEndType ;
 
   typedef VectorDistribution ResourceType ;
 
@@ -55,8 +55,8 @@ class ALIEN_EXPORT SimpleCSRInternalLinearAlgebra : public IInternalLinearAlgebr
   } ;
 
 
-  SimpleCSRInternalLinearAlgebra();
-  virtual ~SimpleCSRInternalLinearAlgebra();
+  SYCLInternalLinearAlgebra();
+  virtual ~SYCLInternalLinearAlgebra();
 
  public:
   // IInternalLinearAlgebra interface.
@@ -72,18 +72,15 @@ class ALIEN_EXPORT SimpleCSRInternalLinearAlgebra : public IInternalLinearAlgebr
   void diagonal(const Matrix& a, Vector& x) const;
   void reciprocal(Vector& x) const;
   void pointwiseMult(const Vector& x, const Vector& y, Vector& w) const;
-  void assign(Vector& x, Real alpha) const;
 
   void computeInvDiag(const Matrix& a, Vector& inv_diag) const;
+
+  void assign(Vector& x, Real alpha) const;
 
   template<typename LambdaT>
   void assign(Vector& x, LambdaT const& lambda) const
   {
-    auto x_ptr = x.getDataPtr() ;
-    for (Integer i = 0; i < x.getAllocSize(); ++i)
-    {
-      x_ptr[i] = lambda(i);
-    }
+    x.apply(lambda) ;
   }
 
   template <typename PrecondT>
@@ -113,14 +110,15 @@ class ALIEN_EXPORT SimpleCSRInternalLinearAlgebra : public IInternalLinearAlgebr
 
  private:
   // No member.
+  std::unique_ptr<SYCLInternal::KernelInternal> m_internal ;
 };
 
-class SimpleCSRInternalLinearAlgebraExpr
-: public IInternalLinearAlgebraExpr<CSRMatrix, CSRVector>
+class SYCLInternalLinearAlgebraExpr
+: public IInternalLinearAlgebraExpr<SYCLMatrixType, SYCLVectorType>
 {
  public:
-  SimpleCSRInternalLinearAlgebraExpr();
-  virtual ~SimpleCSRInternalLinearAlgebraExpr();
+  SYCLInternalLinearAlgebraExpr();
+  virtual ~SYCLInternalLinearAlgebraExpr();
 
  public:
   // IInternalLinearAlgebra interface.
@@ -150,6 +148,7 @@ class SimpleCSRInternalLinearAlgebraExpr
 
  private:
   // No member.
+  std::unique_ptr<SYCLInternal::KernelInternal> m_internal ;
 };
 
 } // namespace Alien

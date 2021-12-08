@@ -107,20 +107,61 @@ class SimpleCSRVector : public IVectorImpl
   template <typename E>
   SimpleCSRVector& operator=(E const& expr);
 
-  void init(const VectorDistribution& dist ALIEN_UNUSED_PARAM, const bool need_allocate)
+  void init(const VectorDistribution& dist, const bool need_allocate)
   {
     alien_debug([&] { cout() << "Initializing SimpleCSRVector " << this; });
-
-    if (this->vblock()) {
-      delete m_vblock;
-      m_vblock = new VBlockImpl(*this->vblock(), this->distribution());
+    if(this->m_multi_impl)
+    {
+      if (this->vblock()) {
+        delete m_vblock;
+        m_vblock = new VBlockImpl(*this->vblock(), this->distribution());
+      }
+      m_local_size = this->scalarizedLocalSize();
     }
-    m_local_size = this->scalarizedLocalSize();
+    else
+    {
+      // Not associated vector
+      m_own_distribution = dist ;
+      m_local_size = m_own_distribution.localSize() ;
+    }
     m_values.resize(m_local_size);
     if (need_allocate) {
       m_values.fill(ValueT());
     }
   }
+
+  const VectorDistribution& distribution() const
+  {
+    if(this->m_multi_impl)
+      return IVectorImpl::distribution() ;
+    else
+      return m_own_distribution ;
+  }
+
+  Arccore::Integer scalarizedLocalSize() const
+  {
+    if(this->m_multi_impl)
+      return IVectorImpl::scalarizedLocalSize() ;
+    else
+      return m_own_distribution.localSize() ;
+  }
+
+  Arccore::Integer scalarizedGlobalSize() const
+  {
+    if(this->m_multi_impl)
+      return IVectorImpl::scalarizedGlobalSize() ;
+    else
+      return m_own_distribution.globalSize() ;
+  }
+
+  Arccore::Integer scalarizedOffset() const
+  {
+    if(this->m_multi_impl)
+      return IVectorImpl::scalarizedOffset() ;
+    else
+      return m_own_distribution.offset() ;
+  }
+
 
   const VBlockImpl& vblockImpl() const { return *m_vblock; }
 
@@ -146,6 +187,8 @@ class SimpleCSRVector : public IVectorImpl
   mutable UniqueArray<ValueT> m_values;
   Integer m_local_size = 0;
   mutable VBlockImpl* m_vblock = nullptr;
+  VectorDistribution m_own_distribution ;
+
 };
 
 /*---------------------------------------------------------------------------*/

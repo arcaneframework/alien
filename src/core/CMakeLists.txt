@@ -20,7 +20,10 @@ add_subdirectory(alien/kernels/composite)
 add_subdirectory(alien/kernels/dok)
 add_subdirectory(alien/kernels/redistributor)
 add_subdirectory(alien/kernels/simple_csr)
+add_subdirectory(alien/kernels/sycl)
 add_subdirectory(alien/index_manager)
+
+find_package(hipSYCL CONFIG REQUIRED)
 
 add_library(alien_core
         alien/Alien.h
@@ -114,19 +117,24 @@ add_library(alien_core
 
 target_link_libraries(alien_core PUBLIC alien_utils alien_data)
 target_link_libraries(alien_core PUBLIC
-        alien_kernel_dok
-        alien_kernel_composite
-        alien_kernel_redistributor
-        alien_kernel_simplecsr)
+                      alien_kernel_dok
+                      alien_kernel_composite
+                      alien_kernel_redistributor
+                      alien_kernel_simplecsr
+                      alien_kernel_sycl)
+                      
 target_link_libraries(alien_core PUBLIC alien_index_manager)
 
 set_property(TARGET alien_core PROPERTY CXX_STANDARD 17)
 
+target_compile_options(alien_core PRIVATE "--gcc-toolchain=${GCCCORE_ROOT}")
+add_sycl_to_target(TARGET alien_core)
+
 target_link_libraries(alien_core PUBLIC
-        Arccore::arccore_trace
-        Arccore::arccore_collections
-        Arccore::arccore_base
-        Arccore::arccore_message_passing_mpi)
+                      Arccore::arccore_trace
+                      Arccore::arccore_collections
+                      Arccore::arccore_base
+                      Arccore::arccore_message_passing_mpi)
 
 find_package(Boost COMPONENTS program_options REQUIRED)
 

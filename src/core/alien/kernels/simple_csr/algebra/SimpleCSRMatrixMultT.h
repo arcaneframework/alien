@@ -448,6 +448,24 @@ const VectorType& x_impl, VectorType& y_impl) const
   }
 }
 
+
+template <typename ValueT>
+void SimpleCSRMatrixMultT<ValueT>::computeInvDiag(VectorType& y) const
+{
+  Real* y_ptr = y.getDataPtr();
+  ConstArrayView<Real> matrix = m_matrix_impl.m_matrix.getValues();
+  ConstArrayView<Integer> cols = m_matrix_impl.m_matrix.getCSRProfile().getCols();
+  ConstArrayView<Integer> row_offset =
+  m_matrix_impl.m_matrix.getCSRProfile().getRowOffset();
+  for (Integer irow = 0; irow < m_matrix_impl.m_local_size; ++irow) {
+    for (Integer j = row_offset[irow]; j < row_offset[irow + 1]; ++j)
+    {
+      if(cols[j]==irow)
+        y_ptr[irow] = 1./matrix[j];
+    }
+  }
+}
+
 /*---------------------------------------------------------------------------*/
 
 } // namespace Alien::SimpleCSRInternal
