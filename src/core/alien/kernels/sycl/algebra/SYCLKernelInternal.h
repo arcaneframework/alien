@@ -74,7 +74,7 @@ class KernelInternal
                  {
                    auto access_y = y.template get_access<cl::sycl::access::mode::read_write>(cgh);
 
-                   cgh.parallel_for<class vector_axpy>(cl::sycl::range<1>{m_total_threads}, [=] (cl::sycl::item<1> itemId)
+                   cgh.parallel_for<class vector_apply>(cl::sycl::range<1>{m_total_threads}, [=] (cl::sycl::item<1> itemId)
                                                       {
                                                          auto id = itemId.get_id(0);
                                                          for (auto i = id; i < y.get_count(); i += itemId.get_range()[0])
@@ -387,8 +387,9 @@ class KernelInternal
              {
                auto access_x = x.template get_access<cl::sycl::access::mode::read>(cgh);
                auto access_y = y.template get_access<cl::sycl::access::mode::read>(cgh);
-               auto access_w = w.template get_access<cl::sycl::access::mode::read_write>(cgh);
-
+               //auto access_w = w.template get_access<cl::sycl::access::mode::write>(cgh);
+               auto access_w = cl::sycl::accessor { w, cgh, cl::sycl::write_only, cl::sycl::property::no_init{}};
+               //auto access_w = w.get_access(cgh,cl::sycl::write_only, cl::sycl::property::no_init{});
                cgh.parallel_for<class vector_dot>(cl::sycl::range<1>{m_total_threads}, [=] (cl::sycl::item<1> itemId)
                                                   {
                                                      auto id = itemId.get_id(0);

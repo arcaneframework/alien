@@ -47,8 +47,9 @@ int main(int argc, char** argv)
   options_description desc;
   desc.add_options()
       ("help", "produce help")
-      ("size",    value<int>()->default_value(16),  "size")
-      ("nb-test", value<int>()->default_value(1),    "nb tests") ;
+      ("size",    value<int>()->default_value(16),            "size")
+      ("nb-test", value<int>()->default_value(1),             "nb tests")
+      ("test",    value<std::string>()->default_value("all"), "test") ;
 
   variables_map vm;
   store(parse_command_line(argc, argv, desc), vm);
@@ -74,8 +75,8 @@ int main(int argc, char** argv)
   using namespace Alien;
   //Alien::ITraceMng* trace_mng = AlienTest::Environment::traceMng();
 
-  int nb_test = vm["nb-test"].as<int>() ;
-
+  std::string test    = vm["test"].as<std::string>() ;
+  int nb_test         = vm["nb-test"].as<int>() ;
   Integer global_size = vm["size"].as<int>() ;
 
   const Alien::Space s(global_size, "MySpace");
@@ -130,18 +131,26 @@ int main(int argc, char** argv)
 
   Alien::SimpleCSRLinearAlgebra csr_alg;
   Alien::SYCLLinearAlgebra      sycl_alg;
-
+  if( (test.compare("all") == 0 ) || (test.compare("copy")==0 ))
   {
     trace_mng->info() <<"TEST COPY : r = y";
-    for(int i=0;i<nb_test;++i)
     {
-      SentryType s(timer,"CSR-COPY") ;
-      csr_alg.copy(y,r) ;
+      auto const& csr_y = y.impl()->get<Alien::BackEnd::tag::simplecsr>() ;
+      auto&       csr_r = r.impl()->get<Alien::BackEnd::tag::simplecsr>() ;
+      for(int i=0;i<nb_test;++i)
+      {
+        SentryType s(timer,"CSR-COPY") ;
+        csr_alg.copy(y,r) ;
+      }
     }
-    for(int i=0;i<nb_test;++i)
     {
-      SentryType s(timer,"SYLC-COPY") ;
-      sycl_alg.copy(y,r) ;
+      auto const& sycl_y = y.impl()->get<Alien::BackEnd::tag::sycl>() ;
+      auto&       sycl_r = r.impl()->get<Alien::BackEnd::tag::sycl>() ;
+      for(int i=0;i<nb_test;++i)
+      {
+        SentryType s(timer,"SYLC-COPY") ;
+        sycl_alg.copy(y,r) ;
+      }
     }
     {
       Alien::LocalVectorReader reader(r);
@@ -152,17 +161,26 @@ int main(int argc, char** argv)
     }
   }
 
+  if( (test.compare("all") == 0 ) || (test.compare("axpy")==0 ))
   {
     trace_mng->info() <<"TEST AXPY : y += a*x ";
-    for(int i=0;i<nb_test;++i)
     {
-      SentryType s(timer,"CSR-AXPY") ;
-      csr_alg.axpy(1.,x,y) ;
+      auto const& csr_x = x.impl()->get<Alien::BackEnd::tag::simplecsr>() ;
+      auto&       csr_y = y.impl()->get<Alien::BackEnd::tag::simplecsr>() ;
+      for(int i=0;i<nb_test;++i)
+      {
+        SentryType s(timer,"CSR-AXPY") ;
+        csr_alg.axpy(1.,x,y) ;
+      }
     }
-    for(int i=0;i<nb_test;++i)
     {
-      SentryType s(timer,"SYCL-AXPY") ;
-      sycl_alg.axpy(1.,x,y) ;
+      auto const& sycl_x = x.impl()->get<Alien::BackEnd::tag::sycl>() ;
+      auto&       sycl_y = y.impl()->get<Alien::BackEnd::tag::sycl>() ;
+      for(int i=0;i<nb_test;++i)
+      {
+        SentryType s(timer,"SYCL-AXPY") ;
+        sycl_alg.axpy(1.,x,y) ;
+      }
     }
 
     {
@@ -174,6 +192,7 @@ int main(int argc, char** argv)
     }
   }
 
+  if( (test.compare("all") == 0 ) || (test.compare("dot")==0 ))
   {
     trace_mng->info() <<"TEST DOT : dot(x,y) ";
     Real x_dot_y_ref = 0. ;
@@ -185,52 +204,45 @@ int main(int argc, char** argv)
     }
     Real x_dot_y = 0. ;
 
-    for(int i=0;i<nb_test;++i)
     {
-      SentryType s(timer,"CSR-DOT") ;
-      x_dot_y = csr_alg.dot(x,y) ;
+      auto const& csr_x = x.impl()->get<Alien::BackEnd::tag::simplecsr>() ;
+      auto const& csr_y = y.impl()->get<Alien::BackEnd::tag::simplecsr>() ;
+      for(int i=0;i<nb_test;++i)
+      {
+        SentryType s(timer,"CSR-DOT") ;
+        x_dot_y = csr_alg.dot(x,y) ;
+      }
     }
-    for(int i=0;i<nb_test;++i)
     {
-      SentryType s(timer,"SYLC-DOT") ;
-      x_dot_y = sycl_alg.dot(x,y) ;
+      auto const& sycl_x = x.impl()->get<Alien::BackEnd::tag::sycl>() ;
+      auto const& sycl_y = y.impl()->get<Alien::BackEnd::tag::sycl>() ;
+      for(int i=0;i<nb_test;++i)
+      {
+        SentryType s(timer,"SYLC-DOT") ;
+        x_dot_y = sycl_alg.dot(x,y) ;
+      }
     }
     trace_mng->info() <<"SYCL DOT(X,Y) = "<<x_dot_y<<" REF="<<x_dot_y_ref;
   }
 
+  if( (test.compare("all") == 0 ) || (test.compare("mult")==0 ))
   {
     trace_mng->info() <<"TEST SPMV : y = A*x ";
-    for(int i=0;i<nb_test;++i)
     {
-      {
-        Alien::LocalVectorWriter writer(x);
-        for (Integer i = 0; i < local_size; ++i)
-          writer[i] = i;
-      }
-      {
-        Alien::LocalVectorWriter writer(y);
-        for (Integer i = 0; i < local_size; ++i)
-          writer[i] = 0.;
-      }
-
+      auto const& csr_A = A.impl()->get<Alien::BackEnd::tag::simplecsr>() ;
+      auto const& csr_x = x.impl()->get<Alien::BackEnd::tag::simplecsr>() ;
+      auto&       csr_y = y.impl()->get<Alien::BackEnd::tag::simplecsr>() ;
+      for(int i=0;i<nb_test;++i)
       {
         SentryType s(timer,"CSR-SPMV") ;
         csr_alg.mult(A,x,y) ;
       }
     }
-    for(int i=0;i<nb_test;++i)
     {
-      {
-        Alien::LocalVectorWriter writer(x);
-        for (Integer i = 0; i < local_size; ++i)
-          writer[i] = i;
-      }
-      {
-        Alien::LocalVectorWriter writer(y);
-        for (Integer i = 0; i < local_size; ++i)
-          writer[i] = 0.;
-      }
-
+      auto const& sycl_A = A.impl()->get<Alien::BackEnd::tag::sycl>() ;
+      auto const& sycl_x = x.impl()->get<Alien::BackEnd::tag::sycl>() ;
+      auto&       sycl_y = y.impl()->get<Alien::BackEnd::tag::sycl>() ;
+      for(int i=0;i<nb_test;++i)
       {
         SentryType s(timer,"SYLC-SPMV") ;
         sycl_alg.mult(A,x,y) ;

@@ -36,7 +36,8 @@ namespace Alien
 typedef AlgebraTraits<BackEnd::tag::sycl>::matrix_type SYCLMatrixType;
 typedef AlgebraTraits<BackEnd::tag::sycl>::vector_type SYCLVectorType;
 
-class ALIEN_EXPORT SYCLInternalLinearAlgebra : public IInternalLinearAlgebra<SYCLMatrixType, SYCLVectorType>
+class ALIEN_EXPORT SYCLInternalLinearAlgebra
+: public IInternalLinearAlgebra<SYCLMatrixType, SYCLVectorType>
 {
  public:
 
@@ -81,6 +82,7 @@ class ALIEN_EXPORT SYCLInternalLinearAlgebra : public IInternalLinearAlgebra<SYC
   void assign(Vector& x, LambdaT const& lambda) const
   {
     x.apply(lambda) ;
+    //m_internal->apply(lambda,x) ;
   }
 
   template <typename PrecondT>

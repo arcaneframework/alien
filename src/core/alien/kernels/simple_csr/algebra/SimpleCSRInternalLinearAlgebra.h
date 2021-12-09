@@ -37,7 +37,8 @@ namespace Alien
 typedef AlgebraTraits<BackEnd::tag::simplecsr>::matrix_type CSRMatrix;
 typedef AlgebraTraits<BackEnd::tag::simplecsr>::vector_type CSRVector;
 
-class ALIEN_EXPORT SimpleCSRInternalLinearAlgebra : public IInternalLinearAlgebra<CSRMatrix, CSRVector>
+class ALIEN_EXPORT SimpleCSRInternalLinearAlgebra
+: public IInternalLinearAlgebra<CSRMatrix, CSRVector>
 {
  public:
   typedef BackEnd::tag::simplecsr BackEndType ;
