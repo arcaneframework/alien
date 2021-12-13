@@ -29,6 +29,7 @@ Matrix::Matrix(const MultiMatrixImpl* multi_impl)
 : IMatrixImpl(multi_impl, AlgebraTraits<BackEnd::tag::ginkgo>::name())
 , gko::matrix::Csr<double, int>(
   gko::ReferenceExecutor::create(),
+  //gko::CudaExecutor::create(0, gko::OmpExecutor::create(),true),
   gko::dim<2>(multi_impl->rowSpace().size(), multi_impl->colSpace().size()))
 , data(gko::dim<2>{ (multi_impl->rowSpace().size(), multi_impl->colSpace().size()) })
 {

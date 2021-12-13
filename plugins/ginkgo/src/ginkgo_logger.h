@@ -29,6 +29,7 @@ ValueType get_first_element(const gko::matrix::Dense<ValueType>* mtx)
   return mtx->get_executor()->copy_val_to_host(mtx->get_const_values());
 }
 
+
 // Utility function which computes the norm of a Ginkgo gko::matrix::Dense
 // vector.
 template <typename ValueType>
@@ -40,7 +41,7 @@ const gko::matrix::Dense<ValueType>* b)
   // Initialize a result scalar containing the value 0.0.
   auto b_norm =
   gko::initialize<gko::matrix::Dense<gko::remove_complex<ValueType>>>(
-  { 0.0 }, exec);
+  {0.0}, exec);
   // Use the dense `compute_norm2` function to compute the norm.
   b->compute_norm2(gko::lend(b_norm));
   // Use the other utility function to return the norm contained in `b_norm`
@@ -51,8 +52,7 @@ const gko::matrix::Dense<ValueType>* b)
 // vector in order to print a table of real vs recurrent (internal to the
 // solvers) residual norms.
 template <typename ValueType>
-struct ResidualLogger : gko::log::Logger
-{
+struct ResidualLogger : gko::log::Logger {
   using RealValueType = gko::remove_complex<ValueType>;
   // Output the logger's data in a table format
   void write() const
@@ -114,8 +114,7 @@ struct ResidualLogger : gko::log::Logger
       // Add the norm to the `recurrent_norms` vector
       recurrent_norms.push_back(get_first_element(gko::lend(dense_norm)));
       // Otherwise, use the recurrent residual vector
-    }
-    else {
+    } else {
       auto dense_residual = gko::as<gko_dense>(residual);
       // Compute the residual vector's norm
       auto norm = compute_norm(gko::lend(dense_residual));
@@ -128,9 +127,9 @@ struct ResidualLogger : gko::log::Logger
       // Store the matrix's executor
       auto exec = matrix->get_executor();
       // Create a scalar containing the value 1.0
-      auto one = gko::initialize<gko_dense>({ 1.0 }, exec);
+      auto one = gko::initialize<gko_dense>({1.0}, exec);
       // Create a scalar containing the value -1.0
-      auto neg_one = gko::initialize<gko_dense>({ -1.0 }, exec);
+      auto neg_one = gko::initialize<gko_dense>({-1.0}, exec);
       // Instantiate a temporary result variable
       auto res = gko::clone(b);
       // Compute the real residual vector by calling apply on the system
@@ -141,8 +140,7 @@ struct ResidualLogger : gko::log::Logger
       // Compute the norm of the residual vector and add it to the
       // `real_norms` vector
       real_norms.push_back(compute_norm(gko::lend(res)));
-    }
-    else {
+    } else {
       // Add to the `real_norms` vector the value -1.0 if it could not be
       // computed
       real_norms.push_back(-1.0);
@@ -154,8 +152,7 @@ struct ResidualLogger : gko::log::Logger
       // Add the norm to the `implicit_norms` vector
       implicit_norms.push_back(
       std::sqrt(get_first_element(gko::lend(dense_norm))));
-    }
-    else {
+    } else {
       // Add to the `implicit_norms` vector the value -1.0 if it could not
       // be computed
       implicit_norms.push_back(-1.0);
@@ -168,9 +165,9 @@ struct ResidualLogger : gko::log::Logger
   // Construct the logger and store the system matrix and b vectors
   ResidualLogger(std::shared_ptr<const gko::Executor> exec,
                  const gko::LinOp* matrix, const gko_dense* b)
-  : gko::log::Logger(exec, gko::log::Logger::iteration_complete_mask)
-  , matrix{ matrix }
-  , b{ b }
+  : gko::log::Logger(exec, gko::log::Logger::iteration_complete_mask),
+  matrix{matrix},
+  b{b}
   {}
 
  private:
