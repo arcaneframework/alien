@@ -30,6 +30,7 @@ Vector::Vector(const MultiVectorImpl* multi_impl)
 : IVectorImpl(multi_impl, AlgebraTraits<BackEnd::tag::ginkgo>::name())
 , gko::matrix::Dense<double>(
   gko::ReferenceExecutor::create(),
+  //gko::CudaExecutor::create(0, gko::OmpExecutor::create(),true),
   gko::dim<2>(multi_impl->space().size(), 1))
 , data(gko::dim<2>(multi_impl->space().size(), 1))
 {
