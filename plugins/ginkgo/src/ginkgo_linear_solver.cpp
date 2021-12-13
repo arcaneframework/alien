@@ -18,6 +18,7 @@
 
 #include "matrix.h"
 #include "vector.h"
+#include "ginkgo_logger.h"
 
 #include <boost/timer.hpp>
 
@@ -36,6 +37,8 @@
 
 #include <memory>
 #include <core/log/convergence.hpp>
+
+
 
 namespace Alien
 {
@@ -161,38 +164,57 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   const double reduction_factor{ m_options.stopCriteriaValue() };
   using cg = gko::solver::Cg<double>;
   auto exec = gko::ReferenceExecutor::create();
+  //auto exec = gko::CudaExecutor::create(0, gko::OmpExecutor::create(),true);
 
   // Prepare the stopping criteria
   auto iter_stop = gko::stop::Iteration::build().with_max_iters(m_options.numIterationsMax()).on(exec);
   auto res_stop = gko::stop::ResidualNorm<double>::build().with_reduction_factor(reduction_factor).on(exec);
 
-  // Prepare logger
-  std::shared_ptr<const gko::log::Convergence<double>> logger = gko::log::Convergence<double>::create(exec);
-  iter_stop->add_logger(logger);
-  res_stop->add_logger(logger);
+  // Prepare Convergence logger
+  std::shared_ptr<const gko::log::Convergence<double>> conv_logger = gko::log::Convergence<double>::create(exec);
+  iter_stop->add_logger(conv_logger);
+  res_stop->add_logger(conv_logger);
 
   auto solver_factory =
-  cg::build().with_criteria(gko::share(iter_stop), gko::share(res_stop))
-  /*gko::stop::Iteration::build().with_max_iters(m_options.numIterationsMax()).on(exec),
-             gko::stop::ResidualNorm<double>::build().with_reduction_factor(reduction_factor).on(exec))*/
-  .on(exec);
+    cg::build()
+      .with_criteria(
+        gko::share(iter_stop),
+        gko::share(res_stop))
+    .on(exec);
 
+  /// --- MATRIX
   /* make_shared does not work : loses the pointer to the gko::executor ! */
   auto p = std::shared_ptr<const gko::matrix::Csr<double, int>>(A.internal(), [](auto* p) { std::cout << " Did not delete the shared_pointer ! " << std::endl; });
+
+  // Instantiate a ResidualLogger logger.
+  auto logger = std::make_shared<ResidualLogger<double>>(exec, gko::lend(p), gko::lend(b.internal()));
+
+  // Add the previously created logger to the solver factory. The logger
+  // will be automatically propagated to all solvers created from this factory.
+  solver_factory->add_logger(logger);
+
+  // generate the solver
   auto solver = solver_factory->generate(share(p));
 
+  // RHS b, solution x
   solver->apply(lend(b.internal()), lend(x.internal()));
 
+  // Print the table of the residuals obtained from the logger
+  logger->write();
+
   // get nb iterations + final residual
-  auto num_iters = logger->get_num_iterations();
-  auto residual_norm = logger->get_residual_norm();
+  auto num_iters = conv_logger->get_num_iterations();
+  auto residual_norm = conv_logger->get_residual_norm();
   auto vec_res_norm = reinterpret_cast<const gko::matrix::Dense<double>*>(residual_norm);
   auto res = vec_res_norm->get_const_values()[0];
 
   // Print infos
-  std::cout << "Solver has converged : " << logger->has_converged() << std::endl;
+  std::cout << "Solver has converged : " << conv_logger->has_converged() << std::endl;
   std::cout << "Nb iterations : " << num_iters << std::endl;
   std::cout << "Residual norm : " << res << std::endl;
+  std::cout << "Stop criteria Value : " << m_options.stopCriteriaValue() << std::endl;
+  std::cout << "check : " << (res < m_options.stopCriteriaValue()) << std::endl;
+  std::cout << "Reduction factor : " << reduction_factor << std::endl;
 
   // update the counters
   ++m_solve_num;
