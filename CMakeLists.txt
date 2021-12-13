@@ -15,6 +15,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 cmake_minimum_required(VERSION 3.11)
+cmake_policy(SET CMP0079 NEW)
 
 # MUST be done before call to 'project'
 get_cmake_property(vars CACHE_VARIABLES)
