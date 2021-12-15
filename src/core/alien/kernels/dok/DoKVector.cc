@@ -17,3 +17,16 @@
  */
 
 #include "DoKVector.h"
+
+namespace Alien
+{
+
+void DoKVector::_distribute()
+{
+  Redistributor redist(
+  distribution().globalSize(), distribution().parallelMng(), true);
+  DoKDistributor dist(redist.commPlan());
+  dist.distribute(*this, *this);
+}
+
+} // namespace Alien

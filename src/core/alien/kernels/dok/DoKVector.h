@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * SPDX-License-Identifier: Apache-2.0
+ *  SPDX-License-Identifier: Apache-2.0
  */
 
 #pragma once
@@ -30,8 +30,11 @@
 
 namespace Alien
 {
+
+class DoKDistributor;
+
 /*!
- * Matrix stored as Dictionary Of Keys
+ * Vector stored as Dictionary Of Keys
  */
 class DoKVector : public IVectorImpl
 {
@@ -69,17 +72,8 @@ class DoKVector : public IVectorImpl
   void assemble() { _distribute(); }
 
  private:
-  void _distribute()
-  {
-    // Redistributor redist(
-    // distribution().globalSize(), distribution().parallelMng(), true);
-    // DoKDistributor dist(redist.commPlan());
-    // DoKLocalMatrixT<ValueType> new_data;
-    // // distribute does not work if src == tgt.
-    // dist.distribute(m_data, new_data);
-    // m_data = new_data;
-    // m_data.compact();
-  }
+  void _distribute();
+  friend DoKDistributor;
 
  private:
   std::unordered_map<Arccore::Int32, DoKVector::ValueType> m_data;

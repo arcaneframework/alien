@@ -53,6 +53,8 @@ class ALIEN_EXPORT DoKDistributorComm
 
   void computeCommPlan(IReverseIndexer* rev_index);
 
+  void computeCommPlan(Arccore::Span<Int32>);
+
   template <typename T>
   void exchange(ConstArrayView<T> snd, ArrayView<T> rcv)
   {
@@ -79,7 +81,6 @@ class ALIEN_EXPORT DoKDistributorComm
   UniqueArray<Int32> m_rcv_offset;
   UniqueArray<Int32> m_rcv_rows;
   UniqueArray<Int32> m_rcv_cols;
-  void computeCommPlan(Arccore::Span<Int32>);
 };
 
 } // namespace Alien
