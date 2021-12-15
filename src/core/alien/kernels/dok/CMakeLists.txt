@@ -24,7 +24,6 @@ add_library(alien_kernel_dok OBJECT
         DoKDistributorComm.h
         DoKDistributor.h
         DoKDistributor.cc
-        DoKDistributorT.h
         DoKLocalMatrixIndexer.cc
         DoKLocalMatrixIndexer.h
         DoKLocalMatrixT.h
