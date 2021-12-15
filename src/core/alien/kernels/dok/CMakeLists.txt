@@ -15,10 +15,14 @@
 # SPDX-License-Identifier: Apache-2.0
 
 add_library(alien_kernel_dok OBJECT
-        converters/to_simple_csr_matrix.cc
-        converters/to_simple_csr_matrix.h
         converters/from_simple_csr_matrix.cc
         converters/from_simple_csr_matrix.h
+        converters/from_simple_csr_vector.cc
+        converters/from_simple_csr_vector.h
+        converters/to_simple_csr_matrix.cc
+        converters/to_simple_csr_matrix.h
+        converters/to_simple_csr_vector.cc
+        converters/to_simple_csr_vector.h
         DoKBackEnd.h
         DoKDistributorComm.cc
         DoKDistributorComm.h

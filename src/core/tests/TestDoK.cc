@@ -33,6 +33,9 @@
 #include <alien/kernels/dok/converters/from_simple_csr_matrix.h>
 #include <alien/kernels/dok/converters/to_simple_csr_matrix.h>
 #include <alien/kernels/simple_csr/SimpleCSRMatrix.h>
+#include <alien/kernels/dok/converters/from_simple_csr_vector.h>
+#include <alien/kernels/dok/converters/to_simple_csr_vector.h>
+#include <alien/kernels/simple_csr/SimpleCSRVector.h>
 
 #include <alien/core/impl/MultiMatrixImpl.h>
 #include <alien/kernels/dok/DoKBackEnd.h>
@@ -186,7 +189,31 @@ TEST(TestDoKVector, Build)
   DoKVector v(new Alien::MultiVectorImpl(space, vd));
 
   for (int i = 0; i < space->size(); ++i) {
-    v.contribute(i, 1.0);
+    v.contribute(i, i + 1.0);
   }
   v.assemble();
+}
+
+TEST(TestDoKVector, ConvertToCSR)
+{
+  auto space = std::make_shared<Space>(Space(10));
+  auto vd = std::make_shared<VectorDistribution>(VectorDistribution(*space, AlienTest::Environment::parallelMng()));
+  Alien::MultiVectorImpl multi(space, vd);
+  DoKVector v(&multi);
+
+  if (!vd->parallelMng()->commRank()) {
+    for (int i = 0; i < space->size(); ++i) {
+      v.contribute(i, i + 1.0);
+    }
+  }
+  v.assemble();
+
+  typedef Alien::SimpleCSRVector<Real> SimpleCSRVect;
+  SimpleCSRVect csr_vect(&multi);
+  Alien::DoKToSimpleCSRVectorConverter converter;
+  converter.convert(&v, &csr_vect);
+
+  for (int i = 0; i < vd->localSize(); ++i) {
+    ASSERT_EQ(csr_vect[i], vd->offset() + i + 1.0);
+  }
 }

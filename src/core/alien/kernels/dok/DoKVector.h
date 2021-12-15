@@ -32,9 +32,12 @@ namespace Alien
 {
 
 class DoKDistributor;
+class DoKToSimpleCSRVectorConverter;
 
 /*!
  * Vector stored as Dictionary Of Keys
+ *
+ * This allows to create "sparse" vector, as `id` are not required to be consecutive nor to have any meaning.
  */
 class ALIEN_EXPORT DoKVector : public IVectorImpl
 {
@@ -51,19 +54,30 @@ class ALIEN_EXPORT DoKVector : public IVectorImpl
 
   ~DoKVector() override = default;
 
-  void clear() override {}
+  void clear() override
+  {
+    m_data.clear();
+  }
 
+  /// Contribute to a non zero, identified by its index
+  /// \param index can be local or remote
+  /// \param value
+  /// \return updated local value.
   std::optional<ValueType> contribute(Arccore::Int32 index, ValueType value)
   {
     m_data[index] += value;
     return m_data[index];
   }
 
+  /// Set a non zero, identified by its index. Should not be used on remote values as we do not have global ordering between calls.
+  /// \param index can be local or remote
+  /// \param value
+  /// \return updated local value.
   std::optional<ValueType> set(Arccore::Int32 index, ValueType value)
   {
-    // if (distribution().owner(index) != distribution().parallelMng()->commRank()) {
-    //   return std::nullopt;
-    // }
+    //     if (distribution().owner(index) != distribution().parallelMng()->commRank()) {
+    //       return std::nullopt;
+    //     }
     m_data[index] = value;
     return value;
   }
@@ -71,9 +85,15 @@ class ALIEN_EXPORT DoKVector : public IVectorImpl
   //! Dispatch matrix elements
   void assemble() { _distribute(); }
 
+  void reserve(Arccore::Int32 size)
+  {
+    m_data.reserve(size);
+  }
+
  private:
   void _distribute();
   friend DoKDistributor;
+  friend DoKToSimpleCSRVectorConverter;
 
  private:
   std::unordered_map<Arccore::Int32, DoKVector::ValueType> m_data;
