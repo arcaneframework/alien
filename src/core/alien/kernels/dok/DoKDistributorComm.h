@@ -28,7 +28,6 @@
 namespace Alien
 {
 
-class MatrixDistribution;
 class RedistributorCommPlan;
 
 class ALIEN_EXPORT DoKDistributorComm
@@ -80,6 +79,7 @@ class ALIEN_EXPORT DoKDistributorComm
   UniqueArray<Int32> m_rcv_offset;
   UniqueArray<Int32> m_rcv_rows;
   UniqueArray<Int32> m_rcv_cols;
+  void computeCommPlan(Arccore::Span<Int32>);
 };
 
 } // namespace Alien
