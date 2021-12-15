@@ -53,15 +53,17 @@ void DoKDistributor::distribute(const DoKVector& src, DoKVector& dst)
 
   m_distributor->computeCommPlan(snd_keys);
 
+  const auto size = m_distributor->rcvSize();
   // We split in 2 arrays to be able to use Arccore ...
-  UniqueArray<DoKVector::ValueType> rcv_values(m_distributor->rcvSize());
-  UniqueArray<Int32> rcv_keys(m_distributor->rcvSize());
+  UniqueArray<DoKVector::ValueType> rcv_values(size);
+  UniqueArray<Int32> rcv_keys(size);
   m_distributor->exchange(snd_keys.constView(), rcv_keys.view());
   m_distributor->exchange(snd_values.constView(), rcv_values.view());
 
   dst.m_data.clear();
-  for (int offset = 0; offset < (int)rcv_values.size(); ++offset) {
-    dst.set(rcv_keys[i], rcv_values[i]);
+
+  for (int offset = 0; offset < size; ++offset) {
+    dst.set(rcv_keys[offset], rcv_values[offset]);
   }
 }
 

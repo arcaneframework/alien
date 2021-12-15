@@ -36,7 +36,7 @@ class DoKDistributor;
 /*!
  * Vector stored as Dictionary Of Keys
  */
-class DoKVector : public IVectorImpl
+class ALIEN_EXPORT DoKVector : public IVectorImpl
 {
  public:
   typedef Real ValueType;

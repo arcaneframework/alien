@@ -34,7 +34,7 @@ add_library(alien_kernel_dok OBJECT
         IReverseIndexer.h
         BaseDoKDirectMatrixBuilder.cpp
         BaseDoKDirectMatrixBuilder.h
-        DoKVector.cc DoKVector.h)
+        DoKVector.h DoKVector.cc)
 
 target_include_directories(alien_kernel_dok PRIVATE ../../..)
 target_include_directories(alien_kernel_dok PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/../../..)
