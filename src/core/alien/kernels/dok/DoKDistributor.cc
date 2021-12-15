@@ -18,6 +18,8 @@
 
 #include "DoKDistributor.h"
 
+#include <vector>
+
 #include "DoKBackEnd.h"
 #include "DoKMatrixT.h"
 #include "DoKVector.h"
