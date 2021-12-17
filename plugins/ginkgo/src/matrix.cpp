@@ -19,6 +19,7 @@
 #include "matrix.h"
 
 #include <alien/ginkgo/backend.h>
+#include <alien/ginkgo/machine_backend.h>
 #include <alien/core/impl/MultiMatrixImpl.h>
 
 #include <arccore/message_passing_mpi/MpiMessagePassingMng.h>
@@ -28,7 +29,8 @@ namespace Alien::Ginkgo
 Matrix::Matrix(const MultiMatrixImpl* multi_impl)
 : IMatrixImpl(multi_impl, AlgebraTraits<BackEnd::tag::ginkgo>::name())
 , gko::matrix::Csr<double, int>(
-  gko::ReferenceExecutor::create(),
+  ginkgo_executor::exec_map.at(ginkgo_executor::target_machine)(),  // throws if not valid
+  //gko::ReferenceExecutor::create(),
   //gko::CudaExecutor::create(0, gko::OmpExecutor::create(),true),
   gko::dim<2>(multi_impl->rowSpace().size(), multi_impl->colSpace().size()))
 , data(gko::dim<2>{ (multi_impl->rowSpace().size(), multi_impl->colSpace().size()) })

@@ -19,17 +19,19 @@
 #include "vector.h"
 
 #include <alien/ginkgo/backend.h>
+#include <alien/ginkgo/machine_backend.h>
 #include <alien/core/impl/MultiVectorImpl.h>
 
-//#include <arccore/message_passing_mpi/MpiMessagePassingMng.h>
-//#include <petscvec.h>
+
 
 namespace Alien::Ginkgo
 {
 Vector::Vector(const MultiVectorImpl* multi_impl)
 : IVectorImpl(multi_impl, AlgebraTraits<BackEnd::tag::ginkgo>::name())
 , gko::matrix::Dense<double>(
-  gko::ReferenceExecutor::create(),
+  ginkgo_executor::exec_map.at(ginkgo_executor::target_machine)(),  // throws if not valid
+  // Alien::Ginkgo::create<exec_target>(),
+  //gko::ReferenceExecutor::create(),
   //gko::CudaExecutor::create(0, gko::OmpExecutor::create(),true),
   gko::dim<2>(multi_impl->space().size(), 1))
 , data(gko::dim<2>(multi_impl->space().size(), 1))

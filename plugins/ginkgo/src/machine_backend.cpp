@@ -16,31 +16,33 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
+
 #include <alien/ginkgo/machine_backend.h>
 
 namespace Alien::Ginkgo
 {
 
-std::string ginkgo_executor::target_machine = "reference";
+  std::string ginkgo_executor::target_machine = "reference";
 
-std::map<std::string, std::function<std::shared_ptr<gko::Executor>()>>
-ginkgo_executor::exec_map{
-  { "omp", [] { return gko::OmpExecutor::create(); } },
-  { "cuda",
-    [] {
-      return gko::CudaExecutor::create(0, gko::OmpExecutor::create(),
-                                       true);
-    } },
-  { "hip",
-    [] {
-      return gko::HipExecutor::create(0, gko::OmpExecutor::create(),
-                                      true);
-    } },
-  { "dpcpp",
-    [] {
-      return gko::DpcppExecutor::create(0,
-                                        gko::OmpExecutor::create());
-    } },
-  { "reference", [] { return gko::ReferenceExecutor::create(); } }
-};
-} // namespace Alien::Ginkgo
+  std::map<std::string, std::function<std::shared_ptr<gko::Executor>()>>
+  ginkgo_executor::exec_map{
+    { "omp", [] { return gko::OmpExecutor::create(); } },
+    { "cuda",
+      [] {
+        return gko::CudaExecutor::create(0, gko::OmpExecutor::create(),
+                                         true);
+      } },
+    { "hip",
+      [] {
+        return gko::HipExecutor::create(0, gko::OmpExecutor::create(),
+                                        true);
+      } },
+    { "dpcpp",
+      [] {
+        return gko::DpcppExecutor::create(0,
+                                          gko::OmpExecutor::create());
+      } },
+    { "reference", [] { return gko::ReferenceExecutor::create(); } }
+  };
+} // namespace
