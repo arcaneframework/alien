@@ -163,7 +163,10 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   // Parameter the solver factory
   const double reduction_factor{ m_options.stopCriteriaValue() };
   using cg = gko::solver::Cg<double>;
-  auto exec = gko::ReferenceExecutor::create();
+
+  // get the executor from the Matrix
+  auto exec = A.internal()->get_executor();
+  //auto exec = gko::ReferenceExecutor::create();
   //auto exec = gko::CudaExecutor::create(0, gko::OmpExecutor::create(),true);
 
   // Prepare the stopping criteria

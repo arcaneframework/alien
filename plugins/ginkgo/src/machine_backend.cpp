@@ -16,52 +16,33 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
+
 #include <alien/ginkgo/machine_backend.h>
 
 namespace Alien::Ginkgo
 {
 
-#ifdef ALIEN_PLUGIN_GINKGO_REF
-std::string ginkgo_executor::target_machine = "reference";
-#elif ALIEN_PLUGIN_GINKGO_OMP
-std::string ginkgo_executor::target_machine = "omp";
-#elif ALIEN_PLUGIN_GINKGO_CUDA
-std::string ginkgo_executor::target_machine = "cuda";
-#elif ALIEN_PLUGIN_GINKGO_HIP
-std::string ginkgo_executor::target_machine = "hip";
-#elif ALIEN_PLUGIN_GINKGO_DPCPP
-std::string ginkgo_executor::target_machine = "dpcpp";
-#else
-std::string ginkgo_executor::target_machine = "default";
-#endif
+  std::string ginkgo_executor::target_machine = "reference";
 
-std::map<std::string, std::function<std::shared_ptr<gko::Executor>()>>
-ginkgo_executor::exec_map{
-  { "omp",
-    [] {
-      return gko::OmpExecutor::create();
-    } },
-  { "cuda",
-    [] {
-      return gko::CudaExecutor::create(0, gko::OmpExecutor::create(), true);
-    } },
-  { "hip",
-    [] {
-      return gko::HipExecutor::create(0, gko::OmpExecutor::create(), true);
-    } },
-  { "dpcpp",
-    [] {
-      return gko::DpcppExecutor::create(0, gko::OmpExecutor::create());
-    } },
-  { "reference",
-    [] {
-      return gko::ReferenceExecutor::create();
-    } },
-  { "default",
-    [] {
-      std::cout << "----------- No Ginkgo Executor specified !" << std::endl;
-      std::cout << "----------- Using FALLBACK : Alien plugin GINKGO with REFERENCE Executor" << std::endl;
-      return gko::ReferenceExecutor::create();
-    } }
-};
-} // namespace Alien::Ginkgo
+  std::map<std::string, std::function<std::shared_ptr<gko::Executor>()>>
+  ginkgo_executor::exec_map{
+    { "omp", [] { return gko::OmpExecutor::create(); } },
+    { "cuda",
+      [] {
+        return gko::CudaExecutor::create(0, gko::OmpExecutor::create(),
+                                         true);
+      } },
+    { "hip",
+      [] {
+        return gko::HipExecutor::create(0, gko::OmpExecutor::create(),
+                                        true);
+      } },
+    { "dpcpp",
+      [] {
+        return gko::DpcppExecutor::create(0,
+                                          gko::OmpExecutor::create());
+      } },
+    { "reference", [] { return gko::ReferenceExecutor::create(); } }
+  };
+} // namespace

@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include <alien/ginkgo/GinkgoConfig.h>
 #include <ginkgo/ginkgo.hpp>
 #include <map>
 
@@ -29,6 +28,7 @@ struct ginkgo_executor
 {
   static std::string target_machine;
   static std::map<std::string, std::function<std::shared_ptr<gko::Executor>()>> exec_map;
+
 };
 
-} // namespace Alien::Ginkgo
+}
