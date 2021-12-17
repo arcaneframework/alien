@@ -47,7 +47,12 @@ Matrix::~Matrix() {}
 
 void Matrix::assemble()
 {
-  this->read(data);
+
+  if ((this->rowSpace().size() == data.get_size()[0]) && (this->colSpace().size() == data.get_size()[1])) {
+    this->read(data);
+  }
+  else
+    throw Arccore::FatalErrorException("Matrix size does not match data size");
 }
 
 void Matrix::setRowValues(int row, Arccore::ConstArrayView<int> cols, Arccore::ConstArrayView<double> values)

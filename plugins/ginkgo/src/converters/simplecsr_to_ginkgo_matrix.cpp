@@ -83,8 +83,6 @@ void SimpleCSR_to_Ginkgo_MatrixConverter::_build(const Alien::SimpleCSRMatrix<Ar
   const auto localOffset = dist.rowOffset();
   const auto ilower = localOffset;
   const auto iupper = localOffset + localSize - 1;
-  const auto jlower = ilower;
-  const auto jupper = iupper;
 
   auto values = sourceImpl.internal().getValues();
   auto cols = profile.getCols();
@@ -180,5 +178,3 @@ void SimpleCSR_to_Ginkgo_MatrixConverter::_buildBlock(const Alien::SimpleCSRMatr
 }
 
 REGISTER_MATRIX_CONVERTER(SimpleCSR_to_Ginkgo_MatrixConverter);
-
-//REGISTER_MATRIX_CONVERTER(SimpleCSR_to_Ginkgo_MatrixConverter);
