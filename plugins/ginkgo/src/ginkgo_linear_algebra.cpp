@@ -93,6 +93,7 @@ namespace Alien::Ginkgo {
     }
 
     void InternalLinearAlgebra::mult(const Matrix &ma, const Vector &vx, Vector &vr) const {
+        auto x = ma.internal();
         //~ MatMult(ma.internal(), vx.internal(), vr.internal());
     }
 
@@ -143,4 +144,4 @@ namespace Alien::Ginkgo {
     InternalLinearAlgebraFactory() {
         return new Ginkgo::InternalLinearAlgebra();
     }
-} // namespace Alien::Petsc
+} // namespace Alien::Ginkgo
