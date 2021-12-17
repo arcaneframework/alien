@@ -83,8 +83,11 @@ void Vector::getValues(Arccore::ArrayView<double> values) const
 
 void Vector::assemble()
 {
-  this->read(data);
-
+  if ((this->get_size()[0] == data.get_size()[0]) && (this->get_size()[1] == data.get_size()[1])) {
+    this->read(data);
+  }
+  else
+    throw Arccore::FatalErrorException("Vec size does not match data size");
   /*std::cout << "\n------------ data contains : -----------------" << std::endl;
   for (int i = 0; i<data.get_size()[0]; i++) {
     std::cout << data.get_value(i, 0) << " ";
