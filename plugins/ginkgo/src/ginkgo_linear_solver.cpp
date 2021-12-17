@@ -38,8 +38,6 @@
 #include <memory>
 #include <core/log/convergence.hpp>
 
-
-
 namespace Alien
 {
 // Compile GinkgoLinearSolver.
@@ -179,11 +177,11 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   res_stop->add_logger(conv_logger);
 
   auto solver_factory =
-    cg::build()
-      .with_criteria(
-        gko::share(iter_stop),
-        gko::share(res_stop))
-    .on(exec);
+  cg::build()
+  .with_criteria(
+  gko::share(iter_stop),
+  gko::share(res_stop))
+  .on(exec);
 
   /// --- MATRIX
   /* make_shared does not work : loses the pointer to the gko::executor ! */
