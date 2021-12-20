@@ -95,10 +95,12 @@ generate_export_header(alien_ginkgo
         EXPORT_FILE_NAME include/alien/ginkgo/export.h
         )
 
+# Examples
+set (ALIEN_GINKGO_BENCHMARK ON)
+add_subdirectory(bench)
+
 # Tests
-
 enable_testing()
-
 add_subdirectory(test)
 
 # Install
