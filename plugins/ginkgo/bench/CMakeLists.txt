@@ -30,9 +30,3 @@ target_link_libraries(bench_ginkgo PUBLIC
 
 configure_file(../../hypre/examples/msc00726.mtx msc00726.mtx COPYONLY)
 configure_file(../../hypre/examples/mesh1em6.mtx mesh1em6.mtx COPYONLY)
-configure_file(../../../data/algebre_test/algebre_first/matrix/matrix_default_name.mtx matrix_first.mtx)
-configure_file(../../../data/algebre_test/algebre_first/vector/vector_default_name.mtx vector_first.mtx)
-configure_file(../../../data/algebre_test/algebre_mid/matrix/matrix_default_name.mtx matrix_mid.mtx)
-configure_file(../../../data/algebre_test/algebre_mid/vector/vector_default_name.mtx vector_mid.mtx)
-configure_file(../../../data/algebre_test/algebre_last/matrix/matrix_default_name.mtx matrix_last.mtx)
-configure_file(../../../data/algebre_test/algebre_last/vector/vector_default_name.mtx vector_last.mtx)
