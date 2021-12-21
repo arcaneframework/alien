@@ -160,6 +160,15 @@ Real SimpleCSRInternalLinearAlgebra::dot(const CSRVector& vx, const CSRVector& v
   return CBLASMPIKernel::dot(vx.distribution(), vx, vy);
 }
 
+
+void SimpleCSRInternalLinearAlgebra::dot(const CSRVector& vx,
+                                         const CSRVector& vy,
+                                         SimpleCSRInternalLinearAlgebra::FutureType& res) const
+{
+  SentryType s(m_timer,"CSR-DOT") ;
+  res() = CBLASMPIKernel::dot(vx.distribution(), vx, vy);
+}
+
 /*---------------------------------------------------------------------------*/
 
 void SimpleCSRInternalLinearAlgebra::scal(Real alpha, CSRVector& vx) const

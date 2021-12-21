@@ -32,6 +32,10 @@
 namespace Alien
 {
   namespace SYCLInternal {
+
+    template<typename T>
+    class Future ;
+
     class KernelInternal ;
   }
 
@@ -54,11 +58,14 @@ class ALIEN_EXPORT SYCLInternalLinearAlgebra
     typedef Exception::NumericException BaseType ;
     NullValueException(std::string const& type)
     : BaseType(type,__LINE__)
-  {}
+    {}
   } ;
+
+  typedef SYCLInternal::Future<Real> FutureType ;
 
   typedef Alien::StdTimer   TimerType ;
   typedef TimerType::Sentry SentryType ;
+
 
   SYCLInternalLinearAlgebra();
   virtual ~SYCLInternalLinearAlgebra();
@@ -75,6 +82,7 @@ class ALIEN_EXPORT SYCLInternalLinearAlgebra
   void aypx(Real alpha, Vector& y, const Vector& x) const;
   void copy(const Vector& x, Vector& r) const;
   Real dot(const Vector& x, const Vector& y) const;
+  void dot(const Vector& x, const Vector& y, SYCLInternal::Future<Real>& res) const;
   void scal(Real alpha, Vector& x) const;
   void diagonal(const Matrix& a, Vector& x) const;
   void reciprocal(Vector& x) const;
@@ -121,6 +129,7 @@ class ALIEN_EXPORT SYCLInternalLinearAlgebra
   mutable TimerType m_timer;
 };
 
+
 class SYCLInternalLinearAlgebraExpr
 : public IInternalLinearAlgebraExpr<SYCLMatrixType, SYCLVectorType>
 {
@@ -149,8 +158,7 @@ class SYCLInternalLinearAlgebraExpr
   void axpy(Real alpha, UniqueArray<Real> const& x, UniqueArray<Real>& r) const;
   void aypx(Real alpha, UniqueArray<Real>& y, UniqueArray<Real> const& x) const;
   void copy(const UniqueArray<Real>& x, UniqueArray<Real>& r) const;
-  Real dot(
-  Integer local_size, const UniqueArray<Real>& x, const UniqueArray<Real>& y) const;
+  Real dot(Integer local_size, const UniqueArray<Real>& x, const UniqueArray<Real>& y) const;
 
   void scal(Real alpha, UniqueArray<Real>& x) const;
 

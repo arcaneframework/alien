@@ -17,10 +17,11 @@ namespace Alien
   class BiCGStab
   {
     public:
-      typedef AlgebraT                        AlgebraType;
-      typedef typename AlgebraType::Matrix    MatrixType;
-      typedef typename AlgebraType::Vector    VectorType;
-      typedef typename MatrixType::ValueType  ValueType;
+      typedef AlgebraT                         AlgebraType;
+      typedef typename AlgebraType::Matrix     MatrixType;
+      typedef typename AlgebraType::Vector     VectorType;
+      typedef typename MatrixType::ValueType   ValueType;
+      typedef typename AlgebraType::FutureType FutureType;
 
       class Iteration
       {
@@ -32,6 +33,8 @@ namespace Alien
                      int max_iter,
                      ITraceMng* trace_mng = nullptr)
               : m_algebra (algebra)
+              , m_value(0)
+              , m_f_value(m_value)
               , m_max_iteration (max_iter)
               , m_tol (tol)
               , m_iter (0)
@@ -65,8 +68,8 @@ namespace Alien
           {
             if (m_iter >= m_max_iteration)
               return true;
-            m_value = m_algebra.dot (r, r);
-            m_status = m_value < m_criteria_value;
+            m_algebra.dot (r, r,m_f_value);
+            m_status = m_f_value.get() < m_criteria_value;
             return m_status;
           }
 
@@ -101,6 +104,7 @@ namespace Alien
           ValueType    m_tol            = 0.;
           int          m_iter           = 0;
           ValueType    m_value          = 0.;
+          FutureType   m_f_value;
           ValueType    m_criteria_value = 0.;
           ValueType    m_value_init     = 0.;
           ValueType    m_nrm2_b         = 0.;
@@ -127,7 +131,7 @@ namespace Alien
       {
         if(iter.nullRhs())
            return 0 ;
-        ValueType rho (0), rho1 (0), alpha (0), beta (0), gamma (0), omega (0);
+        ValueType  rho (0),   rho1 (0),    alpha (0),     beta (0),    gamma (0),     omega (0);
         VectorType p, phat, s, shat, t, v, r, r0;
 
         m_algebra.allocate (AlgebraType::resource (A), p, phat, s, shat, t, v, r, r0) ;
@@ -261,6 +265,166 @@ namespace Alien
           }
           else
             omega = omega/beta ;
+
+          //m_algebra.process (seq3);
+          m_algebra.axpy (omega, shat, x);
+          m_algebra.axpy (alpha, phat, x);
+          m_algebra.copy (s, r);
+          m_algebra.axpy (-omega, t, r);
+
+          rho = rho1;
+
+          ++iter;
+        }
+
+        m_algebra.free (p, phat, s, shat, t, v, r, r0);
+
+        return 0;
+      }
+
+
+
+      template<typename PrecondT, typename iterT>
+      int solve2 (PrecondT& precond, iterT& iter, MatrixType const& A,
+                 VectorType const& b, VectorType& x)
+      {
+        if(iter.nullRhs())
+           return 0 ;
+        ValueType  rho (0),   rho1 (0),    alpha (0),     beta (0),    gamma (0),     omega (0);
+        FutureType frho(rho), frho1(rho1), falpha(alpha), fbeta(beta), fgamma(gamma), fomega(omega) ;
+        VectorType p, phat, s, shat, t, v, r, r0;
+
+        m_algebra.allocate (AlgebraType::resource (A), p, phat, s, shat, t, v, r, r0) ;
+
+        // SEQ0
+        //  r = b - A * x;
+        m_algebra.copy (b, r);
+        m_algebra.mult (A, x, r0);
+        m_algebra.axpy (-1., r0, r);
+
+        // rtilde = r
+        m_algebra.copy (r, r0);
+        m_algebra.copy (r, p);
+        m_algebra.dot (r, r0, frho1);
+        //m_trace_mng->info()<<"RHO1"<<frho1.get();
+
+        /*
+           phat = solve(M, p);
+           v = A * phat;
+           gamma = dot(r0, v);
+           alpha = rho_1 / gamma;
+           s = r - alpha * v;
+         */
+        // SEQ1
+        m_algebra.exec (precond, p, phat);
+        m_algebra.mult (A, phat, v);
+        m_algebra.dot (v, r0, falpha);
+        if (falpha.get() == 0)
+            throw typename AlgebraType::NullValueException ("alpha");
+        alpha = frho1.get()/alpha ;
+
+        m_algebra.copy (r, s);
+        m_algebra.axpy (-alpha, v, s);
+
+        if (iter.stop(s))
+        {
+           ++iter;
+           m_algebra.axpy (alpha, phat, x);
+           m_algebra.free (p, phat, s, shat, t, v, r, r0);
+           return 0;
+        }
+
+
+        // SEQ 2
+        m_algebra.exec (precond, s, shat);
+        m_algebra.mult (A, shat, t);
+        m_algebra.dot (t, s,fomega);
+        m_algebra.dot (t, t,fbeta);
+        if (fbeta.get() == 0)
+        {
+             if (iter.stop (r))
+             {
+               ++iter;
+               m_algebra.axpy (alpha, phat, x);
+               m_algebra.free (p, phat, s, shat, t, v, r, r0);
+               return 0;
+             }
+             else
+               throw typename AlgebraType::NullValueException ("beta");
+        }
+
+        omega = fomega.get()/beta ;
+
+        // SEQ 3
+        m_algebra.axpy (omega, shat, x);
+        m_algebra.axpy (alpha, phat, x);
+        m_algebra.copy (s, r);
+        m_algebra.axpy (-omega, t, r);
+
+        rho = rho1;
+        ++iter;
+
+         //SEQ4
+         /*
+           beta = (rho_1 / rho_2) * (alpha / omega);
+           p = r + beta * (p - omega * v);
+         */
+        m_algebra.dot (r, r0,frho1);
+        beta = (frho1.get()/rho)*(alpha/omega) ;
+        m_algebra.axpy (-omega, v, p);
+        m_algebra.scal (beta, p);
+        m_algebra.axpy (-1.,r, p);
+
+        while (!iter.stop (r))
+        {
+
+          //if (m_output_level > 0 && m_trace_mng)
+          //  m_trace_mng->info()<<"Iteration : "<<iter ()<<" criteria value="<<iter.getValue() ;
+          //SEQ4
+          m_algebra.dot (r, r0,frho1);
+          beta = (frho1.get()/rho)*(alpha/omega);
+          m_algebra.axpy (-omega, v, p);
+          m_algebra.scal (beta, p);
+          m_algebra.axpy (-1.,r, p);
+          if(rho==0)
+            throw typename AlgebraType::NullValueException ("rho");
+
+          //m_algebra.process (seq1);
+          m_algebra.exec (precond, p, phat);
+          m_algebra.mult (A, phat, v);
+          m_algebra.dot (v, r0,falpha);
+          if(falpha.get()==0)
+            throw typename AlgebraType::NullValueException ("alpha");
+          else
+            alpha = rho1/alpha ;
+
+          m_algebra.copy (r, s);
+          m_algebra.axpy (-alpha, v, s);
+
+          if (iter.stop(s))
+          {
+            m_algebra.axpy (alpha, phat, x);
+            m_algebra.free (p, phat, s, shat, t, v, r, r0);
+            return 0;
+          }
+
+          //m_algebra.process (seq2);
+          m_algebra.exec (precond, s, shat);
+          m_algebra.mult (A, shat, t);
+          m_algebra.dot (t, s,fomega);
+          m_algebra.dot (t, t,fbeta);
+          if (fbeta.get() == 0)
+          {
+            if (iter.stop (s))
+            {
+              m_algebra.axpy (alpha, phat, x);
+              m_algebra.free (p, phat, s, shat, t, v, r, r0);
+              return 0;
+            }
+            throw typename AlgebraType::NullValueException ("beta");
+          }
+          else
+            omega = fomega.get()/beta ;
 
           //m_algebra.process (seq3);
           m_algebra.axpy (omega, shat, x);

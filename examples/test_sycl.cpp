@@ -34,6 +34,10 @@
 #include <alien/kernels/sycl/algebra/SYCLLinearAlgebra.h>
 #include <alien/kernels/sycl/algebra/SYCLInternalLinearAlgebra.h>
 
+#include "alien/kernels/sycl/data/SYCLEnv.h"
+#include "alien/kernels/sycl/data/SYCLEnvInternal.h"
+#include <alien/kernels/sycl/algebra/SYCLKernelInternal.h>
+
 #include <alien/ref/AlienRefSemantic.h>
 
 
@@ -206,6 +210,8 @@ int main(int argc, char** argv)
         x_dot_y_ref += reader_x[i]*reader_y[i] ;
     }
     Real x_dot_y = 0. ;
+    Real x_dot_y2 = 0. ;
+    Alien::SYCLInternalLinearAlgebra::FutureType f_x_dot_y(x_dot_y2) ;
 
     {
       auto const& csr_x = x.impl()->get<Alien::BackEnd::tag::simplecsr>() ;
@@ -226,15 +232,23 @@ int main(int argc, char** argv)
       auto const& sycl_x = x.impl()->get<Alien::BackEnd::tag::sycl>() ;
       auto const& sycl_y = y.impl()->get<Alien::BackEnd::tag::sycl>() ;
 
+
       for(int itest=0;itest<nb_test;++itest)
       {
         //std::cout<<itest<<"*";
         SentryType s(timer,"SYLC-DOT") ;
         x_dot_y = internal_sycl_alg.dot(sycl_x,sycl_y) ;
       }
+      for(int itest=0;itest<nb_test;++itest)
+      {
+        //std::cout<<itest<<"*";
+        SentryType s(timer,"SYLC-DOT-F") ;
+        internal_sycl_alg.dot(sycl_x,sycl_y,f_x_dot_y) ;
+      }
+
       //std::cout<<std::endl ;
     }
-    trace_mng->info() <<"SYCL DOT(X,Y) = "<<x_dot_y<<" REF="<<x_dot_y_ref;
+    trace_mng->info() <<"SYCL DOT(X,Y) = "<<x_dot_y<<", F-DOT = "<<f_x_dot_y.get()<<", REF="<<x_dot_y_ref;
   }
 
   if( (test.compare("all") == 0 ) || (test.compare("mult")==0 ))

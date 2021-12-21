@@ -24,15 +24,50 @@
 
 /*---------------------------------------------------------------------------*/
 
+
 namespace Alien::SYCLInternal
 {
 
 /*---------------------------------------------------------------------------*/
 
+  template<typename T>
+  class Future
+  {
+  public:
+    Future(T& value)
+    : m_value(value)
+    , m_d_value(&m_value,1)
+    {
+
+    }
+
+    T& operator()() {
+      return m_value ;
+    }
+
+    T operator()() const {
+      return m_value ;
+    }
+
+    T get()
+    {
+        auto h_access = m_d_value.template get_access<cl::sycl::access::mode::read>();
+        m_value = h_access[0];
+        return m_value ;
+    }
+
+    cl::sycl::buffer<T, 1>& deviceValue() {
+      return m_d_value ;
+    }
+  private:
+    T& m_value ;
+    cl::sycl::buffer<T, 1> m_d_value ;
+  };
+
 class KernelInternal
 {
 private :
-  int m_dot_algo = 0 ;
+  int m_dot_algo = 3 ;
 
 public:
   KernelInternal()
@@ -620,6 +655,99 @@ public:
 
 
   template <typename T>
+  class map4_reduction_sum;
+
+  template <typename T>
+  void map4_reduce_sum(cl::sycl::buffer<T>& x,
+                       cl::sycl::buffer<T>& y,
+                       cl::sycl::buffer<T>& res)
+  {
+   std::size_t local = m_max_work_group_size;
+   std::size_t total_threads = m_total_threads ;
+   std::size_t length = x.get_count();
+
+   //T sum_init = 0 ;
+   //cl::sycl::buffer<T> sum{&sum_init,1};
+   {
+        /* Each iteration of the do loop applies one level of reduction until
+         * the input is of length 1 (i.e. the reduction is complete). */
+        //do
+        {
+          auto f0 = [total_threads, length, local, &x, &y,&res](cl::sycl::handler& h) mutable
+                   {
+                      cl::sycl::nd_range<1> range{cl::sycl::range<1>{total_threads},
+                                                  cl::sycl::range<1>{local}};
+                      auto access_x = x.template get_access<cl::sycl::access::mode::read>(h);
+                      auto access_y = y.template get_access<cl::sycl::access::mode::read>(h);
+
+                      cl::sycl::accessor access_sum {res, h};
+                      auto sumReduction = cl::sycl::reduction(access_sum, cl::sycl::plus<T>());
+
+                      //auto access_sum = cl::sycl::accessor<T,0,access::mode::write,access::target::global_buffer>(res, h);
+                      //auto access_sum = cl::sycl::accessor { res, h, cl::sycl::read_write, cl::sycl::property::no_init{}};
+
+                      //auto sumReduction = cl::sycl::reduction(access_sum,cl::sycl::plus<T>(), cl::sycl::property::reduction::initialize_to_identity);
+                      //auto sumReduction = cl::sycl::reduction(access_sum,cl::sycl::plus<T>());
+
+                      cl::sycl::accessor<T, 1, cl::sycl::access::mode::read_write,cl::sycl::access::target::local>
+                        scratch(cl::sycl::range<1>(local), h);
+
+                      /* The parallel_for invocation chosen is the variant with an nd_item
+                       * parameter, since the code requires barriers for correctness. */
+
+                      h.parallel_for<map4_reduction_sum<T>>(range,
+                                                            sumReduction,
+                                                            [access_x,access_y,scratch,local,length,total_threads] (cl::sycl::nd_item<1> id, auto& sum)
+                                                            {
+                                                                std::size_t globalid = id.get_global_id(0);
+                                                                std::size_t localid = id.get_local_id(0);
+
+                                                                scratch[localid] = (globalid < length)?  access_x[globalid]*access_y[globalid] : 0. ;
+
+                                                                for (auto i = globalid+total_threads; i < length; i += total_threads)
+                                                                  scratch[localid] += access_x[i]*access_y[i];
+
+                                                                id.barrier(cl::sycl::access::fence_space::local_space);
+
+                                                                /* Apply the reduction operation between the current local
+                                                                 * id and the one on the other half of the vector. */
+                                                                if (globalid < length)
+                                                                {
+                                                                  //int min = (length < local) ? length : local;
+                                                                  int min = local ;
+                                                                  for (std::size_t offset = min / 2; offset > 0; offset /= 2)
+                                                                  //for (std::size_t offset = id.get_local_range(0) / 2; offset > 0; offset /= 2)
+                                                                  {
+                                                                    if (localid < offset)
+                                                                    {
+                                                                       scratch[localid] += scratch[localid + offset];
+                                                                    }
+                                                                    id.barrier(cl::sycl::access::fence_space::local_space);
+                                                                  }
+                                                                }
+                                                                /* The final result will be stored in local id 0. */
+                                                                if (localid == 0)
+                                                                {
+                                                                  //access_sum[id.get_group(0)] = scratch[localid];
+                                                                  sum += scratch[localid] ;
+                                                                }
+
+                                                            });
+
+                 };
+          m_env->internal()->queue().submit(f0);
+
+          /* At this point, you could queue::wait_and_throw() to ensure that
+           * errors are caught quickly. However, this would likely impact
+           * performance negatively. */
+          length = (length+local-1) / local;
+          //++level ;
+        } //while (length > 1);
+    }
+  }
+
+
+  template <typename T>
   T reduce_sum2(const std::vector<T>& x)
   {
     T value = 0 ;
@@ -763,7 +891,6 @@ public:
   T dot(cl::sycl::buffer<T>& x,
         cl::sycl::buffer<T>& y)
   {
-    std::cout<<"DOT ALGO : "<<m_dot_algo<<std::endl ;
     switch(m_dot_algo)
     {
       case 0 :
@@ -777,32 +904,18 @@ public:
       default:
         return sycl_reduce_sum(x,y) ;
     }
-
-
-    //return sycl_reduce_sum(w) ;
-    /*
-    using namespace cl;
-    T sumResult = 0;
-
-    sycl::buffer<T> sum_buff{&sumResult,1};
-
-    m_env->internal()->queue().submit([&](sycl::handler &cgh)
-                                      {
-                                        auto x_acc = x.template get_access<sycl::access_mode::read>(cgh);
-                                        auto y_acc = y.template get_access<sycl::access_mode::read>(cgh);
-
-                                        sycl::accessor sum_acc {sum_buff, cgh};
-                                        auto sumReduction = sycl::reduction(sum_acc, sycl::plus<T>());
-                                        cgh.parallel_for(sycl::range<1>{x.get_count()},
-                                                         sumReduction,
-                                                         [=](sycl::id<1> idx, auto &sum)
-                                                         {
-                                                           sum += x_acc[idx]*y_acc[idx];
-                                                         });
-                                      });
-    return sum_buff.get_host_access()[0];
-    */
   }
+
+
+  template <typename T>
+  void dot(cl::sycl::buffer<T>& x,
+           cl::sycl::buffer<T>& y,
+           cl::sycl::buffer<T>& res)
+  {
+    map4_reduce_sum(x,y,res) ;
+    //map3_reduce_sum(x,y) ;
+  }
+
 
  private:
   SYCLEnv*    m_env                 = nullptr ;

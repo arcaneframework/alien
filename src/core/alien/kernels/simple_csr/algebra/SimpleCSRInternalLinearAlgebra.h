@@ -56,6 +56,31 @@ class ALIEN_EXPORT SimpleCSRInternalLinearAlgebra
   {}
   } ;
 
+  template<typename T>
+  class Future
+  {
+  public :
+    Future(T& value)
+    : m_value(value)
+    {}
+
+    T& operator()() {
+      return m_value ;
+    }
+
+    T operator()() const {
+      return m_value ;
+    }
+
+    T get() {
+      return m_value ;
+    }
+  private :
+    T& m_value ;
+  };
+
+  typedef Future<Real> FutureType ;
+
   typedef Alien::StdTimer   TimerType ;
   typedef TimerType::Sentry SentryType ;
 
@@ -73,6 +98,7 @@ class ALIEN_EXPORT SimpleCSRInternalLinearAlgebra
   void aypx(Real alpha, Vector& y, const Vector& x) const;
   void copy(const Vector& x, Vector& r) const;
   Real dot(const Vector& x, const Vector& y) const;
+  void dot(const Vector& x, const Vector& y, FutureType& res) const;
   void scal(Real alpha, Vector& x) const;
   void diagonal(const Matrix& a, Vector& x) const;
   void reciprocal(Vector& x) const;
@@ -124,6 +150,7 @@ class SimpleCSRInternalLinearAlgebraExpr
 : public IInternalLinearAlgebraExpr<CSRMatrix, CSRVector>
 {
  public:
+
   SimpleCSRInternalLinearAlgebraExpr();
   virtual ~SimpleCSRInternalLinearAlgebraExpr();
 

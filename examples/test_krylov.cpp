@@ -45,6 +45,10 @@
 #include <alien/kernels/sycl/data/SYCLVector.h>
 #include <alien/kernels/sycl/algebra/SYCLLinearAlgebra.h>
 #include <alien/kernels/sycl/algebra/SYCLInternalLinearAlgebra.h>
+
+#include "alien/kernels/sycl/data/SYCLEnv.h"
+#include "alien/kernels/sycl/data/SYCLEnvInternal.h"
+#include <alien/kernels/sycl/algebra/SYCLKernelInternal.h>
 #endif
 
 #include <alien/expression/krylov/BiCGStab.h>
@@ -428,7 +432,18 @@ int main(int argc, char** argv)
                   solver.solve(precond,stop_criteria,true_A,true_b,true_x) ;
                 }
                 break ;
-                case 1:
+                case 1 :
+                {
+                  trace_mng->info()<<"DIAG PRECONDITIONER";
+                  typedef Alien::DiagPreconditioner<AlgebraType> PrecondType ;
+                  PrecondType      precond{true_A} ;
+                  precond.init() ;
+                  SentryType sentry(timer,"BiCGS-Diag") ;
+                  solver.solve2(precond,stop_criteria,true_A,true_b,true_x) ;
+                }
+                break ;
+
+                case 10:
                 {
                   trace_mng->info()<<"CHEBYSHEV PRECONDITIONER";
                   double polynom_factor          = vm["poly-factor"].as<double>() ;
@@ -444,7 +459,23 @@ int main(int argc, char** argv)
                   solver.solve(precond,stop_criteria,true_A,true_b,true_x) ;
                 }
                 break ;
-                case 2:
+                case 12:
+                {
+                  trace_mng->info()<<"CHEBYSHEV PRECONDITIONER";
+                  double polynom_factor          = vm["poly-factor"].as<double>() ;
+                  int    polynom_order           = vm["poly-order"].as<int>() ;
+                  int    polynom_factor_max_iter = vm["poly-factor-max-iter"].as<int>() ;
+
+                  typedef Alien::ChebyshevPreconditioner<AlgebraType> PrecondType ;
+                  PrecondType      precond{alg,true_A,polynom_factor,polynom_order,polynom_factor_max_iter,trace_mng} ;
+                  precond.setOutputLevel(output_level) ;
+                  precond.init() ;
+
+                  SentryType sentry(timer,"BiCGS-ChebyshevPoly") ;
+                  solver.solve2(precond,stop_criteria,true_A,true_b,true_x) ;
+                }
+                break ;
+                case 20:
                 {
                   trace_mng->info()<<"NEUNMAN PRECONDITIONER";
                   double polynom_factor          = vm["poly-factor"].as<double>() ;
@@ -457,6 +488,21 @@ int main(int argc, char** argv)
 
                   SentryType sentry(timer,"BiCGS-NeumanPoly") ;
                   solver.solve(precond,stop_criteria,true_A,true_b,true_x) ;
+                }
+                break ;
+                case 21:
+                {
+                  trace_mng->info()<<"NEUNMAN PRECONDITIONER";
+                  double polynom_factor          = vm["poly-factor"].as<double>() ;
+                  int    polynom_order           = vm["poly-order"].as<int>() ;
+                  int    polynom_factor_max_iter = vm["poly-factor-max-iter"].as<int>() ;
+
+                  typedef Alien::NeumannPolyPreconditioner<AlgebraType> PrecondType ;
+                  PrecondType precond{alg,true_A,polynom_factor,polynom_order,polynom_factor_max_iter,trace_mng} ;
+                  precond.init() ;
+
+                  SentryType sentry(timer,"BiCGS-NeumanPoly") ;
+                  solver.solve2(precond,stop_criteria,true_A,true_b,true_x) ;
                 }
                 break ;
                 default:

@@ -178,6 +178,15 @@ Real SYCLInternalLinearAlgebra::dot(const SYCLVector<Real>& vx, const SYCLVector
   return m_internal->dot(vx.internal()->values(), vy.internal()->values());
 }
 
+
+void SYCLInternalLinearAlgebra::dot(const SYCLVector<Real>& vx,
+                                    const SYCLVector<Real>& vy,
+                                    SYCLInternal::Future<Real>& res) const
+{
+  SentryType s(m_timer,"SYCL-DOT-F") ;
+  m_internal->dot(vx.internal()->values(), vy.internal()->values(),res.deviceValue());
+}
+
 /*---------------------------------------------------------------------------*/
 
 void SYCLInternalLinearAlgebra::scal(Real alpha, SYCLVector<Real>& vx) const
