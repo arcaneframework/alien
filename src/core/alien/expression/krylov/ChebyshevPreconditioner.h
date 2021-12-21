@@ -111,7 +111,8 @@ namespace Alien
       VectorType x ;
       m_algebra.allocate(AlgebraType::resource(m_matrix),x) ;
       std::random_device rd;
-      std::mt19937 gen(rd());
+      //std::mt19937 gen(rd());
+      std::mt19937 gen;
       std::uniform_real_distribution<> dis(-1., 1.);
 
       m_algebra.assign(x,[&](std::size_t i)
@@ -138,7 +139,7 @@ namespace Alien
         m_algebra.scal(1/norme,m_y) ;
         m_algebra.copy(m_y,x);
         m_beta = xAx/xdx ;
-        if(m_trace_mng && m_output_level>0)
+        if(m_trace_mng && m_output_level>1)
           m_trace_mng->info()<<"Iter("<<i<<") : beta ratio="<<m_beta ;
       }
       if(m_trace_mng)
@@ -155,7 +156,8 @@ namespace Alien
       m_algebra.allocate(AlgebraType::resource(m_matrix),x) ;
 
       std::random_device rd;
-      std::mt19937 gen(rd());
+      //std::mt19937 gen(rd());
+      std::mt19937 gen;
       std::uniform_real_distribution<> dis(-1., 1.);
       /*
       for (std::size_t i = 0; i < x.getAllocSize(); ++i)
@@ -181,7 +183,7 @@ namespace Alien
         ValueType xAx = m_algebra.dot(m_y,x) ;
         ValueType xdx = m_algebra.dot(x,x) ;
         m_alpha = xAx/xdx ;
-        if(m_trace_mng && m_output_level>0)
+        if(m_trace_mng && m_output_level>1)
           m_trace_mng->info()<<"Iter("<<i<<") : alpha ratio="<<m_alpha ;
 
         ValueType norme = m_algebra.norm2(m_y) ;

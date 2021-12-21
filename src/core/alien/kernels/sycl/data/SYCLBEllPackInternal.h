@@ -101,6 +101,10 @@ class MatrixInternal
 
   void mult(ValueBufferType& x, ValueBufferType& y, QueueType& queue) const;
 
+  void computeInvDiag(ValueBufferType& y) const;
+
+  void computeInvDiag(ValueBufferType& y, QueueType& queue) const;
+
   ValueBufferType& getValues() { return m_values; }
 
   ValueBufferType const getValues() const { return m_values; }

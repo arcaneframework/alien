@@ -155,6 +155,7 @@ const UniqueArray<Real>& x_impl, UniqueArray<Real>& y_impl) const
 template <typename ValueT>
 void SYCLBEllPackMatrixMultT<ValueT>::computeInvDiag(VectorType& y) const
 {
+  m_matrix_impl.computeInvDiag(y) ;
 }
 
 /*---------------------------------------------------------------------------*/

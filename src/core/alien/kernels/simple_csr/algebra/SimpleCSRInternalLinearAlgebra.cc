@@ -62,7 +62,10 @@ SimpleCSRInternalLinearAlgebra::SimpleCSRInternalLinearAlgebra()
 
 /*---------------------------------------------------------------------------*/
 
-SimpleCSRInternalLinearAlgebra::~SimpleCSRInternalLinearAlgebra() {}
+SimpleCSRInternalLinearAlgebra::~SimpleCSRInternalLinearAlgebra()
+{
+  m_timer.printInfo();
+}
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
@@ -102,6 +105,7 @@ Real SimpleCSRInternalLinearAlgebra::norm1(const CSRVector& vx ALIEN_UNUSED_PARA
 
 Real SimpleCSRInternalLinearAlgebra::norm2(const CSRVector& vx) const
 {
+  SentryType s(m_timer,"CSR-NORM2") ;
   return CBLASMPIKernel::nrm2(vx.distribution(), vx);
 }
 
@@ -110,6 +114,7 @@ Real SimpleCSRInternalLinearAlgebra::norm2(const CSRVector& vx) const
 void SimpleCSRInternalLinearAlgebra::mult(
 const CSRMatrix& ma, const CSRVector& vx, CSRVector& vr) const
 {
+  SentryType s(m_timer,"CSR-SPMV") ;
   Internal::SimpleCSRMatrixMultT<Real>(ma).mult(vx, vr);
 }
 
@@ -117,6 +122,7 @@ const CSRMatrix& ma, const CSRVector& vx, CSRVector& vr) const
 void SimpleCSRInternalLinearAlgebra::computeInvDiag(
 const CSRMatrix& ma, CSRVector& vr) const
 {
+  SentryType s(m_timer,"CSR-INVDIAG") ;
   Internal::SimpleCSRMatrixMultT<Real>(ma).computeInvDiag(vr);
 }
 
@@ -124,6 +130,7 @@ const CSRMatrix& ma, CSRVector& vr) const
 
 void SimpleCSRInternalLinearAlgebra::axpy(Real alpha, const CSRVector& vx, CSRVector& vr) const
 {
+  SentryType s(m_timer,"CSR-AXPY") ;
   CBLASMPIKernel::axpy(vx.distribution(), alpha, vx, vr);
 }
 
@@ -141,6 +148,7 @@ void SimpleCSRInternalLinearAlgebra::aypx(Real alpha ALIEN_UNUSED_PARAM,
 
 void SimpleCSRInternalLinearAlgebra::copy(const CSRVector& vx, CSRVector& vr) const
 {
+  SentryType s(m_timer,"CSR-COPY") ;
   CBLASMPIKernel::copy(vx.distribution(), vx, vr);
 }
 
@@ -148,6 +156,7 @@ void SimpleCSRInternalLinearAlgebra::copy(const CSRVector& vx, CSRVector& vr) co
 
 Real SimpleCSRInternalLinearAlgebra::dot(const CSRVector& vx, const CSRVector& vy) const
 {
+  SentryType s(m_timer,"CSR-DOT") ;
   return CBLASMPIKernel::dot(vx.distribution(), vx, vy);
 }
 
@@ -155,6 +164,7 @@ Real SimpleCSRInternalLinearAlgebra::dot(const CSRVector& vx, const CSRVector& v
 
 void SimpleCSRInternalLinearAlgebra::scal(Real alpha, CSRVector& vx) const
 {
+  SentryType s(m_timer,"CSR-SCAL") ;
   CBLASMPIKernel::scal(vx.distribution(), alpha, vx);
 }
 
@@ -175,11 +185,13 @@ void SimpleCSRInternalLinearAlgebra::pointwiseMult(const CSRVector& vx,
                                                    const CSRVector& vy,
                                                    CSRVector& vz) const
 {
+  SentryType s(m_timer,"CSR-XYZ") ;
   CBLASMPIKernel::pointwiseMult(vx.distribution(), vx,vy,vz);
 }
 
 void SimpleCSRInternalLinearAlgebra::assign(CSRVector& vx, Real alpha) const
 {
+  SentryType s(m_timer,"CSR-ASSIGN") ;
   CBLASMPIKernel::assign(vx.distribution(), alpha, vx);
 }
 

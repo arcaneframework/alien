@@ -65,6 +65,13 @@ namespace Alien
   }
 
   template<typename ValueT>
+  void SYCLVector<ValueT>::setValuesFromHost()
+  {
+    delete m_internal ;
+    m_internal = new VectorInternal(m_h_values.data(),m_local_size) ;
+  }
+
+  template<typename ValueT>
   void SYCLVector<ValueT>::setValues(std::size_t size, ValueType const* ptr )
   {
     m_h_values.resize(size) ;

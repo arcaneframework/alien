@@ -95,6 +95,7 @@ int main(int argc, char** argv)
       ("nx",                  value<int>()->default_value(10),       "nx")
       ("ny",                  value<int>()->default_value(10),       "ny")
       ("precond",             value<int>()->default_value(1),        "preconditioner 0->id, 1->cheb, 2->neumann")
+      ("output-level",        value<int>()->default_value(0),        "output level")
       ("max-iter",            value<int>()->default_value(1000),     "max iterations")
       ("tol",                 value<double>()->default_value(1.e-6), "Tolerance")
       ("poly-factor",         value<double>()->default_value(0.5),   "Polynome factor")
@@ -392,10 +393,11 @@ int main(int argc, char** argv)
   typedef TimerType::Sentry SentryType ;
 
   TimerType timer;
-  int    max_iteration = vm["max-iter"].as<int>();
-  double tol           = vm["tol"].as<double>();
-  int precond          = vm["precond"].as<int>();
-  std::string kernel   = vm["kernel"].as<std::string>() ;
+  int         max_iteration = vm["max-iter"].as<int>();
+  double      tol           = vm["tol"].as<double>();
+  int         precond       = vm["precond"].as<int>();
+  std::string kernel        = vm["kernel"].as<std::string>() ;
+  int         output_level  = vm["output-level"].as<int>();
 
   auto run = [&](auto& alg)
             {
@@ -411,8 +413,8 @@ int main(int argc, char** argv)
               auto&       true_x = x.impl()->get<BackEndType>(true) ;
 
               SolverType       solver{alg,trace_mng} ;
-              solver.setOutputLevel(1) ;
-              StopCriteriaType stop_criteria{alg,true_b,tol,max_iteration,trace_mng} ;
+              solver.setOutputLevel(output_level) ;
+              StopCriteriaType stop_criteria{alg,true_b,tol,max_iteration,output_level>0?trace_mng:nullptr} ;
 
               switch(precond)
               {
@@ -435,9 +437,10 @@ int main(int argc, char** argv)
 
                   typedef Alien::ChebyshevPreconditioner<AlgebraType> PrecondType ;
                   PrecondType      precond{alg,true_A,polynom_factor,polynom_order,polynom_factor_max_iter,trace_mng} ;
+                  precond.setOutputLevel(output_level) ;
                   precond.init() ;
 
-                  SentryType sentry(timer,"BiCGS-Diag") ;
+                  SentryType sentry(timer,"BiCGS-ChebyshevPoly") ;
                   solver.solve(precond,stop_criteria,true_A,true_b,true_x) ;
                 }
                 break ;
@@ -452,13 +455,23 @@ int main(int argc, char** argv)
                   PrecondType precond{alg,true_A,polynom_factor,polynom_order,polynom_factor_max_iter,trace_mng} ;
                   precond.init() ;
 
-                  SentryType sentry(timer,"BiCGS-Diag") ;
+                  SentryType sentry(timer,"BiCGS-NeumanPoly") ;
                   solver.solve(precond,stop_criteria,true_A,true_b,true_x) ;
                 }
                 break ;
                 default:
                   trace_mng->info()<<"Unknown Preconitioner id";
                   break ;
+              }
+              if(stop_criteria.getStatus())
+              {
+                trace_mng->info()<<"Solver has converged";
+                trace_mng->info()<<"Nb iterations  : "<<stop_criteria();
+                trace_mng->info()<<"Criteria value : "<<stop_criteria.getValue();
+              }
+              else
+              {
+                trace_mng->info()<<"Solver convergence failed";
               }
             } ;
 

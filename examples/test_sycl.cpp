@@ -32,6 +32,7 @@
 #include <alien/kernels/sycl/data/SYCLBEllPackMatrix.h>
 #include <alien/kernels/sycl/data/SYCLVector.h>
 #include <alien/kernels/sycl/algebra/SYCLLinearAlgebra.h>
+#include <alien/kernels/sycl/algebra/SYCLInternalLinearAlgebra.h>
 
 #include <alien/ref/AlienRefSemantic.h>
 
@@ -49,7 +50,8 @@ int main(int argc, char** argv)
       ("help", "produce help")
       ("size",    value<int>()->default_value(16),            "size")
       ("nb-test", value<int>()->default_value(1),             "nb tests")
-      ("test",    value<std::string>()->default_value("all"), "test") ;
+      ("test",    value<std::string>()->default_value("all"), "test")
+      ("dot-algo", value<int>()->default_value(0),            "dot algo choice") ;
 
   variables_map vm;
   store(parse_command_line(argc, argv, desc), vm);
@@ -130,7 +132,8 @@ int main(int argc, char** argv)
   }
 
   Alien::SimpleCSRLinearAlgebra csr_alg;
-  Alien::SYCLLinearAlgebra      sycl_alg;
+  Alien::SYCLLinearAlgebra sycl_alg;
+
   if( (test.compare("all") == 0 ) || (test.compare("copy")==0 ))
   {
     trace_mng->info() <<"TEST COPY : r = y";
@@ -207,20 +210,29 @@ int main(int argc, char** argv)
     {
       auto const& csr_x = x.impl()->get<Alien::BackEnd::tag::simplecsr>() ;
       auto const& csr_y = y.impl()->get<Alien::BackEnd::tag::simplecsr>() ;
-      for(int i=0;i<nb_test;++i)
+
+      for(int itest=0;itest<nb_test;++itest)
       {
+        //std::cout<<itest<<"*";
         SentryType s(timer,"CSR-DOT") ;
         x_dot_y = csr_alg.dot(x,y) ;
       }
+      //std::cout<<std::endl ;
     }
     {
+      int dot_algo = vm["dot-algo"].as<int>() ;
+      Alien::SYCLInternalLinearAlgebra internal_sycl_alg;
+      internal_sycl_alg.setDotAlgo(dot_algo) ;
       auto const& sycl_x = x.impl()->get<Alien::BackEnd::tag::sycl>() ;
       auto const& sycl_y = y.impl()->get<Alien::BackEnd::tag::sycl>() ;
-      for(int i=0;i<nb_test;++i)
+
+      for(int itest=0;itest<nb_test;++itest)
       {
+        //std::cout<<itest<<"*";
         SentryType s(timer,"SYLC-DOT") ;
-        x_dot_y = sycl_alg.dot(x,y) ;
+        x_dot_y = internal_sycl_alg.dot(sycl_x,sycl_y) ;
       }
+      //std::cout<<std::endl ;
     }
     trace_mng->info() <<"SYCL DOT(X,Y) = "<<x_dot_y<<" REF="<<x_dot_y_ref;
   }

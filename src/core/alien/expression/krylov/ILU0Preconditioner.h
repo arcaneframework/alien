@@ -11,58 +11,24 @@
 
 namespace Alien
 {
-
-  template<typename AlgebraT>
-  class ILU0Preconditioner
+  template<typename MatrixT, typename VectorT>
+  class LUFactorisationAlgp
   {
-  public:
-    typedef AlgebraT                         AlgebraType ;
-    typedef typename AlgebraType::Matrix     MatrixType;
-    typedef typename AlgebraType::Vector     VectorType;
-    typedef typename MatrixType::ProfileType ProfileType ;
-    typedef typename MatrixType::ValueType   ValueType;
-    struct CSRData
-    {
-      int              m_nrows ;
-      const int*       m_cols ;
-      const int*       m_kcol ;
-      const int*       m_dcol ;
-      MatrixType*      m_values ;
-    };
-
-
-    ILU0Preconditioner(MatrixType& matrix, ITraceMng* trace_mng=nullptr)
-    : m_matrix(matrix)
-    , m_trace_mng(trace_mng)
-    {
-
-    }
-
-    virtual ~ILU0Preconditioner()
-    {};
-
-
-    //! operator preparation
-    void baseInit()
+  public :
+    void init(MatrixT const& matrix)
     {
       m_lu_matrix.reset(new MatrixType());
-      m_lu_matrix->clone(m_matrix);
+      m_lu_matrix->clone(matrix);
       m_profile = &m_lu_matrix->getProfile() ;
       m_max_external_size = 0 ;
-    }
-
-    void init()
-    {
-      baseInit() ;
-
       m_alloc_size = Alien::numRows(*m_lu_matrix) ;
       m_x.resize(m_alloc_size) ;
       m_work.resize(m_alloc_size) ;
       m_work.assign(m_work.size(),-1) ;
       factorizeInternal() ;
       m_work.clear() ;
-    }
 
+    }
 
     void factorize()
     {
@@ -236,6 +202,64 @@ namespace Alien
           x[irow] = inv(values[dk]) * val ;
         }
     }
+    const MatrixType &getLUMatrix() const
+    {
+      return *m_lu_matrix;
+    }
+
+  private :
+    std::unique_ptr<MatrixType>   m_lu_matrix ;
+    ProfileType const*            m_profile                     = nullptr;
+    std::vector<int>              m_work ;
+    CSRData                       m_blk_data ;
+    std::size_t                   m_alloc_size                  = 0 ;
+
+    mutable VectorType            m_x ;
+
+    int m_max_external_size                                     = 0 ;
+  };
+
+  template<typename AlgebraT>
+  class ILU0Preconditioner
+  {
+  public:
+    typedef AlgebraT                         AlgebraType ;
+    typedef typename AlgebraType::Matrix     MatrixType;
+    typedef typename AlgebraType::Vector     VectorType;
+    typedef typename MatrixType::ProfileType ProfileType ;
+    typedef typename MatrixType::ValueType   ValueType;
+    struct CSRData
+    {
+      int              m_nrows ;
+      const int*       m_cols ;
+      const int*       m_kcol ;
+      const int*       m_dcol ;
+      MatrixType*      m_values ;
+    };
+
+
+    ILU0Preconditioner(MatrixType& matrix, ITraceMng* trace_mng=nullptr)
+    : m_matrix(matrix)
+    , m_trace_mng(trace_mng)
+    {
+
+    }
+
+    virtual ~ILU0Preconditioner()
+    {};
+
+
+    //! operator preparation
+    void baseInit()
+    {
+      m_lu_algo.init(m_matrix) ;
+    }
+
+    void init()
+    {
+      baseInit() ;
+    }
+
 
 
 
@@ -258,22 +282,9 @@ namespace Alien
 
 
 
-    const MatrixType &getLUMatrix() const
-    {
-      return *m_lu_matrix;
-    }
 
   protected :
     MatrixType const&             m_matrix;
-    std::unique_ptr<MatrixType>   m_lu_matrix ;
-    ProfileType const*            m_profile                     = nullptr;
-    std::vector<int>              m_work ;
-    CSRData                       m_blk_data ;
-    std::size_t                   m_alloc_size                  = 0 ;
-
-    mutable VectorType            m_x ;
-
-    int m_max_external_size                                     = 0 ;
 
 
     ITraceMng*                    m_trace_mng                   = nullptr ;

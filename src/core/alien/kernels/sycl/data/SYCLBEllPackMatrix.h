@@ -91,6 +91,8 @@ namespace Alien
 
     void mult(SYCLVector<ValueType> const& x, SYCLVector<ValueType>& y) const ;
 
+    void computeInvDiag(SYCLVector<ValueType>& y) const ;
+
     const DistStructInfo& getDistStructInfo() const { return m_matrix_dist_info; }
 
     SYCLInternal::CommProperty::ePolicyType getSendPolicy() const

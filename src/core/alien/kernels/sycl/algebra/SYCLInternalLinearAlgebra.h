@@ -25,6 +25,8 @@
 #include <alien/kernels/sycl/SYCLBackEnd.h>
 
 #include <alien/utils/ExceptionUtils.h>
+
+#include <alien/utils/StdTimer.h>
 /*---------------------------------------------------------------------------*/
 
 namespace Alien
@@ -55,9 +57,13 @@ class ALIEN_EXPORT SYCLInternalLinearAlgebra
   {}
   } ;
 
+  typedef Alien::StdTimer   TimerType ;
+  typedef TimerType::Sentry SentryType ;
 
   SYCLInternalLinearAlgebra();
   virtual ~SYCLInternalLinearAlgebra();
+
+  void setDotAlgo(int dot_algo) ;
 
  public:
   // IInternalLinearAlgebra interface.
@@ -111,8 +117,8 @@ class ALIEN_EXPORT SYCLInternalLinearAlgebra
   }
 
  private:
-  // No member.
   std::unique_ptr<SYCLInternal::KernelInternal> m_internal ;
+  mutable TimerType m_timer;
 };
 
 class SYCLInternalLinearAlgebraExpr
@@ -149,8 +155,8 @@ class SYCLInternalLinearAlgebraExpr
   void scal(Real alpha, UniqueArray<Real>& x) const;
 
  private:
-  // No member.
   std::unique_ptr<SYCLInternal::KernelInternal> m_internal ;
+
 };
 
 } // namespace Alien

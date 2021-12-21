@@ -120,13 +120,16 @@ class ALIEN_EXPORT SYCLVector : public IVectorImpl
   template <typename LambdaT>
   void apply(LambdaT const& lambda)
   {
-    std::vector<ValueType> values(m_local_size) ;
     for(std::size_t i=0;i<m_local_size;++i)
-      values[i] = lambda(i) ;
-    setValues(m_local_size,values.data()) ;
+    {
+      m_h_values[i] = lambda(i) ;
+    }
+    setValuesFromHost() ;
   }
 
   void setValues(std::size_t size, ValueType const* ptr ) ;
+
+  void setValuesFromHost() ;
 
   void copyValuesTo(std::size_t size, ValueType* ptr ) const ;
 
@@ -136,10 +139,10 @@ class ALIEN_EXPORT SYCLVector : public IVectorImpl
   SYCLVector& operator=(E const& expr);
 
  private:
-  mutable VectorInternal* m_internal = nullptr;
+  mutable VectorInternal*        m_internal = nullptr;
   mutable std::vector<ValueType> m_h_values ;
-  Integer m_local_size = 0;
-  VectorDistribution m_own_distribution ;
+  std::size_t                    m_local_size = 0;
+  VectorDistribution             m_own_distribution ;
 };
 
 //extern template class SYCLVector<Real>;

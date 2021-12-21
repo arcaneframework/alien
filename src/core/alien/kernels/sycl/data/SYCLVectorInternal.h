@@ -42,7 +42,6 @@ class VectorInternal
   : m_values(ptr, cl::sycl::range<1>(size))
   {
     m_values.set_final_data(nullptr);
-    std::cout<<"CREATE SYCL VECTOR INTERNAL : "<<size<<std::endl ;
   }
 
   virtual ~VectorInternal() {}

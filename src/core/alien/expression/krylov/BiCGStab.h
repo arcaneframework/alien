@@ -73,7 +73,7 @@ namespace Alien
           void operator++ ()
           {
             if(m_trace_mng)
-              m_trace_mng->info()<<"ITERATION ("<<m_iter<<","<<m_value<<")";
+              m_trace_mng->info()<<"ITERATION ("<<m_iter<<","<<getValue ()<<")";
             ++m_iter;
           }
 
@@ -142,7 +142,7 @@ namespace Alien
         m_algebra.copy (r, r0);
         m_algebra.copy (r, p);
         rho1 = m_algebra.dot (r, r0);
-        m_trace_mng->info()<<"RHO1"<<rho1;
+        //m_trace_mng->info()<<"RHO1"<<rho1;
 
         /*
            phat = solve(M, p);
@@ -214,8 +214,8 @@ namespace Alien
         while (!iter.stop (r))
         {
 
-          if (m_output_level > 0 && m_trace_mng)
-            m_trace_mng->info()<<"Iteration : "<<iter ()<<" criteria value="<<iter.getValue() ;
+          //if (m_output_level > 0 && m_trace_mng)
+          //  m_trace_mng->info()<<"Iteration : "<<iter ()<<" criteria value="<<iter.getValue() ;
           //SEQ4
           rho1 = m_algebra.dot (r, r0);
           beta = (rho1/rho)*(alpha/omega);

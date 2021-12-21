@@ -29,6 +29,7 @@
 
 #include <alien/utils/ExceptionUtils.h>
 
+#include <alien/utils/StdTimer.h>
 /*---------------------------------------------------------------------------*/
 
 namespace Alien
@@ -54,6 +55,9 @@ class ALIEN_EXPORT SimpleCSRInternalLinearAlgebra
     : BaseType(type,__LINE__)
   {}
   } ;
+
+  typedef Alien::StdTimer   TimerType ;
+  typedef TimerType::Sentry SentryType ;
 
 
   SimpleCSRInternalLinearAlgebra();
@@ -113,7 +117,7 @@ class ALIEN_EXPORT SimpleCSRInternalLinearAlgebra
   }
 
  private:
-  // No member.
+  mutable TimerType m_timer;
 };
 
 class SimpleCSRInternalLinearAlgebraExpr

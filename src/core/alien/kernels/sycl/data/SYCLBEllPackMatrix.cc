@@ -319,9 +319,6 @@ namespace Alien
     //, m_h_cols{cols,cols+m_nnz}
     //, m_h_block_cols(m_block_nnz*block_size)
     {
-
-      std::cout<<"BEllPackStructInfo CONTRUCTOR"<<std::endl ;
-
       alien_debug([&] {
                            cout() << "COMPUTE BELLPACK PROFILE";
                            cout() << "       NROWS : "<<m_nrows;
@@ -339,7 +336,6 @@ namespace Alien
                                     cols,
                                     h_block_row_offset} ;
 
-      std::cout<<"FIN BEllPackStructInfo CONTRUCTOR"<<std::endl ;
     }
 
   namespace SYCLInternal
@@ -350,15 +346,12 @@ namespace Alien
     , m_h_values(profile->getBlockNnz()*block_size)
     , m_values(m_h_values.data(),cl::sycl::range<1>(profile->getBlockNnz()*block_size))
     {
-      std::cout<<"MatrixInternal::MatrixInternal"<<std::endl ;
       //m_values.set_final_data(nullptr);
-      std::cout<<"FIN MatrixInternal::MatrixInternal"<<std::endl ;
     }
 
     template <typename ValueT, int BlockSize>
     bool MatrixInternal<ValueT, BlockSize>::setMatrixValues(ValueT const* values)
     {
-      std::cout<<"MatrixInternal::setMatrixValues"<<std::endl ;
 
       auto env                 = SYCLEnv::instance() ;
       auto& queue              = env->internal()->queue() ;
@@ -499,7 +492,6 @@ namespace Alien
         std::cout<<"Matrix["<<i<<"]="<<h_block_values[i] <<std::endl ;
       }*/
 
-      std::cout<<"FIN MatrixInternal::setMatrixValues"<<std::endl ;
       return true ;
     }
 
@@ -507,7 +499,7 @@ namespace Alien
     void MatrixInternal<ValueT, BlockSize>::mult(ValueBufferType& x, ValueBufferType& y, cl::sycl::queue& queue) const
     {
 
-      std::cout<<"MatrixInternal::mult"<<std::endl ;
+      //std::cout<<"MatrixInternal::mult"<<std::endl ;
 
       auto device = queue.get_device();
 
@@ -572,13 +564,77 @@ namespace Alien
       {
         std::cout<<"Y["<<i<<"]="<<h_y[i] <<std::endl ;
       }*/
-      std::cout<<"Fin MatrixInternal::mult"<<std::endl ;
+      //std::cout<<"Fin MatrixInternal::mult"<<std::endl ;
     }
 
     template <typename ValueT, int BlockSize>
     void MatrixInternal<ValueT, BlockSize>::mult(ValueBufferType& x, ValueBufferType& y) const
     {
       this->mult(x,y,SYCLEnv::instance()->internal()->queue()) ;
+    }
+
+
+    template <typename ValueT, int BlockSize>
+    void MatrixInternal<ValueT, BlockSize>::computeInvDiag(ValueBufferType& y, cl::sycl::queue& queue) const
+    {
+
+      auto device = queue.get_device();
+
+      auto num_groups = queue.get_device().get_info<cl::sycl::info::device::max_compute_units>();
+      // getting the maximum work group size per thread
+      auto max_work_group_size = queue.get_device().get_info<cl::sycl::info::device::max_work_group_size>();
+      // building the best number of global thread
+      auto total_threads = num_groups * block_size;
+
+      auto nrows = m_profile->getNRows() ;
+      auto nnz   = m_profile->getNnz() ;
+
+      auto internal_profile  = m_profile->internal() ;
+      auto& kcol             = internal_profile->getKCol() ;
+      auto& block_row_offset = internal_profile->getBlockRowOffset() ;
+      auto& block_cols       = internal_profile->getBlockCols() ;
+      {
+        // COMPUTE VALUES
+        queue.submit([&](cl::sycl::handler& cgh)
+                     {
+                       auto access_block_row_offset = block_row_offset.template get_access<cl::sycl::access::mode::read>(cgh);
+                       auto access_cols             = block_cols.template get_access<cl::sycl::access::mode::read>(cgh);
+                       auto access_values           = m_values.template get_access<cl::sycl::access::mode::read>(cgh);
+                       auto access_y                = y.template get_access<cl::sycl::access::mode::read_write>(cgh);
+
+
+                       cgh.parallel_for<class compute_mult>(cl::sycl::range<1>{total_threads},
+                                                            [=] (cl::sycl::item<1> item_id)
+                                                            {
+                                                              auto id = item_id.get_id(0);
+                                                              //auto local_id  = item_id.get_local_id(0);
+                                                              //auto block_id  = item_id.get_group(0) ;
+                                                              //auto global_id = item_id.get_global_id(0);
+
+                                                              for (auto i = id; i < nrows; i += item_id.get_range()[0])
+                                                              {
+                                                                 auto block_id = i/block_size ;
+                                                                 auto local_id = i%block_size ;
+
+                                                                 int block_row_offset   = access_block_row_offset[block_id]*block_size ;
+                                                                 auto block_row_size    = access_block_row_offset[block_id+1]-access_block_row_offset[block_id] ;
+                                                                 for(int j=0;j<block_row_size;++j)
+                                                                 {
+                                                                   auto k = block_row_offset+j*block_size+local_id ;
+                                                                   if((access_cols[k])==int(i) && (access_values[k]!=0) )
+                                                                     access_y[i] = 1./access_values[k] ;
+                                                                 }
+                                                              }
+                                                            });
+                     });
+      }
+    }
+
+
+    template <typename ValueT, int BlockSize>
+    void MatrixInternal<ValueT, BlockSize>::computeInvDiag(ValueBufferType& y) const
+    {
+      this->computeInvDiag(y,SYCLEnv::instance()->internal()->queue()) ;
     }
   }
 
@@ -630,6 +686,13 @@ namespace Alien
   void SYCLBEllPackMatrix<ValueT>::mult(SYCLVector<ValueT> const& x, SYCLVector<ValueT>& y) const
   {
     return m_matrix1024->mult(x.internal()->values(),y.internal()->values());
+  }
+
+
+  template <typename ValueT>
+  void SYCLBEllPackMatrix<ValueT>::computeInvDiag(SYCLVector<ValueType>& y) const
+  {
+    return m_matrix1024->computeInvDiag(y.internal()->values());
   }
 
 /*---------------------------------------------------------------------------*/
