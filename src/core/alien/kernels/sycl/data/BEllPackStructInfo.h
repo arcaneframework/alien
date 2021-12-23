@@ -85,6 +85,19 @@ class BEllPackStructInfo : BaseBEllPackStructInfo
 
   Integer getBlockNnz() const { return m_block_nnz ; }
 
+  int const* kcol() const {
+    return nullptr ;
+  }
+
+  int const* cols() const {
+    return nullptr ;
+  }
+
+  int const* dcol() const {
+    return nullptr ;
+  }
+
+
 
 
  protected:

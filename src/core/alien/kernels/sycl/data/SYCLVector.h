@@ -117,6 +117,14 @@ class ALIEN_EXPORT SYCLVector : public IVectorImpl
       return m_own_distribution.offset() ;
   }
 
+  ValueType* getDataPtr() { return m_h_values.data(); }
+  ValueType* data() { return m_h_values.data(); }
+
+  ValueType const* getDataPtr() const { return m_h_values.data(); }
+  ValueType const* data() const { return m_h_values.data(); }
+  ValueType const* getAddressData() const { return m_h_values.data(); }
+
+
   template <typename LambdaT>
   void apply(LambdaT const& lambda)
   {

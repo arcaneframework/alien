@@ -575,6 +575,30 @@ namespace Alien
 
 
     template <typename ValueT, int BlockSize>
+    void MatrixInternal<ValueT, BlockSize>::addLMult(ValueType alpha, ValueBufferType& x, ValueBufferType& y) const
+    {
+      this->mult(x,y,SYCLEnv::instance()->internal()->queue()) ;
+    }
+
+    template <typename ValueT, int BlockSize>
+    void MatrixInternal<ValueT, BlockSize>::addUMult(ValueType alpha, ValueBufferType& x, ValueBufferType& y) const
+    {
+      this->mult(x,y,SYCLEnv::instance()->internal()->queue()) ;
+    }
+
+    template <typename ValueT, int BlockSize>
+    void MatrixInternal<ValueT, BlockSize>::multInvDiag(ValueBufferType& y, cl::sycl::queue& queue) const
+    {
+
+    }
+
+    template <typename ValueT, int BlockSize>
+    void MatrixInternal<ValueT, BlockSize>::multInvDiag(ValueBufferType& y) const
+    {
+      this->multInvDiag(y,SYCLEnv::instance()->internal()->queue()) ;
+    }
+
+    template <typename ValueT, int BlockSize>
     void MatrixInternal<ValueT, BlockSize>::computeInvDiag(ValueBufferType& y, cl::sycl::queue& queue) const
     {
 
@@ -653,8 +677,7 @@ namespace Alien
              int const* kcol,
              int const* cols)
   {
-    alien_debug(
-        [&] { cout() << "INIT SYCL MATTRIX"; });
+    alien_debug([&] { cout() << "INIT SYCL MATTRIX"; });
     std::size_t block_nrows = ProfileInternal1024::nbBlocks(nrows) ;
 
     ProfileInternal1024::computeBlockRowOffset(m_block_row_offset,nrows,kcol) ;
@@ -677,6 +700,15 @@ namespace Alien
   }
 
   template <typename ValueT>
+  SYCLBEllPackMatrix<ValueT>*
+  SYCLBEllPackMatrix<ValueT>::cloneTo(const MultiMatrixImpl* multi) const
+  {
+    SYCLBEllPackMatrix<ValueT>* matrix = new SYCLBEllPackMatrix<ValueT>(multi);
+    matrix->initMatrix(m_parallel_mng,m_profile1024->getNRows(),m_profile1024->kcol(),m_profile1024->cols()) ;
+    return matrix;
+  }
+
+  template <typename ValueT>
   bool SYCLBEllPackMatrix<ValueT>::setMatrixValues(Arccore::Real const* values)
   {
     return m_matrix1024->setMatrixValues(values);
@@ -688,6 +720,23 @@ namespace Alien
     return m_matrix1024->mult(x.internal()->values(),y.internal()->values());
   }
 
+  template <typename ValueT>
+  void SYCLBEllPackMatrix<ValueT>::addLMult(ValueT alpha,SYCLVector<ValueT> const& x, SYCLVector<ValueT>& y) const
+  {
+    return m_matrix1024->addLMult(alpha,x.internal()->values(),y.internal()->values());
+  }
+
+  template <typename ValueT>
+  void SYCLBEllPackMatrix<ValueT>::addUMult(ValueT alpha,SYCLVector<ValueT> const& x, SYCLVector<ValueT>& y) const
+  {
+    return m_matrix1024->addUMult(alpha,x.internal()->values(),y.internal()->values());
+  }
+
+  template <typename ValueT>
+  void SYCLBEllPackMatrix<ValueT>::multInvDiag(SYCLVector<ValueType>& y) const
+  {
+    return m_matrix1024->multInvDiag(y.internal()->values());
+  }
 
   template <typename ValueT>
   void SYCLBEllPackMatrix<ValueT>::computeInvDiag(SYCLVector<ValueType>& y) const

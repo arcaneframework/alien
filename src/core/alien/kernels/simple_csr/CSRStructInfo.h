@@ -172,11 +172,29 @@ class CSRStructInfo
 
   Integer getBlockNnz() const { return m_block_row_offset[m_nrow]; }
 
-  UniqueArray<Integer>& getUpperDiagIndex() { return m_upper_diag_index; }
-
-  ConstArrayView<Integer> getUpperDiagIndex() const
+  UniqueArray<Integer>& getUpperDiagOffset()
   {
-    return m_upper_diag_index.constView();
+    if(m_col_ordering != eUndef && m_upper_diag_offset.size() == 0)
+      computeUpperDiagOffset() ;
+    return m_upper_diag_offset;
+  }
+
+  ConstArrayView<Integer> getUpperDiagOffset() const
+  {
+    if(m_col_ordering != eUndef && m_upper_diag_offset.size() == 0)
+      computeUpperDiagOffset() ;
+    return m_upper_diag_offset.constView();
+  }
+
+  int const* dcol() const
+  {
+    if(m_col_ordering == eUndef)
+      return nullptr ;
+    else
+    {
+      getUpperDiagOffset() ;
+      return m_upper_diag_offset.data();
+    }
   }
 
   void allocate()
@@ -184,6 +202,26 @@ class CSRStructInfo
     m_cols.resize(m_row_offset[m_nrow]);
     if (m_is_variable_block)
       m_block_cols.resize(m_row_offset[m_nrow]);
+  }
+
+  void computeUpperDiagOffset() const
+  {
+    if(m_col_ordering != eUndef)
+    {
+      m_upper_diag_offset.resize(m_nrow) ;
+      for (int irow = 0; irow < m_nrow; ++irow)
+      {
+        int index = m_row_offset[irow] ;
+        for (int k = m_row_offset[irow]; k < m_row_offset[irow + 1]; ++k)
+        {
+          if(m_cols[k]<irow)
+            ++index ;
+          else
+            break ;
+        }
+        m_upper_diag_offset[irow] = index ;
+      }
+    }
   }
 
   Integer computeBandeSize() const
@@ -250,7 +288,7 @@ class CSRStructInfo
 
     setDiagFirst(profile.getDiagFirstOpt());
 
-    m_upper_diag_index.copy(profile.getUpperDiagIndex());
+    m_upper_diag_offset.copy(profile.getUpperDiagOffset());
 
     setSymmetric(profile.getSymmetric());
   }
@@ -264,7 +302,7 @@ class CSRStructInfo
   Arccore::UniqueArray<Arccore::Integer> m_block_cols;
   ColOrdering m_col_ordering;
   bool m_diag_first = true;
-  Arccore::UniqueArray<Arccore::Integer> m_upper_diag_index;
+  mutable Arccore::UniqueArray<Arccore::Integer> m_upper_diag_offset;
   bool m_symmetric = true;
   Arccore::Int64 m_timestamp = -1;
 };

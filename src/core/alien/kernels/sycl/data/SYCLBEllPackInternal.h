@@ -101,6 +101,16 @@ class MatrixInternal
 
   void mult(ValueBufferType& x, ValueBufferType& y, QueueType& queue) const;
 
+  void addLMult(ValueType alpha, ValueBufferType& x, ValueBufferType& y) const;
+  void addUMult(ValueType alpha, ValueBufferType& x, ValueBufferType& y) const;
+
+  void addLMult(ValueType alpha, ValueBufferType& x, ValueBufferType& y, QueueType& queue) const;
+  void addUMult(ValueType alpha, ValueBufferType& x, ValueBufferType& y, QueueType& queue) const;
+
+  void multInvDiag(ValueBufferType& y) const;
+
+  void multInvDiag(ValueBufferType& y, QueueType& queue) const;
+
   void computeInvDiag(ValueBufferType& y) const;
 
   void computeInvDiag(ValueBufferType& y, QueueType& queue) const;

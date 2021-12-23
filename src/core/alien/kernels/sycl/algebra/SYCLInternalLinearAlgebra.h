@@ -77,18 +77,26 @@ class ALIEN_EXPORT SYCLInternalLinearAlgebra
   Real norm0(const Vector& x) const;
   Real norm1(const Vector& x) const;
   Real norm2(const Vector& x) const;
+
   void mult(const Matrix& a, const Vector& x, Vector& r) const;
+  void addLMult(Real alpha,const Matrix& A, const Vector& x, Vector& y) const;
+  void addUMult(Real alpha,const Matrix& A, const Vector& x, Vector& y) const;
+
+  void multInvDiag(const Matrix& A, Vector& y) const;
+  void computeInvDiag(const Matrix& a, Vector& inv_diag) const;
+
   void axpy(Real alpha, const Vector& x, Vector& r) const;
   void aypx(Real alpha, Vector& y, const Vector& x) const;
   void copy(const Vector& x, Vector& r) const;
+
   Real dot(const Vector& x, const Vector& y) const;
   void dot(const Vector& x, const Vector& y, SYCLInternal::Future<Real>& res) const;
+
   void scal(Real alpha, Vector& x) const;
   void diagonal(const Matrix& a, Vector& x) const;
   void reciprocal(Vector& x) const;
   void pointwiseMult(const Vector& x, const Vector& y, Vector& w) const;
 
-  void computeInvDiag(const Matrix& a, Vector& inv_diag) const;
 
   void assign(Vector& x, Real alpha) const;
 

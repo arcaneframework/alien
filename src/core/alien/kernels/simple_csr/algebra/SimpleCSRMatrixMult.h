@@ -55,7 +55,11 @@ class SimpleCSRMatrixMultT
   void mult(const VectorType& x, VectorType& y) const;
   void mult(const UniqueArray<Real>& x, UniqueArray<Real>& y) const;
 
+  void addLMult(Real alpha,const VectorType& x, VectorType& y) const;
+  void addUMult(Real alpha,const VectorType& x, VectorType& y) const;
+
   void computeInvDiag(VectorType& y) const;
+  void multInvDiag(VectorType& y) const;
 
  private:
   void _parallelMult(const VectorType& x, VectorType& y) const;
@@ -63,6 +67,9 @@ class SimpleCSRMatrixMultT
 
   void _seqMult(const VectorType& x, VectorType& y) const;
   void _seqMult(const UniqueArray<Real>& x, UniqueArray<Real>& y) const;
+
+  void _seqAddLMult(Real alpha, const VectorType& x, VectorType& y) const;
+  void _seqAddUMult(Real alpha, const VectorType& x, VectorType& y) const;
 
   void _parallelMultBlock(const VectorType& x, VectorType& y) const;
 

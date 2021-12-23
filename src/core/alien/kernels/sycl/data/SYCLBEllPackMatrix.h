@@ -59,6 +59,7 @@ namespace Alien
 
 
    typedef BEllPackStructInfo<1024,int>                      ProfileInternal1024;
+   typedef BEllPackStructInfo<1024,int>                      ProfileType;
 
   public:
    /** Constructeur de la classe */
@@ -76,10 +77,17 @@ namespace Alien
    {}
 
    /** Destructeur de la classe */
-    ~SYCLBEllPackMatrix () ;
+    virtual ~SYCLBEllPackMatrix () ;
 
     void setTraceMng(ITraceMng* trace_mng) { m_trace = trace_mng; }
 
+    ProfileType const& getProfile() const {
+      return *m_profile1024 ;
+    }
+
+    ValueType* getAddressData() { return nullptr; }
+
+    ValueType const* getAddressData() const { return nullptr; }
    public:
 
     bool initMatrix(Arccore::MessagePassing::IMessagePassingMng* parallel_mng,
@@ -87,10 +95,15 @@ namespace Alien
                     int const* kcol,
                     int const* cols);
 
+    SYCLBEllPackMatrix* cloneTo(const MultiMatrixImpl* multi) const ;
+
     bool setMatrixValues(Arccore::Real const* values);
 
     void mult(SYCLVector<ValueType> const& x, SYCLVector<ValueType>& y) const ;
+    void addLMult(ValueType alpha,SYCLVector<ValueType> const& x, SYCLVector<ValueType>& y) const ;
+    void addUMult(ValueType alpha,SYCLVector<ValueType> const& x, SYCLVector<ValueType>& y) const ;
 
+    void multInvDiag(SYCLVector<ValueType>& y) const ;
     void computeInvDiag(SYCLVector<ValueType>& y) const ;
 
     const DistStructInfo& getDistStructInfo() const { return m_matrix_dist_info; }

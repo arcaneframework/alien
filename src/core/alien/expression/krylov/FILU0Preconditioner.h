@@ -11,43 +11,20 @@ namespace Alien
 {
 
 
-  template<typename AlgebraT>
-  class FILU0Preconditioner
-  : public ILU0Preconditioner<AlgebraT>
+  template<typename MatrixT, typename VectorT>
+  class FLUFactorisationAlgo
+  : public LUFactorisationAlgo<MatrixT,VectorT>
   {
-  public:
-
-    typedef AlgebraT                        AlgebraType ;
-    typedef typename AlgebraType::Matrix    MatrixType;
-    typedef typename AlgebraType::Vector    VectorType;
-    typedef typename MatrixType::ValueType  ValueType;
-
-    typedef ILU0Preconditioner<AlgebraT>    BaseType ;
-
-    class SolveLU : public BaseType::SolveLU
-    {
-    public :
-      typedef typename BaseType::SolveLU ParentType ;
-
-      SolveLU(FILU0Preconditioner* precond, ITraceMng* trace_mng=nullptr)
-      : ParentType(precond,trace_mng)
-      , m_precond(precond)
-      {}
-
-
-      virtual ~SolveLU(){}
-
-
-
-    private:
-      FILU0Preconditioner const* m_precond = nullptr;
-    };
-
-    FILU0Preconditioner(MatrixT& matrix,ITraceMng* trace_mng=nullptr)
-    : BaseType(matrix,trace_mng)
+  public :
+    typedef LUFactorisationAlgo<MatrixT,VectorT> BaseType ;
+    typedef MatrixT                              MatrixType;
+    typedef VectorT                              VectorType;
+    typedef typename MatrixType::ProfileType     ProfileType ;
+    typedef typename MatrixType::ValueType       ValueType;
+    FLUFactorisationAlgo()
     {}
 
-    virtual ~FILU0Preconditioner()
+    virtual ~FLUFactorisationAlgo()
     {}
 
     void setParameter(std::string param, int value) {
@@ -62,49 +39,56 @@ namespace Alien
         m_tol = value ;
     }
 
-    void init()
+    template<typename AlgebraT>
+    void init(AlgebraT& algebra, MatrixT const& matrix)
     {
-      BaseType::baseInit() ;
+      BaseType::baseInit(algebra,matrix) ;
+      algebra.allocate(AlgebraT::resource(matrix),m_xk) ;
 
-
-      this->m_alloc_size = Alien::numRows(*this->m_lu_matrix) ;
-
-      this->m_x.resize(this->m_alloc_size) ;
-      m_xk.resize(this->m_alloc_size) ;
-      this->m_work.resize(this->m_alloc_size) ;
-      this->m_work.assign(this->m_work.size(),-1) ;
       if(m_nb_factorization_iter==0)
       {
-          ValueType* values = this->m_blk_data.m_values  ;
-          factorizeInternal(values,values) ;
+        BaseType::factorize(*this->m_lu_matrix) ;
       }
       else
       {
+        auto const& profile = matrix.getProfile() ;
+        auto nrows = Alien::numRows(matrix) ;
+        int const* kcol = Alien::kcol(profile) ;
+        int const* dcol = Alien::dcol(profile) ;
+        int const* cols = Alien::cols(profile) ;
+
+        typename BaseType::ValueType const* matrix_values = Alien::dataPtr(matrix) ;
+        //auto const& profile = matrix.getProfile() ;
+        auto nnz = Alien::nnz(matrix) ;
+
         for(int iter=0;iter<m_nb_factorization_iter;++iter)
         {
-            ValueType* values = this->m_blk_data.m_values  ;
-
-            auto const& matrix = this->m_matrix ;
-            typename BaseType::ValueType const* matrix_values = Alien::dataPtr(matrix) ;
-            //auto const& profile = matrix.getProfile() ;
-            int nnz = Alien::nnz(matrix) ;
+            ValueType* values = Alien::dataPtr(*this->m_lu_matrix) ;
 
             std::vector<ValueType> guest_values(nnz) ;
             std::copy(values,values+nnz,guest_values.data()) ;
             std::copy(matrix_values,matrix_values+nnz,values) ;
 
-            factorizeInternal(values,guest_values.data()) ;
+            factorizeInternal(nrows,kcol,dcol,cols,values,guest_values.data()) ;
 
         }
       }
       this->m_work.clear() ;
 
+      algebra.allocate(AlgebraT::resource(matrix),m_inv_diag) ;
+      algebra.assign(m_inv_diag,1.);
+      algebra.computeInvDiag(*this->m_lu_matrix,m_inv_diag) ;
     }
+
     ///////////////////////////////////////////////////////////////////////
     //
     // FACTORIZATION
     //
-    void factorizeInternal(ValueType* values,
+    void factorizeInternal(std::size_t nrows,
+                           int const* kcol,
+                           int const* dcol,
+                           int const* cols,
+                           ValueType* values,
                            ValueType* values0)
     {
       /*
@@ -119,12 +103,8 @@ namespace Alien
          EndFor
        *
        */
-      int const* kcol = this->m_blk_data.m_kcol ;
-      int const* dcol = this->m_blk_data.m_dcol ;
-      int const* cols = this->m_blk_data.m_cols ;
-      int nrows = this->m_blk_data.m_nrows ;
 
-      for(int irow=1;irow<nrows;++irow)           // i=1->nrow
+      for(std::size_t irow=1;irow<nrows;++irow)           // i=1->nrow
       {
         _factorizeRow(irow,kcol,dcol,cols,values,values0) ;
       }
@@ -135,61 +115,97 @@ namespace Alien
     //
     // TRIANGULAR RESOLUTION
     //
-    void solveLInternal(ValueType const* y, ValueType* x,ValueType* xk) const
-    {
 
-        CSRData const& blk_data = this->m_blk_data ;
-        int internal_size = blk_data.m_nrows ;
-        int const* kcol = blk_data.m_kcol ;
-        int const* dcol = blk_data.m_dcol ;
-        int const* cols = blk_data.m_cols ;
-        ValueType* values = blk_data.m_values  ;
-        std::copy(x,x+domain_size,xk) ;
-        for(int irow=0;irow<internal_size;++irow)
+    template<typename AlgebraT>
+    void solveL(AlgebraT& algebra,
+                VectorType const& y,
+                VectorType& x,
+                VectorType& xk) const
+    {
+#ifdef DEBUG
+        auto const& profile = this->m_lu_matrix->getProfile() ;
+        int nrows = Alien::numRows(*this->m_lu_matrix) ;
+        int const* kcol = Alien::kcol(profile) ;
+        int const* dcol = Alien::dcol(profile) ;
+        int const* cols = Alien::cols(profile) ;
+
+        ValueType* values = Alien::dataPtr(*this->m_lu_matrix) ;
+
+        std::copy(x,x+nrows,xk) ;
+        for(int irow=0;irow<nrows;++irow)
         {
             ValueType val = y[irow] ;
             for(int k=kcol[irow];k<dcol[irow];++k)
               val -= values[k]*xk[cols[k]] ;
             x[irow] = val ;
         }
-        solveLInterface(y,x,xk) ;
+#endif
+        algebra.copy(x,xk) ;
+        algebra.copy(y,x) ;
+        algebra.addLMult(-1,*this->m_lu_matrix,xk,x) ;
      }
 
-    void solveUInternal(ValueType const* y, ValueType* x,ValueType* xk) const
+    template<typename AlgebraT>
+    void solveU(AlgebraT& algebra, VectorType const& y, VectorType& x,VectorType& xk) const
     {
-        using namespace Alien::MatrixVector::Expr ;
-        CSRData const& blk_data = this->m_blk_data ;
-        int internal_size  = blk_data.m_nrows ;
-        int interface_size = blk_data.m_interface_size ;
-        int domain_size = internal_size+interface_size ;
+#ifdef DEBUG
+      auto const& profile = this->m_lu_matrix->getProfile() ;
+      int nrows = Alien::numRows(*this->m_lu_matrix) ;
+      int const* kcol = Alien::kcol(profile) ;
+      int const* dcol = Alien::dcol(profile) ;
+      int const* cols = Alien::cols(profile) ;
 
-        int const* kcol = blk_data.m_kcol ;
-        int const* dcol = blk_data.m_dcol ;
-        int const* cols = blk_data.m_cols ;
-        ValueType* values = blk_data.m_values  ;
-        std::copy(x,x+domain_size,xk) ;
-        solveUInterface(domain_id,y,x,xk) ;
-        //for(int irow=int_size-1;irow>-1;--irow)
-        for(int irow=0;irow<internal_size;++irow)
+      ValueType* values = Alien::dataPtr(*this->m_lu_matrix) ;
+
+      std::copy(x,x+nrows,xk) ;
+      for(int irow=0;irow<nrows;++irow)
+      {
+        int dk = dcol[irow] ;
+        ValueType val = y[irow] ;
+        for(int k=dk+1;k<kcol[irow+1];++k)
         {
-          int dk = dcol[irow] ;
-          ValueType val = y[irow] ;
-          for(int k=dk+1;k<kcol[irow+1];++k)
-          {
-            val -= values[k]*xk[cols[k]] ;
-          }
-          val = inv(values[dk]) * val ;
-          x[irow] = val ;
+          val -= values[k]*xk[cols[k]] ;
         }
-
+        val = inv(values[dk]) * val ;
+        x[irow] = val ;
+      }
+#endif
+      algebra.copy(x,xk) ;
+      algebra.copy(y,x) ;
+      algebra.addUMult(-1.,*this->m_lu_matrix,xk,x) ;
+      algebra.pointwiseMult(m_inv_diag,x,x) ;
+      //algebra.multInvDiag(*this->m_lu_matrix,x) ;
     }
 
+    template<typename AlgebraT>
+    void solve(AlgebraT& algebra, VectorType const& x, VectorType& y) const
+    {
 
+      //////////////////////////////////////////////////////////////////////////
+      //
+      //     L.X1 = Y
+      //
 
+      algebra.copy(x,this->m_x) ;
+      for(int iter=0;iter<m_nb_solver_iter;++iter)
+      {
+         solveL(algebra,x,this->m_x,m_xk) ;
+      }
+
+      //////////////////////////////////////////////////////////////////////
+      //
+      // Solve U.X = L-1(Y)
+      //
+      algebra.copy(this->m_x,y) ;
+      for(int iter=0;iter<m_nb_solver_iter;++iter)
+      {
+         solveU(algebra,this->m_x,y,m_xk) ;
+      }
+    }
 
   private :
 
-    void _factorizeRow(int irow,
+    void _factorizeRow(std::size_t irow,
                       int const* kcol,
                       int const* dcol,
                       int const* cols,
@@ -210,7 +226,7 @@ namespace Alien
        for(int k=kcol[irow];k<dcol[irow];++k)  // k=1 ->i-1
        {
          int krow = cols[k] ;
-         typename BaseType::ValueType aik = values[k] * inv(values0[dcol[krow]]) ;
+         typename BaseType::ValueType aik = values[k] / values0[dcol[krow]] ;
          values[k] = aik ; // aik = aik/akk
          for(int l=kcol[krow];l<kcol[krow+1];++l)
            this->m_work[cols[l]] = l ;
@@ -228,17 +244,82 @@ namespace Alien
        }
     }
 
+    mutable VectorType        m_xk ;
+    mutable VectorType        m_inv_diag ;
 
+  public:
     //!PARAMETERS
     int       m_nb_factorization_iter = 0 ;
     int       m_nb_solver_iter        = 0 ;
     ValueType m_tol                   = 0 ;
 
-    mutable VectorType        m_xk ;
-    std::unique_ptr<SolveLU>  m_solverLU ;
+  } ;
+
+  template<typename AlgebraT>
+  class FILU0Preconditioner
+  {
+  public:
+
+    typedef AlgebraT                        AlgebraType ;
+    typedef typename AlgebraType::Matrix    MatrixType;
+    typedef typename AlgebraType::Vector    VectorType;
+    typedef typename MatrixType::ValueType  ValueType;
 
 
-    bool      m_verbose               = false ;
+    typedef FLUFactorisationAlgo<MatrixType,VectorType> AlgoType ;
+
+    FILU0Preconditioner(AlgebraType& algebra,
+                        MatrixType const& matrix,
+                        ITraceMng* trace_mng=nullptr)
+    : m_algebra(algebra)
+    , m_matrix(matrix)
+    , m_trace_mng(trace_mng)
+    {}
+
+    virtual ~FILU0Preconditioner()
+    {}
+
+    void setParameter(std::string param, int value)
+    {
+      m_algo.setParameter(param,value) ;
+    }
+
+    void setParameter(std::string param, double value)
+    {
+      m_algo.setParameter(param,value) ;
+    }
+
+    void init()
+    {
+      m_algo.init(m_algebra, m_matrix) ;
+      if(m_trace_mng)
+      {
+        m_trace_mng->info()<<"FILU Preconditioner :";
+        m_trace_mng->info()<<"     Nb Factor iter :"<<m_algo.m_nb_factorization_iter;
+        m_trace_mng->info()<<"     Nb Solver iter :"<<m_algo.m_nb_solver_iter;
+        m_trace_mng->info()<<"     Tolerance      :"<<m_algo.m_tol;
+      }
+    }
+
+    void solve(VectorType const& y, VectorType& x) const
+    {
+      m_algo.solve(m_algebra,y,x) ;
+    }
+
+
+    void solve(AlgebraType& algebra,VectorType const& y, VectorType& x) const
+    {
+      m_algo.solve(algebra,y,x) ;
+    }
+
+  private :
+
+    AlgebraType&                  m_algebra ;
+    MatrixType const&             m_matrix;
+    AlgoType                      m_algo ;
+
+    ITraceMng*                    m_trace_mng = nullptr ;
+    bool                          m_verbose   = false ;
 
   };
 

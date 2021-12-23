@@ -76,7 +76,7 @@ namespace Alien
           void operator++ ()
           {
             if(m_trace_mng)
-              m_trace_mng->info()<<"ITERATION ("<<m_iter<<","<<getValue ()<<")";
+              m_trace_mng->info()<<"iteration ("<<m_iter<<") criteria = "<<getValue ();
             ++m_iter;
           }
 
@@ -146,7 +146,8 @@ namespace Alien
         m_algebra.copy (r, r0);
         m_algebra.copy (r, p);
         rho1 = m_algebra.dot (r, r0);
-        //m_trace_mng->info()<<"RHO1"<<rho1;
+        if (m_output_level > 1)
+          _print (0, "Seq 0", "rho1", rho1);
 
         /*
            phat = solve(M, p);
@@ -162,9 +163,10 @@ namespace Alien
         if (alpha == 0)
             throw typename AlgebraType::NullValueException ("alpha");
         alpha = rho1/alpha ;
-
         m_algebra.copy (r, s);
         m_algebra.axpy (-alpha, v, s);
+        if (m_output_level > 1)
+          _print (0, "Seq 1", "alpha", alpha);
 
         if (iter.stop(s))
         {
@@ -180,6 +182,7 @@ namespace Alien
         m_algebra.mult (A, shat, t);
         omega = m_algebra.dot (t, s);
         beta = m_algebra.dot (t, t);
+
         if (beta == 0)
         {
              if (iter.stop (r))
@@ -192,8 +195,9 @@ namespace Alien
              else
                throw typename AlgebraType::NullValueException ("beta");
         }
-
         omega = omega/beta ;
+        if (m_output_level > 1)
+          _print (iter (), "Seq 2", "beta", beta, "alpha", alpha, "rho1", rho1);
 
         // SEQ 3
         m_algebra.axpy (omega, shat, x);
@@ -203,29 +207,20 @@ namespace Alien
 
         rho = rho1;
         ++iter;
-
-         //SEQ4
-         /*
-           beta = (rho_1 / rho_2) * (alpha / omega);
-           p = r + beta * (p - omega * v);
-         */
-        rho1 = m_algebra.dot (r, r0);
-        beta = (rho1/rho)*(alpha/omega) ;
-        m_algebra.axpy (-omega, v, p);
-        m_algebra.scal (beta, p);
-        m_algebra.axpy (-1.,r, p);
+        if (m_output_level > 1)
+          _print (iter (), "Seq 3", "beta", beta, "alpha", alpha, "rho1", rho1);
 
         while (!iter.stop (r))
         {
-
-          //if (m_output_level > 0 && m_trace_mng)
-          //  m_trace_mng->info()<<"Iteration : "<<iter ()<<" criteria value="<<iter.getValue() ;
           //SEQ4
           rho1 = m_algebra.dot (r, r0);
           beta = (rho1/rho)*(alpha/omega);
           m_algebra.axpy (-omega, v, p);
           m_algebra.scal (beta, p);
-          m_algebra.axpy (-1.,r, p);
+          m_algebra.axpy (1.,r, p);
+          if (m_output_level > 1)
+            _print (iter (), "Seq 4", "beta", beta, "alpha", alpha, "rho1", rho1);
+
           if(rho==0)
             throw typename AlgebraType::NullValueException ("rho");
 
@@ -241,6 +236,8 @@ namespace Alien
           m_algebra.copy (r, s);
           m_algebra.axpy (-alpha, v, s);
 
+          if (m_output_level > 1)
+            _print (iter (), "Seq 1", "alpha", alpha);
           if (iter.stop(s))
           {
             m_algebra.axpy (alpha, phat, x);
@@ -253,6 +250,9 @@ namespace Alien
           m_algebra.mult (A, shat, t);
           omega = m_algebra.dot (t, s);
           beta = m_algebra.dot (t, t);
+
+          if (m_output_level > 1)
+            _print (iter (), "Seq 2", "beta", beta, "alpha", alpha, "rho1", rho1, "omega", omega);
           if (beta == 0)
           {
             if (iter.stop (s))
@@ -275,6 +275,9 @@ namespace Alien
           rho = rho1;
 
           ++iter;
+          if (m_output_level > 1)
+            _print (iter (), "end loop", "beta", beta, "alpha", alpha, "rho", rho);
+
         }
 
         m_algebra.free (p, phat, s, shat, t, v, r, r0);
@@ -444,6 +447,54 @@ namespace Alien
 
 
     private:
+      void
+      _print (int iter, std::string const& msg, std::string const& label0,
+              ValueType value0)
+      {
+        if (m_trace_mng)
+        {
+          m_trace_mng->info () << msg ;
+          m_trace_mng->info () << "Iterate: " << iter << " " << label0 << " "
+              << value0 ;
+        }
+      }
+      void
+      _print (int iter, std::string const& msg, std::string const& label0,
+              ValueType value0, std::string const& label1, ValueType value1)
+      {
+        if (m_trace_mng)
+        {
+          _print (iter, msg, label0, value0);
+          m_trace_mng->info () << "Iterate: " << iter << " " << label1 << " "
+              << value1 ;
+        }
+      }
+      void
+      _print (int iter, std::string const& msg, std::string const& label0,
+              ValueType value0, std::string const& label1, ValueType value1,
+              std::string const& label2, ValueType value2)
+      {
+        if (m_trace_mng)
+        {
+          _print (iter, msg, label0, value0, label1, value1);
+          m_trace_mng->info () << "Iterate: " << iter << " " << label2 << " "
+              << value2 ;
+        }
+      }
+      void
+      _print (int iter, std::string const& msg, std::string const& label0,
+              ValueType value0, std::string const& label1, ValueType value1,
+              std::string const& label2, ValueType value2,
+              std::string const& label3, ValueType value3)
+      {
+        if (m_trace_mng)
+        {
+          _print (iter, msg, label0, value0, label1, value1, label2, value2);
+          m_trace_mng->info () << "Iterate: " << iter << " " << label3 << " "
+              << value3 ;
+        }
+      }
+
       AlgebraType& m_algebra;
       ITraceMng*   m_trace_mng    = nullptr ;
       int          m_output_level = 0 ;

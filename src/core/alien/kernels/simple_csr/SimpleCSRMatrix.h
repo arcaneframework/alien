@@ -61,7 +61,7 @@ class SimpleCSRMatrix : public IMatrixImpl
  public:
   /** Constructeur de la classe */
   SimpleCSRMatrix()
-  : IMatrixImpl(NULL, AlgebraTraits<BackEnd::tag::simplecsr>::name())
+  : IMatrixImpl(nullptr, AlgebraTraits<BackEnd::tag::simplecsr>::name())
   , m_send_policy(SimpleCSRInternal::CommProperty::ASynch)
   , m_recv_policy(SimpleCSRInternal::CommProperty::ASynch)
   {}
@@ -69,7 +69,7 @@ class SimpleCSRMatrix : public IMatrixImpl
   /** Constructeur de la classe */
   SimpleCSRMatrix(const MultiMatrixImpl* multi_impl)
   : IMatrixImpl(multi_impl, AlgebraTraits<BackEnd::tag::simplecsr>::name())
-  , m_matrix(multi_impl->vblock() != nullptr)
+  , m_matrix(multi_impl?multi_impl->vblock() != nullptr:false)
   , m_send_policy(SimpleCSRInternal::CommProperty::ASynch)
   , m_recv_policy(SimpleCSRInternal::CommProperty::ASynch)
   {}
@@ -294,7 +294,6 @@ class SimpleCSRMatrix : public IMatrixImpl
   Integer m_myrank = 0;
   ITraceMng* m_trace = nullptr;
 
-  // From unsuccessful try to implement multiplication.
   friend class SimpleCSRInternal::SimpleCSRMatrixMultT<ValueType>;
 };
 

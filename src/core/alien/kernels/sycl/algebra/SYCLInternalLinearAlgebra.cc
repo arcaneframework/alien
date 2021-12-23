@@ -136,6 +136,32 @@ void SYCLInternalLinearAlgebra::mult(const SYCLBEllPackMatrix<Real>& ma,
   Internal::SYCLBEllPackMatrixMultT<Real>(ma).mult(vx, vr);
 }
 
+void SYCLInternalLinearAlgebra::addLMult(Real alpha,
+                                         const SYCLBEllPackMatrix<Real>& ma,
+                                         const SYCLVector<Real>& vx,
+                                         SYCLVector<Real>& vr) const
+{
+  SentryType s(m_timer,"SYCL-ADDLMULT") ;
+  Internal::SYCLBEllPackMatrixMultT<Real>(ma).addLMult(alpha,vx, vr);
+}
+
+void SYCLInternalLinearAlgebra::addUMult(Real alpha,
+                                         const SYCLBEllPackMatrix<Real>& ma,
+                                         const SYCLVector<Real>& vx,
+                                         SYCLVector<Real>& vr) const
+{
+  SentryType s(m_timer,"SYCL-ADDUMULT") ;
+  Internal::SYCLBEllPackMatrixMultT<Real>(ma).addUMult(alpha,vx, vr);
+}
+
+void SYCLInternalLinearAlgebra::
+multInvDiag(const SYCLBEllPackMatrix<Real>& ma,
+            SYCLVector<Real>& vr) const
+{
+  SentryType s(m_timer,"SYCL-MULTINVDIAG") ;
+  Internal::SYCLBEllPackMatrixMultT<Real>(ma).multInvDiag(vr);
+}
+
 void SYCLInternalLinearAlgebra::
 computeInvDiag(const SYCLBEllPackMatrix<Real>& ma,
                SYCLVector<Real>& vr) const

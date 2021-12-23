@@ -111,16 +111,39 @@ Real SimpleCSRInternalLinearAlgebra::norm2(const CSRVector& vx) const
 
 /*---------------------------------------------------------------------------*/
 
-void SimpleCSRInternalLinearAlgebra::mult(
-const CSRMatrix& ma, const CSRVector& vx, CSRVector& vr) const
+void SimpleCSRInternalLinearAlgebra::mult(const CSRMatrix& ma,
+                                          const CSRVector& vx,
+                                          CSRVector& vr) const
 {
   SentryType s(m_timer,"CSR-SPMV") ;
   Internal::SimpleCSRMatrixMultT<Real>(ma).mult(vx, vr);
 }
 
+void SimpleCSRInternalLinearAlgebra::addLMult(Real alpha,
+                                              const CSRMatrix& ma,
+                                              const CSRVector& vx,
+                                              CSRVector& vr) const
+{
+  SentryType s(m_timer,"CSR-AddLMult") ;
+  Internal::SimpleCSRMatrixMultT<Real>(ma).addLMult(alpha,vx, vr);
+}
 
-void SimpleCSRInternalLinearAlgebra::computeInvDiag(
-const CSRMatrix& ma, CSRVector& vr) const
+void SimpleCSRInternalLinearAlgebra::addUMult(Real alpha,
+                                              const CSRMatrix& ma,
+                                              const CSRVector& vx,
+                                              CSRVector& vr) const
+{
+  SentryType s(m_timer,"CSR-AddUMult") ;
+  Internal::SimpleCSRMatrixMultT<Real>(ma).addUMult(alpha,vx, vr);
+}
+
+void SimpleCSRInternalLinearAlgebra::multInvDiag(const CSRMatrix& ma, CSRVector& vr) const
+{
+  SentryType s(m_timer,"CSR-MULTINVDIAG") ;
+  Internal::SimpleCSRMatrixMultT<Real>(ma).multInvDiag(vr);
+}
+
+void SimpleCSRInternalLinearAlgebra::computeInvDiag(const CSRMatrix& ma, CSRVector& vr) const
 {
   SentryType s(m_timer,"CSR-INVDIAG") ;
   Internal::SimpleCSRMatrixMultT<Real>(ma).computeInvDiag(vr);

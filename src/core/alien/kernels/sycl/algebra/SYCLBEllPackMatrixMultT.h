@@ -42,7 +42,19 @@ void SYCLBEllPackMatrixMultT<ValueT>::mult(const VectorType& x, VectorType& y) c
     _parallelMult(x, y);
   else
     _seqMult(x, y);
+}
 
+
+template <typename ValueT>
+void SYCLBEllPackMatrixMultT<ValueT>::addLMult(Real alpha, const VectorType& x, VectorType& y) const
+{
+  m_matrix_impl.addLMult(alpha,x,y) ;
+}
+
+template <typename ValueT>
+void SYCLBEllPackMatrixMultT<ValueT>::addUMult(Real alpha, const VectorType& x, VectorType& y) const
+{
+  m_matrix_impl.addUMult(alpha,x,y) ;
 }
 
 template <typename ValueT>
@@ -151,6 +163,13 @@ const UniqueArray<Real>& x_impl, UniqueArray<Real>& y_impl) const
 
 /*---------------------------------------------------------------------------*/
 
+
+
+template <typename ValueT>
+void SYCLBEllPackMatrixMultT<ValueT>::multInvDiag(VectorType& y) const
+{
+  m_matrix_impl.multInvDiag(y) ;
+}
 
 template <typename ValueT>
 void SYCLBEllPackMatrixMultT<ValueT>::computeInvDiag(VectorType& y) const

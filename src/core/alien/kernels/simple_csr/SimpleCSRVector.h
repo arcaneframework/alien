@@ -94,9 +94,10 @@ class SimpleCSRVector : public IVectorImpl
   UniqueArray<ValueType> const& getArrayValues() const { return m_values; }
 
   ValueType* getDataPtr() { return m_values.data(); }
+  ValueType* data() { return m_values.data(); }
 
-  const ValueType* getDataPtr() const { return m_values.data(); }
-
+  ValueType const* getDataPtr() const { return m_values.data(); }
+  ValueType const* data() const { return m_values.data(); }
   ValueType const* getAddressData() const { return m_values.data(); }
 
   ValueType& operator[](Integer index) { return m_values[index]; }

@@ -57,6 +57,21 @@ void SimpleCSRMatrixMultT<ValueT>::mult(const VectorType& x, VectorType& y) cons
   }
 }
 
+
+template <typename ValueT>
+void SimpleCSRMatrixMultT<ValueT>::addLMult(Real alpha,const VectorType& x, VectorType& y) const
+{
+  _seqAddLMult(alpha,x, y);
+}
+
+template <typename ValueT>
+void SimpleCSRMatrixMultT<ValueT>::addUMult(Real alpha,const VectorType& x, VectorType& y) const
+{
+  _seqAddUMult(alpha,x, y);
+
+}
+
+
 template <typename ValueT>
 void SimpleCSRMatrixMultT<ValueT>::mult(const UniqueArray<Real>& x, UniqueArray<Real>& y) const
 {
@@ -200,6 +215,42 @@ void SimpleCSRMatrixMultT<ValueT>::_seqMult(const VectorType& x_impl, VectorType
     Real tmpy = 0.;
     for (Integer j = row_offset[irow]; j < row_offset[irow + 1]; ++j) {
       tmpy += matrix[j] * x_ptr[cols[j]];
+    }
+    y_ptr[irow] = tmpy;
+  }
+}
+
+template <typename ValueT>
+void SimpleCSRMatrixMultT<ValueT>::_seqAddLMult(Real alpha,const VectorType& x_impl, VectorType& y_impl) const
+{
+  Real* y_ptr = y_impl.getDataPtr();
+  Real* x_ptr = (Real*)x_impl.getDataPtr();
+  ConstArrayView<Real> matrix = m_matrix_impl.m_matrix.getValues();
+  ConstArrayView<Integer> cols = m_matrix_impl.m_matrix.getCSRProfile().getCols();
+  ConstArrayView<Integer> row_offset = m_matrix_impl.m_matrix.getCSRProfile().getRowOffset();
+  auto diag_offset = m_matrix_impl.m_matrix.getCSRProfile().getUpperDiagOffset() ;
+  for (Integer irow = 0; irow < m_matrix_impl.m_local_size; ++irow) {
+    Real tmpy = y_ptr[irow];
+    for (Integer j = row_offset[irow]; j < diag_offset[irow]; ++j) {
+      tmpy += alpha* matrix[j] * x_ptr[cols[j]];
+    }
+    y_ptr[irow] = tmpy;
+  }
+}
+
+template <typename ValueT>
+void SimpleCSRMatrixMultT<ValueT>::_seqAddUMult(Real alpha,const VectorType& x_impl, VectorType& y_impl) const
+{
+  Real* y_ptr = y_impl.getDataPtr();
+  Real* x_ptr = (Real*)x_impl.getDataPtr();
+  ConstArrayView<Real> matrix = m_matrix_impl.m_matrix.getValues();
+  ConstArrayView<Integer> cols = m_matrix_impl.m_matrix.getCSRProfile().getCols();
+  ConstArrayView<Integer> row_offset = m_matrix_impl.m_matrix.getCSRProfile().getRowOffset();
+  auto diag_offset = m_matrix_impl.m_matrix.getCSRProfile().getUpperDiagOffset() ;
+  for (Integer irow = 0; irow < m_matrix_impl.m_local_size; ++irow) {
+    Real tmpy = y_ptr[irow];
+    for (Integer j = diag_offset[irow]+1; j < row_offset[irow + 1]; ++j) {
+      tmpy += alpha*matrix[j] * x_ptr[cols[j]];
     }
     y_ptr[irow] = tmpy;
   }
@@ -450,13 +501,27 @@ const VectorType& x_impl, VectorType& y_impl) const
 
 
 template <typename ValueT>
+void SimpleCSRMatrixMultT<ValueT>::multInvDiag(VectorType& y) const
+{
+  Real* y_ptr = y.getDataPtr();
+  ConstArrayView<Real> matrix = m_matrix_impl.m_matrix.getValues();
+  ConstArrayView<Integer> cols = m_matrix_impl.m_matrix.getCSRProfile().getCols();
+  ConstArrayView<Integer> row_offset = m_matrix_impl.m_matrix.getCSRProfile().getRowOffset();
+  auto diag_offset = m_matrix_impl.m_matrix.getCSRProfile().getUpperDiagOffset() ;
+  for (Integer irow = 0; irow < m_matrix_impl.m_local_size; ++irow)
+  {
+    y_ptr[irow] = y_ptr[irow]/matrix[diag_offset[irow]];
+  }
+}
+
+template <typename ValueT>
 void SimpleCSRMatrixMultT<ValueT>::computeInvDiag(VectorType& y) const
 {
   Real* y_ptr = y.getDataPtr();
   ConstArrayView<Real> matrix = m_matrix_impl.m_matrix.getValues();
   ConstArrayView<Integer> cols = m_matrix_impl.m_matrix.getCSRProfile().getCols();
-  ConstArrayView<Integer> row_offset =
-  m_matrix_impl.m_matrix.getCSRProfile().getRowOffset();
+  ConstArrayView<Integer> row_offset = m_matrix_impl.m_matrix.getCSRProfile().getRowOffset();
+  //auto diag_offset = m_matrix_impl.m_matrix.getCSRProfile().getDiagOffset() ;
   for (Integer irow = 0; irow < m_matrix_impl.m_local_size; ++irow) {
     for (Integer j = row_offset[irow]; j < row_offset[irow + 1]; ++j)
     {
