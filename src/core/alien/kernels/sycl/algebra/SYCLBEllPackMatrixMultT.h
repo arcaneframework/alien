@@ -44,17 +44,16 @@ void SYCLBEllPackMatrixMultT<ValueT>::mult(const VectorType& x, VectorType& y) c
     _seqMult(x, y);
 }
 
-
 template <typename ValueT>
 void SYCLBEllPackMatrixMultT<ValueT>::addLMult(Real alpha, const VectorType& x, VectorType& y) const
 {
-  m_matrix_impl.addLMult(alpha,x,y) ;
+  m_matrix_impl.addLMult(alpha, x, y);
 }
 
 template <typename ValueT>
 void SYCLBEllPackMatrixMultT<ValueT>::addUMult(Real alpha, const VectorType& x, VectorType& y) const
 {
-  m_matrix_impl.addUMult(alpha,x,y) ;
+  m_matrix_impl.addUMult(alpha, x, y);
 }
 
 template <typename ValueT>
@@ -75,32 +74,32 @@ const VectorType& x_impl, VectorType& y_impl) const
 #ifdef ENABLE_MPI_SYCL
   Integer alloc_size = m_matrix_impl.m_local_size + m_matrix_impl.m_ghost_size;
   x_impl.resize(alloc_size);
-  Real* y_ptr = y_impl.getDataPtr();
-  Real* x_ptr = (ValueT*)x_impl.getDataPtr();
+  Real* y_ptr                   = y_impl.getDataPtr();
+  Real* x_ptr                   = (ValueT*)x_impl.getDataPtr();
   ConstArrayView<ValueT> matrix = m_matrix_impl.m_matrix.getValues();
   // ConstArrayView<Integer> cols2 =
   // m_matrix_impl.m_matrix.getProfile().getCols();
-  ConstArrayView<Integer> cols = m_matrix_impl.getDistStructInfo().m_cols;
+  ConstArrayView<Integer> cols       = m_matrix_impl.getDistStructInfo().m_cols;
   ConstArrayView<Integer> row_offset = m_matrix_impl.m_matrix.getProfile().getRowOffset();
   SendRecvOp<ValueT> op(x_ptr, m_matrix_impl.m_matrix_dist_info.m_send_info,
-                      m_matrix_impl.m_send_policy, x_ptr, m_matrix_impl.m_matrix_dist_info.m_recv_info,
-                      m_matrix_impl.m_recv_policy, m_matrix_impl.m_parallel_mng, m_matrix_impl.m_trace);
+                        m_matrix_impl.m_send_policy, x_ptr, m_matrix_impl.m_matrix_dist_info.m_recv_info,
+                        m_matrix_impl.m_recv_policy, m_matrix_impl.m_parallel_mng, m_matrix_impl.m_trace);
   op.start();
 
 #endif
 
-  m_matrix_impl.mult(x_impl,y_impl) ;
+  m_matrix_impl.mult(x_impl, y_impl);
 
 #ifdef ENABLE_MPI_SYCL
   op.end();
 
-  Integer interface_nrow = m_matrix_impl.m_matrix_dist_info.m_interface_nrow;
+  Integer interface_nrow          = m_matrix_impl.m_matrix_dist_info.m_interface_nrow;
   ConstArrayView<Integer> row_ids = m_matrix_impl.m_matrix_dist_info.m_interface_rows;
   for (Integer i = 0; i < interface_nrow; ++i) {
     Integer irow = row_ids[i];
-    Integer off = row_offset[irow] + local_row_size[irow];
+    Integer off  = row_offset[irow] + local_row_size[irow];
     Integer off2 = row_offset[irow + 1];
-    Real tmpy = 0.;
+    Real tmpy    = 0.;
     for (Integer j = off; j < off2; ++j) {
       tmpy += matrix[j] * x_ptr[cols[j]];
       // m_matrix_impl.space().message()<<"mat["<<cols[j]<<","<<cols2[j]<<"]="<<matrix[j]<<"*"<<x_ptr[cols[j]];
@@ -116,9 +115,9 @@ void SYCLBEllPackMatrixMultT<ValueT>::_parallelMult(
 const UniqueArray<Real>& x_impl, UniqueArray<Real>& y_impl) const
 {
 #ifdef ENABLE_MPI_SYCL
-  Real* y_ptr = dataPtr(y_impl);
-  Real* x_ptr = (Real*)dataPtr(x_impl);
-  ConstArrayView<Real> matrix = m_matrix_impl.m_matrix.getValues();
+  Real* y_ptr                  = dataPtr(y_impl);
+  Real* x_ptr                  = (Real*)dataPtr(x_impl);
+  ConstArrayView<Real> matrix  = m_matrix_impl.m_matrix.getValues();
   ConstArrayView<Integer> cols = m_matrix_impl.getDistStructInfo().m_cols;
   ConstArrayView<Integer> row_offset =
   m_matrix_impl.m_matrix.getProfile().getRowOffset();
@@ -133,13 +132,13 @@ const UniqueArray<Real>& x_impl, UniqueArray<Real>& y_impl) const
 #ifdef ENABLE_MPI_SYCL
   op.end();
 
-  Integer interface_nrow = m_matrix_impl.m_matrix_dist_info.m_interface_nrow;
+  Integer interface_nrow          = m_matrix_impl.m_matrix_dist_info.m_interface_nrow;
   ConstArrayView<Integer> row_ids = m_matrix_impl.m_matrix_dist_info.m_interface_rows;
   for (Integer i = 0; i < interface_nrow; ++i) {
     Integer irow = row_ids[i];
-    Integer off = row_offset[irow] + local_row_size[irow];
+    Integer off  = row_offset[irow] + local_row_size[irow];
     Integer off2 = row_offset[irow + 1];
-    Real tmpy = 0.;
+    Real tmpy    = 0.;
     for (Integer j = off; j < off2; ++j) {
       tmpy += matrix[j] * x_ptr[cols[j]];
     }
@@ -152,7 +151,7 @@ const UniqueArray<Real>& x_impl, UniqueArray<Real>& y_impl) const
 template <typename ValueT>
 void SYCLBEllPackMatrixMultT<ValueT>::_seqMult(const VectorType& x_impl, VectorType& y_impl) const
 {
-  m_matrix_impl.mult(x_impl,y_impl) ;
+  m_matrix_impl.mult(x_impl, y_impl);
 }
 
 template <typename ValueT>
@@ -163,25 +162,22 @@ const UniqueArray<Real>& x_impl, UniqueArray<Real>& y_impl) const
 
 /*---------------------------------------------------------------------------*/
 
-
-
 template <typename ValueT>
 void SYCLBEllPackMatrixMultT<ValueT>::multInvDiag(VectorType& y) const
 {
-  m_matrix_impl.multInvDiag(y) ;
+  m_matrix_impl.multInvDiag(y);
 }
 
 template <typename ValueT>
 void SYCLBEllPackMatrixMultT<ValueT>::computeInvDiag(VectorType& y) const
 {
-  m_matrix_impl.computeInvDiag(y) ;
+  m_matrix_impl.computeInvDiag(y);
 }
 
 /*---------------------------------------------------------------------------*/
 
-
 /*---------------------------------------------------------------------------*/
 
-} // namespace Alien::SYCLBEllPackInternal
+} // namespace Alien::SYCLInternal
 
 /*---------------------------------------------------------------------------*/

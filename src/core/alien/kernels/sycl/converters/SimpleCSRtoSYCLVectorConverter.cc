@@ -34,6 +34,7 @@ class SimpleCSRtoSYCLVectorConverter : public IVectorConverter
  public:
   SimpleCSRtoSYCLVectorConverter();
   virtual ~SimpleCSRtoSYCLVectorConverter() {}
+
  public:
   Alien::BackEndId sourceBackend() const
   {
@@ -55,17 +56,16 @@ SimpleCSRtoSYCLVectorConverter::SimpleCSRtoSYCLVectorConverter()
 
 /*---------------------------------------------------------------------------*/
 
-void
-SimpleCSRtoSYCLVectorConverter::convert(
-    const IVectorImpl* sourceImpl, IVectorImpl* targetImpl) const
+void SimpleCSRtoSYCLVectorConverter::convert(
+const IVectorImpl* sourceImpl, IVectorImpl* targetImpl) const
 {
   const SimpleCSRVector<double>& v =
-      cast<SimpleCSRVector<double>>(sourceImpl, sourceBackend());
+  cast<SimpleCSRVector<double>>(sourceImpl, sourceBackend());
   SYCLVector<double>& v2 =
-      cast<SYCLVector<double>>(targetImpl, targetBackend());
+  cast<SYCLVector<double>>(targetImpl, targetBackend());
 
   alien_debug(
-      [&] { cout() << "Converting SimpleCSRVector: " << &v << " to SYCLVector " << &v2; });
+  [&] { cout() << "Converting SimpleCSRVector: " << &v << " to SYCLVector " << &v2; });
 
   ConstArrayView<Real> values = v.values();
   v2.setValues(v.scalarizedLocalSize(), values.data());

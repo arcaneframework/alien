@@ -29,71 +29,74 @@
 namespace Alien::SYCLInternal
 {
 
-  template<int BlockSize,typename IndexT>
-  struct ALIEN_EXPORT StructInfoInternal
+template <int BlockSize, typename IndexT>
+struct ALIEN_EXPORT StructInfoInternal
+{
+  // clang-format off
+  static const int                        block_size = BlockSize ;
+  typedef IndexT                          index_type ;
+  typedef cl::sycl::buffer<index_type, 1> index_buffer_type ;
+  typedef cl::sycl::buffer<index_type, 1> IndexBufferType ;
+  // clang-format on
+
+  StructInfoInternal(std::size_t nrows,
+                     std::size_t nnz,
+                     std::size_t block_nrows,
+                     std::size_t block_nnz,
+                     int const* h_kcol,
+                     int const* h_cols,
+                     int const* h_block_row_offset);
+
+  //IndexBufferType& getBlockRowOffset() { return m_block_row_offset ; }
+
+  IndexBufferType& getBlockRowOffset() const { return m_block_row_offset; }
+
+  IndexBufferType& getBlockCols() const { return m_block_cols; }
+
+  IndexBufferType& getKCol() const { return m_kcol; }
+
+  int const* kcol() const
   {
-    static const int                        block_size = BlockSize ;
-    typedef IndexT                          index_type ;
-    typedef cl::sycl::buffer<index_type, 1> index_buffer_type ;
-    typedef cl::sycl::buffer<index_type, 1> IndexBufferType ;
+    return m_h_kcol.data();
+  }
 
-    StructInfoInternal(std::size_t nrows,
-                       std::size_t nnz,
-                       std::size_t block_nrows,
-                       std::size_t block_nnz,
-                       int const* h_kcol,
-                       int const* h_cols,
-                       int const* h_block_row_offset) ;
+  int const* cols() const
+  {
+    return m_h_cols.data();
+  }
 
+  int const* dcol() const
+  {
+    getUpperDiagOffset();
+    return m_h_dcol.data();
+  }
 
-    //IndexBufferType& getBlockRowOffset() { return m_block_row_offset ; }
+  void getUpperDiagOffset() const;
+  void computeLowerUpperMask() const;
 
-    IndexBufferType& getBlockRowOffset() const { return  m_block_row_offset ; }
+  IndexBufferType& getLowerMask() const;
+  IndexBufferType& getUpperMask() const;
 
-    IndexBufferType& getBlockCols() const { return m_block_cols; }
+  // clang-format off
+  std::size_t m_nrows       = 0 ;
+  std::size_t m_nnz         = 0 ;
+  std::size_t m_block_nrows = 0 ;
+  std::size_t m_block_nnz   = 0 ;
 
-    IndexBufferType& getKCol() const { return m_kcol; }
+  std::vector<index_type> m_h_kcol ;
+  std::vector<index_type> m_h_cols ;
+  std::vector<index_type> m_h_block_cols ;
 
-    int const* kcol() const
-    {
-      return m_h_kcol.data() ;
-    }
+  mutable IndexBufferType                   m_block_row_offset ;
+  mutable IndexBufferType                   m_block_cols ;
+  mutable IndexBufferType                   m_kcol ;
 
-    int const* cols() const
-    {
-      return m_h_cols.data() ;
-    }
-
-    int const* dcol() const
-    {
-      getUpperDiagOffset() ;
-      return m_h_dcol.data() ;
-    }
-
-    void getUpperDiagOffset() const ;
-    void computeLowerUpperMask() const ;
-
-    IndexBufferType& getLowerMask() const;
-    IndexBufferType& getUpperMask() const;
-
-    std::size_t m_nrows       = 0 ;
-    std::size_t m_nnz         = 0 ;
-    std::size_t m_block_nrows = 0 ;
-    std::size_t m_block_nnz   = 0 ;
-
-    std::vector<index_type> m_h_kcol ;
-    std::vector<index_type> m_h_cols ;
-    std::vector<index_type> m_h_block_cols ;
-
-    mutable IndexBufferType          m_block_row_offset ;
-    mutable IndexBufferType          m_block_cols ;
-    mutable IndexBufferType          m_kcol ;
-
-    mutable bool                              m_lower_upper_mask_ready = false ;
-    mutable std::vector<index_type>           m_h_dcol ;
-    mutable std::unique_ptr<IndexBufferType>  m_lower_mask ;
-    mutable std::unique_ptr<IndexBufferType>  m_upper_mask ;
-  };
+  mutable bool                              m_lower_upper_mask_ready = false ;
+  mutable std::vector<index_type>           m_h_dcol ;
+  mutable std::unique_ptr<IndexBufferType>  m_lower_mask ;
+  mutable std::unique_ptr<IndexBufferType>  m_upper_mask ;
+  // clang-format on
+};
 
 /*---------------------------------------------------------------------------*/
 
@@ -101,6 +104,7 @@ template <typename ValueT, int BlockSize>
 class MatrixInternal
 {
  public:
+  // clang-format off
   typedef ValueT   ValueType;
   typedef ValueT   value_type;
   static const int block_size = BlockSize ;
@@ -116,19 +120,19 @@ class MatrixInternal
   typedef cl::sycl::buffer<value_type, 1>       ValueBufferType ;
 
   typedef cl::sycl::queue                       QueueType ;
+  // clang-format on
 
  public:
-  MatrixInternal(ProfileType const* profile) ;
+  MatrixInternal(ProfileType const* profile);
 
   ~MatrixInternal() {}
 
-  bool setMatrixValues(ValueType const* values, bool only_host) ;
-  bool setMatrixValuesFromHost() ;
+  bool setMatrixValues(ValueType const* values, bool only_host);
+  bool setMatrixValuesFromHost();
 
-  bool needUpdate() ;
-  void notifyChanges() ;
-  void endUpdate() ;
-
+  bool needUpdate();
+  void notifyChanges();
+  void endUpdate();
 
   void mult(ValueBufferType& x, ValueBufferType& y) const;
 
@@ -156,23 +160,24 @@ class MatrixInternal
 
   ProfileType const* getProfile() const { return m_profile; }
 
-  ValueType const* getHCsrData() const {
-    return m_h_csr_values.data() ;
+  ValueType const* getHCsrData() const
+  {
+    return m_h_csr_values.data();
   }
 
-  ValueType * getHCsrData() {
-    return m_h_csr_values.data() ;
+  ValueType* getHCsrData()
+  {
+    return m_h_csr_values.data();
   }
 
-
-
-  ProfileType const* m_profile = nullptr;
+  // clang-format off
+  ProfileType const*      m_profile = nullptr;
 
   std::vector<ValueType>  m_h_csr_values ;
   std::vector<ValueType>  m_h_values ;
   mutable ValueBufferType m_values ;
   bool                    m_values_is_update = false ;
-
+  // clang-format on
 };
 
 /*---------------------------------------------------------------------------*/

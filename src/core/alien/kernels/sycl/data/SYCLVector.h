@@ -24,7 +24,6 @@
 
 #pragma once
 
-
 #include <alien/core/impl/IVectorImpl.h>
 #include <alien/data/ISpace.h>
 #include <alien/kernels/sycl/SYCLBackEnd.h>
@@ -36,13 +35,13 @@
 namespace Alien
 {
 
-  namespace SYCLInternal
-  {
+namespace SYCLInternal
+{
 
-    template <typename ValueT>
-    class VectorInternal;
+  template <typename ValueT>
+  class VectorInternal;
 
-  }
+}
 
 template <typename ValueT>
 class ALIEN_EXPORT SYCLVector : public IVectorImpl
@@ -57,19 +56,21 @@ class ALIEN_EXPORT SYCLVector : public IVectorImpl
   : IVectorImpl(nullptr, AlgebraTraits<BackEnd::tag::sycl>::name())
   {}
 
-  //! Constructeur avec association à un MultiImpl
+  //! Constructeur avec association ? un MultiImpl
   SYCLVector(const MultiVectorImpl* multi_impl)
   : IVectorImpl(multi_impl, AlgebraTraits<BackEnd::tag::sycl>::name())
   {}
 
-  virtual ~SYCLVector () ;
+  virtual ~SYCLVector();
 
-  VectorInternal* internal() {
-    return m_internal ;
+  VectorInternal* internal()
+  {
+    return m_internal;
   }
 
-  VectorInternal const* internal() const {
-    return m_internal ;
+  VectorInternal const* internal() const
+  {
+    return m_internal;
   }
 
   Integer getAllocSize() const
@@ -77,61 +78,58 @@ class ALIEN_EXPORT SYCLVector : public IVectorImpl
     return m_local_size;
   }
 
-  void allocate() ;
+  void allocate();
 
-  void resize(Integer alloc_size) const ;
+  void resize(Integer alloc_size) const;
 
-
-  void clear() ;
+  void clear();
 
   void init(const VectorDistribution& dist, const bool need_allocate)
   {
     alien_debug([&] { cout() << "Initializing SYCLVector " << this; });
-    if(this->m_multi_impl)
-    {
+    if (this->m_multi_impl) {
       m_local_size = this->scalarizedLocalSize();
     }
-    else
-    {
+    else {
       // Not associated vector
-      m_own_distribution = dist ;
-      m_local_size = m_own_distribution.localSize() ;
+      m_own_distribution = dist;
+      m_local_size       = m_own_distribution.localSize();
     }
     if (need_allocate) {
-      allocate() ;
+      allocate();
     }
   }
 
   const VectorDistribution& distribution() const
   {
-    if(this->m_multi_impl)
-      return IVectorImpl::distribution() ;
+    if (this->m_multi_impl)
+      return IVectorImpl::distribution();
     else
-      return m_own_distribution ;
+      return m_own_distribution;
   }
 
   Arccore::Integer scalarizedLocalSize() const
   {
-    if(this->m_multi_impl)
-      return IVectorImpl::scalarizedLocalSize() ;
+    if (this->m_multi_impl)
+      return IVectorImpl::scalarizedLocalSize();
     else
-      return m_own_distribution.localSize() ;
+      return m_own_distribution.localSize();
   }
 
   Arccore::Integer scalarizedGlobalSize() const
   {
-    if(this->m_multi_impl)
-      return IVectorImpl::scalarizedGlobalSize() ;
+    if (this->m_multi_impl)
+      return IVectorImpl::scalarizedGlobalSize();
     else
-      return m_own_distribution.globalSize() ;
+      return m_own_distribution.globalSize();
   }
 
   Arccore::Integer scalarizedOffset() const
   {
-    if(this->m_multi_impl)
-      return IVectorImpl::scalarizedOffset() ;
+    if (this->m_multi_impl)
+      return IVectorImpl::scalarizedOffset();
     else
-      return m_own_distribution.offset() ;
+      return m_own_distribution.offset();
   }
 
   ValueType* getDataPtr() { return m_h_values.data(); }
@@ -141,35 +139,33 @@ class ALIEN_EXPORT SYCLVector : public IVectorImpl
   ValueType const* data() const { return m_h_values.data(); }
   ValueType const* getAddressData() const { return m_h_values.data(); }
 
-
   template <typename LambdaT>
   void apply(LambdaT const& lambda)
   {
-    for(std::size_t i=0;i<m_local_size;++i)
-    {
-      m_h_values[i] = lambda(i) ;
+    for (std::size_t i = 0; i < m_local_size; ++i) {
+      m_h_values[i] = lambda(i);
     }
-    setValuesFromHost() ;
+    setValuesFromHost();
   }
 
-  void setValues(std::size_t size, ValueType const* ptr ) ;
+  void setValues(std::size_t size, ValueType const* ptr);
 
-  void setValuesFromHost() ;
+  void setValuesFromHost();
 
-  void copyValuesTo(std::size_t size, ValueType* ptr ) const ;
-
+  void copyValuesTo(std::size_t size, ValueType* ptr) const;
 
   // FIXME: not implemented !
   template <typename E>
   SYCLVector& operator=(E const& expr);
 
  private:
+  // clang-format off
   mutable VectorInternal*        m_internal = nullptr;
   mutable std::vector<ValueType> m_h_values ;
   std::size_t                    m_local_size = 0;
   VectorDistribution             m_own_distribution ;
+  // clang-format on
 };
 
 //extern template class SYCLVector<Real>;
-}
-
+} // namespace Alien

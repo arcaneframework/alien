@@ -51,7 +51,7 @@ void DistStructInfo::compute(Integer nproc, ConstArrayView<Integer> offset, Inte
 #endif
   std::vector<Integer> count(nproc);
   count.assign(nproc, 0);
-  const Integer nrow = profile.getNRow();
+  const Integer nrow                 = profile.getNRow();
   ConstArrayView<Integer> row_offset = profile.getRowOffset();
   // ArrayView<Integer> cols = profile->getCols();
   m_cols.copy(profile.getCols());
@@ -65,7 +65,7 @@ void DistStructInfo::compute(Integer nproc, ConstArrayView<Integer> offset, Inte
     Integer lrow_size = 0;
     for (Integer icol = row_offset[irow]; icol < row_offset[irow + 1]; ++icol) {
       Integer col_uid = m_cols[icol];
-      Integer ip = domainId(nproc, offset, col_uid);
+      Integer ip      = domainId(nproc, offset, col_uid);
       // TODO: deal with ip == -1
       // fout<<"col("<<col_uid<<","<<ip<<");";
       if (ip == my_rank) {
@@ -93,7 +93,7 @@ void DistStructInfo::compute(Integer nproc, ConstArrayView<Integer> offset, Inte
   }
   // COMPUTE GHOST LOCAL ID PER NEIGH DOMAIN
   for (Integer ip = 0; ip < nproc; ++ip) {
-    Integer lid = 0;
+    Integer lid   = 0;
     auto& lids_ip = lids[ip];
     for (Integer uid : gids[ip]) {
       lids_ip.insert(std::make_pair(uid, lid));
@@ -111,7 +111,7 @@ void DistStructInfo::compute(Integer nproc, ConstArrayView<Integer> offset, Inte
     std::size_t ghost_size = col_offset[nproc] - col_offset[0];
     m_recv_info.m_rank_ids.resize(ghost_size);
     m_recv_info.m_ids.resize(ghost_size);
-    Integer icount = 0;
+    Integer icount       = 0;
     Integer ghost_icount = 0;
     std::set<Integer> ghost_set;
     for (Integer irow = 0; irow < nrow; ++irow) {
@@ -122,13 +122,13 @@ void DistStructInfo::compute(Integer nproc, ConstArrayView<Integer> offset, Inte
         for (Integer icol = row_offset[irow] + m_local_row_size[irow];
              icol < row_offset[irow + 1]; ++icol) {
           // compute local id of ghost col id
-          Integer col_uid = m_cols[icol];
-          Integer ip = domainId(nproc, offset, col_uid);
-          m_cols[icol] = lids[ip][col_uid] + col_offset[ip];
+          Integer col_uid  = m_cols[icol];
+          Integer ip       = domainId(nproc, offset, col_uid);
+          m_cols[icol]     = lids[ip][col_uid] + col_offset[ip];
           auto const& iter = ghost_set.insert(col_uid);
           if (iter.second) {
             m_recv_info.m_rank_ids[ghost_icount] = ip;
-            m_recv_info.m_ids[ghost_icount] = m_cols[icol];
+            m_recv_info.m_ids[ghost_icount]      = m_cols[icol];
             ++ghost_icount;
           }
         }
@@ -141,7 +141,7 @@ void DistStructInfo::compute(Integer nproc, ConstArrayView<Integer> offset, Inte
   //
   // INFO to recv from neighbour processors
   //
-  Integer nb_neighbour = 0;
+  Integer nb_neighbour       = 0;
   Integer first_upper_neighb = 0;
   for (Integer ip = 0; ip < nproc; ++ip)
     // if (count[ip] > 0)
@@ -152,11 +152,11 @@ void DistStructInfo::compute(Integer nproc, ConstArrayView<Integer> offset, Inte
         ++first_upper_neighb;
     }
 
-  m_recv_info.m_num_neighbours = nb_neighbour;
+  m_recv_info.m_num_neighbours     = nb_neighbour;
   m_recv_info.m_first_upper_neighb = first_upper_neighb;
   m_recv_info.m_ranks.resize(nb_neighbour);
   m_recv_info.m_ids_offset.resize(nb_neighbour + 1);
-  nb_neighbour = 0;
+  nb_neighbour                = 0;
   m_recv_info.m_ids_offset[0] = nrow;
   for (Integer ip = 0; ip < nproc; ++ip)
     // if (count[ip] > 0) {
@@ -179,7 +179,7 @@ void DistStructInfo::compute(Integer nproc, ConstArrayView<Integer> offset, Inte
   //
   // INFO to send to neighbour processor
   std::vector<std::vector<Integer>> send_ids(nproc);
-  nb_neighbour = 0;
+  nb_neighbour       = 0;
   Integer send_count = 0;
   std::vector<Integer> buffer;
   for (Integer ip = 0; ip < nproc; ++ip) {
@@ -200,7 +200,7 @@ void DistStructInfo::compute(Integer nproc, ConstArrayView<Integer> offset, Inte
             std::map<Integer, Integer>::iterator iter = lids[ip2].begin();
             while (iter != lids[ip2].end()) {
               // buffer.push_back((*iter).first);
-              buffer[(*iter).second] = (*iter).first;
+              buffer[(*iter).second]                      = (*iter).first;
               m_recv_info.m_uids[offset + (*iter).second] = (*iter).first;
               ++iter;
             }
@@ -230,17 +230,17 @@ void DistStructInfo::compute(Integer nproc, ConstArrayView<Integer> offset, Inte
   m_send_info.m_ids.resize(send_count);
   m_send_info.m_ids_offset.resize(nb_neighbour + 1);
   first_upper_neighb = 0;
-  Integer icount = 0;
-  nb_neighbour = 0;
+  Integer icount     = 0;
+  nb_neighbour       = 0;
   for (Integer ip = 0; ip < nproc; ++ip) {
     if (send_ids[ip].size() > 0) {
-      m_send_info.m_ranks[nb_neighbour] = ip;
+      m_send_info.m_ranks[nb_neighbour]      = ip;
       m_send_info.m_ids_offset[nb_neighbour] = icount;
       ++nb_neighbour;
       if (ip < my_rank)
         ++first_upper_neighb;
       std::size_t nids = send_ids[ip].size();
-      Integer* ids = &send_ids[ip][0];
+      Integer* ids     = &send_ids[ip][0];
       for (auto i = 0; i < nids; ++i) {
         m_send_info.m_ids[icount] = ids[i] - local_offset;
         // fout<<"SEND : "<<ids[i]<<" "<<ids[i] - local_offset<<endl;
@@ -249,7 +249,7 @@ void DistStructInfo::compute(Integer nproc, ConstArrayView<Integer> offset, Inte
     }
   }
   m_send_info.m_ids_offset[nb_neighbour] = icount;
-  m_send_info.m_first_upper_neighb = first_upper_neighb;
+  m_send_info.m_first_upper_neighb       = first_upper_neighb;
 
   // m_send_info->printInfo(trace->info().file());
 }
@@ -265,7 +265,7 @@ void DistStructInfo::compute(Integer nproc, ConstArrayView<Integer> offset, Inte
   std::vector<Integer> block_count(nproc);
   block_count.assign(nproc, 0);
 
-  Integer nrow = profile.getNRow();
+  Integer nrow                       = profile.getNRow();
   ConstArrayView<Integer> row_offset = profile.getRowOffset();
   m_cols.copy(profile.getCols());
 
@@ -286,7 +286,7 @@ void DistStructInfo::compute(Integer nproc, ConstArrayView<Integer> offset, Inte
     // fout<<"ROW("<<irow<<")";
     for (Integer icol = row_offset[irow]; icol < row_offset[irow + 1]; ++icol) {
       Integer col_uid = m_cols[icol];
-      Integer ip = domainId(nproc, offset, col_uid);
+      Integer ip      = domainId(nproc, offset, col_uid);
       // TODO: Deal with ip == -1
       // fout<<"col("<<col_uid<<","<<ip<<");";
       if (ip == my_rank) {
@@ -318,7 +318,7 @@ void DistStructInfo::compute(Integer nproc, ConstArrayView<Integer> offset, Inte
 
   // COMPUTE GHOST LOCAL ID PER NEIGH DOMAIN
   for (int ip = 0; ip < nproc; ++ip) {
-    int lid = 0;
+    int lid       = 0;
     auto& lids_ip = lids[ip];
     for (int uid : gids[ip]) {
       lids_ip.insert(std::make_pair(uid, lid));
@@ -327,7 +327,7 @@ void DistStructInfo::compute(Integer nproc, ConstArrayView<Integer> offset, Inte
   }
 
   {
-    // Il faut une map ordonn�e
+    // Il faut une map ordonn?e
     std::map<Integer, Integer> ghost_sizes;
 
     // Integer icount = 0;
@@ -340,7 +340,7 @@ void DistStructInfo::compute(Integer nproc, ConstArrayView<Integer> offset, Inte
     std::size_t ghostsize = col_offset[nproc] - col_offset[0];
     m_recv_info.m_rank_ids.resize(ghostsize);
     m_recv_info.m_ids.resize(ghostsize);
-    int icount = 0;
+    int icount       = 0;
     int ghost_icount = 0;
     std::set<int> ghost_set;
     for (Integer irow = 0; irow < nrow; ++irow) {
@@ -352,13 +352,13 @@ void DistStructInfo::compute(Integer nproc, ConstArrayView<Integer> offset, Inte
         for (Integer icol = row_offset[irow] + m_local_row_size[irow];
              icol < row_offset[irow + 1]; ++icol) {
           // compute local id of ghost col id
-          Integer col_uid = m_cols[icol];
-          Integer ip = domainId(nproc, offset, col_uid);
-          m_cols[icol] = lids[ip][col_uid] + col_offset[ip];
+          Integer col_uid  = m_cols[icol];
+          Integer ip       = domainId(nproc, offset, col_uid);
+          m_cols[icol]     = lids[ip][col_uid] + col_offset[ip];
           auto const& iter = ghost_set.insert(col_uid);
           if (iter.second) {
             m_recv_info.m_rank_ids[ghost_icount] = ip;
-            m_recv_info.m_ids[ghost_icount] = m_cols[icol];
+            m_recv_info.m_ids[ghost_icount]      = m_cols[icol];
             ++ghost_icount;
           }
           // fout<<"COL["<<icol<<","<<col_uid<<"]="<<m_cols[icol]<<"
@@ -370,27 +370,27 @@ void DistStructInfo::compute(Integer nproc, ConstArrayView<Integer> offset, Inte
       }
     }
 
-    ConstArrayView<Integer> local_sizes = blocks.sizeOfLocalIndex();
+    ConstArrayView<Integer> local_sizes   = blocks.sizeOfLocalIndex();
     ConstArrayView<Integer> local_offsets = blocks.offsetOfLocalIndex();
 
     ALIEN_ASSERT(
     (local_offsets.size() == local_sizes.size() + 1), ("sizes are different"));
 
-    const Integer size = local_sizes.size();
+    const Integer size       = local_sizes.size();
     const Integer ghost_size = ghost_sizes.size();
 
     m_block_sizes.resize(size + ghost_size);
     m_block_offsets.resize(size + ghost_size);
 
     for (Integer i = 0; i < size; ++i) {
-      m_block_sizes[i] = local_sizes[i];
+      m_block_sizes[i]   = local_sizes[i];
       m_block_offsets[i] = local_offsets[i];
     }
 
     for (std::map<Integer, Integer>::const_iterator it = ghost_sizes.begin();
          it != ghost_sizes.end(); ++it) {
-      const Integer lid = it->first;
-      m_block_sizes[lid] = it->second;
+      const Integer lid    = it->first;
+      m_block_sizes[lid]   = it->second;
       m_block_offsets[lid] = m_block_offsets[lid - 1] + m_block_sizes[lid - 1];
     }
   }
@@ -417,13 +417,13 @@ void DistStructInfo::compute(Integer nproc, ConstArrayView<Integer> offset, Inte
       if (ip < my_rank)
         ++first_upper_neighb;
     }
-  m_recv_info.m_num_neighbours = nb_neighbour;
+  m_recv_info.m_num_neighbours     = nb_neighbour;
   m_recv_info.m_first_upper_neighb = first_upper_neighb;
   m_recv_info.m_ranks.resize(nb_neighbour);
   m_recv_info.m_ids_offset.resize(nb_neighbour + 1);
   m_recv_info.m_block_ids_offset.resize(nb_neighbour + 1);
-  nb_neighbour = 0;
-  m_recv_info.m_ids_offset[0] = nrow;
+  nb_neighbour                      = 0;
+  m_recv_info.m_ids_offset[0]       = nrow;
   m_recv_info.m_block_ids_offset[0] = block_nrow;
   for (Integer ip = 0; ip < nproc; ++ip)
     // if (count[ip] > 0) {
@@ -449,7 +449,7 @@ void DistStructInfo::compute(Integer nproc, ConstArrayView<Integer> offset, Inte
   //
   // INFO to send to neighbour processor
   std::vector<std::vector<Integer>> send_ids(nproc);
-  nb_neighbour = 0;
+  nb_neighbour       = 0;
   Integer send_count = 0;
   std::vector<Integer> buffer;
   for (Integer ip = 0; ip < nproc; ++ip) {
@@ -470,7 +470,7 @@ void DistStructInfo::compute(Integer nproc, ConstArrayView<Integer> offset, Inte
             std::map<Integer, Integer>::iterator iter = lids[ip2].begin();
             while (iter != lids[ip2].end()) {
               // buffer.push_back((*iter).first);
-              buffer[(*iter).second] = (*iter).first;
+              buffer[(*iter).second]                      = (*iter).first;
               m_recv_info.m_uids[offset + (*iter).second] = (*iter).first;
               ++iter;
             }
@@ -504,8 +504,8 @@ void DistStructInfo::compute(Integer nproc, ConstArrayView<Integer> offset, Inte
   nb_neighbour = 0;
   for (Integer ip = 0; ip < nproc; ++ip) {
     if (send_ids[ip].size() > 0) {
-      m_send_info.m_ranks[nb_neighbour] = ip;
-      m_send_info.m_ids_offset[nb_neighbour] = icount;
+      m_send_info.m_ranks[nb_neighbour]            = ip;
+      m_send_info.m_ids_offset[nb_neighbour]       = icount;
       m_send_info.m_block_ids_offset[nb_neighbour] = block_icount;
       ++nb_neighbour;
       if (ip < my_rank)
@@ -519,7 +519,7 @@ void DistStructInfo::compute(Integer nproc, ConstArrayView<Integer> offset, Inte
       }
     }
   }
-  m_send_info.m_ids_offset[nb_neighbour] = icount;
+  m_send_info.m_ids_offset[nb_neighbour]       = icount;
   m_send_info.m_block_ids_offset[nb_neighbour] = block_icount;
 
   // m_send_info.printInfo(send_fout);
@@ -528,7 +528,7 @@ void DistStructInfo::compute(Integer nproc, ConstArrayView<Integer> offset, Inte
 void DistStructInfo::copy(const DistStructInfo& src)
 {
   m_local_row_size.copy(src.m_local_row_size);
-  m_ghost_nrow = src.m_ghost_nrow;
+  m_ghost_nrow     = src.m_ghost_nrow;
   m_interface_nrow = src.m_interface_nrow;
 
   m_interface_rows.copy(src.m_interface_rows);

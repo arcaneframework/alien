@@ -61,11 +61,12 @@ class ALIEN_EXPORT SYCLInternalLinearAlgebra
     {}
   } ;
 
+  // clang-format off
   typedef SYCLInternal::Future<Real> FutureType ;
 
-  typedef Alien::StdTimer   TimerType ;
-  typedef TimerType::Sentry SentryType ;
-
+  typedef Alien::StdTimer            TimerType ;
+  typedef TimerType::Sentry          SentryType ;
+  // clang-format on
 
   SYCLInternalLinearAlgebra();
   virtual ~SYCLInternalLinearAlgebra();

@@ -25,7 +25,6 @@
 #include "alien/kernels/sycl/SYCLPrecomp.h"
 #include "alien/kernels/sycl/data/SendRecvOp.h"
 
-
 /*---------------------------------------------------------------------------*/
 
 namespace Alien::SYCLInternal
@@ -81,8 +80,8 @@ class ALIEN_EXPORT DistStructInfo
   void copy(const DistStructInfo& distStructInfo);
 
   Arccore::UniqueArray<Arccore::Integer> m_local_row_size;
-  Arccore::Integer m_ghost_nrow = 0;
-  Arccore::Integer m_interface_nrow = 0;
+  Arccore::Integer m_ghost_nrow              = 0;
+  Arccore::Integer m_interface_nrow          = 0;
   Arccore::Integer m_first_upper_ghost_index = 0;
   Arccore::UniqueArray<Arccore::Integer> m_interface_rows;
   std::unordered_set<int> m_interface_row_set;

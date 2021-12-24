@@ -1,4 +1,21 @@
 /*
+ * Copyright 2020 IFPEN-CEA
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+/*
  * ILU0Preconditioner.h
  *
  *  Created on: Sep 20, 2010
@@ -12,43 +29,45 @@
 namespace Alien
 {
 
-  template<typename MatrixT, typename VectorT>
-  class LUFactorisationAlgo
+template <typename MatrixT, typename VectorT>
+class LUFactorisationAlgo
+{
+ public:
+  // clang-format off
+  typedef MatrixT                          MatrixType;
+  typedef VectorT                          VectorType;
+  typedef typename MatrixType::ProfileType ProfileType ;
+  typedef typename MatrixType::ValueType   ValueType;
+  // clang-format on
+
+  LUFactorisationAlgo()
+  {}
+
+  virtual ~LUFactorisationAlgo()
+  {}
+
+  template <typename AlgebraT>
+  void baseInit(AlgebraT& algebra, MatrixT const& matrix)
   {
-  public :
-    // clang-format off
-    typedef MatrixT                          MatrixType;
-    typedef VectorT                          VectorType;
-    typedef typename MatrixType::ProfileType ProfileType ;
-    typedef typename MatrixType::ValueType   ValueType;
-    LUFactorisationAlgo()
-    {}
+    m_lu_matrix.reset(matrix.cloneTo(nullptr));
+    m_profile    = &m_lu_matrix->getProfile();
+    m_alloc_size = CSRConstViewT<MatrixT>(*m_lu_matrix).nrows();
+    m_work.resize(m_alloc_size);
+    m_work.assign(m_work.size(), -1);
+    algebra.allocate(AlgebraT::resource(matrix), m_x);
+  }
 
-    virtual ~LUFactorisationAlgo()
-    {}
+  template <typename AlgebraT>
+  void init(AlgebraT& algebra, MatrixT const& matrix)
+  {
+    baseInit(algebra, matrix);
+    factorize(*m_lu_matrix);
+    m_work.clear();
+  }
 
-    template<typename AlgebraT>
-    void baseInit(AlgebraT& algebra, MatrixT const& matrix)
-    {
-      m_lu_matrix.reset(matrix.cloneTo(nullptr));
-      m_profile = &m_lu_matrix->getProfile() ;
-      m_alloc_size = CSRConstViewT<MatrixT>(*m_lu_matrix).nrows() ;
-      m_work.resize(m_alloc_size) ;
-      m_work.assign(m_work.size(),-1) ;
-      algebra.allocate(AlgebraT::resource(matrix),m_x) ;
-    }
-
-    template<typename AlgebraT>
-    void init(AlgebraT& algebra,MatrixT const& matrix)
-    {
-      baseInit(algebra,matrix) ;
-      factorize(*m_lu_matrix) ;
-      m_work.clear() ;
-    }
-
-    void factorize(MatrixT& matrix)
-    {
-      /*
+  void factorize(MatrixT& matrix)
+  {
+    /*
        *
          For i = 1, . . . ,N Do:
             For k = 1, . . . , i - 1 and if (i, k) 2 NZ(A) Do:
@@ -60,163 +79,163 @@ namespace Alien
          EndFor
        *
        */
-      CSRModifierViewT<MatrixT> modifier(matrix) ;
+    CSRModifierViewT<MatrixT> modifier(matrix);
 
-      auto nrows  = modifier.nrows() ;
-      auto kcol   = modifier.kcol() ;
-      auto dcol   = modifier.dcol() ;
-      auto cols   = modifier.cols() ;
-      auto values = modifier.data() ;
+    // clang-format off
+    auto nrows  = modifier.nrows() ;
+    auto kcol   = modifier.kcol() ;
+    auto dcol   = modifier.dcol() ;
+    auto cols   = modifier.cols() ;
+    auto values = modifier.data() ;
+    // clang-format on
 
-      for(std::size_t irow=1;irow<nrows;++irow)           // i=1->nrow
-      {
-         for(int k=kcol[irow];k<dcol[irow];++k)  // k=1 ->i-1
-         {
-           int krow = cols[k] ;
-           ValueType aik = values[k] / values[dcol[krow]] ; // aik = aik/akk
-           values[k] = aik ;
-           for(int l=kcol[krow];l<kcol[krow+1];++l)
-             m_work[cols[l]] = l ;
-           for(int j=k+1;j<kcol[irow+1];++j)   // j=k+1->n
-           {
-             int jcol = cols[j] ;
-             int kj = m_work[jcol];
-             if(kj!=-1)
-             {
-               values[j] -= aik*values[kj] ;                      // aij = aij - aik*akj
-             }
-           }
-           for(int l=kcol[krow];l<kcol[krow+1];++l)
-             m_work[cols[l]] = -1 ;
-         }
-      }
-    }
-
-
-    void solveL(ValueType const* y, ValueType* x) const
+    for (std::size_t irow = 1; irow < nrows; ++irow) // i=1->nrow
     {
-      CSRConstViewT<MatrixT> view(*m_lu_matrix) ;
-      auto nrows  = view.nrows() ;
-      auto kcol   = view.kcol() ;
-      auto dcol   = view.dcol() ;
-      auto cols   = view.cols() ;
-      auto values = view.data() ;
-
-      for(std::size_t irow=0;irow<nrows;++irow)
+      for (int k = kcol[irow]; k < dcol[irow]; ++k) // k=1 ->i-1
       {
-        ValueType val = y[irow] ;
-        for(int k=kcol[irow];k<dcol[irow];++k)
-          val -= values[k]*x[cols[k]] ;
-        x[irow] = val ;
-      }
-    }
-
-
-    void solveU(ValueType const* y, ValueType* x) const
-    {
-      CSRConstViewT<MatrixT> view(*m_lu_matrix) ;
-      auto nrows  = view.nrows() ;
-      auto kcol   = view.kcol() ;
-      auto dcol   = view.dcol() ;
-      auto cols   = view.cols() ;
-      auto values = view.data() ;
-
-      for(int irow = (int)nrows-1;irow>-1;--irow)
-      {
-        int dk = dcol[irow] ;
-        ValueType val = y[irow] ;
-        for(int k=dk+1;k<kcol[irow+1];++k)
+        int krow      = cols[k];
+        ValueType aik = values[k] / values[dcol[krow]]; // aik = aik/akk
+        values[k]     = aik;
+        for (int l = kcol[krow]; l < kcol[krow + 1]; ++l)
+          m_work[cols[l]] = l;
+        for (int j = k + 1; j < kcol[irow + 1]; ++j) // j=k+1->n
         {
-          val -= values[k]*x[cols[k]] ;
+          int jcol = cols[j];
+          int kj   = m_work[jcol];
+          if (kj != -1) {
+            values[j] -= aik * values[kj]; // aij = aij - aik*akj
+          }
         }
-        x[irow] = val/values[dk] ;
+        for (int l = kcol[krow]; l < kcol[krow + 1]; ++l)
+          m_work[cols[l]] = -1;
       }
     }
+  }
 
-    template<typename AlgebraT>
-    void solve(AlgebraT& algebra, VectorType const& y, VectorType& x) const
-    {
-
-      //////////////////////////////////////////////////////////////////////////
-      //
-      //     L.X1 = Y
-      //
-      solveL(y.data(),m_x.data()) ;
-
-      //////////////////////////////////////////////////////////////////////////
-      //
-      //     U.X = X1
-      //
-      solveU(m_x.data(),x.data()) ;
-    }
-
-    const MatrixType &getLUMatrix() const
-    {
-      return *m_lu_matrix;
-    }
-
-  protected :
-    std::unique_ptr<MatrixType>   m_lu_matrix ;
-    ProfileType const*            m_profile                     = nullptr;
-    mutable VectorType            m_x ;
-
-    std::vector<int>              m_work ;
-    std::size_t                   m_alloc_size                  = 0 ;
-
-  };
-
-  template<typename AlgebraT>
-  class ILU0Preconditioner
+  void solveL(ValueType const* y, ValueType* x) const
   {
-  public:
-    typedef AlgebraT                         AlgebraType ;
-    typedef typename AlgebraType::Matrix     MatrixType;
-    typedef typename AlgebraType::Vector     VectorType;
-    typedef typename MatrixType::ProfileType ProfileType ;
-    typedef typename MatrixType::ValueType   ValueType;
+    CSRConstViewT<MatrixT> view(*m_lu_matrix);
+    // clang-format off
+    auto nrows  = view.nrows() ;
+    auto kcol   = view.kcol() ;
+    auto dcol   = view.dcol() ;
+    auto cols   = view.cols() ;
+    auto values = view.data() ;
+    // clang-format on
 
-    typedef LUFactorisationAlgo<MatrixType,VectorType> AlgoType ;
-
-    ILU0Preconditioner(AlgebraType& algebra, MatrixType const& matrix, ITraceMng* trace_mng=nullptr)
-    : m_algebra(algebra)
-    , m_matrix(matrix)
-    , m_trace_mng(trace_mng)
-    {
-
+    for (std::size_t irow = 0; irow < nrows; ++irow) {
+      ValueType val = y[irow];
+      for (int k = kcol[irow]; k < dcol[irow]; ++k)
+        val -= values[k] * x[cols[k]];
+      x[irow] = val;
     }
+  }
 
-    virtual ~ILU0Preconditioner()
-    {};
+  void solveU(ValueType const* y, ValueType* x) const
+  {
+    CSRConstViewT<MatrixT> view(*m_lu_matrix);
+    // clang-format off
+    auto nrows  = view.nrows() ;
+    auto kcol   = view.kcol() ;
+    auto dcol   = view.dcol() ;
+    auto cols   = view.cols() ;
+    auto values = view.data() ;
+    // clang-format on
 
-    void init()
-    {
-      m_algo.init(m_algebra,m_matrix) ;
+    for (int irow = (int)nrows - 1; irow > -1; --irow) {
+      int dk        = dcol[irow];
+      ValueType val = y[irow];
+      for (int k = dk + 1; k < kcol[irow + 1]; ++k) {
+        val -= values[k] * x[cols[k]];
+      }
+      x[irow] = val / values[dk];
     }
+  }
 
-    void solve(VectorType const& y, VectorType& x) const
-    {
-      m_algo.solve(m_algebra,y,x) ;
-    }
+  template <typename AlgebraT>
+  void solve(AlgebraT& algebra, VectorType const& y, VectorType& x) const
+  {
 
+    //////////////////////////////////////////////////////////////////////////
+    //
+    //     L.X1 = Y
+    //
+    solveL(y.data(), m_x.data());
 
-    void solve(AlgebraType& algebra,VectorType const& y, VectorType& x) const
-    {
-      m_algo.solve(algebra,y,x) ;
-    }
+    //////////////////////////////////////////////////////////////////////////
+    //
+    //     U.X = X1
+    //
+    solveU(m_x.data(), x.data());
+  }
 
+  const MatrixType& getLUMatrix() const
+  {
+    return *m_lu_matrix;
+  }
 
-    void update(){
-      // update value from m_matrix
-    }
+ protected:
+  // clang-format off
+  std::unique_ptr<MatrixType>   m_lu_matrix ;
+  ProfileType const*            m_profile                     = nullptr;
+  mutable VectorType            m_x ;
 
+  std::vector<int>              m_work ;
+  std::size_t                   m_alloc_size                  = 0 ;
+  // clang-format on
+};
 
-  private :
-    AlgebraType&                  m_algebra ;
-    MatrixType const&             m_matrix;
-    AlgoType                      m_algo ;
+template <typename AlgebraT>
+class ILU0Preconditioner
+{
+ public:
+  // clang-format off
+  typedef AlgebraT                         AlgebraType ;
+  typedef typename AlgebraType::Matrix     MatrixType;
+  typedef typename AlgebraType::Vector     VectorType;
+  typedef typename MatrixType::ProfileType ProfileType ;
+  typedef typename MatrixType::ValueType   ValueType;
+  // clang-format on
 
-    ITraceMng*                    m_trace_mng = nullptr ;
+  typedef LUFactorisationAlgo<MatrixType, VectorType> AlgoType;
 
-  };
+  ILU0Preconditioner(AlgebraType& algebra, MatrixType const& matrix, ITraceMng* trace_mng = nullptr)
+  : m_algebra(algebra)
+  , m_matrix(matrix)
+  , m_trace_mng(trace_mng)
+  {
+  }
 
-}
+  virtual ~ILU0Preconditioner(){};
+
+  void init()
+  {
+    m_algo.init(m_algebra, m_matrix);
+  }
+
+  void solve(VectorType const& y, VectorType& x) const
+  {
+    m_algo.solve(m_algebra, y, x);
+  }
+
+  void solve(AlgebraType& algebra, VectorType const& y, VectorType& x) const
+  {
+    m_algo.solve(algebra, y, x);
+  }
+
+  void update()
+  {
+    // update value from m_matrix
+  }
+
+ private:
+  // clang-format off
+  AlgebraType&                  m_algebra ;
+  MatrixType const&             m_matrix;
+  AlgoType                      m_algo ;
+
+  ITraceMng*                    m_trace_mng = nullptr ;
+  // clang-format on
+};
+
+} // namespace Alien

@@ -38,6 +38,7 @@ class SimpleCSRtoSYCLMatrixConverter : public IMatrixConverter
  public:
   SimpleCSRtoSYCLMatrixConverter();
   virtual ~SimpleCSRtoSYCLMatrixConverter() {}
+
  public:
   BackEndId sourceBackend() const
   {
@@ -57,52 +58,48 @@ SimpleCSRtoSYCLMatrixConverter::SimpleCSRtoSYCLMatrixConverter()
 
 /*---------------------------------------------------------------------------*/
 
-void
-SimpleCSRtoSYCLMatrixConverter::convert(
-    const IMatrixImpl* sourceImpl, IMatrixImpl* targetImpl) const
+void SimpleCSRtoSYCLMatrixConverter::convert(
+const IMatrixImpl* sourceImpl, IMatrixImpl* targetImpl) const
 {
   const SimpleCSRMatrix<Real>& v =
-      cast<SimpleCSRMatrix<Real>>(sourceImpl, sourceBackend());
+  cast<SimpleCSRMatrix<Real>>(sourceImpl, sourceBackend());
   SYCLBEllPackMatrix<Real>& v2 = cast<SYCLBEllPackMatrix<Real>>(targetImpl, targetBackend());
 
   alien_debug(
-      [&] { cout() << "Converting SimpleCSRMatrix: " << &v << " to SYCLBEllPackMatrix " << &v2; });
+  [&] { cout() << "Converting SimpleCSRMatrix: " << &v << " to SYCLBEllPackMatrix " << &v2; });
 
-    _build(v, v2);
+  _build(v, v2);
 }
 
-void
-SimpleCSRtoSYCLMatrixConverter::_build(
-    const SimpleCSRMatrix<Real>& sourceImpl, SYCLBEllPackMatrix<Real>& targetImpl) const
+void SimpleCSRtoSYCLMatrixConverter::_build(
+const SimpleCSRMatrix<Real>& sourceImpl, SYCLBEllPackMatrix<Real>& targetImpl) const
 {
   typedef SimpleCSRMatrix<Real>::MatrixInternal CSRMatrixType;
 
   const MatrixDistribution& dist = targetImpl.distribution();
-  const CSRStructInfo& profile = sourceImpl.getCSRProfile();
-  const Integer localSize = profile.getNRow();
-  const Integer localOffset = dist.rowOffset();
-  auto const& matrixInternal = sourceImpl.internal();
-  const Integer myRank = dist.parallelMng()->commRank();
-  const Integer nProc = dist.parallelMng()->commSize();
+  const CSRStructInfo& profile   = sourceImpl.getCSRProfile();
+  const Integer localSize        = profile.getNRow();
+  const Integer localOffset      = dist.rowOffset();
+  auto const& matrixInternal     = sourceImpl.internal();
+  const Integer myRank           = dist.parallelMng()->commRank();
+  const Integer nProc            = dist.parallelMng()->commSize();
 
   {
 
     auto const& matrix_profile = sourceImpl.internal().getCSRProfile();
-    int nrows = matrix_profile.getNRow();
-    int const* kcol = matrix_profile.getRowOffset().unguardedBasePointer();
-    int const* cols = matrix_profile.getCols().unguardedBasePointer();
+    int nrows                  = matrix_profile.getNRow();
+    int const* kcol            = matrix_profile.getRowOffset().unguardedBasePointer();
+    int const* cols            = matrix_profile.getCols().unguardedBasePointer();
 
     if (not targetImpl.initMatrix(dist.parallelMng(), nrows, kcol, cols)) {
       throw FatalErrorException(A_FUNCINFO, "SYCL Initialisation failed");
     }
 
-    if (not targetImpl.setMatrixValues(matrixInternal.getDataPtr(),false)) {
+    if (not targetImpl.setMatrixValues(matrixInternal.getDataPtr(), false)) {
       throw FatalErrorException(A_FUNCINFO, "Cannot set SYCL Matrix Values");
     }
-
   }
 }
-
 
 /*---------------------------------------------------------------------------*/
 

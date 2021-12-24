@@ -49,10 +49,12 @@ class SYCLVector;
 template <typename T>
 struct SYCLBEllPackTraits
 {
+  // clang-format off
   typedef SYCLBEllPackMatrix<T>                              MatrixType;
   typedef SYCLVector<T>                                      VectorType;
   typedef IInternalLinearAlgebra<MatrixType, VectorType>     AlgebraType;
   typedef IInternalLinearAlgebraExpr<MatrixType, VectorType> AlgebraExprType;
+  // clang-format on
 };
 
 extern SYCLBEllPackTraits<Real>::AlgebraType* SYCLInternalLinearAlgebraFactory();
@@ -73,10 +75,13 @@ namespace BackEnd
 template <>
 struct AlgebraTraits<BackEnd::tag::sycl>
 {
+  // clang-format off
   typedef SYCLBEllPackTraits<Real>::MatrixType      matrix_type;
   typedef SYCLBEllPackTraits<Real>::VectorType      vector_type;
   typedef SYCLBEllPackTraits<Real>::AlgebraType     algebra_type;
   typedef SYCLBEllPackTraits<Real>::AlgebraExprType algebra_expr_type;
+  // clang-format on
+
   static algebra_type* algebra_factory(
   IMessagePassingMng* p_mng ALIEN_UNUSED_PARAM = nullptr)
   {

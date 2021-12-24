@@ -33,9 +33,11 @@ class SYCLBEllPackMatrixMultT
 {
  public:
   //! Template parameter
-  typedef ValueT ValueType;
+  // clang-format off
+  typedef ValueT                        ValueType;
   typedef SYCLBEllPackMatrix<ValueType> MatrixType;
-  typedef SYCLVector<ValueType> VectorType;
+  typedef SYCLVector<ValueType>         VectorType;
+  // clang-format on
 
  public:
   //! Constructeur de la classe

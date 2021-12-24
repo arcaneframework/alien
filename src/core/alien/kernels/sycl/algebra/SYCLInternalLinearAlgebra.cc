@@ -21,7 +21,6 @@
 #include <arccore/base/NotImplementedException.h>
 #include <arccore/base/TraceInfo.h>
 
-
 #include <alien/core/backend/LinearAlgebraExprT.h>
 #include <alien/core/backend/LinearAlgebraT.h>
 
@@ -69,37 +68,37 @@ namespace Internal = SYCLInternal;
 SYCLInternalLinearAlgebra::SYCLInternalLinearAlgebra()
 : IInternalLinearAlgebra<SYCLBEllPackMatrix<Real>, SYCLVector<Real>>()
 {
-  m_internal.reset(new SYCLInternal::KernelInternal()) ;
+  m_internal.reset(new SYCLInternal::KernelInternal());
 }
 
 /*---------------------------------------------------------------------------*/
 
 SYCLInternalLinearAlgebra::~SYCLInternalLinearAlgebra()
 {
-  m_timer.printInfo() ;
+  m_timer.printInfo();
 }
-
 
 void SYCLInternalLinearAlgebra::setDotAlgo(int dot_algo)
 {
-  m_internal->setDotAlgo(dot_algo) ;
+  m_internal->setDotAlgo(dot_algo);
 }
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 SYCLInternalLinearAlgebra::ResourceType const&
-SYCLInternalLinearAlgebra::resource(Matrix const& A) {
-  return A.distribution().rowDistribution() ;
+SYCLInternalLinearAlgebra::resource(Matrix const& A)
+{
+  return A.distribution().rowDistribution();
 }
 
-void SYCLInternalLinearAlgebra::allocate(ResourceType const& distribution,Vector& v)
+void SYCLInternalLinearAlgebra::allocate(ResourceType const& distribution, Vector& v)
 {
-  v.init(distribution,true) ;
+  v.init(distribution, true);
 }
 
 void SYCLInternalLinearAlgebra::free(Vector& v)
 {
-  v.clear() ;
+  v.clear();
 }
 
 Real SYCLInternalLinearAlgebra::norm0(const SYCLVector<Real>& vx ALIEN_UNUSED_PARAM) const
@@ -122,7 +121,7 @@ Real SYCLInternalLinearAlgebra::norm1(const SYCLVector<Real>& vx ALIEN_UNUSED_PA
 
 Real SYCLInternalLinearAlgebra::norm2(const SYCLVector<Real>& vx) const
 {
-  SentryType s(m_timer,"SYCL-NORM2") ;
+  SentryType s(m_timer, "SYCL-NORM2");
   return std::sqrt(m_internal->dot(vx.internal()->values(), vx.internal()->values()));
 }
 
@@ -132,7 +131,7 @@ void SYCLInternalLinearAlgebra::mult(const SYCLBEllPackMatrix<Real>& ma,
                                      const SYCLVector<Real>& vx,
                                      SYCLVector<Real>& vr) const
 {
-  SentryType s(m_timer,"SYCL-SPMV") ;
+  SentryType s(m_timer, "SYCL-SPMV");
   Internal::SYCLBEllPackMatrixMultT<Real>(ma).mult(vx, vr);
 }
 
@@ -141,8 +140,8 @@ void SYCLInternalLinearAlgebra::addLMult(Real alpha,
                                          const SYCLVector<Real>& vx,
                                          SYCLVector<Real>& vr) const
 {
-  SentryType s(m_timer,"SYCL-ADDLMULT") ;
-  Internal::SYCLBEllPackMatrixMultT<Real>(ma).addLMult(alpha,vx, vr);
+  SentryType s(m_timer, "SYCL-ADDLMULT");
+  Internal::SYCLBEllPackMatrixMultT<Real>(ma).addLMult(alpha, vx, vr);
 }
 
 void SYCLInternalLinearAlgebra::addUMult(Real alpha,
@@ -150,15 +149,15 @@ void SYCLInternalLinearAlgebra::addUMult(Real alpha,
                                          const SYCLVector<Real>& vx,
                                          SYCLVector<Real>& vr) const
 {
-  SentryType s(m_timer,"SYCL-ADDUMULT") ;
-  Internal::SYCLBEllPackMatrixMultT<Real>(ma).addUMult(alpha,vx, vr);
+  SentryType s(m_timer, "SYCL-ADDUMULT");
+  Internal::SYCLBEllPackMatrixMultT<Real>(ma).addUMult(alpha, vx, vr);
 }
 
 void SYCLInternalLinearAlgebra::
 multInvDiag(const SYCLBEllPackMatrix<Real>& ma,
             SYCLVector<Real>& vr) const
 {
-  SentryType s(m_timer,"SYCL-MULTINVDIAG") ;
+  SentryType s(m_timer, "SYCL-MULTINVDIAG");
   Internal::SYCLBEllPackMatrixMultT<Real>(ma).multInvDiag(vr);
 }
 
@@ -166,7 +165,7 @@ void SYCLInternalLinearAlgebra::
 computeInvDiag(const SYCLBEllPackMatrix<Real>& ma,
                SYCLVector<Real>& vr) const
 {
-  SentryType s(m_timer,"SYCL-INVDIAG") ;
+  SentryType s(m_timer, "SYCL-INVDIAG");
   Internal::SYCLBEllPackMatrixMultT<Real>(ma).computeInvDiag(vr);
 }
 
@@ -174,15 +173,15 @@ computeInvDiag(const SYCLBEllPackMatrix<Real>& ma,
 
 void SYCLInternalLinearAlgebra::axpy(Real alpha, const SYCLVector<Real>& vx, SYCLVector<Real>& vr) const
 {
-  SentryType s(m_timer,"SYCL-AXPY") ;
+  SentryType s(m_timer, "SYCL-AXPY");
   m_internal->axpy(alpha, vx.internal()->values(), vr.internal()->values());
 }
 
 /*---------------------------------------------------------------------------*/
 
 void SYCLInternalLinearAlgebra::aypx(Real alpha ALIEN_UNUSED_PARAM,
-                                          SYCLVector<Real>& y ALIEN_UNUSED_PARAM,
-                                          const SYCLVector<Real>& x ALIEN_UNUSED_PARAM) const
+                                     SYCLVector<Real>& y ALIEN_UNUSED_PARAM,
+                                     const SYCLVector<Real>& x ALIEN_UNUSED_PARAM) const
 {
   throw NotImplementedException(
   A_FUNCINFO, "SYCLLinearAlgebra::aypx not implemented");
@@ -192,7 +191,7 @@ void SYCLInternalLinearAlgebra::aypx(Real alpha ALIEN_UNUSED_PARAM,
 
 void SYCLInternalLinearAlgebra::copy(const SYCLVector<Real>& vx, SYCLVector<Real>& vr) const
 {
-  SentryType s(m_timer,"SYCL-COPY") ;
+  SentryType s(m_timer, "SYCL-COPY");
   m_internal->copy(vx.internal()->values(), vr.internal()->values());
 }
 
@@ -200,39 +199,38 @@ void SYCLInternalLinearAlgebra::copy(const SYCLVector<Real>& vx, SYCLVector<Real
 
 Real SYCLInternalLinearAlgebra::dot(const SYCLVector<Real>& vx, const SYCLVector<Real>& vy) const
 {
-  SentryType s(m_timer,"SYCL-DOT") ;
+  SentryType s(m_timer, "SYCL-DOT");
   return m_internal->dot(vx.internal()->values(), vy.internal()->values());
 }
-
 
 void SYCLInternalLinearAlgebra::dot(const SYCLVector<Real>& vx,
                                     const SYCLVector<Real>& vy,
                                     SYCLInternal::Future<Real>& res) const
 {
-  SentryType s(m_timer,"SYCL-DOT-F") ;
-  m_internal->dot(vx.internal()->values(), vy.internal()->values(),res.deviceValue());
+  SentryType s(m_timer, "SYCL-DOT-F");
+  m_internal->dot(vx.internal()->values(), vy.internal()->values(), res.deviceValue());
 }
 
 /*---------------------------------------------------------------------------*/
 
 void SYCLInternalLinearAlgebra::scal(Real alpha, SYCLVector<Real>& vx) const
 {
-  SentryType s(m_timer,"SYCL-SCAL") ;
-  return m_internal->scal(alpha,vx.internal()->values());
+  SentryType s(m_timer, "SYCL-SCAL");
+  return m_internal->scal(alpha, vx.internal()->values());
 }
 
 void SYCLInternalLinearAlgebra::pointwiseMult(const SYCLVector<Real>& vx,
                                               const SYCLVector<Real>& vy,
                                               SYCLVector<Real>& vz) const
 {
-  SentryType s(m_timer,"SYCL-XYZ") ;
-  return m_internal->pointwiseMult(vx.internal()->values(),vy.internal()->values(),vz.internal()->values());
+  SentryType s(m_timer, "SYCL-XYZ");
+  return m_internal->pointwiseMult(vx.internal()->values(), vy.internal()->values(), vz.internal()->values());
 }
 
 void SYCLInternalLinearAlgebra::assign(SYCLVector<Real>& vx, Real alpha) const
 {
-  SentryType s(m_timer,"SYCL-ASSIGN") ;
-  return m_internal->assign(alpha,vx.internal()->values());
+  SentryType s(m_timer, "SYCL-ASSIGN");
+  return m_internal->assign(alpha, vx.internal()->values());
 }
 
 void SYCLInternalLinearAlgebra::diagonal(
@@ -248,11 +246,10 @@ void SYCLInternalLinearAlgebra::reciprocal(SYCLVector<Real>& x ALIEN_UNUSED_PARA
   A_FUNCINFO, "SYCLLinearAlgebra::aypx not implemented");
 }
 
-
 SYCLInternalLinearAlgebraExpr::SYCLInternalLinearAlgebraExpr()
 : IInternalLinearAlgebraExpr<SYCLBEllPackMatrix<Real>, SYCLVector<Real>>()
 {
-  m_internal.reset(new SYCLInternal::KernelInternal()) ;
+  m_internal.reset(new SYCLInternal::KernelInternal());
 }
 
 /*---------------------------------------------------------------------------*/
@@ -282,7 +279,7 @@ Real SYCLInternalLinearAlgebraExpr::norm1(const SYCLVector<Real>& vx ALIEN_UNUSE
 
 Real SYCLInternalLinearAlgebraExpr::norm2(const SYCLVector<Real>& vx) const
 {
-  return std::sqrt(m_internal->dot(vx.internal()->values(),vx.internal()->values()));
+  return std::sqrt(m_internal->dot(vx.internal()->values(), vx.internal()->values()));
 }
 
 /*---------------------------------------------------------------------------*/
@@ -320,7 +317,7 @@ void SYCLInternalLinearAlgebraExpr::aypx(Real alpha, UniqueArray<Real>& vy, Uniq
 }
 
 void SYCLInternalLinearAlgebraExpr::aypx(Real alpha ALIEN_UNUSED_PARAM,
-                                              SYCLVector<Real>& y ALIEN_UNUSED_PARAM, const SYCLVector<Real>& x ALIEN_UNUSED_PARAM) const
+                                         SYCLVector<Real>& y ALIEN_UNUSED_PARAM, const SYCLVector<Real>& x ALIEN_UNUSED_PARAM) const
 {
   throw NotImplementedException(
   A_FUNCINFO, "SYCLLinearAlgebra::aypx not implemented");
@@ -344,7 +341,7 @@ void SYCLInternalLinearAlgebraExpr::copy(const SYCLVector<Real>& vx, SYCLVector<
 Real SYCLInternalLinearAlgebraExpr::dot(
 Integer local_size, const UniqueArray<Real>& vx, const UniqueArray<Real>& vy) const
 {
-  return 0. ;//cblas::dot(local_size, dataPtr(vx), 1, dataPtr(vy), 1);
+  return 0.; //cblas::dot(local_size, dataPtr(vx), 1, dataPtr(vy), 1);
 }
 
 Real SYCLInternalLinearAlgebraExpr::dot(const SYCLVector<Real>& vx, const SYCLVector<Real>& vy) const
@@ -379,7 +376,7 @@ void SYCLInternalLinearAlgebraExpr::reciprocal(SYCLVector<Real>& x ALIEN_UNUSED_
 }
 
 void SYCLInternalLinearAlgebraExpr::pointwiseMult(const SYCLVector<Real>& x ALIEN_UNUSED_PARAM,
-                                                       const SYCLVector<Real>& y ALIEN_UNUSED_PARAM, SYCLVector<Real>& w ALIEN_UNUSED_PARAM) const
+                                                  const SYCLVector<Real>& y ALIEN_UNUSED_PARAM, SYCLVector<Real>& w ALIEN_UNUSED_PARAM) const
 {
   throw NotImplementedException(
   A_FUNCINFO, "SYCLLinearAlgebra::aypx not implemented");

@@ -33,9 +33,11 @@ template <typename ValueT = Real>
 class VectorInternal
 {
  public:
-  typedef ValueT ValueType;
-  typedef VectorInternal<ValueType> ThisType;
+  // clang-format off
+  typedef ValueT                         ValueType;
+  typedef VectorInternal<ValueType>      ThisType;
   typedef cl::sycl::buffer<ValueType, 1> ValueBufferType ;
+  // clang-format on
 
  public:
   VectorInternal(ValueType const* ptr, std::size_t size)
@@ -46,24 +48,26 @@ class VectorInternal
 
   virtual ~VectorInternal() {}
 
-  ValueBufferType& values() {
-    return m_values ;
+  ValueBufferType& values()
+  {
+    return m_values;
   }
 
-  ValueBufferType& values() const {
-    return m_values ;
+  ValueBufferType& values() const
+  {
+    return m_values;
   }
 
   void copyValuesToHost(std::size_t size, ValueT* ptr)
   {
     auto h_values = m_values.template get_access<cl::sycl::access::mode::read>();
-    for(std::size_t i=0;i<size;++i)
-      ptr[i] = h_values[i] ;
+    for (std::size_t i = 0; i < size; ++i)
+      ptr[i] = h_values[i];
   }
 
   //VectorInternal<ValueT>* clone() const { return new VectorInternal<ValueT>(*this); }
 
-  mutable ValueBufferType m_values ;
+  mutable ValueBufferType m_values;
 };
 
 /*---------------------------------------------------------------------------*/

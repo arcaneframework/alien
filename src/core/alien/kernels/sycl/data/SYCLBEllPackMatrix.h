@@ -24,12 +24,10 @@
 
 #pragma once
 
-
 #include <alien/core/impl/IMatrixImpl.h>
 #include <alien/core/impl/MultiMatrixImpl.h>
 
 #include <alien/data/ISpace.h>
-
 
 #include <alien/kernels/sycl/SYCLPrecomp.h>
 
@@ -42,12 +40,12 @@
 
 namespace Alien::SYCLInternal
 {
-  template <typename ValueT>
-  class SYCLBEllPackMatrixMultT;
+template <typename ValueT>
+class SYCLBEllPackMatrixMultT;
 
-  template <typename ValueT, int BlockSize>
-  class MatrixInternal ;
-}
+template <typename ValueT, int BlockSize>
+class MatrixInternal;
+} // namespace Alien::SYCLInternal
 
 /*---------------------------------------------------------------------------*/
 
@@ -56,120 +54,120 @@ namespace Alien
 
 /*---------------------------------------------------------------------------*/
 
-  template <int BlockSize,typename IndexT>
-  class BEllPackStructInfo ;
+template <int BlockSize, typename IndexT>
+class BEllPackStructInfo;
 
-  template <typename ValueT>
-  class SYCLVector ;
+template <typename ValueT>
+class SYCLVector;
 
-  template <typename ValueT>
-  class ALIEN_EXPORT SYCLBEllPackMatrix : public IMatrixImpl
+template <typename ValueT>
+class ALIEN_EXPORT SYCLBEllPackMatrix : public IMatrixImpl
+{
+ public:
+  // clang-format off
+  typedef ValueT                                            ValueType;
+  typedef ValueT                                            value_type ;
+
+  typedef SYCLInternal::DistStructInfo                      DistStructInfo;
+  typedef SYCLInternal::MatrixInternal<ValueType,1024>      MatrixInternal1024;
+
+
+  typedef BEllPackStructInfo<1024,int>                      ProfileInternal1024;
+  typedef BEllPackStructInfo<1024,int>                      ProfileType;
+  typedef typename ProfileType::IndexType                   IndexType ;
+  // clang-format on
+
+ public:
+  /** Constructeur de la classe */
+  SYCLBEllPackMatrix()
+  : IMatrixImpl(nullptr, AlgebraTraits<BackEnd::tag::sycl>::name())
+  , m_send_policy(SYCLInternal::CommProperty::ASynch)
+  , m_recv_policy(SYCLInternal::CommProperty::ASynch)
+  {}
+
+  /** Constructeur de la classe */
+  SYCLBEllPackMatrix(const MultiMatrixImpl* multi_impl)
+  : IMatrixImpl(multi_impl, AlgebraTraits<BackEnd::tag::sycl>::name())
+  , m_send_policy(SYCLInternal::CommProperty::ASynch)
+  , m_recv_policy(SYCLInternal::CommProperty::ASynch)
+  {}
+
+  /** Destructeur de la classe */
+  virtual ~SYCLBEllPackMatrix();
+
+  void setTraceMng(ITraceMng* trace_mng) { m_trace = trace_mng; }
+
+  ProfileType const& getProfile() const
   {
-  public:
+    return *m_profile1024;
+  }
 
-  public:
-// clang-format off
-   typedef ValueT                                            ValueType;
-   typedef ValueT                                            value_type ;
+  ValueType* getAddressData();
+  ValueType* data();
 
-   typedef SYCLInternal::DistStructInfo                      DistStructInfo;
-   typedef SYCLInternal::MatrixInternal<ValueType,1024>      MatrixInternal1024;
+  ValueType const* getAddressData() const;
+  ValueType const* data() const;
 
+ public:
+  bool initMatrix(Arccore::MessagePassing::IMessagePassingMng* parallel_mng,
+                  std::size_t nrows,
+                  int const* kcol,
+                  int const* cols);
 
-   typedef BEllPackStructInfo<1024,int>                      ProfileInternal1024;
-   typedef BEllPackStructInfo<1024,int>                      ProfileType;
-   typedef typename ProfileType::IndexType                   IndexType ;
+  SYCLBEllPackMatrix* cloneTo(const MultiMatrixImpl* multi) const;
 
-  public:
-   /** Constructeur de la classe */
-   SYCLBEllPackMatrix()
-   : IMatrixImpl(nullptr, AlgebraTraits<BackEnd::tag::sycl>::name())
-   , m_send_policy(SYCLInternal::CommProperty::ASynch)
-   , m_recv_policy(SYCLInternal::CommProperty::ASynch)
-   {}
+  bool setMatrixValues(Arccore::Real const* values, bool only_host);
 
-   /** Constructeur de la classe */
-   SYCLBEllPackMatrix(const MultiMatrixImpl* multi_impl)
-   : IMatrixImpl(multi_impl, AlgebraTraits<BackEnd::tag::sycl>::name())
-   , m_send_policy(SYCLInternal::CommProperty::ASynch)
-   , m_recv_policy(SYCLInternal::CommProperty::ASynch)
-   {}
+  void notifyChanges();
+  void endUpdate();
 
-   /** Destructeur de la classe */
-    virtual ~SYCLBEllPackMatrix () ;
+  void mult(SYCLVector<ValueType> const& x, SYCLVector<ValueType>& y) const;
+  void addLMult(ValueType alpha, SYCLVector<ValueType> const& x, SYCLVector<ValueType>& y) const;
+  void addUMult(ValueType alpha, SYCLVector<ValueType> const& x, SYCLVector<ValueType>& y) const;
 
-    void setTraceMng(ITraceMng* trace_mng) { m_trace = trace_mng; }
+  void multInvDiag(SYCLVector<ValueType>& y) const;
+  void computeInvDiag(SYCLVector<ValueType>& y) const;
 
-    ProfileType const& getProfile() const {
-      return *m_profile1024 ;
-    }
+  const DistStructInfo& getDistStructInfo() const { return m_matrix_dist_info; }
 
-    ValueType* getAddressData() ;
-    ValueType* data() ;
+  SYCLInternal::CommProperty::ePolicyType getSendPolicy() const
+  {
+    return m_send_policy;
+  }
 
-    ValueType const* getAddressData() const ;
-    ValueType const* data() const ;
-   public:
+  SYCLInternal::CommProperty::ePolicyType getRecvPolicy() const
+  {
+    return m_recv_policy;
+  }
 
-    bool initMatrix(Arccore::MessagePassing::IMessagePassingMng* parallel_mng,
-                    std::size_t nrows,
-                    int const* kcol,
-                    int const* cols);
+  MatrixInternal1024* internal() { return m_matrix1024; }
 
-    SYCLBEllPackMatrix* cloneTo(const MultiMatrixImpl* multi) const ;
+  MatrixInternal1024 const* internal() const { return m_matrix1024; }
 
-    bool setMatrixValues(Arccore::Real const* values, bool only_host);
+  bool isParallel() const { return m_is_parallel; }
 
-    void notifyChanges() ;
-    void endUpdate() ;
+  // clang-format off
+  ProfileInternal1024*                    m_profile1024 = nullptr ;
+  MatrixInternal1024*                     m_matrix1024  = nullptr;
 
-    void mult(SYCLVector<ValueType> const& x, SYCLVector<ValueType>& y) const ;
-    void addLMult(ValueType alpha,SYCLVector<ValueType> const& x, SYCLVector<ValueType>& y) const ;
-    void addUMult(ValueType alpha,SYCLVector<ValueType> const& x, SYCLVector<ValueType>& y) const ;
+  int                                     m_block_size = 1024 ;
+  std::vector<int>                        m_block_row_offset ;
+  std::vector<int>                        m_block_cols ;
+  std::vector<ValueType>                  m_block_values ;
 
-    void multInvDiag(SYCLVector<ValueType>& y) const ;
-    void computeInvDiag(SYCLVector<ValueType>& y) const ;
+  bool                                    m_is_parallel = false;
+  IMessagePassingMng*                     m_parallel_mng = nullptr;
+  Integer                                 m_nproc = 1;
+  Integer                                 m_myrank = 0;
+  DistStructInfo                          m_matrix_dist_info;
+  SYCLInternal::CommProperty::ePolicyType m_send_policy;
+  SYCLInternal::CommProperty::ePolicyType m_recv_policy;
+  ITraceMng*                              m_trace = nullptr;
+  // clang-format on
 
-    const DistStructInfo& getDistStructInfo() const { return m_matrix_dist_info; }
-
-    SYCLInternal::CommProperty::ePolicyType getSendPolicy() const
-    {
-      return m_send_policy;
-    }
-
-    SYCLInternal::CommProperty::ePolicyType getRecvPolicy() const
-    {
-      return m_recv_policy;
-    }
-
-    MatrixInternal1024* internal() { return m_matrix1024; }
-
-    MatrixInternal1024 const* internal() const { return m_matrix1024; }
-
-    bool isParallel() const { return m_is_parallel; }
-
-    // clang-format off
-    ProfileInternal1024*                    m_profile1024 = nullptr ;
-    MatrixInternal1024*                     m_matrix1024  = nullptr;
-
-    int                                     m_block_size = 1024 ;
-    std::vector<int>                        m_block_row_offset ;
-    std::vector<int>                        m_block_cols ;
-    std::vector<ValueType>                  m_block_values ;
-
-    bool                                    m_is_parallel = false;
-    IMessagePassingMng*                     m_parallel_mng = nullptr;
-    Integer                                 m_nproc = 1;
-    Integer                                 m_myrank = 0;
-    DistStructInfo                          m_matrix_dist_info;
-    SYCLInternal::CommProperty::ePolicyType m_send_policy;
-    SYCLInternal::CommProperty::ePolicyType m_recv_policy;
-    ITraceMng*                              m_trace = nullptr;
-    // clang-format on
-
-    // From unsuccessful try to implement multiplication.
-    friend class SYCLInternal::SYCLBEllPackMatrixMultT<ValueType>;
-  };
+  // From unsuccessful try to implement multiplication.
+  friend class SYCLInternal::SYCLBEllPackMatrixMultT<ValueType>;
+};
 
 //extern template class SYCLBEllPackMatrix<double>;
-}
+} // namespace Alien
