@@ -44,13 +44,17 @@ namespace Alien
 /*---------------------------------------------------------------------------*/
 
 template<int BlockSize, typename IndexT = int>
-class BEllPackStructInfo : BaseBEllPackStructInfo
+class ALIEN_EXPORT BEllPackStructInfo
+: BaseBEllPackStructInfo
 {
  public:
-  typedef IndexT index_type ;
-  static const int block_size = BlockSize ;
+  // clang-format off
+
+  typedef IndexT                                             index_type ;
+  static const int                                           block_size = BlockSize ;
 
   typedef SYCLInternal::StructInfoInternal<BlockSize,IndexT> InternalType ;
+  typedef IndexT                                             IndexType ;
 
   static std::size_t nbBlocks(std::size_t nrows) {
     return (nrows+block_size-1)/block_size ;
@@ -83,24 +87,16 @@ class BEllPackStructInfo : BaseBEllPackStructInfo
 
   std::size_t getNnz() const { return m_nnz; }
 
-  Integer getBlockNnz() const { return m_block_nnz ; }
+  std::size_t getBlockNnz() const { return m_block_nnz ; }
 
-  int const* kcol() const {
-    return nullptr ;
-  }
+  IndexType const* kcol() const ;
 
-  int const* cols() const {
-    return nullptr ;
-  }
+  IndexType const* cols() const ;
 
-  int const* dcol() const {
-    return nullptr ;
-  }
-
-
-
+  IndexType const* dcol() const ;
 
  protected:
+  // clang-format off
   std::size_t m_nrows       = 0 ;
   std::size_t m_nnz         = 0 ;
   std::size_t m_block_nrows = 0 ;
@@ -110,6 +106,7 @@ class BEllPackStructInfo : BaseBEllPackStructInfo
 
 
   Arccore::Int64 m_timestamp = -1;
+  // clang-format on
 };
 
 /*---------------------------------------------------------------------------*/

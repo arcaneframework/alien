@@ -40,6 +40,8 @@ class CSRStructInfo
     eFull
   };
 
+  typedef Integer IndexType ;
+
  public:
   CSRStructInfo(bool is_variable_block = false)
   : m_is_variable_block(is_variable_block)
@@ -120,9 +122,9 @@ class CSRStructInfo
     return m_block_row_offset;
   }
 
-  Arccore::ArrayView<Arccore::Integer> getRowOffset() { return m_row_offset.view(); }
+  Arccore::ArrayView<Integer> getRowOffset() { return m_row_offset.view(); }
 
-  Arccore::ConstArrayView<Arccore::Integer> getRowOffset() const
+  Arccore::ConstArrayView<Integer> getRowOffset() const
   {
     return m_row_offset.constView();
   }

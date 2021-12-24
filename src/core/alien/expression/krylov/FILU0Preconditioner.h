@@ -9,13 +9,12 @@
 
 namespace Alien
 {
-
-
   template<typename MatrixT, typename VectorT>
   class FLUFactorisationAlgo
   : public LUFactorisationAlgo<MatrixT,VectorT>
   {
   public :
+    // clang-format off
     typedef LUFactorisationAlgo<MatrixT,VectorT> BaseType ;
     typedef MatrixT                              MatrixType;
     typedef VectorT                              VectorType;
@@ -51,27 +50,7 @@ namespace Alien
       }
       else
       {
-        auto const& profile = matrix.getProfile() ;
-        auto nrows = Alien::numRows(matrix) ;
-        int const* kcol = Alien::kcol(profile) ;
-        int const* dcol = Alien::dcol(profile) ;
-        int const* cols = Alien::cols(profile) ;
-
-        typename BaseType::ValueType const* matrix_values = Alien::dataPtr(matrix) ;
-        //auto const& profile = matrix.getProfile() ;
-        auto nnz = Alien::nnz(matrix) ;
-
-        for(int iter=0;iter<m_nb_factorization_iter;++iter)
-        {
-            ValueType* values = Alien::dataPtr(*this->m_lu_matrix) ;
-
-            std::vector<ValueType> guest_values(nnz) ;
-            std::copy(values,values+nnz,guest_values.data()) ;
-            std::copy(matrix_values,matrix_values+nnz,values) ;
-
-            factorizeInternal(nrows,kcol,dcol,cols,values,guest_values.data()) ;
-
-        }
+        factorizeMultiIter(*this->m_lu_matrix) ;
       }
       this->m_work.clear() ;
 
@@ -84,7 +63,7 @@ namespace Alien
     //
     // FACTORIZATION
     //
-    void factorizeInternal(std::size_t nrows,
+    void factorizeIter(std::size_t nrows,
                            int const* kcol,
                            int const* dcol,
                            int const* cols,
@@ -110,12 +89,31 @@ namespace Alien
       }
     }
 
+    void factorizeMultiIter(MatrixT const& matrix)
+    {
+      CSRModifierViewT<MatrixT> modifier(*this->m_lu_matrix) ;
+
+      auto nrows  = modifier.nrows() ;
+      auto nnz    = modifier.nnz() ;
+      auto kcol   = modifier.kcol() ;
+      auto dcol   = modifier.dcol() ;
+      auto cols   = modifier.cols() ;
+      auto values = modifier.data() ;
+
+      for(int iter=0;iter<m_nb_factorization_iter;++iter)
+      {
+        auto matrix_values = CSRConstViewT<MatrixT>(matrix).data() ;
+        std::vector<ValueType> guest_values(nnz) ;
+        std::copy(values,values+nnz,guest_values.data()) ;
+        std::copy(matrix_values,matrix_values+nnz,values) ;
+        factorizeIter(nrows,kcol,dcol,cols,values,guest_values.data()) ;
+      }
+    }
 
     ///////////////////////////////////////////////////////////////////////
     //
     // TRIANGULAR RESOLUTION
     //
-
     template<typename AlgebraT>
     void solveL(AlgebraT& algebra,
                 VectorType const& y,
@@ -123,22 +121,21 @@ namespace Alien
                 VectorType& xk) const
     {
 #ifdef DEBUG
-        auto const& profile = this->m_lu_matrix->getProfile() ;
-        int nrows = Alien::numRows(*this->m_lu_matrix) ;
-        int const* kcol = Alien::kcol(profile) ;
-        int const* dcol = Alien::dcol(profile) ;
-        int const* cols = Alien::cols(profile) ;
+      CSRConstViewT<MatrixT> view(*m_lu_matrix) ;
+      auto nrows  = view.nrows() ;
+      auto kcol   = view.kcol() ;
+      auto dcol   = view.dcol() ;
+      auto cols   = view.cols() ;
+      auto values = view.data() ;
 
-        ValueType* values = Alien::dataPtr(*this->m_lu_matrix) ;
-
-        std::copy(x,x+nrows,xk) ;
-        for(int irow=0;irow<nrows;++irow)
-        {
-            ValueType val = y[irow] ;
-            for(int k=kcol[irow];k<dcol[irow];++k)
-              val -= values[k]*xk[cols[k]] ;
-            x[irow] = val ;
-        }
+      std::copy(x,x+nrows,xk) ;
+      for(int irow=0;irow<nrows;++irow)
+      {
+          ValueType val = y[irow] ;
+          for(int k=kcol[irow];k<dcol[irow];++k)
+            val -= values[k]*xk[cols[k]] ;
+          x[irow] = val ;
+      }
 #endif
         algebra.copy(x,xk) ;
         algebra.copy(y,x) ;
@@ -149,13 +146,12 @@ namespace Alien
     void solveU(AlgebraT& algebra, VectorType const& y, VectorType& x,VectorType& xk) const
     {
 #ifdef DEBUG
-      auto const& profile = this->m_lu_matrix->getProfile() ;
-      int nrows = Alien::numRows(*this->m_lu_matrix) ;
-      int const* kcol = Alien::kcol(profile) ;
-      int const* dcol = Alien::dcol(profile) ;
-      int const* cols = Alien::cols(profile) ;
-
-      ValueType* values = Alien::dataPtr(*this->m_lu_matrix) ;
+      CSRConstViewT<MatrixT> view(*m_lu_matrix) ;
+      auto nrows  = view.nrows() ;
+      auto kcol   = view.kcol() ;
+      auto dcol   = view.dcol() ;
+      auto cols   = view.cols() ;
+      auto values = view.data() ;
 
       std::copy(x,x+nrows,xk) ;
       for(int irow=0;irow<nrows;++irow)
@@ -170,6 +166,7 @@ namespace Alien
         x[irow] = val ;
       }
 #endif
+
       algebra.copy(x,xk) ;
       algebra.copy(y,x) ;
       algebra.addUMult(-1.,*this->m_lu_matrix,xk,x) ;

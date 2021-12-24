@@ -51,6 +51,7 @@ namespace Alien
   public:
 
   public:
+// clang-format off
    typedef ValueT                                            ValueType;
    typedef ValueT                                            value_type ;
 
@@ -60,6 +61,7 @@ namespace Alien
 
    typedef BEllPackStructInfo<1024,int>                      ProfileInternal1024;
    typedef BEllPackStructInfo<1024,int>                      ProfileType;
+   typedef typename ProfileType::IndexType                   IndexType ;
 
   public:
    /** Constructeur de la classe */
@@ -85,9 +87,11 @@ namespace Alien
       return *m_profile1024 ;
     }
 
-    ValueType* getAddressData() { return nullptr; }
+    ValueType* getAddressData() ;
+    ValueType* data() ;
 
-    ValueType const* getAddressData() const { return nullptr; }
+    ValueType const* getAddressData() const ;
+    ValueType const* data() const ;
    public:
 
     bool initMatrix(Arccore::MessagePassing::IMessagePassingMng* parallel_mng,
@@ -97,7 +101,10 @@ namespace Alien
 
     SYCLBEllPackMatrix* cloneTo(const MultiMatrixImpl* multi) const ;
 
-    bool setMatrixValues(Arccore::Real const* values);
+    bool setMatrixValues(Arccore::Real const* values, bool only_host);
+
+    void notifyChanges() ;
+    void endUpdate() ;
 
     void mult(SYCLVector<ValueType> const& x, SYCLVector<ValueType>& y) const ;
     void addLMult(ValueType alpha,SYCLVector<ValueType> const& x, SYCLVector<ValueType>& y) const ;
@@ -124,6 +131,7 @@ namespace Alien
 
     bool isParallel() const { return m_is_parallel; }
 
+    // clang-format off
     ProfileInternal1024*                    m_profile1024 = nullptr ;
     MatrixInternal1024*                     m_matrix1024  = nullptr;
 
@@ -139,7 +147,8 @@ namespace Alien
     DistStructInfo                          m_matrix_dist_info;
     SYCLInternal::CommProperty::ePolicyType m_send_policy;
     SYCLInternal::CommProperty::ePolicyType m_recv_policy;
-    ITraceMng* m_trace = nullptr;
+    ITraceMng*                              m_trace = nullptr;
+    // clang-format on
 
     // From unsuccessful try to implement multiplication.
     friend class SYCLInternal::SYCLBEllPackMatrixMultT<ValueType>;

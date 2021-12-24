@@ -52,11 +52,15 @@ template <typename ValueT>
 class SimpleCSRMatrix : public IMatrixImpl
 {
  public:
-  typedef ValueT ValueType;
-  typedef SimpleCSRInternal::CSRStructInfo CSRStructInfo;
-  typedef SimpleCSRInternal::CSRStructInfo ProfileType;
-  typedef SimpleCSRInternal::DistStructInfo DistStructInfo;
+// clang-format off
+  typedef ValueT                                       ValueType;
+  typedef SimpleCSRInternal::CSRStructInfo             CSRStructInfo;
+  typedef SimpleCSRInternal::CSRStructInfo             ProfileType;
+  typedef SimpleCSRInternal::DistStructInfo            DistStructInfo;
   typedef SimpleCSRInternal::MatrixInternal<ValueType> MatrixInternal;
+  typedef typename ProfileType::IndexType              IndexType ;
+  // clang-format on
+
 
  public:
   /** Constructeur de la classe */
@@ -119,8 +123,10 @@ class SimpleCSRMatrix : public IMatrixImpl
   }
 
   ValueType* getAddressData() { return m_matrix.getDataPtr(); }
+  ValueType* data() { return m_matrix.getDataPtr(); }
 
   ValueType const* getAddressData() const { return m_matrix.getDataPtr(); }
+  ValueType const* data() const { return m_matrix.getDataPtr(); }
 
   MatrixInternal& internal() { return m_matrix; }
 
@@ -260,6 +266,20 @@ class SimpleCSRMatrix : public IMatrixImpl
     matrix->m_matrix.copy(m_matrix);
     matrix->m_matrix_dist_info.copy(m_matrix_dist_info);
     return matrix;
+  }
+
+  void notifyChanges()
+  {
+    m_matrix.notifyChanges() ;
+  }
+
+  void endUpdate()
+  {
+    if(m_matrix.needUpdate())
+    {
+      m_matrix.endUpdate() ;
+      this->updateTimestamp() ;
+    }
   }
 
  private:

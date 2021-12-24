@@ -7,59 +7,16 @@
 
 #pragma once
 
-
+#include <alien/handlers/scalar/CSRModifierViewT.h>
 
 namespace Alien
 {
-  template<typename MatrixT>
-  std::size_t numRows(MatrixT const& matrix)
-  {
-    return matrix.getProfile().getNRows() ;
-  }
-
-
-  template<typename MatrixT>
-  std::size_t nnz(MatrixT const& matrix)
-  {
-    return matrix.getProfile().getNnz() ;
-  }
-
-  template<typename ProfileT>
-  int const* kcol(ProfileT const& profile)
-  {
-    return profile.kcol() ;
-  }
-
-  template<typename ProfileT>
-  int const* dcol(ProfileT const& profile)
-  {
-    return profile.dcol() ;
-  }
-
-
-  template<typename ProfileT>
-  int const* cols(ProfileT const& profile)
-  {
-    return profile.cols() ;
-  }
-
-
-  template<typename MatrixT>
-  typename  MatrixT::ValueType const* dataPtr(MatrixT const& matrix)
-  {
-    return matrix.getAddressData() ;
-  }
-
-  template<typename MatrixT>
-  typename  MatrixT::ValueType* dataPtr(MatrixT& matrix)
-  {
-    return matrix.getAddressData() ;
-  }
 
   template<typename MatrixT, typename VectorT>
   class LUFactorisationAlgo
   {
   public :
+    // clang-format off
     typedef MatrixT                          MatrixType;
     typedef VectorT                          VectorType;
     typedef typename MatrixType::ProfileType ProfileType ;
@@ -75,7 +32,7 @@ namespace Alien
     {
       m_lu_matrix.reset(matrix.cloneTo(nullptr));
       m_profile = &m_lu_matrix->getProfile() ;
-      m_alloc_size = Alien::numRows(*m_lu_matrix) ;
+      m_alloc_size = CSRConstViewT<MatrixT>(*m_lu_matrix).nrows() ;
       m_work.resize(m_alloc_size) ;
       m_work.assign(m_work.size(),-1) ;
       algebra.allocate(AlgebraT::resource(matrix),m_x) ;
@@ -103,13 +60,14 @@ namespace Alien
          EndFor
        *
        */
+      CSRModifierViewT<MatrixT> modifier(matrix) ;
 
-      auto const& profile = matrix.getProfile() ;
-      auto nrows = Alien::numRows(matrix) ;
-      int const* kcol = Alien::kcol(profile) ;
-      int const* dcol = Alien::dcol(profile) ;
-      int const* cols = Alien::cols(profile) ;
-      ValueType* values = Alien::dataPtr(matrix) ;
+      auto nrows  = modifier.nrows() ;
+      auto kcol   = modifier.kcol() ;
+      auto dcol   = modifier.dcol() ;
+      auto cols   = modifier.cols() ;
+      auto values = modifier.data() ;
+
       for(std::size_t irow=1;irow<nrows;++irow)           // i=1->nrow
       {
          for(int k=kcol[irow];k<dcol[irow];++k)  // k=1 ->i-1
@@ -137,40 +95,42 @@ namespace Alien
 
     void solveL(ValueType const* y, ValueType* x) const
     {
-        auto const& profile = m_lu_matrix->getProfile() ;
-        auto nrows = Alien::numRows(*m_lu_matrix) ;
-        int const* kcol = Alien::kcol(profile) ;
-        int const* dcol = Alien::dcol(profile) ;
-        int const* cols = Alien::cols(profile) ;
-        ValueType* values = Alien::dataPtr(*m_lu_matrix) ;
-        for(std::size_t irow=0;irow<nrows;++irow)
-        {
-          ValueType val = y[irow] ;
-          for(int k=kcol[irow];k<dcol[irow];++k)
-            val -= values[k]*x[cols[k]] ;
-          x[irow] = val ;
-        }
+      CSRConstViewT<MatrixT> view(*m_lu_matrix) ;
+      auto nrows  = view.nrows() ;
+      auto kcol   = view.kcol() ;
+      auto dcol   = view.dcol() ;
+      auto cols   = view.cols() ;
+      auto values = view.data() ;
+
+      for(std::size_t irow=0;irow<nrows;++irow)
+      {
+        ValueType val = y[irow] ;
+        for(int k=kcol[irow];k<dcol[irow];++k)
+          val -= values[k]*x[cols[k]] ;
+        x[irow] = val ;
+      }
     }
 
 
     void solveU(ValueType const* y, ValueType* x) const
     {
-        auto const& profile = m_lu_matrix->getProfile() ;
-        auto nrows = Alien::numRows(*m_lu_matrix) ;
-        int const* kcol = Alien::kcol(profile) ;
-        int const* dcol = Alien::dcol(profile) ;
-        int const* cols = Alien::cols(profile) ;
-        ValueType* values = Alien::dataPtr(*m_lu_matrix) ;
-        for(int irow = nrows-1;irow>-1;--irow)
+      CSRConstViewT<MatrixT> view(*m_lu_matrix) ;
+      auto nrows  = view.nrows() ;
+      auto kcol   = view.kcol() ;
+      auto dcol   = view.dcol() ;
+      auto cols   = view.cols() ;
+      auto values = view.data() ;
+
+      for(int irow = (int)nrows-1;irow>-1;--irow)
+      {
+        int dk = dcol[irow] ;
+        ValueType val = y[irow] ;
+        for(int k=dk+1;k<kcol[irow+1];++k)
         {
-          int dk = dcol[irow] ;
-          ValueType val = y[irow] ;
-          for(int k=dk+1;k<kcol[irow+1];++k)
-          {
-            val -= values[k]*x[cols[k]] ;
-          }
-          x[irow] = val/values[dk] ;
+          val -= values[k]*x[cols[k]] ;
         }
+        x[irow] = val/values[dk] ;
+      }
     }
 
     template<typename AlgebraT>

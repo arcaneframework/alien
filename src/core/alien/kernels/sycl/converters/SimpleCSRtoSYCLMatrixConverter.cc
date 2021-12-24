@@ -79,7 +79,7 @@ SimpleCSRtoSYCLMatrixConverter::_build(
       throw FatalErrorException(A_FUNCINFO, "SYCL Initialisation failed");
     }
 
-    if (not targetImpl.setMatrixValues(matrixInternal.getDataPtr())) {
+    if (not targetImpl.setMatrixValues(matrixInternal.getDataPtr(),false)) {
       throw FatalErrorException(A_FUNCINFO, "Cannot set SYCL Matrix Values");
     }
 
