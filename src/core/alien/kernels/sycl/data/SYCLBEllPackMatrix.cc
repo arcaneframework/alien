@@ -201,10 +201,17 @@ namespace Alien
     template <int BlockSize, typename IndexT>
     void SYCLInternal::StructInfoInternal<BlockSize,IndexT>::computeLowerUpperMask() const
     {
-      if(m_lower_mask.get() == nullptr)
+
+      if(not m_lower_upper_mask_ready)
       {
+        //std::vector<int> h_lower_mask(m_block_nnz*block_size) ;
+        //std::vector<int> h_upper_mask(m_block_nnz*block_size) ;
         m_lower_mask.reset(new IndexBufferType(cl::sycl::range<1>(m_block_nnz*block_size))) ;
         m_upper_mask.reset(new IndexBufferType(cl::sycl::range<1>(m_block_nnz*block_size))) ;
+
+        //m_lower_mask->set_final_data(nullptr);
+        //m_upper_mask->set_final_data(nullptr);
+
 
 
         auto env = SYCLEnv::instance() ;
@@ -220,63 +227,67 @@ namespace Alien
 
         {
           IndexBufferType dcol_buffer(m_h_dcol.data(),cl::sycl::range<1>(m_nrows)) ;
+          //IndexBufferType lower_mask(h_lower_mask.data(),cl::sycl::range<1>(m_block_nnz*block_size)) ;
+          //IndexBufferType upper_mask(h_upper_mask.data(),cl::sycl::range<1>(m_block_nnz*block_size)) ;
+          //IndexBufferType& lower_mask = *m_lower_mask ;
+          //IndexBufferType& upper_mask = *m_upper_mask ;
 
           auto nrows = m_nrows ;
 
+          queue.submit([&](cl::sycl::handler& cgh)
+                       {
+                         auto access_dcol_buffer      = dcol_buffer.template get_access<cl::sycl::access::mode::read>(cgh);
 
-            queue.submit([&](cl::sycl::handler& cgh)
-                         {
-                           auto access_dcol_buffer      = dcol_buffer.template get_access<cl::sycl::access::mode::read>(cgh);
+                         auto access_kcol_buffer      = m_kcol.template get_access<cl::sycl::access::mode::read>(cgh);
+                         auto access_block_row_offset = m_block_row_offset.template get_access<cl::sycl::access::mode::read>(cgh);
 
-                           auto access_kcol_buffer      = m_kcol.template get_access<cl::sycl::access::mode::read>(cgh);
-                           auto access_block_row_offset = m_block_row_offset.template get_access<cl::sycl::access::mode::read>(cgh);
-
-                           auto access_lower_mask       = m_lower_mask->template get_access<cl::sycl::access::mode::write>(cgh);
-                           auto access_upper_mask       = m_upper_mask->template get_access<cl::sycl::access::mode::write>(cgh);
+                         auto access_lower_mask       = cl::sycl::accessor { *m_lower_mask, cgh, cl::sycl::write_only, cl::sycl::property::no_init{}};
+                         auto access_upper_mask       = cl::sycl::accessor { *m_upper_mask, cgh, cl::sycl::write_only, cl::sycl::property::no_init{}};
 
 
-                           cgh.parallel_for<class vector_rs>(cl::sycl::range<1>{total_threads},
-                                                             [=] (cl::sycl::item<1> itemId)
-                                                             {
-                                                                 auto id = itemId.get_id(0);
+                         cgh.parallel_for<class vector_rs>(cl::sycl::range<1>{total_threads},
+                                                           [=] (cl::sycl::item<1> itemId)
+                                                           {
+                                                               auto id = itemId.get_id(0);
 
-                                                                 for (auto i = id; i < nrows; i += itemId.get_range()[0])
+                                                               for (auto i = id; i < nrows; i += itemId.get_range()[0])
+                                                               {
+                                                                 auto block_id = i/block_size ;
+                                                                 auto local_id = i%block_size ;
+
+                                                                 int begin              = access_kcol_buffer[i] ;
+                                                                 int end                = access_kcol_buffer[i+1] ;
+                                                                 int diag               = access_dcol_buffer[i] ;
+                                                                 int row_size           = end - begin ;
+
+                                                                 int block_row_offset   = access_block_row_offset[block_id]*block_size ;
+                                                                 auto block_row_size    = access_block_row_offset[block_id+1]-access_block_row_offset[block_id] ;
+
+                                                                 access_lower_mask[block_row_offset+(diag-begin)*block_size+local_id] = 0 ;
+                                                                 access_upper_mask[block_row_offset+(diag-begin)*block_size+local_id] = 0 ;
+
+                                                                 for(int k=begin;k<diag;++k)
                                                                  {
-                                                                   auto block_id = i/block_size ;
-                                                                   auto local_id = i%block_size ;
-
-                                                                   int begin              = access_kcol_buffer[i] ;
-                                                                   int end                = access_kcol_buffer[i+1] ;
-                                                                   int diag               = access_dcol_buffer[i] ;
-                                                                   int row_size           = end - begin ;
-
-                                                                   int block_row_offset   = access_block_row_offset[block_id]*block_size ;
-                                                                   auto block_row_size = access_block_row_offset[block_id+1]-access_block_row_offset[block_id] ;
-
-                                                                   access_lower_mask[block_row_offset+(diag-begin)*block_size+local_id] = 0 ;
-                                                                   access_upper_mask[block_row_offset+(diag-begin)*block_size+local_id] = 0 ;
-
-                                                                    for(int k=begin;k<diag;++k)
-                                                                    {
-                                                                      access_lower_mask[block_row_offset+(k-begin)*block_size+local_id] = 1 ;
-                                                                      access_upper_mask[block_row_offset+(k-begin)*block_size+local_id] = 0 ;
-                                                                    }
-                                                                    for(int k=diag+1;k<end;++k)
-                                                                    {
-                                                                      access_lower_mask[block_row_offset+(k-begin)*block_size+local_id] = 0 ;
-                                                                      access_upper_mask[block_row_offset+(k-begin)*block_size+local_id] = 1 ;
-                                                                    }
-
-                                                                    for(int k=row_size;k<block_row_size;++k)
-                                                                    {
-                                                                      access_lower_mask[block_row_offset+(k-begin)*block_size+local_id] = 0 ;
-                                                                      access_upper_mask[block_row_offset+(k-begin)*block_size+local_id] = 0 ;
-                                                                    }
-
+                                                                    access_lower_mask[block_row_offset+(k-begin)*block_size+local_id] = 1 ;
+                                                                    access_upper_mask[block_row_offset+(k-begin)*block_size+local_id] = 0 ;
                                                                  }
-                                                              });
-                         });
+                                                                 for(int k=diag+1;k<end;++k)
+                                                                 {
+                                                                    access_lower_mask[block_row_offset+(k-begin)*block_size+local_id] = 0 ;
+                                                                    access_upper_mask[block_row_offset+(k-begin)*block_size+local_id] = 1 ;
+                                                                 }
+                                                                 for(int k=row_size;k<block_row_size;++k)
+                                                                 {
+                                                                    access_lower_mask[block_row_offset+k*block_size+local_id] = 0 ;
+                                                                    access_upper_mask[block_row_offset+k*block_size+local_id] = 0 ;
+                                                                 }
+
+                                                               }
+                                                            });
+                       });
+
         }
+        m_lower_upper_mask_ready = true ;
       }
     }
 
@@ -555,7 +566,9 @@ namespace Alien
       auto& kcol             = internal_profile->getKCol() ;
       auto& block_row_offset = internal_profile->getBlockRowOffset() ;
       auto& block_cols       = internal_profile->getBlockCols() ;
+
       auto& mask             = internal_profile->getLowerMask() ;
+
       {
         // COMPUTE VALUES
         queue.submit([&](cl::sycl::handler& cgh)

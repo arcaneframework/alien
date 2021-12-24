@@ -104,11 +104,13 @@ namespace Alien
     CSRModifierViewT(MatrixT& matrix)
     : BaseType(matrix.getProfile())
     , m_matrix(matrix)
-    {}
+    {
+      m_matrix.notifyChanges() ;
+    }
 
     virtual ~CSRModifierViewT()
     {
-      this->m_matrix.endUpdate() ;
+      m_matrix.endUpdate() ;
     }
 
     ValueType* data()

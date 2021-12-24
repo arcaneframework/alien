@@ -46,13 +46,55 @@ include(LoadAlienTest)
 # Tests
 #-----------------------------------------------------------
 
+
+alien_test( BENCH krylov-simplecsr
+            NAME diag
+            COMMAND krylov_example.exe 
+            OPTIONS --nx 10 --ny 10 --precond diag --kernel simplcsr)
+            
+alien_test( BENCH krylov-simplecsr
+            NAME cheb
+            COMMAND krylov_example.exe 
+            OPTIONS --nx 10 --ny 10 --precond cheb --kernel simplcsr)
+            
+alien_test( BENCH krylov-simplecsr
+            NAME poly
+            COMMAND krylov_example.exe
+            OPTIONS --nx 10 --ny 10 --precond poly --kernel simplcsr)
+            
+alien_test( BENCH krylov-simplecsr
+            NAME ilu0
+            COMMAND krylov_example.exe 
+            OPTIONS --nx 10 --ny 10 --precond ilu0 --kernel simplcsr)
+
+alien_test( BENCH krylov-simplecsr
+            NAME filu0
+            COMMAND krylov_example.exe 
+            OPTIONS --nx 10 --ny 10 --precond filu0 --kernel simplcsr)
+
+if(ALIEN_USE_SYCL)
+
 alien_test( BENCH sycl
-            NAME sycl.default
-            PROCS 1
+            NAME default
             COMMAND sycl_example.exe)
-
-alien_test( BENCH krylov-diag-scsr
-            NAME krylov.diag-scsr
-            PROCS 1
-            COMMAND krylov_example.exe)
-
+            
+alien_test( BENCH krylov-sycl
+            NAME diag
+            COMMAND krylov_example.exe
+            OPTIONS --nx 10 --ny 10 --precond diag --kernel sycl)
+            
+alien_test( BENCH krylov-sycl
+            NAME cheb
+            COMMAND krylov_example.exe
+            OPTIONS --nx 10 --ny 10 --precond cheb --kernel sycl)
+            
+alien_test( BENCH krylov-sycl
+            NAME poly
+            COMMAND krylov_example.exe
+            OPTIONS --nx 10 --ny 10 --precond poly --kernel sycl)
+            
+alien_test( BENCH krylov-sycl
+            NAME filu0
+            COMMAND krylov_example.exe
+            OPTIONS --nx 10 --ny 10 --precond filu0 --kernel sycl)
+endif()

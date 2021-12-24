@@ -70,7 +70,6 @@ namespace Alien::SYCLInternal
       return m_h_dcol.data() ;
     }
 
-
     void getUpperDiagOffset() const ;
     void computeLowerUpperMask() const ;
 
@@ -86,13 +85,14 @@ namespace Alien::SYCLInternal
     std::vector<index_type> m_h_cols ;
     std::vector<index_type> m_h_block_cols ;
 
-    mutable std::vector<index_type>  m_h_dcol ;
     mutable IndexBufferType          m_block_row_offset ;
     mutable IndexBufferType          m_block_cols ;
     mutable IndexBufferType          m_kcol ;
 
-    mutable std::unique_ptr<IndexBufferType> m_lower_mask ;
-    mutable std::unique_ptr<IndexBufferType> m_upper_mask ;
+    mutable bool                              m_lower_upper_mask_ready = false ;
+    mutable std::vector<index_type>           m_h_dcol ;
+    mutable std::unique_ptr<IndexBufferType>  m_lower_mask ;
+    mutable std::unique_ptr<IndexBufferType>  m_upper_mask ;
   };
 
 /*---------------------------------------------------------------------------*/
