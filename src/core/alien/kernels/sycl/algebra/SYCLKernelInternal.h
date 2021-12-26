@@ -35,7 +35,8 @@ class Future
  public:
   Future(T& value)
   : m_value(value)
-  , m_d_value(&m_value, 1)
+  , m_d_value{1}
+  //, m_d_value{SYCLEnv::instance()->maxNumGroups()}
   {
   }
 
@@ -769,6 +770,152 @@ class KernelInternal
   }
 
   template <typename T>
+  class map5_reduction_sum;
+
+  template <typename T>
+  class map5_reduction_sum1;
+
+  template <typename T>
+  void map5_reduce_sum(cl::sycl::buffer<T>& x,
+                       cl::sycl::buffer<T>& y,
+                       cl::sycl::buffer<T>& res)
+  {
+    std::size_t local         = m_max_work_group_size;
+    std::size_t total_threads = m_total_threads;
+    std::size_t length        = x.get_count();
+
+    int level = 0;
+    {
+      /* Each iteration of the do loop applies one level of reduction until
+         * the input is of length 1 (i.e. the reduction is complete). */
+      do
+      {
+        // clang-format off
+          auto f0 = [total_threads, length, local, &x, &y,&res](cl::sycl::handler& h) mutable
+                   {
+                      cl::sycl::nd_range<1> range{cl::sycl::range<1>{total_threads},
+                                                  cl::sycl::range<1>{local}};
+                      auto access_x = x.template get_access<cl::sycl::access::mode::read>(h);
+                      auto access_y = y.template get_access<cl::sycl::access::mode::read>(h);
+                      auto access_sum = cl::sycl::accessor { res, h, cl::sycl::read_write, cl::sycl::property::no_init{}};
+
+                      cl::sycl::accessor<T, 1, cl::sycl::access::mode::read_write,cl::sycl::access::target::local>
+                        scratch(cl::sycl::range<1>(local), h);
+
+                      /* The parallel_for invocation chosen is the variant with an nd_item
+                       * parameter, since the code requires barriers for correctness. */
+
+                      h.parallel_for<map5_reduction_sum<T>>(range,
+                                                            [access_x,access_y,access_sum,scratch,local,length,total_threads] (cl::sycl::nd_item<1> id)
+                                                            {
+                                                                std::size_t globalid = id.get_global_id(0);
+                                                                std::size_t localid = id.get_local_id(0);
+
+                                                                scratch[localid] = (globalid < length)?  access_x[globalid]*access_y[globalid] : 0. ;
+
+                                                                for (auto i = globalid+total_threads; i < length; i += total_threads)
+                                                                  scratch[localid] += access_x[i]*access_y[i];
+
+                                                                id.barrier(cl::sycl::access::fence_space::local_space);
+
+                                                                /* Apply the reduction operation between the current local
+                                                                 * id and the one on the other half of the vector. */
+                                                                if (globalid < length)
+                                                                {
+                                                                  //int min = (length < local) ? length : local;
+                                                                  int min = local ;
+                                                                  for (std::size_t offset = min / 2; offset > 0; offset /= 2)
+                                                                  //for (std::size_t offset = id.get_local_range(0) / 2; offset > 0; offset /= 2)
+                                                                  {
+                                                                    if (localid < offset)
+                                                                    {
+                                                                       scratch[localid] += scratch[localid + offset];
+                                                                    }
+                                                                    id.barrier(cl::sycl::access::fence_space::local_space);
+                                                                  }
+                                                                }
+                                                                /* The final result will be stored in local id 0. */
+                                                                if (localid == 0)
+                                                                {
+                                                                  access_sum[id.get_group(0)] = scratch[localid];
+                                                                }
+
+                                                            });
+
+                 };
+        // clang-format on
+        auto f1 = [length, local, &res](cl::sycl::handler& h) mutable
+                   {
+                      cl::sycl::nd_range<1> range{cl::sycl::range<1>{local},
+                                                  cl::sycl::range<1>{local}};
+                      auto access_sum = res.template get_access<cl::sycl::access::mode::read_write>(h);
+
+                      cl::sycl::accessor<T, 1, cl::sycl::access::mode::read_write,cl::sycl::access::target::local>
+                        scratch(cl::sycl::range<1>(local), h);
+
+                      /* The parallel_for invocation chosen is the variant with an nd_item
+                       * parameter, since the code requires barriers for correctness. */
+                      h.parallel_for<map5_reduction_sum1<T>>(range,
+                                                                [access_sum, scratch, local, length](cl::sycl::nd_item<1> id)
+                                                                {
+                                                                   //auto localid = id.get_id(0);
+                                                                   std::size_t globalid = id.get_global_id(0);
+                                                                   std::size_t localid = id.get_local_id(0);
+
+                                                                  /* All threads collectively read from global memory into local.
+                                                                   * The barrier ensures all threads' IO is resolved before
+                                                                   * execution continues (strictly speaking, all threads within
+                                                                   * a single work-group - there is no co-ordination between
+                                                                   * work-groups, only work-items). */
+                                                                   scratch[localid] = (localid < length)?  access_sum[localid] : 0. ;
+                                                                   id.barrier(cl::sycl::access::fence_space::local_space);
+
+                                                                  /* Apply the reduction operation between the current local
+                                                                   * id and the one on the other half of the vector. */
+                                                                  if (localid < length)
+                                                                  {
+                                                                    //int min = (length < local) ? length : local;
+                                                                    int min = local ;
+                                                                    for (std::size_t offset = min / 2; offset > 0; offset /= 2)
+                                                                    //for (std::size_t offset = id.get_local_range(0) / 2; offset > 0; offset /= 2)
+                                                                    {
+                                                                      if (localid < offset)
+                                                                      {
+                                                                         scratch[localid] += scratch[localid + offset];
+                                                                      }
+                                                                      id.barrier(cl::sycl::access::fence_space::local_space);
+                                                                    }
+                                                                    /* The final result will be stored in local id 0. */
+                                                                    if (localid == 0)
+                                                                    {
+                                                                      access_sum[0] = scratch[localid];
+                                                                    }
+                                                                  }
+                                                                });
+                 };
+        // clang-format on
+        if (level == 0)
+          m_env->internal()->queue().submit(f0);
+        else
+          m_env->internal()->queue().submit(f1);
+
+        /* At this point, you could queue::wait_and_throw() to ensure that
+           * errors are caught quickly. However, this would likely impact
+           * performance negatively. */
+        //length = (length + local - 1) / local;
+        length = (std::min(total_threads,length) + local -1) / local;
+        ++level ;
+      } while (length > 1);
+    }
+    //auto h_x = res.template get_access<cl::sycl::access::mode::read>();
+    //T sum = h_x[0] ;
+    //T sum = 0;
+    //for (int i = 0; i < length; ++i)
+    //  sum += h_x[i];
+    //return sum;
+  }
+
+  template <typename T>
   T reduce_sum2(const std::vector<T>& x)
   {
     T value = 0;
@@ -934,8 +1081,15 @@ class KernelInternal
            cl::sycl::buffer<T>& y,
            cl::sycl::buffer<T>& res)
   {
-    map4_reduce_sum(x, y, res);
-    //map3_reduce_sum(x,y) ;
+    switch (m_dot_algo)
+    {
+    case 3:
+      map4_reduce_sum(x, y, res);
+      break ;
+    default :
+      map5_reduce_sum(x, y, res);
+      break ;
+    }
   }
 
  private:

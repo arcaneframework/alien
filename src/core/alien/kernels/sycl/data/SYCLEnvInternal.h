@@ -33,7 +33,7 @@ namespace Alien
 
 namespace SYCLInternal
 {
-  struct EnvInternal
+  struct ALIEN_EXPORT EnvInternal
   {
     EnvInternal()
     : m_queue(m_device_selector)

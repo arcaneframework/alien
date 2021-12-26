@@ -14,7 +14,7 @@ namespace SYCLInternal
   struct EnvInternal;
 }
 
-class SYCLEnv
+class ALIEN_EXPORT SYCLEnv
 {
  public:
   static SYCLEnv* m_instance;
