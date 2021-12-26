@@ -48,6 +48,10 @@ option(ALIEN_EXPAND_TESTS "Run unit tests one by one" OFF)
 option(ALIEN_USE_HDF5 "Enable HDF5 export" OFF)
 option(ALIEN_USE_LIBXML2 "Enable xml export" OFF)
 option(ALIEN_USE_SYCL "Whether or not to compile SYCL backend" OFF)
+option(ALIEN_USE_PERF_TIMER "Whether or not to enable perf timer" OFF)
+option(ALIEN_WANT_AVX "Whether or not to enable avx flags" OFF)
+option(ALIEN_WANT_AVX2 "Whether or not to enable avx2 flags" OFF)
+option(ALIEN_WANT_AVX512 "Whether or not to enable avx512 flags" OFF)
 option(ALIEN_DEFAULT_OPTIONS "Enable best effort to find optional dependencies" ON)
 
 option(ALIEN_GENERATE_DOCUMENTATION "Generate API documentation" OFF)
@@ -152,6 +156,9 @@ set(version_config "${generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
 set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
 set(namespace "Alien::")
 
+if(ALIEN_USE_PERF_TIMER)
+  add_definitions(-DALIEN_USE_PERF_TIMER)
+endif()
 
 add_subdirectory(src)
 

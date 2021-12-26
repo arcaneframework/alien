@@ -38,6 +38,8 @@
 
 #include <alien/kernels/sycl/SYCLBackEnd.h>
 
+#include <alien/utils/StdTimer.h>
+
 namespace Alien::SYCLInternal
 {
 template <typename ValueT>
@@ -65,6 +67,7 @@ class ALIEN_EXPORT SYCLBEllPackMatrix : public IMatrixImpl
 {
  public:
   // clang-format off
+  static const bool                                         on_host_only = false ;
   typedef ValueT                                            ValueType;
   typedef ValueT                                            value_type ;
 
@@ -75,6 +78,9 @@ class ALIEN_EXPORT SYCLBEllPackMatrix : public IMatrixImpl
   typedef BEllPackStructInfo<1024,int>                      ProfileInternal1024;
   typedef BEllPackStructInfo<1024,int>                      ProfileType;
   typedef typename ProfileType::IndexType                   IndexType ;
+
+  typedef Alien::StdTimer                                   TimerType ;
+  typedef TimerType::Sentry                                 SentryType ;
   // clang-format on
 
  public:
@@ -167,6 +173,15 @@ class ALIEN_EXPORT SYCLBEllPackMatrix : public IMatrixImpl
 
   // From unsuccessful try to implement multiplication.
   friend class SYCLInternal::SYCLBEllPackMatrixMultT<ValueType>;
+
+#ifdef ALIEN_USE_PERF_TIMER
+ private:
+  mutable TimerType m_timer;
+ public:
+  TimerType& timer() const {
+    return m_timer;
+  }
+#endif
 };
 
 //extern template class SYCLBEllPackMatrix<double>;

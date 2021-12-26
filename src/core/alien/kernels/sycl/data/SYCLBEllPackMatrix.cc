@@ -198,8 +198,8 @@ void SYCLInternal::StructInfoInternal<BlockSize, IndexT>::computeLowerUpperMask(
 {
 
   if (not m_lower_upper_mask_ready) {
-    m_lower_mask.reset(new IndexBufferType(cl::sycl::range<1>(m_block_nnz * block_size)));
-    m_upper_mask.reset(new IndexBufferType(cl::sycl::range<1>(m_block_nnz * block_size)));
+    m_lower_mask.reset(new MaskBufferType(cl::sycl::range<1>(m_block_nnz * block_size)));
+    m_upper_mask.reset(new MaskBufferType(cl::sycl::range<1>(m_block_nnz * block_size)));
 
     auto env = SYCLEnv::instance();
 
@@ -276,7 +276,7 @@ void SYCLInternal::StructInfoInternal<BlockSize, IndexT>::computeLowerUpperMask(
 }
 
 template <int BlockSize, typename IndexT>
-typename SYCLInternal::StructInfoInternal<BlockSize, IndexT>::IndexBufferType&
+typename SYCLInternal::StructInfoInternal<BlockSize, IndexT>::MaskBufferType&
 SYCLInternal::StructInfoInternal<BlockSize, IndexT>::getLowerMask() const
 {
   computeLowerUpperMask();
@@ -284,7 +284,7 @@ SYCLInternal::StructInfoInternal<BlockSize, IndexT>::getLowerMask() const
 }
 
 template <int BlockSize, typename IndexT>
-typename SYCLInternal::StructInfoInternal<BlockSize, IndexT>::IndexBufferType&
+typename SYCLInternal::StructInfoInternal<BlockSize, IndexT>::MaskBufferType&
 SYCLInternal::StructInfoInternal<BlockSize, IndexT>::getUpperMask() const
 {
   computeLowerUpperMask();
@@ -760,6 +760,10 @@ SYCLBEllPackMatrix<ValueT>::~SYCLBEllPackMatrix()
 {
   delete m_profile1024;
   delete m_matrix1024;
+
+#ifdef ALIEN_USE_PERF_TIMER
+  m_timer.printInfo("SYCLBELLPACK-MATRIX") ;
+#endif
 }
 
 template <typename ValueT>

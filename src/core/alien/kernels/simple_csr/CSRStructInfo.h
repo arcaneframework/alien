@@ -22,6 +22,7 @@
 
 #include <algorithm>
 #include <alien/kernels/simple_csr/SimpleCSRPrecomp.h>
+#include <alien/utils/StdTimer.h>
 
 /*---------------------------------------------------------------------------*/
 
@@ -40,7 +41,9 @@ class CSRStructInfo
     eFull
   };
 
-  typedef Integer IndexType ;
+  typedef Integer            IndexType ;
+  typedef Alien::StdTimer    TimerType ;
+  typedef TimerType::Sentry  SentryType ;
 
  public:
   CSRStructInfo(bool is_variable_block = false)
@@ -78,6 +81,13 @@ class CSRStructInfo
   }
 
   CSRStructInfo(const CSRStructInfo& src) { copy(src); }
+
+  virtual ~CSRStructInfo()
+  {
+#ifdef ALIEN_USE_PERF_TIMER
+    m_timer.printInfo("CSR-StructInfo") ;
+#endif
+  }
 
   CSRStructInfo& operator=(const CSRStructInfo& src)
   {
@@ -208,6 +218,9 @@ class CSRStructInfo
 
   void computeUpperDiagOffset() const
   {
+#ifdef ALIEN_USE_PERF_TIMER
+    SentryType sentry(m_timer,"CSR-ComputeDiagOffset") ;
+#endif
     if(m_col_ordering != eUndef)
     {
       m_upper_diag_offset.resize(m_nrow) ;
@@ -307,6 +320,10 @@ class CSRStructInfo
   mutable Arccore::UniqueArray<Arccore::Integer> m_upper_diag_offset;
   bool m_symmetric = true;
   Arccore::Int64 m_timestamp = -1;
+#ifdef ALIEN_USE_PERF_TIMER
+ private:
+  mutable TimerType m_timer;
+#endif
 };
 
 /*---------------------------------------------------------------------------*/

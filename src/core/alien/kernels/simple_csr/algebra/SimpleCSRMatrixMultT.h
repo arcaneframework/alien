@@ -178,9 +178,8 @@ const UniqueArray<Real>& x_impl, UniqueArray<Real>& y_impl) const
     Integer off = row_offset[irow];
     Integer off2 = off + local_row_size[irow];
     Real tmpy = 0.;
-    for (Integer j = off; j < off2; ++j) {
-      // Cedric: Il doit y avoir une erreur ici, cols[j] n'est pas forcement dans x_ptr
-      // en particulier si cols[j] est un fantôme !
+    for (Integer j = off; j < off2; ++j)
+    {
       tmpy += matrix[j] * x_ptr[cols[j]];
     }
     y_ptr[irow] = tmpy;
@@ -205,6 +204,9 @@ const UniqueArray<Real>& x_impl, UniqueArray<Real>& y_impl) const
 template <typename ValueT>
 void SimpleCSRMatrixMultT<ValueT>::_seqMult(const VectorType& x_impl, VectorType& y_impl) const
 {
+#ifdef ALIEN_USE_PERF_TIMER
+  typename MatrixType::SentryType sentry(m_matrix_impl.timer(),"CSR-SPMV") ;
+#endif
   Real* y_ptr = y_impl.getDataPtr();
   Real* x_ptr = (Real*)x_impl.getDataPtr();
   ConstArrayView<Real> matrix = m_matrix_impl.m_matrix.getValues();
@@ -223,6 +225,9 @@ void SimpleCSRMatrixMultT<ValueT>::_seqMult(const VectorType& x_impl, VectorType
 template <typename ValueT>
 void SimpleCSRMatrixMultT<ValueT>::_seqAddLMult(Real alpha,const VectorType& x_impl, VectorType& y_impl) const
 {
+#ifdef ALIEN_USE_PERF_TIMER
+  typename MatrixType::SentryType sentry(m_matrix_impl.timer(),"CSR-AddLMult") ;
+#endif
   Real* y_ptr = y_impl.getDataPtr();
   Real* x_ptr = (Real*)x_impl.getDataPtr();
   ConstArrayView<Real> matrix = m_matrix_impl.m_matrix.getValues();
@@ -241,6 +246,9 @@ void SimpleCSRMatrixMultT<ValueT>::_seqAddLMult(Real alpha,const VectorType& x_i
 template <typename ValueT>
 void SimpleCSRMatrixMultT<ValueT>::_seqAddUMult(Real alpha,const VectorType& x_impl, VectorType& y_impl) const
 {
+#ifdef ALIEN_USE_PERF_TIMER
+  typename MatrixType::SentryType sentry(m_matrix_impl.timer(),"CSR-AddUMult") ;
+#endif
   Real* y_ptr = y_impl.getDataPtr();
   Real* x_ptr = (Real*)x_impl.getDataPtr();
   ConstArrayView<Real> matrix = m_matrix_impl.m_matrix.getValues();

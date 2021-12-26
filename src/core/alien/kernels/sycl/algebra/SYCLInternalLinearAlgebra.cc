@@ -75,7 +75,9 @@ SYCLInternalLinearAlgebra::SYCLInternalLinearAlgebra()
 
 SYCLInternalLinearAlgebra::~SYCLInternalLinearAlgebra()
 {
-  m_timer.printInfo();
+#ifdef ALIEN_USE_PERF_TIMER
+  m_timer.printInfo("SYCL-ALGEBRA");
+#endif
 }
 
 void SYCLInternalLinearAlgebra::setDotAlgo(int dot_algo)
@@ -121,7 +123,9 @@ Real SYCLInternalLinearAlgebra::norm1(const SYCLVector<Real>& vx ALIEN_UNUSED_PA
 
 Real SYCLInternalLinearAlgebra::norm2(const SYCLVector<Real>& vx) const
 {
+#ifdef ALIEN_USE_PERF_TIMER
   SentryType s(m_timer, "SYCL-NORM2");
+#endif
   return std::sqrt(m_internal->dot(vx.internal()->values(), vx.internal()->values()));
 }
 
@@ -131,7 +135,9 @@ void SYCLInternalLinearAlgebra::mult(const SYCLBEllPackMatrix<Real>& ma,
                                      const SYCLVector<Real>& vx,
                                      SYCLVector<Real>& vr) const
 {
+#ifdef ALIEN_USE_PERF_TIMER
   SentryType s(m_timer, "SYCL-SPMV");
+#endif
   Internal::SYCLBEllPackMatrixMultT<Real>(ma).mult(vx, vr);
 }
 
@@ -140,7 +146,9 @@ void SYCLInternalLinearAlgebra::addLMult(Real alpha,
                                          const SYCLVector<Real>& vx,
                                          SYCLVector<Real>& vr) const
 {
+#ifdef ALIEN_USE_PERF_TIMER
   SentryType s(m_timer, "SYCL-ADDLMULT");
+#endif
   Internal::SYCLBEllPackMatrixMultT<Real>(ma).addLMult(alpha, vx, vr);
 }
 
@@ -149,7 +157,9 @@ void SYCLInternalLinearAlgebra::addUMult(Real alpha,
                                          const SYCLVector<Real>& vx,
                                          SYCLVector<Real>& vr) const
 {
+#ifdef ALIEN_USE_PERF_TIMER
   SentryType s(m_timer, "SYCL-ADDUMULT");
+#endif
   Internal::SYCLBEllPackMatrixMultT<Real>(ma).addUMult(alpha, vx, vr);
 }
 
@@ -157,7 +167,9 @@ void SYCLInternalLinearAlgebra::
 multInvDiag(const SYCLBEllPackMatrix<Real>& ma,
             SYCLVector<Real>& vr) const
 {
+#ifdef ALIEN_USE_PERF_TIMER
   SentryType s(m_timer, "SYCL-MULTINVDIAG");
+#endif
   Internal::SYCLBEllPackMatrixMultT<Real>(ma).multInvDiag(vr);
 }
 
@@ -165,7 +177,9 @@ void SYCLInternalLinearAlgebra::
 computeInvDiag(const SYCLBEllPackMatrix<Real>& ma,
                SYCLVector<Real>& vr) const
 {
+#ifdef ALIEN_USE_PERF_TIMER
   SentryType s(m_timer, "SYCL-INVDIAG");
+#endif
   Internal::SYCLBEllPackMatrixMultT<Real>(ma).computeInvDiag(vr);
 }
 
@@ -173,7 +187,9 @@ computeInvDiag(const SYCLBEllPackMatrix<Real>& ma,
 
 void SYCLInternalLinearAlgebra::axpy(Real alpha, const SYCLVector<Real>& vx, SYCLVector<Real>& vr) const
 {
+#ifdef ALIEN_USE_PERF_TIMER
   SentryType s(m_timer, "SYCL-AXPY");
+#endif
   m_internal->axpy(alpha, vx.internal()->values(), vr.internal()->values());
 }
 
@@ -191,7 +207,9 @@ void SYCLInternalLinearAlgebra::aypx(Real alpha ALIEN_UNUSED_PARAM,
 
 void SYCLInternalLinearAlgebra::copy(const SYCLVector<Real>& vx, SYCLVector<Real>& vr) const
 {
+#ifdef ALIEN_USE_PERF_TIMER
   SentryType s(m_timer, "SYCL-COPY");
+#endif
   m_internal->copy(vx.internal()->values(), vr.internal()->values());
 }
 
@@ -199,7 +217,9 @@ void SYCLInternalLinearAlgebra::copy(const SYCLVector<Real>& vx, SYCLVector<Real
 
 Real SYCLInternalLinearAlgebra::dot(const SYCLVector<Real>& vx, const SYCLVector<Real>& vy) const
 {
+#ifdef ALIEN_USE_PERF_TIMER
   SentryType s(m_timer, "SYCL-DOT");
+#endif
   return m_internal->dot(vx.internal()->values(), vy.internal()->values());
 }
 
@@ -207,7 +227,9 @@ void SYCLInternalLinearAlgebra::dot(const SYCLVector<Real>& vx,
                                     const SYCLVector<Real>& vy,
                                     SYCLInternal::Future<Real>& res) const
 {
+#ifdef ALIEN_USE_PERF_TIMER
   SentryType s(m_timer, "SYCL-DOT-F");
+#endif
   m_internal->dot(vx.internal()->values(), vy.internal()->values(), res.deviceValue());
 }
 
@@ -215,7 +237,9 @@ void SYCLInternalLinearAlgebra::dot(const SYCLVector<Real>& vx,
 
 void SYCLInternalLinearAlgebra::scal(Real alpha, SYCLVector<Real>& vx) const
 {
+#ifdef ALIEN_USE_PERF_TIMER
   SentryType s(m_timer, "SYCL-SCAL");
+#endif
   return m_internal->scal(alpha, vx.internal()->values());
 }
 
@@ -223,13 +247,17 @@ void SYCLInternalLinearAlgebra::pointwiseMult(const SYCLVector<Real>& vx,
                                               const SYCLVector<Real>& vy,
                                               SYCLVector<Real>& vz) const
 {
+#ifdef ALIEN_USE_PERF_TIMER
   SentryType s(m_timer, "SYCL-XYZ");
+#endif
   return m_internal->pointwiseMult(vx.internal()->values(), vy.internal()->values(), vz.internal()->values());
 }
 
 void SYCLInternalLinearAlgebra::assign(SYCLVector<Real>& vx, Real alpha) const
 {
+#ifdef ALIEN_USE_PERF_TIMER
   SentryType s(m_timer, "SYCL-ASSIGN");
+#endif
   return m_internal->assign(alpha, vx.internal()->values());
 }
 

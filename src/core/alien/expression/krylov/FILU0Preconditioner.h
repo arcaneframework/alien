@@ -140,55 +140,76 @@ class FLUFactorisationAlgo
               VectorType& x,
               VectorType& xk) const
   {
-#ifdef DEBUG
-    CSRConstViewT<MatrixT> view(*m_lu_matrix);
-    auto nrows  = view.nrows();
-    auto kcol   = view.kcol();
-    auto dcol   = view.dcol();
-    auto cols   = view.cols();
-    auto values = view.data();
-
-    std::copy(x, x + nrows, xk);
-    for (int irow = 0; irow < nrows; ++irow) {
-      ValueType val = y[irow];
-      for (int k = kcol[irow]; k < dcol[irow]; ++k)
-        val -= values[k] * xk[cols[k]];
-      x[irow] = val;
-    }
+#ifdef ALIEN_USE_PERF_TIMER
+    typename MatrixType::SentryType sentry(this->m_lu_matrix->timer(),"SolveL") ;
 #endif
-    algebra.copy(x, xk);
-    algebra.copy(y, x);
-    algebra.addLMult(-1, *this->m_lu_matrix, xk, x);
+    if(MatrixType::on_host_only)
+    {
+      CSRConstViewT<MatrixT> view(*this->m_lu_matrix);
+      auto nrows  = view.nrows();
+      auto kcol   = view.kcol();
+      auto dcol   = view.dcol();
+      auto cols   = view.cols();
+      auto values = view.data();
+
+      auto y_ptr  = y.data() ;
+      auto x_ptr  = x.data() ;
+      auto xk_ptr = xk.data() ;
+
+      std::copy(x_ptr, x_ptr + nrows, xk_ptr);
+      for (std::size_t irow = 0; irow < nrows; ++irow) {
+        ValueType val = y_ptr[irow];
+        for (int k = kcol[irow]; k < dcol[irow]; ++k)
+          val -= values[k] * xk_ptr[cols[k]];
+        x_ptr[irow] = val;
+      }
+    }
+    else
+    {
+      algebra.copy(x, xk);
+      algebra.copy(y, x);
+      algebra.addLMult(-1, *this->m_lu_matrix, xk, x);
+    }
   }
 
   template <typename AlgebraT>
   void solveU(AlgebraT& algebra, VectorType const& y, VectorType& x, VectorType& xk) const
   {
-#ifdef DEBUG
-    CSRConstViewT<MatrixT> view(*m_lu_matrix);
-    auto nrows  = view.nrows();
-    auto kcol   = view.kcol();
-    auto dcol   = view.dcol();
-    auto cols   = view.cols();
-    auto values = view.data();
-
-    std::copy(x, x + nrows, xk);
-    for (int irow = 0; irow < nrows; ++irow) {
-      int dk        = dcol[irow];
-      ValueType val = y[irow];
-      for (int k = dk + 1; k < kcol[irow + 1]; ++k) {
-        val -= values[k] * xk[cols[k]];
-      }
-      val     = inv(values[dk]) * val;
-      x[irow] = val;
-    }
+#ifdef ALIEN_USE_PERF_TIMER
+    typename MatrixType::SentryType sentry(this->m_lu_matrix->timer(),"SolveU") ;
 #endif
+    if(MatrixType::on_host_only)
+    {
+      CSRConstViewT<MatrixT> view(*this->m_lu_matrix);
+      auto nrows  = view.nrows();
+      auto kcol   = view.kcol();
+      auto dcol   = view.dcol();
+      auto cols   = view.cols();
+      auto values = view.data();
 
-    algebra.copy(x, xk);
-    algebra.copy(y, x);
-    algebra.addUMult(-1., *this->m_lu_matrix, xk, x);
-    algebra.pointwiseMult(m_inv_diag, x, x);
-    //algebra.multInvDiag(*this->m_lu_matrix,x) ;
+      auto y_ptr  = y.data() ;
+      auto x_ptr  = x.data() ;
+      auto xk_ptr = xk.data() ;
+
+      std::copy(x_ptr, x_ptr + nrows, xk_ptr);
+      for (std::size_t irow = 0; irow < nrows; ++irow) {
+        int dk        = dcol[irow];
+        ValueType val = y_ptr[irow];
+        for (int k = dk + 1; k < kcol[irow + 1]; ++k) {
+          val -= values[k] * xk_ptr[cols[k]];
+        }
+        val     = val/values[dk];
+        x_ptr[irow] = val;
+      }
+    }
+    else
+    {
+      algebra.copy(x, xk);
+      algebra.copy(y, x);
+      algebra.addUMult(-1., *this->m_lu_matrix, xk, x);
+      algebra.pointwiseMult(m_inv_diag, x, x);
+      //algebra.multInvDiag(*this->m_lu_matrix,x) ;
+    }
   }
 
   template <typename AlgebraT>

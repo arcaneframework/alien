@@ -135,7 +135,9 @@ class ALIEN_EXPORT SYCLInternalLinearAlgebra
 
  private:
   std::unique_ptr<SYCLInternal::KernelInternal> m_internal ;
+#ifdef ALIEN_USE_PERF_TIMER
   mutable TimerType m_timer;
+#endif
 };
 
 

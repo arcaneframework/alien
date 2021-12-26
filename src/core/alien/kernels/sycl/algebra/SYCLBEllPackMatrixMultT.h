@@ -47,18 +47,27 @@ void SYCLBEllPackMatrixMultT<ValueT>::mult(const VectorType& x, VectorType& y) c
 template <typename ValueT>
 void SYCLBEllPackMatrixMultT<ValueT>::addLMult(Real alpha, const VectorType& x, VectorType& y) const
 {
+#ifdef ALIEN_USE_PERF_TIMER
+  typename MatrixType::SentryType sentry(m_matrix_impl.timer(),"SYCL-AddLMult") ;
+#endif
   m_matrix_impl.addLMult(alpha, x, y);
 }
 
 template <typename ValueT>
 void SYCLBEllPackMatrixMultT<ValueT>::addUMult(Real alpha, const VectorType& x, VectorType& y) const
 {
+#ifdef ALIEN_USE_PERF_TIMER
+  typename MatrixType::SentryType sentry(m_matrix_impl.timer(),"SYCL-AddUMult") ;
+#endif
   m_matrix_impl.addUMult(alpha, x, y);
 }
 
 template <typename ValueT>
 void SYCLBEllPackMatrixMultT<ValueT>::mult(const UniqueArray<Real>& x, UniqueArray<Real>& y) const
 {
+#ifdef ALIEN_USE_PERF_TIMER
+  typename MatrixType::SentryType sentry(m_matrix_impl.timer(),"SYCL-SPMV") ;
+#endif
   if (m_matrix_impl.m_is_parallel)
     _parallelMult(x, y);
   else

@@ -130,6 +130,22 @@ target_link_libraries(alien_core PUBLIC alien_index_manager)
 
 set_property(TARGET alien_core PROPERTY CXX_STANDARD 17)
 
+message(STATUS "Using AVX Simd instructions ? -> ${ALIEN_WANT_AVX}")
+message(STATUS "Using AVX2 Simd instructions ? -> ${ALIEN_WANT_AVX2}")
+message(STATUS "Using AVX512 Simd instructions ? -> ${ALIEN_WANT_AVX512}")
+
+if(CMAKE_COMPILER_IS_GNUCXX OR (CMAKE_CXX_COMPILER_ID STREQUAL Clang))
+  if(ALIEN_WANT_AVX)
+    target_compile_options(alien_core INTERFACE -mavx)
+  endif()
+  if(ALIEN_WANT_AVX2)
+    target_compile_options(alien_core INTERFACE -mavx -mfma)
+  endif()
+  if(ALIEN_WANT_AVX512)
+    target_compile_options(alien_core INTERFACE -mavx512f -mavx512cd)
+  endif()
+endif()
+
 IF(ALIEN_USE_SYCL)
   target_link_libraries(alien_core PUBLIC alien_kernel_sycl)
   target_compile_options(alien_core PRIVATE "--gcc-toolchain=${GCCCORE_ROOT}")

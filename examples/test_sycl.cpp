@@ -283,7 +283,7 @@ int main(int argc, char** argv)
     }
   }
 
-  timer.printInfo(trace_mng->info().file()) ;
+  timer.printInfo(trace_mng->info().file(),"SYCL-BENCH") ;
 
   MPI_Finalize();
 

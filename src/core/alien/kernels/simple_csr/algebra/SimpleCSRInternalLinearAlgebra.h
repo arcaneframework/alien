@@ -150,8 +150,10 @@ class ALIEN_EXPORT SimpleCSRInternalLinearAlgebra
      free(args...) ;
   }
 
+#ifdef ALIEN_USE_PERF_TIMER
  private:
   mutable TimerType m_timer;
+#endif
 };
 
 class SimpleCSRInternalLinearAlgebraExpr

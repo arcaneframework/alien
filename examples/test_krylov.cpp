@@ -165,7 +165,7 @@ int main(int argc, char** argv)
 
   // Define a lambda function to compute node uids from the 2D (i,j) coordinates
   // (i,j) -> uid = node_uid(i,j)
-  auto node_uid = [&](int i, int j) { return j * Ny + i; };
+  auto node_uid = [&](int i, int j) { return j * Nx + i; };
 
   /*
      * DEFINITION of Unknowns Unique Ids and  Local Ids
@@ -261,6 +261,7 @@ int main(int argc, char** argv)
 
   auto allUIndex = index_manager.getIndexes(indexSetU);
 
+  double off_diag = 0.5 ;
   /*
    *  Assemble matrix.
    */
@@ -322,7 +323,6 @@ int main(int argc, char** argv)
   // SECOND STEP : MATRIX FILLING STEP
   {
     Alien::ProfiledMatrixBuilder builder(A, Alien::ProfiledMatrixOptions::eResetValues);
-    double off_diag = 0.5 ;
     // Loop on Y-axis
     for (int j = first_j; j < last_j; ++j)
     {
@@ -413,7 +413,12 @@ int main(int argc, char** argv)
         auto irow = allUIndex[n_lid];
 
         //writer[irow] = 1. / (1. + i + j);
-        writer[irow] = 1. ;
+        //writer[irow] = 1. ;
+        writer[irow] = 0. ;
+        if(i==Nx-1)
+        {
+          writer[irow] += off_diag ;
+        }
       }
     }
   }
@@ -551,7 +556,7 @@ int main(int argc, char** argv)
 #endif
   }
 
-  timer.printInfo() ;
+  timer.printInfo(trace_mng->info().file(),"KRYLOV-BENCH") ;
 
 
   Environment::finalize();

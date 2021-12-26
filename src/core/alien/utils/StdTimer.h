@@ -50,17 +50,17 @@ class StdTimer
       iter->second += value;
   }
 
-  void printInfo() const
+  void printInfo(const std::string& msg) const
   {
     std::cout << "================================" << std::endl;
-    std::cout << "PERF INFO : " << std::endl;
+    std::cout << "PERF INFO : " << msg<<std::endl;
     for (auto const& iter : m_counters) {
       std::cout << iter.first << ":" << iter.second << std::endl;
     }
     std::cout << "================================" << std::endl;
   }
 
-  void printInfo(std::ostream& out) const
+  void printInfo(std::ostream& out,const std::string& msg) const
   {
     out << "================================" << std::endl;
     out << "PERF INFO : " << std::endl;

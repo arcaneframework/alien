@@ -37,6 +37,7 @@ struct ALIEN_EXPORT StructInfoInternal
   typedef IndexT                          index_type ;
   typedef cl::sycl::buffer<index_type, 1> index_buffer_type ;
   typedef cl::sycl::buffer<index_type, 1> IndexBufferType ;
+  typedef cl::sycl::buffer<uint8_t, 1>    MaskBufferType ;
   // clang-format on
 
   StructInfoInternal(std::size_t nrows,
@@ -74,8 +75,8 @@ struct ALIEN_EXPORT StructInfoInternal
   void getUpperDiagOffset() const;
   void computeLowerUpperMask() const;
 
-  IndexBufferType& getLowerMask() const;
-  IndexBufferType& getUpperMask() const;
+  MaskBufferType& getLowerMask() const;
+  MaskBufferType& getUpperMask() const;
 
   // clang-format off
   std::size_t m_nrows       = 0 ;
@@ -93,8 +94,8 @@ struct ALIEN_EXPORT StructInfoInternal
 
   mutable bool                              m_lower_upper_mask_ready = false ;
   mutable std::vector<index_type>           m_h_dcol ;
-  mutable std::unique_ptr<IndexBufferType>  m_lower_mask ;
-  mutable std::unique_ptr<IndexBufferType>  m_upper_mask ;
+  mutable std::unique_ptr<MaskBufferType>   m_lower_mask ;
+  mutable std::unique_ptr<MaskBufferType>   m_upper_mask ;
   // clang-format on
 };
 

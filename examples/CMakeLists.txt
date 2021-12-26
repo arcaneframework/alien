@@ -29,7 +29,24 @@ target_link_libraries(sycl_example.exe PUBLIC
 endif()
 
 
+message(STATUS "Using AVX Simd instructions ? -> ${ALIEN_WANT_AVX}")
+message(STATUS "Using AVX2 Simd instructions ? -> ${ALIEN_WANT_AVX2}")
+message(STATUS "Using AVX512 Simd instructions ? -> ${ALIEN_WANT_AVX512}")
+
 add_executable(krylov_example.exe test_krylov.cpp)
+
+if(CMAKE_COMPILER_IS_GNUCXX OR (CMAKE_CXX_COMPILER_ID STREQUAL Clang))
+  if(ALIEN_WANT_AVX)
+    target_compile_options(krylov_example.exe INTERFACE -mavx)
+  endif()
+  if(ALIEN_WANT_AVX2)
+    target_compile_options(krylov_example.exe INTERFACE -mavx -mfma)
+  endif()
+  if(ALIEN_WANT_AVX512)
+    target_compile_options(krylov_example.exe INTERFACE -mavx512f -mavx512cd)
+  endif()
+endif()
+
 if(ALIEN_USE_SYCL)
   target_compile_definitions(krylov_example.exe PUBLIC -DALIEN_USE_SYCL)
 endif()

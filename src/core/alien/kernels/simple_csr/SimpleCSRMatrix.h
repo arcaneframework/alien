@@ -31,6 +31,7 @@
 #include <alien/kernels/simple_csr/SimpleCSRInternal.h>
 #include <alien/kernels/simple_csr/SimpleCSRPrecomp.h>
 
+#include <alien/utils/StdTimer.h>
 /*---------------------------------------------------------------------------*/
 
 namespace Alien::SimpleCSRInternal
@@ -53,12 +54,15 @@ class SimpleCSRMatrix : public IMatrixImpl
 {
  public:
 // clang-format off
+  static const bool                                    on_host_only = true ;
   typedef ValueT                                       ValueType;
   typedef SimpleCSRInternal::CSRStructInfo             CSRStructInfo;
   typedef SimpleCSRInternal::CSRStructInfo             ProfileType;
   typedef SimpleCSRInternal::DistStructInfo            DistStructInfo;
   typedef SimpleCSRInternal::MatrixInternal<ValueType> MatrixInternal;
   typedef typename ProfileType::IndexType              IndexType ;
+  typedef Alien::StdTimer                              TimerType ;
+  typedef TimerType::Sentry                            SentryType ;
   // clang-format on
 
 
@@ -79,7 +83,12 @@ class SimpleCSRMatrix : public IMatrixImpl
   {}
 
   /** Destructeur de la classe */
-  virtual ~SimpleCSRMatrix() {}
+  virtual ~SimpleCSRMatrix()
+  {
+#ifdef ALIEN_USE_PERF_TIMER
+    m_timer.printInfo("SimpleCSR-MATRIX") ;
+#endif
+  }
 
   void setTraceMng(ITraceMng* trace_mng) { m_trace = trace_mng; }
 
@@ -317,6 +326,12 @@ class SimpleCSRMatrix : public IMatrixImpl
   ITraceMng* m_trace = nullptr;
 
   friend class SimpleCSRInternal::SimpleCSRMatrixMultT<ValueType>;
+ private:
+  mutable TimerType m_timer;
+ public:
+  TimerType& timer() const {
+    return m_timer;
+  }
 };
 
 /*---------------------------------------------------------------------------*/
