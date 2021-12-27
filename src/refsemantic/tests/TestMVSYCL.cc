@@ -46,7 +46,7 @@ TEST(TestSYCLMV, SYCLExpr)
   Alien::Vector x(vdist); // x.setName("x") ;
   Alien::Vector y(vdist); // y.setName("y") ;
   Alien::Vector r(vdist); // r.setName("r") ;
-  Alien::Real lambda = 0.5;
+  //Alien::Real lambda = 0.5;
 
   auto local_size = vdist.localSize();
   auto offset = vdist.offset();

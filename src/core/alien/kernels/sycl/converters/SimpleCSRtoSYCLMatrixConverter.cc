@@ -78,11 +78,11 @@ const SimpleCSRMatrix<Real>& sourceImpl, SYCLBEllPackMatrix<Real>& targetImpl) c
 
   const MatrixDistribution& dist = targetImpl.distribution();
   const CSRStructInfo& profile = sourceImpl.getCSRProfile();
-  const Integer localSize = profile.getNRow();
-  const Integer localOffset = dist.rowOffset();
+  //const Integer localSize = profile.getNRow();
+  //const Integer localOffset = dist.rowOffset();
   auto const& matrixInternal = sourceImpl.internal();
-  const Integer myRank = dist.parallelMng()->commRank();
-  const Integer nProc = dist.parallelMng()->commSize();
+  //const Integer myRank = dist.parallelMng()->commRank();
+  //const Integer nProc = dist.parallelMng()->commSize();
 
   {
 
