@@ -163,8 +163,8 @@ class NeumannPolyPreconditioner
       m_algebra.copy(m_y, x);
       m_algebra.mult(m_matrix, x, m_y);
       ValueType norme2 = m_algebra.norm2(m_y);
-      m_factor         = norme2 / norme2_k;
-      norme2_k         = norme2;
+      m_factor = norme2 / norme2_k;
+      norme2_k = norme2;
     }
     m_factor = 1. / (m_factor);
 

@@ -58,13 +58,13 @@ class BiCGStab
     , m_iter(0)
     , m_trace_mng(trace_mng)
     {
-      m_algebra.dot(b, b,m_f_value);
-      m_nrm2_b = m_f_value.get() ;
+      m_algebra.dot(b, b, m_f_value);
+      m_nrm2_b = m_f_value.get();
       if (m_trace_mng)
         m_trace_mng->info() << "STOP CRITERIA NORME B = " << m_nrm2_b;
       m_criteria_value = m_tol * m_tol * m_nrm2_b;
-      m_sqrt_nrm2_b    = std::sqrt(m_nrm2_b);
-      m_value          = m_criteria_value + 1;
+      m_sqrt_nrm2_b = std::sqrt(m_nrm2_b);
+      m_value = m_criteria_value + 1;
       if (m_nrm2_b == 0)
         m_status = true;
       else
@@ -191,8 +191,7 @@ class BiCGStab
     if (m_output_level > 1)
       _print(0, "Seq 1", "alpha", alpha);
 
-    if (iter.stop(s))
-    {
+    if (iter.stop(s)) {
       ++iter;
       m_algebra.axpy(alpha, phat, x);
       m_algebra.free(p, phat, s, shat, t, v, r, r0);
@@ -203,12 +202,10 @@ class BiCGStab
     m_algebra.exec(precond, s, shat);
     m_algebra.mult(A, shat, t);
     omega = m_algebra.dot(t, s);
-    beta  = m_algebra.dot(t, t);
+    beta = m_algebra.dot(t, t);
 
-    if (beta == 0)
-    {
-      if (iter.stop(r))
-      {
+    if (beta == 0) {
+      if (iter.stop(r)) {
         ++iter;
         m_algebra.axpy(alpha, phat, x);
         m_algebra.free(p, phat, s, shat, t, v, r, r0);
@@ -232,8 +229,7 @@ class BiCGStab
     if (m_output_level > 1)
       _print(iter(), "Seq 3", "beta", beta, "alpha", alpha, "rho1", rho1);
 
-    while (!iter.stop(r))
-    {
+    while (!iter.stop(r)) {
       //SEQ4
       rho1 = m_algebra.dot(r, r0);
       beta = (rho1 / rho) * (alpha / omega);
@@ -260,8 +256,7 @@ class BiCGStab
 
       if (m_output_level > 1)
         _print(iter(), "Seq 1", "alpha", alpha);
-      if (iter.stop(s))
-      {
+      if (iter.stop(s)) {
         m_algebra.axpy(alpha, phat, x);
         m_algebra.free(p, phat, s, shat, t, v, r, r0);
         return 0;
@@ -271,14 +266,12 @@ class BiCGStab
       m_algebra.exec(precond, s, shat);
       m_algebra.mult(A, shat, t);
       omega = m_algebra.dot(t, s);
-      beta  = m_algebra.dot(t, t);
+      beta = m_algebra.dot(t, t);
 
       if (m_output_level > 1)
         _print(iter(), "Seq 2", "beta", beta, "alpha", alpha, "rho1", rho1, "omega", omega);
-      if (beta == 0)
-      {
-        if (iter.stop(s))
-        {
+      if (beta == 0) {
+        if (iter.stop(s)) {
           m_algebra.axpy(alpha, phat, x);
           m_algebra.free(p, phat, s, shat, t, v, r, r0);
           return 0;
@@ -353,8 +346,7 @@ class BiCGStab
     if (m_output_level > 1)
       _print(0, "Seq 1", "alpha", alpha);
 
-    if (iter.stop(s))
-    {
+    if (iter.stop(s)) {
       ++iter;
       m_algebra.axpy(alpha, phat, x);
       m_algebra.free(p, phat, s, shat, t, v, r, r0);
@@ -366,10 +358,8 @@ class BiCGStab
     m_algebra.mult(A, shat, t);
     m_algebra.dot(t, s, fomega);
     m_algebra.dot(t, t, fbeta);
-    if (fbeta.get() == 0)
-    {
-      if (iter.stop(r))
-      {
+    if (fbeta.get() == 0) {
+      if (iter.stop(r)) {
         ++iter;
         m_algebra.axpy(alpha, phat, x);
         m_algebra.free(p, phat, s, shat, t, v, r, r0);
@@ -393,8 +383,7 @@ class BiCGStab
     if (m_output_level > 1)
       _print(iter(), "Seq 3", "beta", beta, "alpha", alpha, "rho1", rho1);
 
-    while (!iter.stop(r))
-    {
+    while (!iter.stop(r)) {
       //SEQ4
       /*
             beta = (rho_1 / rho_2) * (alpha / omega);
@@ -425,8 +414,7 @@ class BiCGStab
       if (m_output_level > 1)
         _print(iter(), "Seq 1", "alpha", alpha);
 
-      if (iter.stop(s))
-      {
+      if (iter.stop(s)) {
         m_algebra.axpy(alpha, phat, x);
         m_algebra.free(p, phat, s, shat, t, v, r, r0);
         return 0;
@@ -518,6 +506,6 @@ class BiCGStab
 
   AlgebraType& m_algebra;
   ITraceMng* m_trace_mng = nullptr;
-  int m_output_level     = 0;
+  int m_output_level = 0;
 };
 } // namespace Alien

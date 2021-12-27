@@ -113,12 +113,12 @@ class FLUFactorisationAlgo
     CSRModifierViewT<MatrixT> modifier(*this->m_lu_matrix);
 
     // clang-format off
-      auto nrows  = modifier.nrows() ;
-      auto nnz    = modifier.nnz() ;
-      auto kcol   = modifier.kcol() ;
-      auto dcol   = modifier.dcol() ;
-      auto cols   = modifier.cols() ;
-      auto values = modifier.data() ;
+    auto nrows  = modifier.nrows() ;
+    auto nnz    = modifier.nnz() ;
+    auto kcol   = modifier.kcol() ;
+    auto dcol   = modifier.dcol() ;
+    auto cols   = modifier.cols() ;
+    auto values = modifier.data() ;
     // clang-format on
 
     for (int iter = 0; iter < m_nb_factorization_iter; ++iter) {
@@ -141,20 +141,21 @@ class FLUFactorisationAlgo
               VectorType& xk) const
   {
 #ifdef ALIEN_USE_PERF_TIMER
-    typename MatrixType::SentryType sentry(this->m_lu_matrix->timer(),"SolveL") ;
+    typename MatrixType::SentryType sentry(this->m_lu_matrix->timer(), "SolveL");
 #endif
-    if(MatrixType::on_host_only)
-    {
+    if (MatrixType::on_host_only) {
       CSRConstViewT<MatrixT> view(*this->m_lu_matrix);
+      // clang-format off
       auto nrows  = view.nrows();
       auto kcol   = view.kcol();
       auto dcol   = view.dcol();
       auto cols   = view.cols();
       auto values = view.data();
 
-      auto y_ptr  = y.data() ;
-      auto x_ptr  = x.data() ;
-      auto xk_ptr = xk.data() ;
+      auto y_ptr  = y.data();
+      auto x_ptr  = x.data();
+      auto xk_ptr = xk.data();
+      // clang-format on
 
       std::copy(x_ptr, x_ptr + nrows, xk_ptr);
       for (std::size_t irow = 0; irow < nrows; ++irow) {
@@ -164,8 +165,7 @@ class FLUFactorisationAlgo
         x_ptr[irow] = val;
       }
     }
-    else
-    {
+    else {
       algebra.copy(x, xk);
       algebra.copy(y, x);
       algebra.addLMult(-1, *this->m_lu_matrix, xk, x);
@@ -176,34 +176,34 @@ class FLUFactorisationAlgo
   void solveU(AlgebraT& algebra, VectorType const& y, VectorType& x, VectorType& xk) const
   {
 #ifdef ALIEN_USE_PERF_TIMER
-    typename MatrixType::SentryType sentry(this->m_lu_matrix->timer(),"SolveU") ;
+    typename MatrixType::SentryType sentry(this->m_lu_matrix->timer(), "SolveU");
 #endif
-    if(MatrixType::on_host_only)
-    {
+    if (MatrixType::on_host_only) {
       CSRConstViewT<MatrixT> view(*this->m_lu_matrix);
+      // clang-format off
       auto nrows  = view.nrows();
       auto kcol   = view.kcol();
       auto dcol   = view.dcol();
       auto cols   = view.cols();
       auto values = view.data();
 
-      auto y_ptr  = y.data() ;
-      auto x_ptr  = x.data() ;
-      auto xk_ptr = xk.data() ;
+      auto y_ptr  = y.data();
+      auto x_ptr  = x.data();
+      auto xk_ptr = xk.data();
+      // clang-format on
 
       std::copy(x_ptr, x_ptr + nrows, xk_ptr);
       for (std::size_t irow = 0; irow < nrows; ++irow) {
-        int dk        = dcol[irow];
+        int dk = dcol[irow];
         ValueType val = y_ptr[irow];
         for (int k = dk + 1; k < kcol[irow + 1]; ++k) {
           val -= values[k] * xk_ptr[cols[k]];
         }
-        val     = val/values[dk];
+        val = val / values[dk];
         x_ptr[irow] = val;
       }
     }
-    else
-    {
+    else {
       algebra.copy(x, xk);
       algebra.copy(y, x);
       algebra.addUMult(-1., *this->m_lu_matrix, xk, x);
@@ -257,15 +257,15 @@ class FLUFactorisationAlgo
 
     for (int k = kcol[irow]; k < dcol[irow]; ++k) // k=1 ->i-1
     {
-      int krow                         = cols[k];
+      int krow = cols[k];
       typename BaseType::ValueType aik = values[k] / values0[dcol[krow]];
-      values[k]                        = aik; // aik = aik/akk
+      values[k] = aik; // aik = aik/akk
       for (int l = kcol[krow]; l < kcol[krow + 1]; ++l)
         this->m_work[cols[l]] = l;
       for (int j = k + 1; j < kcol[irow + 1]; ++j) // j=k+1->n
       {
         int jcol = cols[j];
-        int kj   = this->m_work[jcol];
+        int kj = this->m_work[jcol];
         if (kj != -1) {
           values[j] -= aik * values0[kj]; // aij = aij - aik*akj
         }
@@ -283,9 +283,9 @@ class FLUFactorisationAlgo
  public:
   //!PARAMETERS
   // clang-format off
-    int       m_nb_factorization_iter = 0 ;
-    int       m_nb_solver_iter        = 0 ;
-    ValueType m_tol                   = 0 ;
+  int       m_nb_factorization_iter = 0 ;
+  int       m_nb_solver_iter        = 0 ;
+  ValueType m_tol                   = 0 ;
   // clang-format on
 };
 

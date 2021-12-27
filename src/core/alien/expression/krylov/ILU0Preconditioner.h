@@ -50,7 +50,7 @@ class LUFactorisationAlgo
   void baseInit(AlgebraT& algebra, MatrixT const& matrix)
   {
     m_lu_matrix.reset(matrix.cloneTo(nullptr));
-    m_profile    = &m_lu_matrix->getProfile();
+    m_profile = &m_lu_matrix->getProfile();
     m_alloc_size = CSRConstViewT<MatrixT>(*m_lu_matrix).nrows();
     m_work.resize(m_alloc_size);
     m_work.assign(m_work.size(), -1);
@@ -93,15 +93,15 @@ class LUFactorisationAlgo
     {
       for (int k = kcol[irow]; k < dcol[irow]; ++k) // k=1 ->i-1
       {
-        int krow      = cols[k];
+        int krow = cols[k];
         ValueType aik = values[k] / values[dcol[krow]]; // aik = aik/akk
-        values[k]     = aik;
+        values[k] = aik;
         for (int l = kcol[krow]; l < kcol[krow + 1]; ++l)
           m_work[cols[l]] = l;
         for (int j = k + 1; j < kcol[irow + 1]; ++j) // j=k+1->n
         {
           int jcol = cols[j];
-          int kj   = m_work[jcol];
+          int kj = m_work[jcol];
           if (kj != -1) {
             values[j] -= aik * values[kj]; // aij = aij - aik*akj
           }
@@ -143,7 +143,7 @@ class LUFactorisationAlgo
     // clang-format on
 
     for (int irow = (int)nrows - 1; irow > -1; --irow) {
-      int dk        = dcol[irow];
+      int dk = dcol[irow];
       ValueType val = y[irow];
       for (int k = dk + 1; k < kcol[irow + 1]; ++k) {
         val -= values[k] * x[cols[k]];
