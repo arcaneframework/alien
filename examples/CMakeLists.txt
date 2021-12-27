@@ -96,22 +96,42 @@ alien_test( BENCH sycl
             COMMAND sycl_example.exe)
             
 alien_test( BENCH krylov-sycl
-            NAME diag
+            NAME diag-bicgs0
             COMMAND krylov_example.exe
-            OPTIONS --nx 10 --ny 10 --precond diag --kernel sycl)
+            OPTIONS --nx 10 --ny 10 --precond diag --kernel sycl --bicgs 0)
             
 alien_test( BENCH krylov-sycl
-            NAME cheb
+            NAME cheb-bicgs0
             COMMAND krylov_example.exe
-            OPTIONS --nx 10 --ny 10 --precond cheb --kernel sycl)
+            OPTIONS --nx 10 --ny 10 --precond cheb --kernel sycl --bicgs 0)
             
 alien_test( BENCH krylov-sycl
-            NAME poly
+            NAME poly-bicgs0
             COMMAND krylov_example.exe
-            OPTIONS --nx 10 --ny 10 --precond poly --kernel sycl)
+            OPTIONS --nx 10 --ny 10 --precond poly --kernel sycl --bicgs 0)
             
 alien_test( BENCH krylov-sycl
-            NAME filu0
+            NAME filu0-bicgs0
             COMMAND krylov_example.exe
-            OPTIONS --nx 10 --ny 10 --precond filu0 --kernel sycl)
+            OPTIONS --nx 10 --ny 10 --precond filu0 --kernel sycl --bicgs 0)
+            
+alien_test( BENCH krylov-sycl
+            NAME diag-bicgs1
+            COMMAND krylov_example.exe
+            OPTIONS --nx 10 --ny 10 --precond diag --kernel sycl --bicgs 1)
+            
+alien_test( BENCH krylov-sycl
+            NAME cheb-bicgs1
+            COMMAND krylov_example.exe
+            OPTIONS --nx 10 --ny 10 --precond cheb --kernel sycl --bicgs 1)
+            
+alien_test( BENCH krylov-sycl
+            NAME poly-bicgs1
+            COMMAND krylov_example.exe
+            OPTIONS --nx 10 --ny 10 --precond poly --kernel sycl --bicgs 1)
+            
+alien_test( BENCH krylov-sycl
+            NAME filu0--bicgs1
+            COMMAND krylov_example.exe
+            OPTIONS --nx 10 --ny 10 --precond filu0 --kernel sycl --bicgs 1)
 endif()
