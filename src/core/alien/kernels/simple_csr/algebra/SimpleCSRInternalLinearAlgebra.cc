@@ -72,20 +72,20 @@ SimpleCSRInternalLinearAlgebra::~SimpleCSRInternalLinearAlgebra()
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 SimpleCSRInternalLinearAlgebra::ResourceType const&
-SimpleCSRInternalLinearAlgebra::resource(Matrix const& A) {
-  return A.distribution().rowDistribution() ;
+SimpleCSRInternalLinearAlgebra::resource(Matrix const& A)
+{
+  return A.distribution().rowDistribution();
 }
 
-void SimpleCSRInternalLinearAlgebra::allocate(ResourceType const& distribution,Vector& v)
+void SimpleCSRInternalLinearAlgebra::allocate(ResourceType const& distribution, Vector& v)
 {
-  v.init(distribution,true) ;
+  v.init(distribution, true);
 }
 
 void SimpleCSRInternalLinearAlgebra::free(Vector& v)
 {
-  v.clear() ;
+  v.clear();
 }
-
 
 Real SimpleCSRInternalLinearAlgebra::norm0(const CSRVector& vx ALIEN_UNUSED_PARAM) const
 {
@@ -108,7 +108,7 @@ Real SimpleCSRInternalLinearAlgebra::norm1(const CSRVector& vx ALIEN_UNUSED_PARA
 Real SimpleCSRInternalLinearAlgebra::norm2(const CSRVector& vx) const
 {
 #ifdef ALIEN_USE_PERF_TIMER
-  SentryType s(m_timer,"CSR-NORM2") ;
+  SentryType s(m_timer, "CSR-NORM2");
 #endif
   return CBLASMPIKernel::nrm2(vx.distribution(), vx);
 }
@@ -120,7 +120,7 @@ void SimpleCSRInternalLinearAlgebra::mult(const CSRMatrix& ma,
                                           CSRVector& vr) const
 {
 #ifdef ALIEN_USE_PERF_TIMER
-  SentryType s(m_timer,"CSR-SPMV") ;
+  SentryType s(m_timer, "CSR-SPMV");
 #endif
   Internal::SimpleCSRMatrixMultT<Real>(ma).mult(vx, vr);
 }
@@ -131,9 +131,9 @@ void SimpleCSRInternalLinearAlgebra::addLMult(Real alpha,
                                               CSRVector& vr) const
 {
 #ifdef ALIEN_USE_PERF_TIMER
-  SentryType s(m_timer,"CSR-AddLMult") ;
+  SentryType s(m_timer, "CSR-AddLMult");
 #endif
-  Internal::SimpleCSRMatrixMultT<Real>(ma).addLMult(alpha,vx, vr);
+  Internal::SimpleCSRMatrixMultT<Real>(ma).addLMult(alpha, vx, vr);
 }
 
 void SimpleCSRInternalLinearAlgebra::addUMult(Real alpha,
@@ -142,15 +142,15 @@ void SimpleCSRInternalLinearAlgebra::addUMult(Real alpha,
                                               CSRVector& vr) const
 {
 #ifdef ALIEN_USE_PERF_TIMER
-  SentryType s(m_timer,"CSR-AddUMult") ;
+  SentryType s(m_timer, "CSR-AddUMult");
 #endif
-  Internal::SimpleCSRMatrixMultT<Real>(ma).addUMult(alpha,vx, vr);
+  Internal::SimpleCSRMatrixMultT<Real>(ma).addUMult(alpha, vx, vr);
 }
 
 void SimpleCSRInternalLinearAlgebra::multInvDiag(const CSRMatrix& ma, CSRVector& vr) const
 {
 #ifdef ALIEN_USE_PERF_TIMER
-  SentryType s(m_timer,"CSR-MULTINVDIAG") ;
+  SentryType s(m_timer, "CSR-MULTINVDIAG");
 #endif
   Internal::SimpleCSRMatrixMultT<Real>(ma).multInvDiag(vr);
 }
@@ -158,7 +158,7 @@ void SimpleCSRInternalLinearAlgebra::multInvDiag(const CSRMatrix& ma, CSRVector&
 void SimpleCSRInternalLinearAlgebra::computeInvDiag(const CSRMatrix& ma, CSRVector& vr) const
 {
 #ifdef ALIEN_USE_PERF_TIMER
-  SentryType s(m_timer,"CSR-INVDIAG") ;
+  SentryType s(m_timer, "CSR-INVDIAG");
 #endif
   Internal::SimpleCSRMatrixMultT<Real>(ma).computeInvDiag(vr);
 }
@@ -168,7 +168,7 @@ void SimpleCSRInternalLinearAlgebra::computeInvDiag(const CSRMatrix& ma, CSRVect
 void SimpleCSRInternalLinearAlgebra::axpy(Real alpha, const CSRVector& vx, CSRVector& vr) const
 {
 #ifdef ALIEN_USE_PERF_TIMER
-  SentryType s(m_timer,"CSR-AXPY") ;
+  SentryType s(m_timer, "CSR-AXPY");
 #endif
   CBLASMPIKernel::axpy(vx.distribution(), alpha, vx, vr);
 }
@@ -188,7 +188,7 @@ void SimpleCSRInternalLinearAlgebra::aypx(Real alpha ALIEN_UNUSED_PARAM,
 void SimpleCSRInternalLinearAlgebra::copy(const CSRVector& vx, CSRVector& vr) const
 {
 #ifdef ALIEN_USE_PERF_TIMER
-  SentryType s(m_timer,"CSR-COPY") ;
+  SentryType s(m_timer, "CSR-COPY");
 #endif
   CBLASMPIKernel::copy(vx.distribution(), vx, vr);
 }
@@ -198,18 +198,17 @@ void SimpleCSRInternalLinearAlgebra::copy(const CSRVector& vx, CSRVector& vr) co
 Real SimpleCSRInternalLinearAlgebra::dot(const CSRVector& vx, const CSRVector& vy) const
 {
 #ifdef ALIEN_USE_PERF_TIMER
-  SentryType s(m_timer,"CSR-DOT") ;
+  SentryType s(m_timer, "CSR-DOT");
 #endif
   return CBLASMPIKernel::dot(vx.distribution(), vx, vy);
 }
-
 
 void SimpleCSRInternalLinearAlgebra::dot(const CSRVector& vx,
                                          const CSRVector& vy,
                                          SimpleCSRInternalLinearAlgebra::FutureType& res) const
 {
 #ifdef ALIEN_USE_PERF_TIMER
-  SentryType s(m_timer,"CSR-DOT-F") ;
+  SentryType s(m_timer, "CSR-DOT-F");
 #endif
   res() = CBLASMPIKernel::dot(vx.distribution(), vx, vy);
 }
@@ -219,7 +218,7 @@ void SimpleCSRInternalLinearAlgebra::dot(const CSRVector& vx,
 void SimpleCSRInternalLinearAlgebra::scal(Real alpha, CSRVector& vx) const
 {
 #ifdef ALIEN_USE_PERF_TIMER
-  SentryType s(m_timer,"CSR-SCAL") ;
+  SentryType s(m_timer, "CSR-SCAL");
 #endif
   CBLASMPIKernel::scal(vx.distribution(), alpha, vx);
 }
@@ -242,15 +241,15 @@ void SimpleCSRInternalLinearAlgebra::pointwiseMult(const CSRVector& vx,
                                                    CSRVector& vz) const
 {
 #ifdef ALIEN_USE_PERF_TIMER
-  SentryType s(m_timer,"CSR-XYZ") ;
+  SentryType s(m_timer, "CSR-XYZ");
 #endif
-  CBLASMPIKernel::pointwiseMult(vx.distribution(), vx,vy,vz);
+  CBLASMPIKernel::pointwiseMult(vx.distribution(), vx, vy, vz);
 }
 
 void SimpleCSRInternalLinearAlgebra::assign(CSRVector& vx, Real alpha) const
 {
 #ifdef ALIEN_USE_PERF_TIMER
-  SentryType s(m_timer,"CSR-ASSIGN") ;
+  SentryType s(m_timer, "CSR-ASSIGN");
 #endif
   CBLASMPIKernel::assign(vx.distribution(), alpha, vx);
 }

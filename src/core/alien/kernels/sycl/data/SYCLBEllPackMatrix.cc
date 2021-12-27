@@ -76,9 +76,9 @@ void BEllPackStructInfo<BlockSize, IndexT>::computeBlockRowOffset(std::vector<in
   int offset = 0;
   for (std::size_t ib = 0; ib < block_nrows; ++ib) {
     block_row_offset[ib] = offset;
-    int max_row_size     = 0;
+    int max_row_size = 0;
     for (int i = 0; i < std::min(BlockSize, int(nrows - ib * BlockSize)); ++i) {
-      auto irow    = ib * BlockSize + i;
+      auto irow = ib * BlockSize + i;
       int row_size = kcol[irow + 1] - kcol[irow];
       //std::cout<<"ROW["<<ib<<","<<irow<<"] :"<<kcol[irow]<<","<<kcol[irow+1]<<" row_size="<<row_size<<" offset="<<offset<<std::endl ;
       max_row_size = std::max(max_row_size, row_size);
@@ -358,18 +358,18 @@ namespace SYCLInternal
   bool MatrixInternal<ValueT, BlockSize>::setMatrixValuesFromHost()
   {
 
-    auto env                 = SYCLEnv::instance();
-    auto& queue              = env->internal()->queue();
-    auto num_groups          = env->internal()->maxNumGroups();
+    auto env = SYCLEnv::instance();
+    auto& queue = env->internal()->queue();
+    auto num_groups = env->internal()->maxNumGroups();
     auto max_work_group_size = env->internal()->maxWorkGroupSize();
-    auto total_threads       = num_groups * block_size;
+    auto total_threads = num_groups * block_size;
 
-    auto nrows     = m_profile->getNRows();
-    auto nnz       = m_profile->getNnz();
+    auto nrows = m_profile->getNRows();
+    auto nnz = m_profile->getNnz();
     auto block_nnz = m_profile->getBlockNnz();
 
-    auto internal_profile  = m_profile->internal();
-    auto& kcol             = internal_profile->getKCol();
+    auto internal_profile = m_profile->internal();
+    auto& kcol = internal_profile->getKCol();
     auto& block_row_offset = internal_profile->getBlockRowOffset();
 
     {
@@ -471,12 +471,12 @@ namespace SYCLInternal
     auto total_threads = num_groups * block_size;
 
     auto nrows = m_profile->getNRows();
-    auto nnz   = m_profile->getNnz();
+    auto nnz = m_profile->getNnz();
 
-    auto internal_profile  = m_profile->internal();
-    auto& kcol             = internal_profile->getKCol();
+    auto internal_profile = m_profile->internal();
+    auto& kcol = internal_profile->getKCol();
     auto& block_row_offset = internal_profile->getBlockRowOffset();
-    auto& block_cols       = internal_profile->getBlockCols();
+    auto& block_cols = internal_profile->getBlockCols();
     {
       // COMPUTE VALUES
       // clang-format off
@@ -544,12 +544,12 @@ namespace SYCLInternal
     auto total_threads = num_groups * block_size;
 
     auto nrows = m_profile->getNRows();
-    auto nnz   = m_profile->getNnz();
+    auto nnz = m_profile->getNnz();
 
-    auto internal_profile  = m_profile->internal();
-    auto& kcol             = internal_profile->getKCol();
+    auto internal_profile = m_profile->internal();
+    auto& kcol = internal_profile->getKCol();
     auto& block_row_offset = internal_profile->getBlockRowOffset();
-    auto& block_cols       = internal_profile->getBlockCols();
+    auto& block_cols = internal_profile->getBlockCols();
 
     auto& mask = internal_profile->getLowerMask();
 
@@ -762,7 +762,7 @@ SYCLBEllPackMatrix<ValueT>::~SYCLBEllPackMatrix()
   delete m_matrix1024;
 
 #ifdef ALIEN_USE_PERF_TIMER
-  m_timer.printInfo("SYCLBELLPACK-MATRIX") ;
+  m_timer.printInfo("SYCLBELLPACK-MATRIX");
 #endif
 }
 
@@ -788,7 +788,7 @@ initMatrix(Arccore::MessagePassing::IMessagePassingMng* parallel_mng,
   // clang-format on
 
   //delete m_profile1024 ;
-  m_block_size  = 1024;
+  m_block_size = 1024;
   m_profile1024 = new ProfileInternal1024{ nrows, kcol, cols, m_block_row_offset.data() };
 
   //delete m_matrix1024 ;
@@ -889,7 +889,7 @@ void SYCLBEllPackMatrix<ValueT>::computeInvDiag(SYCLVector<ValueType>& y) const
 /*---------------------------------------------------------------------------*/
 
 template class ALIEN_EXPORT SYCLBEllPackMatrix<double>;
-template class ALIEN_EXPORT BEllPackStructInfo<1024,Integer> ;
+template class ALIEN_EXPORT BEllPackStructInfo<1024, Integer>;
 /*---------------------------------------------------------------------------*/
 
 } // namespace Alien

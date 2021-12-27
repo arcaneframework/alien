@@ -31,13 +31,14 @@
 
 namespace Alien
 {
-  namespace SYCLInternal {
+namespace SYCLInternal
+{
 
-    template<typename T>
-    class Future ;
+  template <typename T>
+  class Future;
 
-    class KernelInternal ;
-  }
+  class KernelInternal;
+} // namespace SYCLInternal
 
 typedef AlgebraTraits<BackEnd::tag::sycl>::matrix_type SYCLMatrixType;
 typedef AlgebraTraits<BackEnd::tag::sycl>::vector_type SYCLVectorType;
@@ -46,20 +47,19 @@ class ALIEN_EXPORT SYCLInternalLinearAlgebra
 : public IInternalLinearAlgebra<SYCLMatrixType, SYCLVectorType>
 {
  public:
+  typedef BackEnd::tag::sycl BackEndType;
 
-  typedef BackEnd::tag::sycl BackEndType ;
-
-  typedef VectorDistribution ResourceType ;
+  typedef VectorDistribution ResourceType;
 
   class NullValueException
-      : public Exception::NumericException
+  : public Exception::NumericException
   {
-  public :
-    typedef Exception::NumericException BaseType ;
+   public:
+    typedef Exception::NumericException BaseType;
     NullValueException(std::string const& type)
-    : BaseType(type,__LINE__)
+    : BaseType(type, __LINE__)
     {}
-  } ;
+  };
 
   // clang-format off
   typedef SYCLInternal::Future<Real> FutureType ;
@@ -71,7 +71,7 @@ class ALIEN_EXPORT SYCLInternalLinearAlgebra
   SYCLInternalLinearAlgebra();
   virtual ~SYCLInternalLinearAlgebra();
 
-  void setDotAlgo(int dot_algo) ;
+  void setDotAlgo(int dot_algo);
 
  public:
   // IInternalLinearAlgebra interface.
@@ -80,8 +80,8 @@ class ALIEN_EXPORT SYCLInternalLinearAlgebra
   Real norm2(const Vector& x) const;
 
   void mult(const Matrix& a, const Vector& x, Vector& r) const;
-  void addLMult(Real alpha,const Matrix& A, const Vector& x, Vector& y) const;
-  void addUMult(Real alpha,const Matrix& A, const Vector& x, Vector& y) const;
+  void addLMult(Real alpha, const Matrix& A, const Vector& x, Vector& y) const;
+  void addUMult(Real alpha, const Matrix& A, const Vector& x, Vector& y) const;
 
   void multInvDiag(const Matrix& A, Vector& y) const;
   void computeInvDiag(const Matrix& a, Vector& inv_diag) const;
@@ -98,48 +98,47 @@ class ALIEN_EXPORT SYCLInternalLinearAlgebra
   void reciprocal(Vector& x) const;
   void pointwiseMult(const Vector& x, const Vector& y, Vector& w) const;
 
-
   void assign(Vector& x, Real alpha) const;
 
-  template<typename LambdaT>
+  template <typename LambdaT>
   void assign(Vector& x, LambdaT const& lambda) const
   {
-    x.apply(lambda) ;
+    x.apply(lambda);
     //m_internal->apply(lambda,x) ;
   }
 
   template <typename PrecondT>
-  void exec(PrecondT& precond, Vector const& x, Vector& y) {
-    return precond.solve(*this,x,y) ;
+  void exec(PrecondT& precond, Vector const& x, Vector& y)
+  {
+    return precond.solve(*this, x, y);
   }
 
-  static ResourceType const& resource(Matrix const& A) ;
+  static ResourceType const& resource(Matrix const& A);
 
-  void allocate(ResourceType const& distribution,Vector& v) ;
+  void allocate(ResourceType const& distribution, Vector& v);
 
-  template<typename T0, typename ...T>
-  void allocate(ResourceType const& distribution,T0& v0, T& ... args)
+  template <typename T0, typename... T>
+  void allocate(ResourceType const& distribution, T0& v0, T&... args)
   {
-     allocate(distribution,v0) ;
-     allocate(distribution,args...) ;
+    allocate(distribution, v0);
+    allocate(distribution, args...);
   }
 
-  void free(Vector& v) ;
+  void free(Vector& v);
 
-  template<typename T0, typename ...T>
-  void free(T0& v0, T& ... args)
+  template <typename T0, typename... T>
+  void free(T0& v0, T&... args)
   {
-     free(v0) ;
-     free(args...) ;
+    free(v0);
+    free(args...);
   }
 
  private:
-  std::unique_ptr<SYCLInternal::KernelInternal> m_internal ;
+  std::unique_ptr<SYCLInternal::KernelInternal> m_internal;
 #ifdef ALIEN_USE_PERF_TIMER
   mutable TimerType m_timer;
 #endif
 };
-
 
 class SYCLInternalLinearAlgebraExpr
 : public IInternalLinearAlgebraExpr<SYCLMatrixType, SYCLVectorType>
@@ -174,8 +173,7 @@ class SYCLInternalLinearAlgebraExpr
   void scal(Real alpha, UniqueArray<Real>& x) const;
 
  private:
-  std::unique_ptr<SYCLInternal::KernelInternal> m_internal ;
-
+  std::unique_ptr<SYCLInternal::KernelInternal> m_internal;
 };
 
 } // namespace Alien

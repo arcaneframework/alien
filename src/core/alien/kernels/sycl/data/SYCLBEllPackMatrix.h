@@ -177,8 +177,10 @@ class ALIEN_EXPORT SYCLBEllPackMatrix : public IMatrixImpl
 #ifdef ALIEN_USE_PERF_TIMER
  private:
   mutable TimerType m_timer;
+
  public:
-  TimerType& timer() const {
+  TimerType& timer() const
+  {
     return m_timer;
   }
 #endif

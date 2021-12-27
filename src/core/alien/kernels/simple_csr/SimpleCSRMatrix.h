@@ -53,7 +53,7 @@ template <typename ValueT>
 class SimpleCSRMatrix : public IMatrixImpl
 {
  public:
-// clang-format off
+  // clang-format off
   static const bool                                    on_host_only = true ;
   typedef ValueT                                       ValueType;
   typedef SimpleCSRInternal::CSRStructInfo             CSRStructInfo;
@@ -64,7 +64,6 @@ class SimpleCSRMatrix : public IMatrixImpl
   typedef Alien::StdTimer                              TimerType ;
   typedef TimerType::Sentry                            SentryType ;
   // clang-format on
-
 
  public:
   /** Constructeur de la classe */
@@ -77,7 +76,7 @@ class SimpleCSRMatrix : public IMatrixImpl
   /** Constructeur de la classe */
   SimpleCSRMatrix(const MultiMatrixImpl* multi_impl)
   : IMatrixImpl(multi_impl, AlgebraTraits<BackEnd::tag::simplecsr>::name())
-  , m_matrix(multi_impl?multi_impl->vblock() != nullptr:false)
+  , m_matrix(multi_impl ? multi_impl->vblock() != nullptr : false)
   , m_send_policy(SimpleCSRInternal::CommProperty::ASynch)
   , m_recv_policy(SimpleCSRInternal::CommProperty::ASynch)
   {}
@@ -86,7 +85,7 @@ class SimpleCSRMatrix : public IMatrixImpl
   virtual ~SimpleCSRMatrix()
   {
 #ifdef ALIEN_USE_PERF_TIMER
-    m_timer.printInfo("SimpleCSR-MATRIX") ;
+    m_timer.printInfo("SimpleCSR-MATRIX");
 #endif
   }
 
@@ -279,15 +278,14 @@ class SimpleCSRMatrix : public IMatrixImpl
 
   void notifyChanges()
   {
-    m_matrix.notifyChanges() ;
+    m_matrix.notifyChanges();
   }
 
   void endUpdate()
   {
-    if(m_matrix.needUpdate())
-    {
-      m_matrix.endUpdate() ;
-      this->updateTimestamp() ;
+    if (m_matrix.needUpdate()) {
+      m_matrix.endUpdate();
+      this->updateTimestamp();
     }
   }
 
@@ -324,10 +322,13 @@ class SimpleCSRMatrix : public IMatrixImpl
   ITraceMng* m_trace = nullptr;
 
   friend class SimpleCSRInternal::SimpleCSRMatrixMultT<ValueType>;
+
  private:
   mutable TimerType m_timer;
+
  public:
-  TimerType& timer() const {
+  TimerType& timer() const
+  {
     return m_timer;
   }
 };

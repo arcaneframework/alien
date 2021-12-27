@@ -41,9 +41,9 @@ class CSRStructInfo
     eFull
   };
 
-  typedef Integer            IndexType ;
-  typedef Alien::StdTimer    TimerType ;
-  typedef TimerType::Sentry  SentryType ;
+  typedef Integer IndexType;
+  typedef Alien::StdTimer TimerType;
+  typedef TimerType::Sentry SentryType;
 
  public:
   CSRStructInfo(bool is_variable_block = false)
@@ -85,7 +85,7 @@ class CSRStructInfo
   virtual ~CSRStructInfo()
   {
 #ifdef ALIEN_USE_PERF_TIMER
-    m_timer.printInfo("CSR-StructInfo") ;
+    m_timer.printInfo("CSR-StructInfo");
 #endif
   }
 
@@ -186,25 +186,24 @@ class CSRStructInfo
 
   UniqueArray<Integer>& getUpperDiagOffset()
   {
-    if(m_col_ordering != eUndef && m_upper_diag_offset.size() == 0)
-      computeUpperDiagOffset() ;
+    if (m_col_ordering != eUndef && m_upper_diag_offset.size() == 0)
+      computeUpperDiagOffset();
     return m_upper_diag_offset;
   }
 
   ConstArrayView<Integer> getUpperDiagOffset() const
   {
-    if(m_col_ordering != eUndef && m_upper_diag_offset.size() == 0)
-      computeUpperDiagOffset() ;
+    if (m_col_ordering != eUndef && m_upper_diag_offset.size() == 0)
+      computeUpperDiagOffset();
     return m_upper_diag_offset.constView();
   }
 
   int const* dcol() const
   {
-    if(m_col_ordering == eUndef)
-      return nullptr ;
-    else
-    {
-      getUpperDiagOffset() ;
+    if (m_col_ordering == eUndef)
+      return nullptr;
+    else {
+      getUpperDiagOffset();
       return m_upper_diag_offset.data();
     }
   }
@@ -219,22 +218,19 @@ class CSRStructInfo
   void computeUpperDiagOffset() const
   {
 #ifdef ALIEN_USE_PERF_TIMER
-    SentryType sentry(m_timer,"CSR-ComputeDiagOffset") ;
+    SentryType sentry(m_timer, "CSR-ComputeDiagOffset");
 #endif
-    if(m_col_ordering != eUndef)
-    {
-      m_upper_diag_offset.resize(m_nrow) ;
-      for (int irow = 0; irow < m_nrow; ++irow)
-      {
-        int index = m_row_offset[irow] ;
-        for (int k = m_row_offset[irow]; k < m_row_offset[irow + 1]; ++k)
-        {
-          if(m_cols[k]<irow)
-            ++index ;
+    if (m_col_ordering != eUndef) {
+      m_upper_diag_offset.resize(m_nrow);
+      for (int irow = 0; irow < m_nrow; ++irow) {
+        int index = m_row_offset[irow];
+        for (int k = m_row_offset[irow]; k < m_row_offset[irow + 1]; ++k) {
+          if (m_cols[k] < irow)
+            ++index;
           else
-            break ;
+            break;
         }
-        m_upper_diag_offset[irow] = index ;
+        m_upper_diag_offset[irow] = index;
       }
     }
   }

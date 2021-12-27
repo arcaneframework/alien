@@ -38,7 +38,7 @@ TEST(TestSYCLMV, SYCLExpr)
 {
   using namespace Alien;
   Alien::ITraceMng* trace_mng = AlienTest::Environment::traceMng();
-  Integer global_size         = 1050;
+  Integer global_size = 1050;
   const Alien::Space s(global_size, "MySpace");
   Alien::MatrixDistribution mdist(s, s, AlienTest::Environment::parallelMng());
   Alien::VectorDistribution vdist(s, AlienTest::Environment::parallelMng());
@@ -49,7 +49,7 @@ TEST(TestSYCLMV, SYCLExpr)
   Alien::Real lambda = 0.5;
 
   auto local_size = vdist.localSize();
-  auto offset     = vdist.offset();
+  auto offset = vdist.offset();
   {
     Alien::MatrixProfiler profiler(A);
     for (Integer i = 0; i < local_size; ++i) {
@@ -64,7 +64,7 @@ TEST(TestSYCLMV, SYCLExpr)
   {
     Alien::ProfiledMatrixBuilder builder(A, Alien::ProfiledMatrixOptions::eResetValues);
     for (Integer i = 0; i < local_size; ++i) {
-      Integer row       = offset + i;
+      Integer row = offset + i;
       builder(row, row) = 2.;
       if (row + 1 < global_size)
         builder(row, row + 1) = -1.;
@@ -137,7 +137,7 @@ TEST(TestSYCLMV, SYCLExpr)
     const auto& ma = A.impl()->get<Alien::BackEnd::tag::sycl>();
 
     const auto& vx = x.impl()->get<Alien::BackEnd::tag::sycl>();
-    auto& vy       = y.impl()->get<Alien::BackEnd::tag::sycl>(true);
+    auto& vy = y.impl()->get<Alien::BackEnd::tag::sycl>(true);
 
     sycl_alg.mult(A, x, y);
     {

@@ -38,14 +38,14 @@ class SimpleCSRVector : public IVectorImpl
  public:
   typedef ValueT ValueType;
 
-  //! Constructeur sans association à un MultiImpl
+  //! Constructeur sans association ? un MultiImpl
   SimpleCSRVector()
   : IVectorImpl(nullptr, AlgebraTraits<BackEnd::tag::simplecsr>::name())
   , m_local_size(0)
   , m_vblock(nullptr)
   {}
 
-  //! Constructeur avec association à un MultiImpl
+  //! Constructeur avec association ? un MultiImpl
   SimpleCSRVector(const MultiVectorImpl* multi_impl)
   : IVectorImpl(multi_impl, AlgebraTraits<BackEnd::tag::simplecsr>::name())
   , m_local_size(0)
@@ -111,19 +111,17 @@ class SimpleCSRVector : public IVectorImpl
   void init(const VectorDistribution& dist, const bool need_allocate)
   {
     alien_debug([&] { cout() << "Initializing SimpleCSRVector " << this; });
-    if(this->m_multi_impl)
-    {
+    if (this->m_multi_impl) {
       if (this->vblock()) {
         delete m_vblock;
         m_vblock = new VBlockImpl(*this->vblock(), this->distribution());
       }
       m_local_size = this->scalarizedLocalSize();
     }
-    else
-    {
+    else {
       // Not associated vector
-      m_own_distribution = dist ;
-      m_local_size = m_own_distribution.localSize() ;
+      m_own_distribution = dist;
+      m_local_size = m_own_distribution.localSize();
     }
     m_values.resize(m_local_size);
     if (need_allocate) {
@@ -133,40 +131,39 @@ class SimpleCSRVector : public IVectorImpl
 
   const VectorDistribution& distribution() const
   {
-    if(this->m_multi_impl)
-      return IVectorImpl::distribution() ;
+    if (this->m_multi_impl)
+      return IVectorImpl::distribution();
     else
-      return m_own_distribution ;
+      return m_own_distribution;
   }
 
   Arccore::Integer scalarizedLocalSize() const
   {
-    if(this->m_multi_impl)
-      return IVectorImpl::scalarizedLocalSize() ;
+    if (this->m_multi_impl)
+      return IVectorImpl::scalarizedLocalSize();
     else
-      return m_own_distribution.localSize() ;
+      return m_own_distribution.localSize();
   }
 
   Arccore::Integer scalarizedGlobalSize() const
   {
-    if(this->m_multi_impl)
-      return IVectorImpl::scalarizedGlobalSize() ;
+    if (this->m_multi_impl)
+      return IVectorImpl::scalarizedGlobalSize();
     else
-      return m_own_distribution.globalSize() ;
+      return m_own_distribution.globalSize();
   }
 
   Arccore::Integer scalarizedOffset() const
   {
-    if(this->m_multi_impl)
-      return IVectorImpl::scalarizedOffset() ;
+    if (this->m_multi_impl)
+      return IVectorImpl::scalarizedOffset();
     else
-      return m_own_distribution.offset() ;
+      return m_own_distribution.offset();
   }
-
 
   const VBlockImpl& vblockImpl() const { return *m_vblock; }
 
-  //@{ @name Interface à soi-même
+  //@{ @name Interface ? soi-m?me
   void update(const SimpleCSRVector<ValueT>& v)
   {
     ALIEN_ASSERT((this == &v), ("Unexpected error"));
@@ -188,8 +185,7 @@ class SimpleCSRVector : public IVectorImpl
   mutable UniqueArray<ValueT> m_values;
   Integer m_local_size = 0;
   mutable VBlockImpl* m_vblock = nullptr;
-  VectorDistribution m_own_distribution ;
-
+  VectorDistribution m_own_distribution;
 };
 
 /*---------------------------------------------------------------------------*/

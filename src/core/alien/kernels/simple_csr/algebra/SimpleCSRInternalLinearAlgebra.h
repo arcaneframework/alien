@@ -42,48 +42,51 @@ class ALIEN_EXPORT SimpleCSRInternalLinearAlgebra
 : public IInternalLinearAlgebra<CSRMatrix, CSRVector>
 {
  public:
-  typedef BackEnd::tag::simplecsr BackEndType ;
+  typedef BackEnd::tag::simplecsr BackEndType;
 
-  typedef VectorDistribution ResourceType ;
+  typedef VectorDistribution ResourceType;
 
   class NullValueException
-      : public Exception::NumericException
+  : public Exception::NumericException
   {
-  public :
-    typedef Exception::NumericException BaseType ;
+   public:
+    typedef Exception::NumericException BaseType;
     NullValueException(std::string const& type)
-    : BaseType(type,__LINE__)
-  {}
-  } ;
+    : BaseType(type, __LINE__)
+    {}
+  };
 
-  template<typename T>
+  template <typename T>
   class Future
   {
-  public :
+   public:
     Future(T& value)
     : m_value(value)
     {}
 
-    T& operator()() {
-      return m_value ;
+    T& operator()()
+    {
+      return m_value;
     }
 
-    T operator()() const {
-      return m_value ;
+    T operator()() const
+    {
+      return m_value;
     }
 
-    T get() {
-      return m_value ;
+    T get()
+    {
+      return m_value;
     }
-  private :
-    T& m_value ;
+
+   private:
+    T& m_value;
   };
 
-  typedef Future<Real> FutureType ;
+  typedef Future<Real> FutureType;
 
-  typedef Alien::StdTimer   TimerType ;
-  typedef TimerType::Sentry SentryType ;
-
+  typedef Alien::StdTimer TimerType;
+  typedef TimerType::Sentry SentryType;
 
   SimpleCSRInternalLinearAlgebra();
   virtual ~SimpleCSRInternalLinearAlgebra();
@@ -95,8 +98,8 @@ class ALIEN_EXPORT SimpleCSRInternalLinearAlgebra
   Real norm2(const Vector& x) const;
 
   void mult(const Matrix& A, const Vector& x, Vector& r) const;
-  void addLMult(Real alpha,const Matrix& A, const Vector& x, Vector& y) const;
-  void addUMult(Real alpha,const Matrix& A, const Vector& x, Vector& y) const;
+  void addLMult(Real alpha, const Matrix& A, const Vector& x, Vector& y) const;
+  void addUMult(Real alpha, const Matrix& A, const Vector& x, Vector& y) const;
 
   void multInvDiag(const Matrix& A, Vector& y) const;
   void computeInvDiag(const Matrix& a, Vector& inv_diag) const;
@@ -114,40 +117,39 @@ class ALIEN_EXPORT SimpleCSRInternalLinearAlgebra
   void pointwiseMult(const Vector& x, const Vector& y, Vector& w) const;
   void assign(Vector& x, Real alpha) const;
 
-
-  template<typename LambdaT>
+  template <typename LambdaT>
   void assign(Vector& x, LambdaT const& lambda) const
   {
-    auto x_ptr = x.getDataPtr() ;
-    for (Integer i = 0; i < x.getAllocSize(); ++i)
-    {
+    auto x_ptr = x.getDataPtr();
+    for (Integer i = 0; i < x.getAllocSize(); ++i) {
       x_ptr[i] = lambda(i);
     }
   }
 
   template <typename PrecondT>
-  void exec(PrecondT& precond, Vector const& x, Vector& y) {
-    return precond.solve(*this,x,y) ;
+  void exec(PrecondT& precond, Vector const& x, Vector& y)
+  {
+    return precond.solve(*this, x, y);
   }
 
-  static ResourceType const& resource(Matrix const& A) ;
+  static ResourceType const& resource(Matrix const& A);
 
-  void allocate(ResourceType const& distribution,Vector& v) ;
+  void allocate(ResourceType const& distribution, Vector& v);
 
-  template<typename T0, typename ...T>
-  void allocate(ResourceType const& distribution,T0& v0, T& ... args)
+  template <typename T0, typename... T>
+  void allocate(ResourceType const& distribution, T0& v0, T&... args)
   {
-     allocate(distribution,v0) ;
-     allocate(distribution,args...) ;
+    allocate(distribution, v0);
+    allocate(distribution, args...);
   }
 
-  void free(Vector& v) ;
+  void free(Vector& v);
 
-  template<typename T0, typename ...T>
-  void free(T0& v0, T& ... args)
+  template <typename T0, typename... T>
+  void free(T0& v0, T&... args)
   {
-     free(v0) ;
-     free(args...) ;
+    free(v0);
+    free(args...);
   }
 
 #ifdef ALIEN_USE_PERF_TIMER
@@ -160,7 +162,6 @@ class SimpleCSRInternalLinearAlgebraExpr
 : public IInternalLinearAlgebraExpr<CSRMatrix, CSRVector>
 {
  public:
-
   SimpleCSRInternalLinearAlgebraExpr();
   virtual ~SimpleCSRInternalLinearAlgebraExpr();
 

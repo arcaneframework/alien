@@ -55,8 +55,8 @@ class SimpleCSRMatrixMultT
   void mult(const VectorType& x, VectorType& y) const;
   void mult(const UniqueArray<Real>& x, UniqueArray<Real>& y) const;
 
-  void addLMult(Real alpha,const VectorType& x, VectorType& y) const;
-  void addUMult(Real alpha,const VectorType& x, VectorType& y) const;
+  void addLMult(Real alpha, const VectorType& x, VectorType& y) const;
+  void addUMult(Real alpha, const VectorType& x, VectorType& y) const;
 
   void computeInvDiag(VectorType& y) const;
   void multInvDiag(VectorType& y) const;

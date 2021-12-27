@@ -315,15 +315,13 @@ void StreamMatrixBuilderT<ValueT>::computeProfile()
   m_ghost_row_size.resize(m_local_size);
   m_ghost_row_size.fill(0);
   UniqueArray<Integer>& upper_diag_offset = profile.getUpperDiagOffset();
-  if (m_order_row_cols_opt)
-  {
+  if (m_order_row_cols_opt) {
     profile.setDiagFirst(false);
     upper_diag_offset.resize(m_local_size);
     m_row_size.fill(0);
     row_cols.resize(m_local_size);
   }
-  else
-  {
+  else {
     profile.setDiagFirst(true);
     m_row_size.fill(1);
     row_cols.resize(m_local_size);

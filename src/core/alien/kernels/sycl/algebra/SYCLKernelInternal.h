@@ -36,7 +36,7 @@ class Future
   Future(T& value)
   : m_value(value)
   //, m_d_value{1}
-  , m_d_value{SYCLEnv::instance()->maxNumGroups()}
+  , m_d_value{ SYCLEnv::instance()->maxNumGroups() }
   {
   }
 
@@ -53,7 +53,7 @@ class Future
   T get()
   {
     auto h_access = m_d_value.template get_access<cl::sycl::access::mode::read>();
-    m_value       = h_access[0];
+    m_value = h_access[0];
     return m_value;
   }
 
@@ -266,7 +266,7 @@ class KernelInternal
                                        });
     // clang-format on
 
-    std::size_t local  = m_max_work_group_size;
+    std::size_t local = m_max_work_group_size;
     std::size_t length = x.get_count();
 
     int level = 0;
@@ -334,7 +334,7 @@ class KernelInternal
       } while (length > 1);
     }
     auto h_w = w.template get_access<cl::sycl::access::mode::read>();
-    T sum    = h_w[0];
+    T sum = h_w[0];
     return sum;
   }
 
@@ -350,7 +350,7 @@ class KernelInternal
   {
     auto& w = getWorkBuffer<T>(x.get_count());
 
-    std::size_t local  = m_max_work_group_size;
+    std::size_t local = m_max_work_group_size;
     std::size_t length = x.get_count();
 
     int level = 0;
@@ -491,7 +491,7 @@ class KernelInternal
   T map2_reduce_sum(cl::sycl::buffer<T>& x,
                     cl::sycl::buffer<T>& y)
   {
-    std::size_t local  = m_max_work_group_size;
+    std::size_t local = m_max_work_group_size;
     std::size_t total_threads = m_total_threads;
     std::size_t length = x.get_count();
 
@@ -564,7 +564,6 @@ class KernelInternal
                  };
         // clang-format on
         m_env->internal()->queue().submit(f0);
-
       }
     }
     auto h_sum = sum.template get_access<cl::sycl::access::mode::read>();
@@ -578,9 +577,9 @@ class KernelInternal
   T map3_reduce_sum(cl::sycl::buffer<T>& x,
                     cl::sycl::buffer<T>& y)
   {
-    std::size_t local         = m_max_work_group_size;
+    std::size_t local = m_max_work_group_size;
     std::size_t total_threads = m_total_threads;
-    std::size_t length        = x.get_count();
+    std::size_t length = x.get_count();
 
     //std::vector<T> group_sum(m_max_num_groups) ;
     //cl::sycl::buffer<T> group_sum{ m_max_num_groups };
@@ -660,9 +659,9 @@ class KernelInternal
 
     //return sum.get_host_access()[0];
     auto h_sum = group_sum.template get_access<cl::sycl::access::mode::read>();
-    T sum = 0 ;
-    for(std::size_t i=0;i<std::min(total_threads,round_length)/local;++i)
-      sum += h_sum[i] ;
+    T sum = 0;
+    for (std::size_t i = 0; i < std::min(total_threads, round_length) / local; ++i)
+      sum += h_sum[i];
     return sum;
   }
 
@@ -674,9 +673,9 @@ class KernelInternal
                        cl::sycl::buffer<T>& y,
                        cl::sycl::buffer<T>& res)
   {
-    std::size_t local         = m_max_work_group_size;
+    std::size_t local = m_max_work_group_size;
     std::size_t total_threads = m_total_threads;
-    std::size_t length        = x.get_count();
+    std::size_t length = x.get_count();
 
     //T sum_init = 0 ;
     //cl::sycl::buffer<T> sum{&sum_init,1};
@@ -750,8 +749,7 @@ class KernelInternal
                  };
         // clang-format on
         m_env->internal()->queue().submit(f0);
-
-      } 
+      }
     }
   }
 
@@ -766,16 +764,15 @@ class KernelInternal
                        cl::sycl::buffer<T>& y,
                        cl::sycl::buffer<T>& res)
   {
-    std::size_t local         = m_max_work_group_size;
+    std::size_t local = m_max_work_group_size;
     std::size_t total_threads = m_total_threads;
-    std::size_t length        = x.get_count();
+    std::size_t length = x.get_count();
 
     int level = 0;
     {
       /* Each iteration of the do loop applies one level of reduction until
          * the input is of length 1 (i.e. the reduction is complete). */
-      do
-      {
+      do {
         // clang-format off
           auto f0 = [total_threads, length, local, &x, &y,&res](cl::sycl::handler& h) mutable
                    {
@@ -829,55 +826,50 @@ class KernelInternal
 
                  };
         // clang-format on
-        auto f1 = [length, local, &res](cl::sycl::handler& h) mutable
-                   {
-                      cl::sycl::nd_range<1> range{cl::sycl::range<1>{local},
-                                                  cl::sycl::range<1>{local}};
-                      auto access_sum = res.template get_access<cl::sycl::access::mode::read_write>(h);
+        auto f1 = [length, local, &res](cl::sycl::handler& h) mutable {
+          cl::sycl::nd_range<1> range{ cl::sycl::range<1>{ local },
+                                       cl::sycl::range<1>{ local } };
+          auto access_sum = res.template get_access<cl::sycl::access::mode::read_write>(h);
 
-                      cl::sycl::accessor<T, 1, cl::sycl::access::mode::read_write,cl::sycl::access::target::local>
-                        scratch(cl::sycl::range<1>(local), h);
+          cl::sycl::accessor<T, 1, cl::sycl::access::mode::read_write, cl::sycl::access::target::local>
+          scratch(cl::sycl::range<1>(local), h);
 
-                      /* The parallel_for invocation chosen is the variant with an nd_item
+          /* The parallel_for invocation chosen is the variant with an nd_item
                        * parameter, since the code requires barriers for correctness. */
-                      h.parallel_for<map5_reduction_sum1<T>>(range,
-                                                                [access_sum, scratch, local, length](cl::sycl::nd_item<1> id)
-                                                                {
-                                                                   //auto localid = id.get_id(0);
-                                                                   std::size_t globalid = id.get_global_id(0);
-                                                                   std::size_t localid = id.get_local_id(0);
+          h.parallel_for<map5_reduction_sum1<T>>(range,
+                                                 [access_sum, scratch, local, length](cl::sycl::nd_item<1> id) {
+                                                   //auto localid = id.get_id(0);
+                                                   std::size_t globalid = id.get_global_id(0);
+                                                   std::size_t localid = id.get_local_id(0);
 
-                                                                  /* All threads collectively read from global memory into local.
+                                                   /* All threads collectively read from global memory into local.
                                                                    * The barrier ensures all threads' IO is resolved before
                                                                    * execution continues (strictly speaking, all threads within
                                                                    * a single work-group - there is no co-ordination between
                                                                    * work-groups, only work-items). */
-                                                                   scratch[localid] = (localid < length)?  access_sum[localid] : 0. ;
-                                                                   id.barrier(cl::sycl::access::fence_space::local_space);
+                                                   scratch[localid] = (localid < length) ? access_sum[localid] : 0.;
+                                                   id.barrier(cl::sycl::access::fence_space::local_space);
 
-                                                                  /* Apply the reduction operation between the current local
+                                                   /* Apply the reduction operation between the current local
                                                                    * id and the one on the other half of the vector. */
-                                                                  if (localid < length)
-                                                                  {
-                                                                    //int min = (length < local) ? length : local;
-                                                                    std::size_t min = local ;
-                                                                    for (std::size_t offset = min / 2; offset > 0; offset /= 2)
-                                                                    //for (std::size_t offset = id.get_local_range(0) / 2; offset > 0; offset /= 2)
-                                                                    {
-                                                                      if (localid < offset)
-                                                                      {
-                                                                         scratch[localid] += scratch[localid + offset];
-                                                                      }
-                                                                      id.barrier(cl::sycl::access::fence_space::local_space);
-                                                                    }
-                                                                    /* The final result will be stored in local id 0. */
-                                                                    if (localid == 0)
-                                                                    {
-                                                                      access_sum[0] = scratch[localid];
-                                                                    }
-                                                                  }
-                                                                });
-                 };
+                                                   if (localid < length) {
+                                                     //int min = (length < local) ? length : local;
+                                                     std::size_t min = local;
+                                                     for (std::size_t offset = min / 2; offset > 0; offset /= 2)
+                                                     //for (std::size_t offset = id.get_local_range(0) / 2; offset > 0; offset /= 2)
+                                                     {
+                                                       if (localid < offset) {
+                                                         scratch[localid] += scratch[localid + offset];
+                                                       }
+                                                       id.barrier(cl::sycl::access::fence_space::local_space);
+                                                     }
+                                                     /* The final result will be stored in local id 0. */
+                                                     if (localid == 0) {
+                                                       access_sum[0] = scratch[localid];
+                                                     }
+                                                   }
+                                                 });
+        };
         // clang-format on
         if (level == 0)
           m_env->internal()->queue().submit(f0);
@@ -888,8 +880,8 @@ class KernelInternal
            * errors are caught quickly. However, this would likely impact
            * performance negatively. */
         //length = (length + local - 1) / local;
-        length = (std::min(total_threads,length) + local -1) / local;
-        ++level ;
+        length = (std::min(total_threads, length) + local - 1) / local;
+        ++level;
       } while (length > 1);
     }
     //auto h_x = res.template get_access<cl::sycl::access::mode::read>();
@@ -1009,7 +1001,7 @@ class KernelInternal
        * kernels using the buffers they access are blocked for the length
        * of the accessor's lifetime. */
       auto hI = xbuf.template get_access<cl::sycl::access::mode::read>();
-      value   = hI[0];
+      value = hI[0];
     }
     //value = x[0] ;
     return value;
@@ -1066,14 +1058,13 @@ class KernelInternal
            cl::sycl::buffer<T>& y,
            cl::sycl::buffer<T>& res)
   {
-    switch (m_dot_algo)
-    {
+    switch (m_dot_algo) {
     case 2:
       map4_reduce_sum(x, y, res); // with sycl_reduction
-      break ;
-    default :
+      break;
+    default:
       map5_reduce_sum(x, y, res);
-      break ;
+      break;
     }
   }
 

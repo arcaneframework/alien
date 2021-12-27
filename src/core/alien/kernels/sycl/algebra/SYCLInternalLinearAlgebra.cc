@@ -410,7 +410,7 @@ void SYCLInternalLinearAlgebraExpr::pointwiseMult(const SYCLVector<Real>& x ALIE
   A_FUNCINFO, "SYCLLinearAlgebra::aypx not implemented");
 }
 
-template class ALIEN_EXPORT SYCLInternal::Future<double> ;
+template class ALIEN_EXPORT SYCLInternal::Future<double>;
 
 } // namespace Alien
 

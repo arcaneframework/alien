@@ -93,7 +93,7 @@ class ALIEN_EXPORT SYCLVector : public IVectorImpl
     else {
       // Not associated vector
       m_own_distribution = dist;
-      m_local_size       = m_own_distribution.localSize();
+      m_local_size = m_own_distribution.localSize();
     }
     if (need_allocate) {
       allocate();

@@ -57,20 +57,17 @@ void SimpleCSRMatrixMultT<ValueT>::mult(const VectorType& x, VectorType& y) cons
   }
 }
 
-
 template <typename ValueT>
-void SimpleCSRMatrixMultT<ValueT>::addLMult(Real alpha,const VectorType& x, VectorType& y) const
+void SimpleCSRMatrixMultT<ValueT>::addLMult(Real alpha, const VectorType& x, VectorType& y) const
 {
-  _seqAddLMult(alpha,x, y);
+  _seqAddLMult(alpha, x, y);
 }
 
 template <typename ValueT>
-void SimpleCSRMatrixMultT<ValueT>::addUMult(Real alpha,const VectorType& x, VectorType& y) const
+void SimpleCSRMatrixMultT<ValueT>::addUMult(Real alpha, const VectorType& x, VectorType& y) const
 {
-  _seqAddUMult(alpha,x, y);
-
+  _seqAddUMult(alpha, x, y);
 }
-
 
 template <typename ValueT>
 void SimpleCSRMatrixMultT<ValueT>::mult(const UniqueArray<Real>& x, UniqueArray<Real>& y) const
@@ -117,7 +114,7 @@ const VectorType& x_impl, VectorType& y_impl) const
     Real tmpy = 0.;
     for (Integer j = off; j < off2; ++j) {
       // Cedric: Il doit y avoir une erreur ici, cols[j] n'est pas forcement dans x_ptr
-      // en particulier si cols[j] est un fantôme !
+      // en particulier si cols[j] est un fant?me !
       tmpy += matrix[j] * x_ptr[cols[j]];
       // m_matrix_impl.space().message()<<"mat["<<cols[j]<<","<<cols2[j]<<"]="<<matrix[j]<<"*"<<x_ptr[cols[j]];
     }
@@ -178,8 +175,7 @@ const UniqueArray<Real>& x_impl, UniqueArray<Real>& y_impl) const
     Integer off = row_offset[irow];
     Integer off2 = off + local_row_size[irow];
     Real tmpy = 0.;
-    for (Integer j = off; j < off2; ++j)
-    {
+    for (Integer j = off; j < off2; ++j) {
       tmpy += matrix[j] * x_ptr[cols[j]];
     }
     y_ptr[irow] = tmpy;
@@ -205,7 +201,7 @@ template <typename ValueT>
 void SimpleCSRMatrixMultT<ValueT>::_seqMult(const VectorType& x_impl, VectorType& y_impl) const
 {
 #ifdef ALIEN_USE_PERF_TIMER
-  typename MatrixType::SentryType sentry(m_matrix_impl.timer(),"CSR-SPMV") ;
+  typename MatrixType::SentryType sentry(m_matrix_impl.timer(), "CSR-SPMV");
 #endif
   Real* y_ptr = y_impl.getDataPtr();
   Real* x_ptr = (Real*)x_impl.getDataPtr();
@@ -223,42 +219,42 @@ void SimpleCSRMatrixMultT<ValueT>::_seqMult(const VectorType& x_impl, VectorType
 }
 
 template <typename ValueT>
-void SimpleCSRMatrixMultT<ValueT>::_seqAddLMult(Real alpha,const VectorType& x_impl, VectorType& y_impl) const
+void SimpleCSRMatrixMultT<ValueT>::_seqAddLMult(Real alpha, const VectorType& x_impl, VectorType& y_impl) const
 {
 #ifdef ALIEN_USE_PERF_TIMER
-  typename MatrixType::SentryType sentry(m_matrix_impl.timer(),"CSR-AddLMult") ;
+  typename MatrixType::SentryType sentry(m_matrix_impl.timer(), "CSR-AddLMult");
 #endif
   Real* y_ptr = y_impl.getDataPtr();
   Real* x_ptr = (Real*)x_impl.getDataPtr();
   ConstArrayView<Real> matrix = m_matrix_impl.m_matrix.getValues();
   ConstArrayView<Integer> cols = m_matrix_impl.m_matrix.getCSRProfile().getCols();
   ConstArrayView<Integer> row_offset = m_matrix_impl.m_matrix.getCSRProfile().getRowOffset();
-  auto diag_offset = m_matrix_impl.m_matrix.getCSRProfile().getUpperDiagOffset() ;
+  auto diag_offset = m_matrix_impl.m_matrix.getCSRProfile().getUpperDiagOffset();
   for (Integer irow = 0; irow < m_matrix_impl.m_local_size; ++irow) {
     Real tmpy = y_ptr[irow];
     for (Integer j = row_offset[irow]; j < diag_offset[irow]; ++j) {
-      tmpy += alpha* matrix[j] * x_ptr[cols[j]];
+      tmpy += alpha * matrix[j] * x_ptr[cols[j]];
     }
     y_ptr[irow] = tmpy;
   }
 }
 
 template <typename ValueT>
-void SimpleCSRMatrixMultT<ValueT>::_seqAddUMult(Real alpha,const VectorType& x_impl, VectorType& y_impl) const
+void SimpleCSRMatrixMultT<ValueT>::_seqAddUMult(Real alpha, const VectorType& x_impl, VectorType& y_impl) const
 {
 #ifdef ALIEN_USE_PERF_TIMER
-  typename MatrixType::SentryType sentry(m_matrix_impl.timer(),"CSR-AddUMult") ;
+  typename MatrixType::SentryType sentry(m_matrix_impl.timer(), "CSR-AddUMult");
 #endif
   Real* y_ptr = y_impl.getDataPtr();
   Real* x_ptr = (Real*)x_impl.getDataPtr();
   ConstArrayView<Real> matrix = m_matrix_impl.m_matrix.getValues();
   ConstArrayView<Integer> cols = m_matrix_impl.m_matrix.getCSRProfile().getCols();
   ConstArrayView<Integer> row_offset = m_matrix_impl.m_matrix.getCSRProfile().getRowOffset();
-  auto diag_offset = m_matrix_impl.m_matrix.getCSRProfile().getUpperDiagOffset() ;
+  auto diag_offset = m_matrix_impl.m_matrix.getCSRProfile().getUpperDiagOffset();
   for (Integer irow = 0; irow < m_matrix_impl.m_local_size; ++irow) {
     Real tmpy = y_ptr[irow];
-    for (Integer j = diag_offset[irow]+1; j < row_offset[irow + 1]; ++j) {
-      tmpy += alpha*matrix[j] * x_ptr[cols[j]];
+    for (Integer j = diag_offset[irow] + 1; j < row_offset[irow + 1]; ++j) {
+      tmpy += alpha * matrix[j] * x_ptr[cols[j]];
     }
     y_ptr[irow] = tmpy;
   }
@@ -507,7 +503,6 @@ const VectorType& x_impl, VectorType& y_impl) const
   }
 }
 
-
 template <typename ValueT>
 void SimpleCSRMatrixMultT<ValueT>::multInvDiag(VectorType& y) const
 {
@@ -515,10 +510,9 @@ void SimpleCSRMatrixMultT<ValueT>::multInvDiag(VectorType& y) const
   ConstArrayView<Real> matrix = m_matrix_impl.m_matrix.getValues();
   ConstArrayView<Integer> cols = m_matrix_impl.m_matrix.getCSRProfile().getCols();
   ConstArrayView<Integer> row_offset = m_matrix_impl.m_matrix.getCSRProfile().getRowOffset();
-  auto diag_offset = m_matrix_impl.m_matrix.getCSRProfile().getUpperDiagOffset() ;
-  for (Integer irow = 0; irow < m_matrix_impl.m_local_size; ++irow)
-  {
-    y_ptr[irow] = y_ptr[irow]/matrix[diag_offset[irow]];
+  auto diag_offset = m_matrix_impl.m_matrix.getCSRProfile().getUpperDiagOffset();
+  for (Integer irow = 0; irow < m_matrix_impl.m_local_size; ++irow) {
+    y_ptr[irow] = y_ptr[irow] / matrix[diag_offset[irow]];
   }
 }
 
@@ -531,10 +525,9 @@ void SimpleCSRMatrixMultT<ValueT>::computeInvDiag(VectorType& y) const
   ConstArrayView<Integer> row_offset = m_matrix_impl.m_matrix.getCSRProfile().getRowOffset();
   //auto diag_offset = m_matrix_impl.m_matrix.getCSRProfile().getDiagOffset() ;
   for (Integer irow = 0; irow < m_matrix_impl.m_local_size; ++irow) {
-    for (Integer j = row_offset[irow]; j < row_offset[irow + 1]; ++j)
-    {
-      if(cols[j]==irow)
-        y_ptr[irow] = 1./matrix[j];
+    for (Integer j = row_offset[irow]; j < row_offset[irow + 1]; ++j) {
+      if (cols[j] == irow)
+        y_ptr[irow] = 1. / matrix[j];
     }
   }
 }
