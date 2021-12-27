@@ -50,12 +50,14 @@ int main(int argc, char** argv)
 
   using namespace boost::program_options ;
   options_description desc;
+  // clang-format off
   desc.add_options()
       ("help", "produce help")
       ("size",    value<int>()->default_value(16),            "size")
       ("nb-test", value<int>()->default_value(1),             "nb tests")
       ("test",    value<std::string>()->default_value("all"), "test")
       ("dot-algo", value<int>()->default_value(0),            "dot algo choice") ;
+  // clang-format on
 
   variables_map vm;
   store(parse_command_line(argc, argv, desc), vm);

@@ -279,13 +279,11 @@ class SimpleCSRMatrix : public IMatrixImpl
 
   void notifyChanges()
   {
-    std::cout<<"CSR NOTIFY CHANGES"<<std::endl ;
     m_matrix.notifyChanges() ;
   }
 
   void endUpdate()
   {
-    std::cout<<"CSR ENDUPDATE"<<std::endl ;
     if(m_matrix.needUpdate())
     {
       m_matrix.endUpdate() ;

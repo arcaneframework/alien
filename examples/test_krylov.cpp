@@ -89,6 +89,7 @@ typedef Arccore::Int64 UID;
 int main(int argc, char** argv)
 {
 
+  // clang-format off
   using namespace boost::program_options ;
   options_description desc;
   desc.add_options()
@@ -98,6 +99,7 @@ int main(int argc, char** argv)
       ("precond",             value<std::string>()->default_value("diag"),"preconditioner [diag,cheb,neumann,ilu0,filu0]")
       ("output-level",        value<int>()->default_value(0),             "output level")
       ("bicgs",               value<int>()->default_value(0),             "BiCGS solve type synch : 0 or asynch 1")
+      ("dot-algo", value<int>()->default_value(0),                        "dot algo choice")
       ("max-iter",            value<int>()->default_value(1000),          "max iterations")
       ("tol",                 value<double>()->default_value(1.e-6),      "tolerance")
       ("poly-factor",         value<double>()->default_value(0.5),        "polynome factor")
@@ -107,6 +109,7 @@ int main(int argc, char** argv)
       ("filu-solver-niter",   value<int>()->default_value(3),             "nb ILU resolution iter")
       ("filu-tol",            value<double>()->default_value(3),          "nb ILU tolerance")
       ("kernel",              value<std::string>()->default_value("simplecsr"), "Kernel type simplecsr sycl") ;
+  // clang-format on
 
   variables_map vm;
   store(parse_command_line(argc, argv, desc), vm);
@@ -550,6 +553,7 @@ int main(int argc, char** argv)
   {
 #ifdef ALIEN_USE_SYCL
     Alien::SYCLInternalLinearAlgebra alg;
+    alg.setDotAlgo(vm["dot-algo"].as<int>()) ;
     run(alg) ;
 #else
     trace_mng->info()<<"SYCL BackEnd not available";

@@ -35,8 +35,8 @@ class Future
  public:
   Future(T& value)
   : m_value(value)
-  , m_d_value{1}
-  //, m_d_value{SYCLEnv::instance()->maxNumGroups()}
+  //, m_d_value{1}
+  , m_d_value{SYCLEnv::instance()->maxNumGroups()}
   {
   }
 
@@ -492,6 +492,7 @@ class KernelInternal
                     cl::sycl::buffer<T>& y)
   {
     std::size_t local  = m_max_work_group_size;
+    std::size_t total_threads = m_total_threads;
     std::size_t length = x.get_count();
 
     T sum_init = 0;
@@ -500,13 +501,12 @@ class KernelInternal
     {
       /* Each iteration of the do loop applies one level of reduction until
          * the input is of length 1 (i.e. the reduction is complete). */
-      //do
       {
         auto round_length = round_up(length, local);
         // clang-format off
-          auto f0 = [length, round_length, local, &x, &y, &sum](cl::sycl::handler& h) mutable
+          auto f0 = [length, round_length,total_threads, local, &x, &y, &sum](cl::sycl::handler& h) mutable
                    {
-                      cl::sycl::nd_range<1> range{cl::sycl::range<1>{round_length},
+                      cl::sycl::nd_range<1> range{cl::sycl::range<1>{std::min(total_threads,round_length)},
                                                   cl::sycl::range<1>{local}};
                       auto access_x = x.template get_access<cl::sycl::access::mode::read>(h);
                       auto access_y = y.template get_access<cl::sycl::access::mode::read>(h);
@@ -522,7 +522,7 @@ class KernelInternal
                        * parameter, since the code requires barriers for correctness. */
                       h.parallel_for<sycl_map2_reduction_sum0<T>>(range,
                                                                   sumReduction,
-                                                                  [access_x,access_y, scratch, local, length](cl::sycl::nd_item<1> id, auto &sum)
+                                                                  [access_x,access_y, scratch, local,total_threads,length](cl::sycl::nd_item<1> id, auto &sum)
                                                                   {
                                                                      std::size_t globalid = id.get_global_id(0);
                                                                      std::size_t localid = id.get_local_id(0);
@@ -533,12 +533,14 @@ class KernelInternal
                                                                      * a single work-group - there is no co-ordination between
                                                                      * work-groups, only work-items). */
                                                                      scratch[localid] = (globalid < length)?  access_x[globalid]*access_y[globalid] : 0. ;
+                                                                     for (auto i = globalid+total_threads; i < length; i += total_threads)
+                                                                        scratch[localid] += access_x[i]*access_y[i];
 
                                                                      id.barrier(cl::sycl::access::fence_space::local_space);
 
                                                                     /* Apply the reduction operation between the current local
                                                                      * id and the one on the other half of the vector. */
-                                                                    if (globalid < length)
+                                                                    //if (globalid < length)
                                                                     {
                                                                       //int min = (length < local) ? length : local;
                                                                       int min = local ;
@@ -563,12 +565,7 @@ class KernelInternal
         // clang-format on
         m_env->internal()->queue().submit(f0);
 
-        /* At this point, you could queue::wait_and_throw() to ensure that
-           * errors are caught quickly. However, this would likely impact
-           * performance negatively. */
-        length = (length + local - 1) / local;
-        //++level ;
-      } //while (length > 1);
+      }
     }
     auto h_sum = sum.template get_access<cl::sycl::access::mode::read>();
     return h_sum[0];
@@ -586,28 +583,30 @@ class KernelInternal
     std::size_t length        = x.get_count();
 
     //std::vector<T> group_sum(m_max_num_groups) ;
-    cl::sycl::buffer<T> group_sum{ m_max_num_groups };
+    //cl::sycl::buffer<T> group_sum{ m_max_num_groups };
+    auto& group_sum = getWorkBuffer<T>(m_max_num_groups);
 
-    T sum_init = 0;
-    cl::sycl::buffer<T> sum{ &sum_init, 1 };
+    //T sum_init = 0;
+    //cl::sycl::buffer<T> sum{ &sum_init, 1 };
 
+    auto round_length = round_up(length, local);
     {
       /* Each iteration of the do loop applies one level of reduction until
          * the input is of length 1 (i.e. the reduction is complete). */
       //do
       {
         // clang-format off
-          auto f0 = [total_threads, length, local, &x, &y,&sum, &group_sum](cl::sycl::handler& h) mutable
+          auto f0 = [total_threads,round_length, length, local, &x, &y,&group_sum](cl::sycl::handler& h) mutable
                    {
-                      cl::sycl::nd_range<1> range{cl::sycl::range<1>{total_threads},
+                      cl::sycl::nd_range<1> range{cl::sycl::range<1>{std::min(total_threads,round_length)},
                                                   cl::sycl::range<1>{local}};
                       auto access_x = x.template get_access<cl::sycl::access::mode::read>(h);
                       auto access_y = y.template get_access<cl::sycl::access::mode::read>(h);
 
-                      //auto access_sum = cl::sycl::accessor { group_sum, h, cl::sycl::read_write, cl::sycl::property::no_init{}};
+                      auto access_sum = cl::sycl::accessor { group_sum, h, cl::sycl::read_write, cl::sycl::property::no_init{}};
 
-                      cl::sycl::accessor access_sum {sum, h};
-                      auto sumReduction = cl::sycl::reduction(access_sum, cl::sycl::plus<T>());
+                      //cl::sycl::accessor access_sum {sum, h};
+                      //auto sumReduction = cl::sycl::reduction(access_sum, cl::sycl::plus<T>());
 
                       cl::sycl::accessor<T, 1, cl::sycl::access::mode::read_write,cl::sycl::access::target::local>
                         scratch(cl::sycl::range<1>(local), h);
@@ -616,8 +615,9 @@ class KernelInternal
                        * parameter, since the code requires barriers for correctness. */
 
                       h.parallel_for<sycl_map3_reduction_sum0<T>>(range,
-                                                                  sumReduction,
-                                                                  [access_x,access_y,scratch,local,length,total_threads] (cl::sycl::nd_item<1> id, auto& sum)
+                                                                  //sumReduction,
+                                                                  //[access_x,access_y,scratch,local,length,total_threads] (cl::sycl::nd_item<1> id, auto& sum)
+                                                                  [access_x,access_y,access_sum,scratch,local,length,total_threads] (cl::sycl::nd_item<1> id)
                                                                   {
                                                                       std::size_t globalid = id.get_global_id(0);
                                                                       std::size_t localid = id.get_local_id(0);
@@ -631,12 +631,10 @@ class KernelInternal
 
                                                                       /* Apply the reduction operation between the current local
                                                                        * id and the one on the other half of the vector. */
-                                                                      if (globalid < length)
                                                                       {
                                                                         //int min = (length < local) ? length : local;
-                                                                        int min = local ;
+                                                                        std::size_t min = local ;
                                                                         for (std::size_t offset = min / 2; offset > 0; offset /= 2)
-                                                                        //for (std::size_t offset = id.get_local_range(0) / 2; offset > 0; offset /= 2)
                                                                         {
                                                                           if (localid < offset)
                                                                           {
@@ -648,31 +646,24 @@ class KernelInternal
                                                                       /* The final result will be stored in local id 0. */
                                                                       if (localid == 0)
                                                                       {
-                                                                        //access_sum[id.get_group(0)] = scratch[localid];
-                                                                        sum += scratch[localid] ;
+                                                                        access_sum[id.get_group(0)] = scratch[localid];
+                                                                        //sum += scratch[localid] ;
                                                                       }
-
                                                                   });
 
                  };
         // clang-format on
         m_env->internal()->queue().submit(f0);
 
-        /* At this point, you could queue::wait_and_throw() to ensure that
-           * errors are caught quickly. However, this would likely impact
-           * performance negatively. */
-        length = (length + local - 1) / local;
-        //++level ;
       } //while (length > 1);
     }
 
-    return sum.get_host_access()[0];
-    /*
+    //return sum.get_host_access()[0];
     auto h_sum = group_sum.template get_access<cl::sycl::access::mode::read>();
     T sum = 0 ;
-    for(int i=0;i<length;++i)
+    for(std::size_t i=0;i<std::min(total_threads,round_length)/local;++i)
       sum += h_sum[i] ;
-    return sum;*/
+    return sum;
   }
 
   template <typename T>
@@ -694,10 +685,11 @@ class KernelInternal
          * the input is of length 1 (i.e. the reduction is complete). */
       //do
       {
+        auto round_length = round_up(length, local);
         // clang-format off
-          auto f0 = [total_threads, length, local, &x, &y,&res](cl::sycl::handler& h) mutable
+          auto f0 = [total_threads, round_length, length, local, &x, &y,&res](cl::sycl::handler& h) mutable
                    {
-                      cl::sycl::nd_range<1> range{cl::sycl::range<1>{total_threads},
+                      cl::sycl::nd_range<1> range{cl::sycl::range<1>{std::min(total_threads,round_length)},
                                                   cl::sycl::range<1>{local}};
                       auto access_x = x.template get_access<cl::sycl::access::mode::read>(h);
                       auto access_y = y.template get_access<cl::sycl::access::mode::read>(h);
@@ -733,10 +725,10 @@ class KernelInternal
 
                                                                 /* Apply the reduction operation between the current local
                                                                  * id and the one on the other half of the vector. */
-                                                                if (globalid < length)
+                                                                //if (globalid < length)
                                                                 {
                                                                   //int min = (length < local) ? length : local;
-                                                                  int min = local ;
+                                                                  std::size_t min = local ;
                                                                   for (std::size_t offset = min / 2; offset > 0; offset /= 2)
                                                                   //for (std::size_t offset = id.get_local_range(0) / 2; offset > 0; offset /= 2)
                                                                   {
@@ -753,19 +745,13 @@ class KernelInternal
                                                                   //access_sum[id.get_group(0)] = scratch[localid];
                                                                   sum += scratch[localid] ;
                                                                 }
-
                                                             });
 
                  };
         // clang-format on
         m_env->internal()->queue().submit(f0);
 
-        /* At this point, you could queue::wait_and_throw() to ensure that
-           * errors are caught quickly. However, this would likely impact
-           * performance negatively. */
-        length = (length + local - 1) / local;
-        //++level ;
-      } //while (length > 1);
+      } 
     }
   }
 
@@ -823,8 +809,7 @@ class KernelInternal
                                                                 if (globalid < length)
                                                                 {
                                                                   //int min = (length < local) ? length : local;
-                                                                  int min = local ;
-                                                                  for (std::size_t offset = min / 2; offset > 0; offset /= 2)
+                                                                  for (std::size_t offset = local / 2; offset > 0; offset /= 2)
                                                                   //for (std::size_t offset = id.get_local_range(0) / 2; offset > 0; offset /= 2)
                                                                   {
                                                                     if (localid < offset)
@@ -875,7 +860,7 @@ class KernelInternal
                                                                   if (localid < length)
                                                                   {
                                                                     //int min = (length < local) ? length : local;
-                                                                    int min = local ;
+                                                                    std::size_t min = local ;
                                                                     for (std::size_t offset = min / 2; offset > 0; offset /= 2)
                                                                     //for (std::size_t offset = id.get_local_range(0) / 2; offset > 0; offset /= 2)
                                                                     {
@@ -1068,7 +1053,7 @@ class KernelInternal
     case 1:
       return map_reduce_sum(x, y);
     case 2:
-      return map2_reduce_sum(x, y);
+      return map2_reduce_sum(x, y); // with sycl_reduction
     case 3:
       return map3_reduce_sum(x, y);
     default:
@@ -1083,8 +1068,8 @@ class KernelInternal
   {
     switch (m_dot_algo)
     {
-    case 3:
-      map4_reduce_sum(x, y, res);
+    case 2:
+      map4_reduce_sum(x, y, res); // with sycl_reduction
       break ;
     default :
       map5_reduce_sum(x, y, res);
