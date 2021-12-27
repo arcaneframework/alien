@@ -62,13 +62,12 @@ class CBLASMPIKernel
                             VectorT const& y,
                             VectorT& z)
   {
-    auto local_size = x.scalarizedLocalSize() ;
-    auto x_ptr = x.getDataPtr() ;
-    auto y_ptr = y.getDataPtr() ;
-    auto z_ptr = z.getDataPtr() ;
-    for(std::size_t i=0;i<local_size;++i)
-    {
-      z_ptr[i] = x_ptr[i]*y_ptr[i] ;
+    auto local_size = x.scalarizedLocalSize();
+    auto x_ptr = x.getDataPtr();
+    auto y_ptr = y.getDataPtr();
+    auto z_ptr = z.getDataPtr();
+    for (std::size_t i = 0; i < local_size; ++i) {
+      z_ptr[i] = x_ptr[i] * y_ptr[i];
     }
   }
 
@@ -77,11 +76,10 @@ class CBLASMPIKernel
                      typename VectorT::ValueType alpha,
                      VectorT& y)
   {
-    auto local_size = y.scalarizedLocalSize() ;
-    auto y_ptr = y.getDataPtr() ;
-    for(std::size_t i=0;i<local_size;++i)
-    {
-      y_ptr[i] = alpha ;
+    auto local_size = y.scalarizedLocalSize();
+    auto y_ptr = y.getDataPtr();
+    for (std::size_t i = 0; i < local_size; ++i) {
+      y_ptr[i] = alpha;
     }
   }
 

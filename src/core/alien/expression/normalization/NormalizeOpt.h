@@ -415,7 +415,7 @@ class NormalizeOpt::Op
   void sumBlockEq()
   {
     for (Integer irow = 0; irow < m_local_size; ++irow) {
-      checkNullEq(irow, (diag_first ? 0 : m_upper_diag_offset[irow]-m_row_offset[irow]));
+      checkNullEq(irow, (diag_first ? 0 : m_upper_diag_offset[irow] - m_row_offset[irow]));
       for (Integer col = m_row_offset[irow]; col < m_row_offset[irow + 1]; ++col) {
         for (Integer ieq = 1; ieq < m_equations_num; ++ieq)
           for (Integer ui = 0; ui < m_unknowns_num; ++ui)

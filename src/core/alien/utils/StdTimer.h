@@ -27,7 +27,7 @@ class StdTimer
     virtual ~Sentry()
     {
       std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-      std::chrono::duration<double> time_span   = std::chrono::duration_cast<std::chrono::duration<double>>(end - m_start);
+      std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(end - m_start);
 
       m_parent.add(m_phase, time_span.count());
     }
@@ -53,14 +53,14 @@ class StdTimer
   void printInfo(const std::string& msg) const
   {
     std::cout << "================================" << std::endl;
-    std::cout << "PERF INFO : " << msg<<std::endl;
+    std::cout << "PERF INFO : " << msg << std::endl;
     for (auto const& iter : m_counters) {
       std::cout << iter.first << ":" << iter.second << std::endl;
     }
     std::cout << "================================" << std::endl;
   }
 
-  void printInfo(std::ostream& out,const std::string& msg) const
+  void printInfo(std::ostream& out, const std::string& msg) const
   {
     out << "================================" << std::endl;
     out << "PERF INFO : " << std::endl;
