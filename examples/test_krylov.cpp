@@ -117,8 +117,8 @@ int main(int argc, char** argv)
   notify(vm);
 
   if (vm.count("help")) {
-      std::cout << desc << "\n";
-      return 1;
+    std::cout << desc << "\n";
+    return 1;
   }
 
   /*
@@ -265,7 +265,7 @@ int main(int argc, char** argv)
 
   auto allUIndex = index_manager.getIndexes(indexSetU);
 
-  double off_diag = 0.5 ;
+  double off_diag = 0.5;
   /*
    *  Assemble matrix.
    */
@@ -328,67 +328,56 @@ int main(int argc, char** argv)
   {
     Alien::ProfiledMatrixBuilder builder(A, Alien::ProfiledMatrixOptions::eResetValues);
     // Loop on Y-axis
-    for (int j = first_j; j < last_j; ++j)
-    {
+    for (int j = first_j; j < last_j; ++j) {
       // Loop on X-axis
-      for (int i = 0; i < Nx; ++i)
-      {
+      for (int i = 0; i < Nx; ++i) {
         auto n_uid = node_uid(i, j);
         auto n_lid = uid2lid[n_uid];
         auto irow = allUIndex[n_lid];
 
-        double diag = 0. ;
+        double diag = 0.;
         // OFF DIAG
         // lower
-        if (j > 0)
-        {
+        if (j > 0) {
           auto off_uid = node_uid(i, j - 1);
           auto off_lid = uid2lid[off_uid];
           auto jcol = allUIndex[off_lid];
-          if (jcol != -1)
-          {
+          if (jcol != -1) {
             builder(irow, jcol) = -off_diag;
             diag += off_diag;
           }
         }
         // left
-        if (i > 0)
-        {
+        if (i > 0) {
           auto off_uid = node_uid(i - 1, j);
           auto off_lid = uid2lid[off_uid];
           auto jcol = allUIndex[off_lid];
-          if (jcol != -1)
-          {
+          if (jcol != -1) {
             builder(irow, jcol) = -off_diag;
             diag += off_diag;
           }
         }
         // right
-        if (i < Nx - 1)
-        {
+        if (i < Nx - 1) {
           auto off_uid = node_uid(i + 1, j);
           auto off_lid = uid2lid[off_uid];
           auto jcol = allUIndex[off_lid];
-          if (jcol != -1)
-          {
+          if (jcol != -1) {
             builder(irow, jcol) = -off_diag;
             diag += off_diag;
           }
         }
-        if (i == Nx - 1)
-        {
+        if (i == Nx - 1) {
           // Dirichlet Boundary Condition on XMAX
           diag += off_diag;
         }
 
         // upper
-        if (j < Ny - 1)
-        {
+        if (j < Ny - 1) {
           auto off_uid = node_uid(i, j + 1);
           auto off_lid = uid2lid[off_uid];
           auto jcol = allUIndex[off_lid];
-          if (jcol != -1)
-          {
+          if (jcol != -1) {
             builder(irow, jcol) = -off_diag;
             diag += off_diag;
           }
@@ -398,7 +387,6 @@ int main(int argc, char** argv)
       }
     }
   }
-
 
   /*
    * Build rhs vector
@@ -420,11 +408,10 @@ int main(int argc, char** argv)
 
         //writer[irow] = 1. / (1. + i + j);
         //writer[irow] = 1. ;
-        writer_b[irow] = 0. ;
-        writer_x[irow] = 0. ;
-        if(i==Nx-1)
-        {
-          writer_b[irow] += off_diag ;
+        writer_b[irow] = 0.;
+        writer_x[irow] = 0.;
+        if (i == Nx - 1) {
+          writer_b[irow] += off_diag;
         }
       }
     }
@@ -444,6 +431,7 @@ int main(int argc, char** argv)
   int         asynch        = vm["asynch"].as<int>();
   // clang-format on
 
+  // clang-format off
   auto run = [&](auto& alg)
             {
               typedef typename
@@ -608,25 +596,23 @@ int main(int argc, char** argv)
                 trace_mng->info()<<"Solver convergence failed";
               }
             } ;
+  // clang-format on
 
-  if(kernel.compare("simplecsr")==0)
-  {
-    Alien::SimpleCSRInternalLinearAlgebra alg ;
-    run(alg) ;
+  if (kernel.compare("simplecsr") == 0) {
+    Alien::SimpleCSRInternalLinearAlgebra alg;
+    run(alg);
   }
-  if(kernel.compare("sycl")==0)
-  {
+  if (kernel.compare("sycl") == 0) {
 #ifdef ALIEN_USE_SYCL
     Alien::SYCLInternalLinearAlgebra alg;
-    alg.setDotAlgo(vm["dot-algo"].as<int>()) ;
-    run(alg) ;
+    alg.setDotAlgo(vm["dot-algo"].as<int>());
+    run(alg);
 #else
-    trace_mng->info()<<"SYCL BackEnd not available";
+    trace_mng->info() << "SYCL BackEnd not available";
 #endif
   }
 
-  timer.printInfo(trace_mng->info().file(),"KRYLOV-BENCH") ;
-
+  timer.printInfo(trace_mng->info().file(), "KRYLOV-BENCH");
 
   Environment::finalize();
 

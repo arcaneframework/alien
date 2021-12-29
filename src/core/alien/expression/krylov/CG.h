@@ -42,7 +42,6 @@ class CG
   typedef typename AlgebraType::FutureType FutureType;
   // clang-format on
 
-
   CG(AlgebraType& algebra, ITraceMng* trace_mng = nullptr)
   : m_algebra(algebra)
   , m_trace_mng(trace_mng)
@@ -69,7 +68,7 @@ class CG
     VectorType p, z, q, r;
 
     m_algebra.allocate(AlgebraType::resource(A), p, z, q, r);
-    
+
     // SEQ0
     //  r = b - A * x;
     m_algebra.copy(b, r);
@@ -87,13 +86,13 @@ class CG
      * x += alpha*p
      * r += alpha*q
      */
-    m_algebra.exec(precond,r,z) ;
+    m_algebra.exec(precond, r, z);
     rho1 = m_algebra.dot(r, z);
     m_algebra.copy(z, p);
     m_algebra.mult(A, p, q);
     alpha = m_algebra.dot(p, q);
     if (m_output_level > 1)
-      _print(0, "Seq 1", "rho",rho1,"alpha", alpha);
+      _print(0, "Seq 1", "rho", rho1, "alpha", alpha);
     if (alpha == 0) {
       if (iter.stop(r)) {
         ++iter;
@@ -103,10 +102,10 @@ class CG
       else
         throw typename AlgebraType::NullValueException("alpha");
     }
-    alpha = rho1/alpha ;
+    alpha = rho1 / alpha;
     m_algebra.axpy(alpha, p, x);
     m_algebra.axpy(-alpha, q, r);
-    rho = rho1 ;
+    rho = rho1;
     ++iter;
 
     while (!iter.stop(r)) {
@@ -122,11 +121,11 @@ class CG
        * x += alpha*p
        * r -= alpha*q
        */
-      m_algebra.exec(precond,r,z) ;
+      m_algebra.exec(precond, r, z);
       rho1 = m_algebra.dot(r, z);
-      alpha = rho1/rho ;
+      alpha = rho1 / rho;
       m_algebra.axpy(alpha, p, z);
-      m_algebra.copy(z,p) ;
+      m_algebra.copy(z, p);
       m_algebra.mult(A, p, q);
       alpha = m_algebra.dot(q, p);
       if (alpha == 0) {
@@ -138,10 +137,10 @@ class CG
         else
           throw typename AlgebraType::NullValueException("alpha");
       }
-      alpha = rho1/alpha ;
+      alpha = rho1 / alpha;
       m_algebra.axpy(alpha, p, x);
       m_algebra.axpy(-alpha, q, r);
-      rho = rho1 ;
+      rho = rho1;
       ++iter;
     }
 
@@ -161,7 +160,7 @@ class CG
     if (iter.nullRhs())
       return 0;
     ValueType rho(0), rho1(0), alpha(0);
-    FutureType frho(rho), frho1(rho1), falpha(alpha) ;
+    FutureType frho(rho), frho1(rho1), falpha(alpha);
     VectorType p, z, q, r;
 
     m_algebra.allocate(AlgebraType::resource(A), p, z, q, r);
@@ -183,11 +182,11 @@ class CG
      * x += alpha*p
      * r += alpha*q
      */
-    m_algebra.exec(precond,r,z) ;
+    m_algebra.exec(precond, r, z);
     m_algebra.copy(z, p);
     m_algebra.mult(A, p, q);
-    m_algebra.dot(r, p,frho1);
-    m_algebra.dot(p, q,falpha);
+    m_algebra.dot(r, p, frho1);
+    m_algebra.dot(p, q, falpha);
     if (falpha.get() == 0) {
       if (iter.stop(r)) {
         ++iter;
@@ -197,10 +196,10 @@ class CG
       else
         throw typename AlgebraType::NullValueException("alpha");
     }
-    alpha = frho1.get()/alpha ;
+    alpha = frho1.get() / alpha;
     m_algebra.axpy(alpha, p, x);
     m_algebra.axpy(-alpha, q, r);
-    rho = rho1 ;
+    rho = rho1;
     ++iter;
 
     while (!iter.stop(r)) {
@@ -216,13 +215,13 @@ class CG
        * x += alpha*p
        * r -= alpha*q
        */
-      m_algebra.exec(precond,r,z) ;
-      m_algebra.dot(r, z,frho1);
-      alpha = frho1.get()/rho ;
+      m_algebra.exec(precond, r, z);
+      m_algebra.dot(r, z, frho1);
+      alpha = frho1.get() / rho;
       m_algebra.axpy(alpha, p, z);
-      m_algebra.copy(z,p);
+      m_algebra.copy(z, p);
       m_algebra.mult(A, p, q);
-      m_algebra.dot(p, q,falpha);
+      m_algebra.dot(p, q, falpha);
       if (falpha.get() == 0) {
         if (iter.stop(r)) {
           ++iter;
@@ -232,10 +231,10 @@ class CG
         else
           throw typename AlgebraType::NullValueException("alpha");
       }
-      alpha = rho1/alpha ;
+      alpha = rho1 / alpha;
       m_algebra.axpy(alpha, p, x);
       m_algebra.axpy(-alpha, q, r);
-      rho = rho1 ;
+      rho = rho1;
       ++iter;
     }
 
