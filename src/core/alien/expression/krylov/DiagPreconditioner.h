@@ -63,7 +63,6 @@ class DiagPreconditioner
              VectorType const& x,
              VectorType& y) const
   {
-    //algebra.copy(x, y);
     algebra.pointwiseMult(m_inv_diag, x, y);
   }
 

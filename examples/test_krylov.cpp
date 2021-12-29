@@ -96,11 +96,18 @@ int main(int argc, char** argv)
       ("help", "produce help")
       ("nx",                  value<int>()->default_value(10),            "nx")
       ("ny",                  value<int>()->default_value(10),            "ny")
+<<<<<<< HEAD
       ("solver",              value<std::string>()->default_value("bicgs"),"solver [cg,bicgs]")
       ("precond",             value<std::string>()->default_value("diag"),"preconditioner [diag,cheb,neumann,ilu0,filu0]")
       ("output-level",        value<int>()->default_value(0),             "output level")
       ("asynch",              value<int>()->default_value(0),             "Asynch mode synch : 0 or asynch 1")
       ("dot-algo",            value<int>()->default_value(0),             "dot algo choice")
+=======
+      ("precond",             value<std::string>()->default_value("diag"),"preconditioner [diag,cheb,neumann,ilu0,filu0]")
+      ("output-level",        value<int>()->default_value(0),             "output level")
+      ("bicgs",               value<int>()->default_value(0),             "BiCGS solve type synch : 0 or asynch 1")
+      ("dot-algo", value<int>()->default_value(0),                        "dot algo choice")
+>>>>>>> main
       ("max-iter",            value<int>()->default_value(1000),          "max iterations")
       ("tol",                 value<double>()->default_value(1.e-6),      "tolerance")
       ("poly-factor",         value<double>()->default_value(0.5),        "polynome factor")
@@ -122,6 +129,7 @@ int main(int argc, char** argv)
   }
 
   /*
+<<<<<<< HEAD
    * Example : LAPLACIAN PROBLEM on a 2D square mesh of size NX x NY
    * Unknowns on nodes (i,j)
    * Use a 5-Points stencil
@@ -136,6 +144,22 @@ int main(int argc, char** argv)
    * TUTORIAL : LINEAR SYSTEM mat.X=rhs DEFINITION
    * =========================================
    */
+=======
+     * Example : LAPLACIAN PROBLEM on a 2D square mesh of size NX x NY
+     * Unknowns on nodes (i,j)
+     * Use a 5-Points stencil
+     *
+     *
+     *           (I,J+1)
+     *              |
+     * (I-1,J) -- (I,J) -- (I+1,J)
+     *              |
+     *           (I,J-1)
+     *
+     * TUTORIAL : LINEAR SYSTEM mat.X=rhs DEFINITION
+     * =========================================
+     */
+>>>>>>> main
   int Nx = vm["nx"].as<int>();
   int Ny = vm["ny"].as<int>();
   // int space_size = Nx * Ny;
@@ -241,11 +265,19 @@ int main(int argc, char** argv)
   trace_mng->info() << "LOCAL SIZE  : " << local_size;
 
   /*
+<<<<<<< HEAD
    * DEFINITION of
    * - Alien Space,
    * - matrix and vector distributions
    * to manage the distribution of indexes between all MPI processes
    */
+=======
+     * DEFINITION of
+     * - Alien Space,
+     * - matrix and vector distributions
+     * to manage the distribution of indexes between all MPI processes
+     */
+>>>>>>> main
 
   auto space = Alien::Space(global_size, "MySpace");
 
