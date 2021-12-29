@@ -67,7 +67,7 @@ class DiagPreconditioner
   }
 
  private:
-  AlgebraType& m_algebra ;
+  AlgebraType& m_algebra;
   MatrixType const& m_matrix;
   VectorType m_inv_diag;
 };
