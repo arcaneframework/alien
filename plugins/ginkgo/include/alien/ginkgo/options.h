@@ -29,9 +29,9 @@ struct OptionTypes
   enum eSolver
   {
     CG,
-    // GMRES,
-    // BiCG,
-    // BiCGstab
+    GMRES,
+    BICG,
+    BICGSTAB
   };
 
   enum ePreconditioner

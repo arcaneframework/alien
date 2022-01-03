@@ -26,7 +26,59 @@
 
 #include <alien/kernels/simple_csr/algebra/SimpleCSRLinearAlgebra.h>
 
-int test(const std::string& filename)
+// tmp read from mtx
+#include <fstream>
+
+
+std::vector<double> readFromMtx(const std::string& vec_filename)
+{
+  // read file
+  auto stream = std::ifstream(vec_filename);
+  if (!stream) {
+    std::cerr <<"readFromMatrixMarket", "Unable to read file";
+    return {};
+  }
+
+  // get nb values
+  std::string line;
+  int nbvalues = 0;
+
+  while (std::getline(stream, line)) {
+
+    if ('%' == line[0]) {
+      // skip comment
+      continue;
+    }
+    else {
+      //first line is vector size, then done with banner
+      std::stringstream ss;
+      ss << line;
+      ss >> nbvalues;
+      break;
+    }
+  }
+
+  // read values into std::vector
+  std::vector<double> values(nbvalues);
+  int cpt = 0;
+  while (std::getline(stream, line)) {
+    if ('%' == line[0]) {
+      continue;
+    }
+
+    double value;
+    std::stringstream ss;
+    ss << line;
+    ss >> value;
+    values[cpt] = value;
+    cpt++;
+  }
+  return values;
+}
+
+
+
+int test(const std::string& mat_filename, const std::string& vec_filename="")
 {
   auto* pm = Arccore::MessagePassing::Mpi::StandaloneMpiMessagePassingMng::create(MPI_COMM_WORLD);
   auto* tm = Arccore::arccoreCreateDefaultTraceMng();
@@ -34,8 +86,9 @@ int test(const std::string& filename)
   Alien::setTraceMng(tm);
   Alien::setVerbosityLevel(Alien::Verbosity::Debug);
 
-  auto A = Alien::Move::readFromMatrixMarket(pm,filename);
+  auto A = Alien::Move::readFromMatrixMarket(pm,mat_filename);
 
+//  readVector(vec_filename);
   /**
 	 *  Vecteur xe (ones)
 	 ********************************************/
@@ -59,8 +112,23 @@ int test(const std::string& filename)
 
   Alien::Move::VectorData b(A.rowSpace(), A.distribution().rowDistribution());
 
+  /**
+   * Read vector data from mtx file and write it into Alien Vector
+   */
+
+  if (vec_filename != "") {
+    std::vector<double> values = readFromMtx(vec_filename);
+    int vec_size = values.size();
+
+    Alien::Move::VectorWriter writer(std::move(b));
+    for (int i = 0; i < vec_size; i++) {
+      writer[i] = values[i];
+    }
+    b = writer.release();
+  }
+
   Alien::Ginkgo::LinearAlgebra algebra;
-  algebra.mult(A, xe, b);
+  //algebra.mult(A, xe, b);
 
   /**
 	 *  Calcul x, tq : Ax = b 
@@ -71,8 +139,8 @@ int test(const std::string& filename)
 
 
   Alien::Ginkgo::Options options;
-  options.numIterationsMax(100);
-  options.stopCriteriaValue(1e-10);
+  options.numIterationsMax(200);
+  options.stopCriteriaValue(1e-9);
   options.preconditioner(Alien::Ginkgo::OptionTypes::Jacobi);
   options.solver(Alien::Ginkgo::OptionTypes::CG);
   auto solver = Alien::Ginkgo::LinearSolver(options);
@@ -96,7 +164,7 @@ int test(const std::string& filename)
     tm->info() << " => ||r|| = " << norm << " ; ||r||/||b|| = " << norm / norm_b;
   }
 
-  {
+  /*{
     tm->info() << "|| x - xe ||";
     algebra.axpy(-1., xe, x);
 
@@ -104,13 +172,15 @@ int test(const std::string& filename)
     auto norm_xe = algebra.norm2(xe);
 
     tm->info() << " => ||x-xe|| = " << norm << " ; ||r||/||b|| = " << norm / norm_xe;
-  }
+  }*/
 
   tm->info() << " ";
   tm->info() << "... example finished !!!";
 
   return 0;
 }
+
+
 
 int main(int argc, char** argv)
 {
@@ -119,7 +189,9 @@ int main(int argc, char** argv)
   auto ret = 0;
 
   try {
-    ret = test("mesh1em6.mtx");
+  //ret = test("matrix_first.mtx", "vector_first.mtx");
+  ret = test("mesh1em6.mtx");
+  //  ret = test("msc00726.mtx");
   }
   catch (const Arccore::Exception& ex) {
     std::cerr << "Exception: " << ex << '\n';
