@@ -151,15 +151,14 @@ int main(int argc, char** argv)
   auto comm_size = Environment::parallelMng()->commSize();
   auto comm_rank = Environment::parallelMng()->commRank();
 
-  Arccore::StringBuilder filename("krylov.log") ;
-  Arccore::ReferenceCounter<Arccore::ITraceStream> ofile ;
-  if(comm_size>1)
-  {
-    filename += comm_rank ;
-    ofile = Arccore::ITraceStream::createFileStream(filename.toString()) ;
+  Arccore::StringBuilder filename("krylov.log");
+  Arccore::ReferenceCounter<Arccore::ITraceStream> ofile;
+  if (comm_size > 1) {
+    filename += comm_rank;
+    ofile = Arccore::ITraceStream::createFileStream(filename.toString());
     trace_mng->setRedirectStream(ofile.get());
   }
-  trace_mng->finishInitialize() ;
+  trace_mng->finishInitialize();
 
   Alien::setTraceMng(trace_mng);
   Alien::setVerbosityLevel(Alien::Verbosity::Debug);
@@ -167,7 +166,7 @@ int main(int argc, char** argv)
   trace_mng->info() << "INFO START KRYLOV TEST";
   trace_mng->info() << "NB PROC = " << comm_size;
   trace_mng->info() << "RANK    = " << comm_rank;
-  trace_mng->flush() ;
+  trace_mng->flush();
 
   /*
      * MESH PARTITION ALONG Y AXIS
@@ -257,7 +256,7 @@ int main(int argc, char** argv)
   trace_mng->info() << "GLOBAL SIZE : " << global_size;
   trace_mng->info() << "LOCAL SIZE  : " << local_size;
   trace_mng->info() << "GHOST SIZE  : " << nb_ghost;
-  trace_mng->flush() ;
+  trace_mng->flush();
 
   /*
    * DEFINITION of
@@ -281,7 +280,7 @@ int main(int argc, char** argv)
   trace_mng->info() << "VECTOR DISTRIBUTION INFO";
   trace_mng->info() << "GLOBAL SIZE : " << vector_dist.globalSize();
   trace_mng->info() << "LOCAL SIZE  : " << vector_dist.localSize();
-  trace_mng->flush() ;
+  trace_mng->flush();
 
   auto allUIndex = index_manager.getIndexes(indexSetU);
 
@@ -437,21 +436,24 @@ int main(int argc, char** argv)
     }
   }
 
+  // clang-format off
   typedef Alien::StdTimer   TimerType ;
   typedef TimerType::Sentry SentryType ;
-  TimerType timer;
-  std::string kernel= vm["kernel"].as<std::string>() ;
+  // clang-format on
 
-  if(vm["test"].as<std::string>().compare("all") == 0 || vm["test"].as<std::string>().compare("mult") == 0)
-  {
+  TimerType timer;
+  std::string kernel = vm["kernel"].as<std::string>();
+
+  if (vm["test"].as<std::string>().compare("all") == 0 || vm["test"].as<std::string>().compare("mult") == 0) {
 
     auto x0 = Alien::Vector(vector_dist);
     auto y = Alien::Vector(vector_dist);
     {
       Alien::VectorWriter writer_x0(x0);
-      writer_x0 = 1. ;
+      writer_x0 = 1.;
     }
 
+    // clang-format off
     auto run = [&](auto& alg)
               {
                 typedef typename
@@ -466,26 +468,25 @@ int main(int argc, char** argv)
 
                 alg.mult(true_A,true_x0,true_y) ;
               } ;
+    // clang-format on
 
     if (kernel.compare("simplecsr") == 0) {
       Alien::SimpleCSRInternalLinearAlgebra alg;
-      SentryType sentry(timer,"CSR-SPMV") ;
-      run(alg) ;
+      SentryType sentry(timer, "CSR-SPMV");
+      run(alg);
     }
     if (kernel.compare("sycl") == 0) {
-  #ifdef ALIEN_USE_SYCL
+#ifdef ALIEN_USE_SYCL
       Alien::SYCLInternalLinearAlgebra alg;
-      SentryType sentry(timer,"SYCL-SPMV") ;
-      run(alg) ;
-  #else
+      SentryType sentry(timer, "SYCL-SPMV");
+      run(alg);
+#else
       trace_mng->info() << "SYCL BackEnd not available";
-  #endif
+#endif
     }
   }
 
-
-  if(vm["test"].as<std::string>().compare("all") == 0 || vm["test"].as<std::string>().compare("solver") == 0)
-  {
+  if (vm["test"].as<std::string>().compare("all") == 0 || vm["test"].as<std::string>().compare("solver") == 0) {
     // clang-format off
     int         max_iteration = vm["max-iter"].as<int>();
     double      tol           = vm["tol"].as<double>();

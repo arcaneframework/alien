@@ -337,7 +337,7 @@ BEllPackStructInfo<BlockSize, IndexT>::BEllPackStructInfo(std::size_t nrows,
                                                           int const* h_block_row_offset,
                                                           int const* h_local_row_size)
 
-: BaseBEllPackStructInfo(nrows,kcol[nrows])
+: BaseBEllPackStructInfo(nrows, kcol[nrows])
 , m_block_nrows(BEllPackStructInfo<BlockSize, IndexT>::nbBlocks(nrows))
 , m_block_nnz(h_block_row_offset[m_block_nrows])
 , m_h_local_row_size(h_local_row_size)
@@ -360,7 +360,7 @@ BEllPackStructInfo<BlockSize, IndexT>::BEllPackStructInfo(std::size_t nrows,
                                  kcol,
                                  cols,
                                  h_block_row_offset,
-                                 h_local_row_size};
+                                 h_local_row_size };
 }
 
 template <int BlockSize, typename IndexT>
@@ -393,13 +393,13 @@ namespace SYCLInternal
   , m_values(m_h_values.data(), cl::sycl::range<1>(profile->getBlockNnz() * block_size))
   {
     //m_values.set_final_data(nullptr);
-    alien_debug([&] { cout() << "SYCL InternalMATRIX"<<profile->getBlockNnz() * block_size ; });
+    alien_debug([&] { cout() << "SYCL InternalMATRIX" << profile->getBlockNnz() * block_size; });
   }
 
   template <typename ValueT, int BlockSize>
   bool MatrixInternal<ValueT, BlockSize>::setMatrixValuesFromHost()
   {
-    alien_debug([&] {cout() << "SYCLMatrix setMatrixValuesFromHost ";});
+    alien_debug([&] { cout() << "SYCLMatrix setMatrixValuesFromHost "; });
     auto env = SYCLEnv::instance();
     auto& queue = env->internal()->queue();
     auto num_groups = env->internal()->maxNumGroups();
@@ -414,9 +414,8 @@ namespace SYCLInternal
     auto& kcol = internal_profile->getKCol();
     auto& block_row_offset = internal_profile->getBlockRowOffset();
 
-    auto local_row_size = m_profile->localRowSize() ;
-    if(local_row_size==nullptr)
-    {
+    auto local_row_size = m_profile->localRowSize();
+    if (local_row_size == nullptr) {
       ValueBufferType values_buffer(m_h_csr_values.data(), cl::sycl::range<1>(nnz));
       // COMPUTE COLS
       // clang-format off
@@ -462,8 +461,7 @@ namespace SYCLInternal
       // clang-format on
       m_values_is_update = true;
     }
-    else
-    {
+    else {
       ValueBufferType values_buffer(m_h_csr_values.data(), cl::sycl::range<1>(nnz));
       IndexBufferType lrowsize_buffer(local_row_size, cl::sycl::range<1>(nrows));
       // COMPUTE COLS
@@ -566,30 +564,28 @@ namespace SYCLInternal
   template <typename ValueT, int BlockSize>
   bool MatrixInternal<ValueT, BlockSize>::setMatrixValues(ValueT const* values, bool only_host)
   {
-    alien_debug([&] {cout() << "SYCLMatrix setMatrixValues "<<only_host;});
+    alien_debug([&] { cout() << "SYCLMatrix setMatrixValues " << only_host; });
     auto nnz = m_profile->getNnz();
     m_h_csr_values.resize(nnz);
     std::copy(values, values + nnz, m_h_csr_values.begin());
-    if(m_ext_profile)
-    {
+    if (m_ext_profile) {
+      // clang-format off
       auto kcol            = m_profile->kcol() ;
       auto local_row_size  = m_profile->localRowSize() ;
 
       auto interface_nrows = m_ext_profile->getNRows() ;
       auto ext_nnz         = m_ext_profile->getNnz();
-
+      // clang-format on
 
       m_h_csr_ext_values.resize(ext_nnz);
 
       // EXTRACT EXTERNAL PROFILE
       {
-        int jcol = 0 ;
-        for(std::size_t i=0;i<interface_nrows;++i)
-        {
-          auto id = m_h_interface_row_ids[i] ;
-          for(int k = kcol[id]+local_row_size[id];k<kcol[id+1];++k)
-          {
-            m_h_csr_ext_values[jcol++] = values[k] ;
+        int jcol = 0;
+        for (std::size_t i = 0; i < interface_nrows; ++i) {
+          auto id = m_h_interface_row_ids[i];
+          for (int k = kcol[id] + local_row_size[id]; k < kcol[id + 1]; ++k) {
+            m_h_csr_ext_values[jcol++] = values[k];
           }
         }
       }
@@ -636,13 +632,15 @@ namespace SYCLInternal
     // building the best number of global thread
     auto total_threads = num_groups * block_size;
 
-    auto nrows = m_profile->getNRows();
-    auto nnz = m_profile->getNnz();
+    // clang-format off
+    auto nrows             = m_profile->getNRows();
+    auto nnz               = m_profile->getNnz();
 
-    auto internal_profile = m_profile->internal();
-    auto& kcol = internal_profile->getKCol();
+    auto internal_profile  = m_profile->internal();
+    auto& kcol             = internal_profile->getKCol();
     auto& block_row_offset = internal_profile->getBlockRowOffset();
-    auto& block_cols = internal_profile->getBlockCols();
+    auto& block_cols       = internal_profile->getBlockCols();
+    // clang-format on
     {
       // COMPUTE VALUES
       // clang-format off
@@ -695,7 +693,6 @@ namespace SYCLInternal
     this->mult(x, y, SYCLEnv::instance()->internal()->queue());
   }
 
-
   template <typename ValueT, int BlockSize>
   void MatrixInternal<ValueT, BlockSize>::addExtMult(ValueBufferType& x,
                                                      ValueBufferType& y,
@@ -712,14 +709,16 @@ namespace SYCLInternal
     // building the best number of global thread
     auto total_threads = num_groups * block_size;
 
-    auto nrows = m_profile->getNRows();
-    auto nnz = m_profile->getNnz();
+    // clang-format off
+    auto nrows             = m_profile->getNRows();
+    auto nnz               = m_profile->getNnz();
 
     auto interface_nrow    = m_ext_profile->getNRows();
     auto ext_profile       = m_ext_profile->internal();
     auto& kcol             = ext_profile->getKCol();
     auto& block_row_offset = ext_profile->getBlockRowOffset();
     auto& block_cols       = ext_profile->getBlockCols();
+    // clang-format on
 
     {
       // clang-format off
@@ -781,18 +780,18 @@ namespace SYCLInternal
     // building the best number of global thread
     auto total_threads = num_groups * block_size;
 
-    auto nrows = m_profile->getNRows();
-    auto nnz = m_profile->getNnz();
+    // clang-format off
+    auto nrows             = m_profile->getNRows();
+    auto nnz               = m_profile->getNnz();
 
-    auto internal_profile = m_profile->internal();
-    auto& kcol = internal_profile->getKCol();
+    auto internal_profile  = m_profile->internal();
+    auto& kcol             = internal_profile->getKCol();
     auto& block_row_offset = internal_profile->getBlockRowOffset();
-    auto& block_cols = internal_profile->getBlockCols();
+    auto& block_cols       = internal_profile->getBlockCols();
 
-    auto& mask = internal_profile->getLowerMask();
-
+    auto& mask             = internal_profile->getLowerMask();
+    // clang-format on
     {
-      // COMPUTE VALUES
       // clang-format off
         queue.submit([&](cl::sycl::handler& cgh)
                  {
@@ -1014,12 +1013,11 @@ initMatrix(Arccore::MessagePassing::IMessagePassingMng* parallel_mng,
            int const* cols,
            SimpleCSRInternal::DistStructInfo const& matrix_dist_info)
 {
-  alien_debug([&] { cout() << "INIT SYCL MATRIX "<<parallel_mng; });
-  m_nproc = 1 ;
-  m_myrank = 0 ;
-  m_parallel_mng = parallel_mng ;
-  if(parallel_mng)
-  {
+  alien_debug([&] { cout() << "INIT SYCL MATRIX " << parallel_mng; });
+  m_nproc = 1;
+  m_myrank = 0;
+  m_parallel_mng = parallel_mng;
+  if (parallel_mng) {
     m_nproc = m_parallel_mng->commSize();
     m_myrank = m_parallel_mng->commRank();
   }
@@ -1032,12 +1030,10 @@ initMatrix(Arccore::MessagePassing::IMessagePassingMng* parallel_mng,
   m_ghost_size   = 0;
   // clang-format on
 
-  m_matrix_dist_info.copy(matrix_dist_info) ;
-
+  m_matrix_dist_info.copy(matrix_dist_info);
 
   m_block_size = 1024;
-  if (m_nproc > 1)
-  {
+  if (m_nproc > 1) {
     UniqueArray<Integer> offset(m_nproc + 1);
     Arccore::MessagePassing::mpAllGather(m_parallel_mng,
                                          ConstArrayView<Integer>(1, &m_local_offset), offset.subView(0, m_nproc));
@@ -1048,8 +1044,8 @@ initMatrix(Arccore::MessagePassing::IMessagePassingMng* parallel_mng,
     m_global_size = offset[m_nproc];
     m_ghost_size = m_matrix_dist_info.m_ghost_nrow;
 
-    auto& local_row_size = m_matrix_dist_info.m_local_row_size ;
-    auto sorted_cols     = m_matrix_dist_info.m_cols.data() ;
+    auto& local_row_size = m_matrix_dist_info.m_local_row_size;
+    auto sorted_cols = m_matrix_dist_info.m_cols.data();
 
     std::size_t block_nrows = ProfileInternal1024::nbBlocks(nrows);
 
@@ -1063,40 +1059,36 @@ initMatrix(Arccore::MessagePassing::IMessagePassingMng* parallel_mng,
                       cout() << "BNNZ   = "<<m_block_row_offset[block_nrows];
                     });
     // clang-format on
-    Universe().traceMng()->flush() ;
-    delete m_profile1024 ;
+    //Universe().traceMng()->flush();
+    delete m_profile1024;
     m_profile1024 = new ProfileInternal1024{ nrows,
                                              kcol,
                                              sorted_cols,
                                              m_block_row_offset.data(),
                                              local_row_size.data() };
 
-    delete m_matrix1024 ;
+    delete m_matrix1024;
     m_matrix1024 = new MatrixInternal1024{ m_profile1024 };
 
-
     // EXTRACT EXTERNAL PROFILE
-    std::size_t interface_nrows = m_matrix_dist_info.m_interface_nrow ;
-    std::vector<int> ext_kcol(interface_nrows+1) ;
+    std::size_t interface_nrows = m_matrix_dist_info.m_interface_nrow;
+    std::vector<int> ext_kcol(interface_nrows + 1);
 
-    int ext_nnz = 0 ;
-    for(std::size_t i=0;i<interface_nrows;++i)
-    {
-      auto id = m_matrix_dist_info.m_interface_rows[i] ;
-      ext_kcol[i] = ext_nnz ;
-      ext_nnz += kcol[id+1] -kcol[id] - local_row_size[id] ;
+    int ext_nnz = 0;
+    for (std::size_t i = 0; i < interface_nrows; ++i) {
+      auto id = m_matrix_dist_info.m_interface_rows[i];
+      ext_kcol[i] = ext_nnz;
+      ext_nnz += kcol[id + 1] - kcol[id] - local_row_size[id];
     }
-    ext_kcol[interface_nrows] = ext_nnz ;
+    ext_kcol[interface_nrows] = ext_nnz;
 
-    std::vector<int> ext_cols(ext_nnz) ;
+    std::vector<int> ext_cols(ext_nnz);
     {
-      int jcol = 0 ;
-      for(std::size_t i=0;i<interface_nrows;++i)
-      {
-        auto id = m_matrix_dist_info.m_interface_rows[i] ;
-        for(int k = kcol[id]+local_row_size[id];k<kcol[id+1];++k)
-        {
-          ext_cols[jcol++] = (int)(sorted_cols[k]-nrows) ;
+      int jcol = 0;
+      for (std::size_t i = 0; i < interface_nrows; ++i) {
+        auto id = m_matrix_dist_info.m_interface_rows[i];
+        for (int k = kcol[id] + local_row_size[id]; k < kcol[id + 1]; ++k) {
+          ext_cols[jcol++] = (int)(sorted_cols[k] - nrows);
         }
       }
     }
@@ -1111,27 +1103,26 @@ initMatrix(Arccore::MessagePassing::IMessagePassingMng* parallel_mng,
                       cout() << "EXT BNNZ   = "<<m_block_row_offset[ext_block_nrows];
                     });
     // clang-format on
-    Universe().traceMng()->flush() ;
-    delete m_ext_profile1024 ;
+    
+    delete m_ext_profile1024;
     m_ext_profile1024 = new ProfileInternal1024{ interface_nrows,
                                                  ext_kcol.data(),
                                                  ext_cols.data(),
                                                  m_ext_block_row_offset.data(),
-                                                 nullptr};
+                                                 nullptr };
 
-    m_matrix1024->m_ext_profile = m_ext_profile1024 ;
-    typedef typename MatrixInternal1024::IndexBufferType IndexBufferType ;
-    m_matrix1024->m_h_interface_row_ids = m_matrix_dist_info.m_interface_rows.data() ;
-    m_matrix1024->m_interface_row_ids.reset(new IndexBufferType{m_matrix_dist_info.m_interface_rows.data(),
-                                                                m_matrix_dist_info.m_interface_rows.size()}) ;
+    m_matrix1024->m_ext_profile = m_ext_profile1024;
+    typedef typename MatrixInternal1024::IndexBufferType IndexBufferType;
+    m_matrix1024->m_h_interface_row_ids = m_matrix_dist_info.m_interface_rows.data();
+    m_matrix1024->m_interface_row_ids.reset(new IndexBufferType{ m_matrix_dist_info.m_interface_rows.data(),
+                                                                 m_matrix_dist_info.m_interface_rows.size() });
 
-    m_matrix1024->m_send_ids.reset(new IndexBufferType{m_matrix_dist_info.m_send_info.m_ids.data(),
-                                                       m_matrix_dist_info.m_send_info.m_ids.size()}) ;
-    m_matrix1024->m_recv_ids.reset(new IndexBufferType{m_matrix_dist_info.m_recv_info.m_ids.data(),
-                                                       m_matrix_dist_info.m_recv_info.m_ids.size()}) ;
+    m_matrix1024->m_send_ids.reset(new IndexBufferType{ m_matrix_dist_info.m_send_info.m_ids.data(),
+                                                        m_matrix_dist_info.m_send_info.m_ids.size() });
+    m_matrix1024->m_recv_ids.reset(new IndexBufferType{ m_matrix_dist_info.m_recv_info.m_ids.data(),
+                                                        m_matrix_dist_info.m_recv_info.m_ids.size() });
   }
-  else
-  {
+  else {
 
     std::size_t block_nrows = ProfileInternal1024::nbBlocks(nrows);
 
@@ -1146,17 +1137,16 @@ initMatrix(Arccore::MessagePassing::IMessagePassingMng* parallel_mng,
                     });
     // clang-format on
 
-    delete m_profile1024 ;
+    delete m_profile1024;
     m_profile1024 = new ProfileInternal1024{ nrows,
                                              kcol,
                                              cols,
                                              m_block_row_offset.data(),
                                              nullptr };
 
-    delete m_matrix1024 ;
+    delete m_matrix1024;
     m_matrix1024 = new MatrixInternal1024{ m_profile1024 };
   }
-
 
   return true;
 }
@@ -1232,7 +1222,7 @@ void SYCLBEllPackMatrix<ValueT>::mult(SYCLVector<ValueT> const& x, SYCLVector<Va
 template <typename ValueT>
 void SYCLBEllPackMatrix<ValueT>::endDistMult(SYCLVector<ValueT> const& x, SYCLVector<ValueT>& y) const
 {
-  m_matrix1024->addExtMult(x.internal()->ghostValues(getGhostSize()),y.internal()->values()) ;
+  m_matrix1024->addExtMult(x.internal()->ghostValues(getGhostSize()), y.internal()->values());
 }
 
 template <typename ValueT>

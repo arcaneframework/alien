@@ -24,6 +24,5 @@
 #include "alien/distribution/MatrixDistribution.h"
 #include <alien/kernels/simple_csr/DistStructInfo.h>
 
-
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/

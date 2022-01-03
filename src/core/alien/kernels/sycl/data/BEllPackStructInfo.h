@@ -50,6 +50,7 @@ class BaseBEllPackStructInfo
   Arccore::Int64 timestamp() const { return m_timestamp; }
 
   void setTimestamp(Arccore::Int64 value) { m_timestamp = value; }
+
  protected:
   // clang-format off
   std::size_t m_nrows       = 0 ;
@@ -92,8 +93,9 @@ class ALIEN_EXPORT BEllPackStructInfo
                      int const* h_block_row_offset,
                      int const* h_local_row_size);
 
-  const BaseBEllPackStructInfo& base() const {
-    return *this ;
+  const BaseBEllPackStructInfo& base() const
+  {
+    return *this;
   }
 
   InternalType const* internal() const
@@ -105,9 +107,8 @@ class ALIEN_EXPORT BEllPackStructInfo
 
   Arccore::ConstArrayView<Integer> getRowOffset() const
   {
-    return Arccore::ConstArrayView<Integer>((Integer)m_nrows+1,kcol());
+    return Arccore::ConstArrayView<Integer>((Integer)m_nrows + 1, kcol());
   }
-
 
   IndexType const* kcol() const;
 
@@ -115,7 +116,8 @@ class ALIEN_EXPORT BEllPackStructInfo
 
   IndexType const* dcol() const;
 
-  int const* localRowSize() const {
+  int const* localRowSize() const
+  {
     return m_h_local_row_size;
   }
 

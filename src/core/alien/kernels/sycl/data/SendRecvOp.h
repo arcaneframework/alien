@@ -37,7 +37,8 @@ namespace Arccore
 {
 class ITraceMng;
 }
-namespace Alien::SYCLInternal {
+namespace Alien::SYCLInternal
+{
 
 template <typename ValueT>
 class SYCLSendRecvOp : public Alien::SimpleCSRInternal::IASynchOp
@@ -77,27 +78,28 @@ class SYCLSendRecvOp : public Alien::SimpleCSRInternal::IASynchOp
   {
 #ifdef USE_SYCL_USM
     auto& queue = SYCLEnv::instance()->internal()->queue();
-    cl::sycl::free(m_rbuffer,queue) ;
-    cl::sycl::free(m_sbuffer,queue) ;
+    cl::sycl::free(m_rbuffer, queue);
+    cl::sycl::free(m_sbuffer, queue);
 #endif
   }
 
-
-  void start(bool insitu=false)
+  void start(bool insitu = false)
   {
     //alien_debug([&] {cout() << "SYCLSendRecvOP START "<<m_send_policy;});
     //Universe().traceMng()->flush() ;
 
+    // clang-format off
     auto env           = SYCLEnv::instance();
     auto& queue        = env->internal()->queue();
     auto total_threads = env->maxNumThreads() ;
+    // clang-format on
     if (m_recv_policy == Alien::SimpleCSRInternal::CommProperty::ASynch) {
       m_recv_request.resize(m_recv_info.m_num_neighbours);
       Integer total_nb_recv_ids = m_recv_info.m_ids_offset[m_recv_info.m_num_neighbours] - m_recv_info.m_ids_offset[0];
 #ifdef USE_SYCL_USM
       m_rbuffer = cl::sycl::malloc_shared<ValueT>(total_nb_recv_ids, queue);
 #else
-      m_rbuffer.resize(total_nb_recv_ids) ;
+      m_rbuffer.resize(total_nb_recv_ids);
 #endif
       for (Integer i = 0; i < m_recv_info.m_num_neighbours; ++i) {
         Integer off = m_recv_info.m_ids_offset[i] - m_recv_info.m_ids_offset[0];
@@ -110,10 +112,10 @@ class SYCLSendRecvOp : public Alien::SimpleCSRInternal::IASynchOp
         Integer rank = m_recv_info.m_ranks[i];
 
         m_recv_request[i] =
-            Arccore::MessagePassing::mpReceive(m_parallel_mng,
-                                               ArrayView<ValueT>(size, ptr),
-                                               rank,
-                                               false);
+        Arccore::MessagePassing::mpReceive(m_parallel_mng,
+                                           ArrayView<ValueT>(size, ptr),
+                                           rank,
+                                           false);
       }
     }
     if (m_send_policy == Alien::SimpleCSRInternal::CommProperty::ASynch)
@@ -121,15 +123,15 @@ class SYCLSendRecvOp : public Alien::SimpleCSRInternal::IASynchOp
     if (m_send_info.m_ids.size()) {
       std::size_t total_nb_send_ids = m_send_info.m_ids_offset[m_send_info.m_num_neighbours] - m_send_info.m_ids_offset[0];
 #ifdef USE_SYCL_USM
-      m_sbuffer = cl::sycl::malloc_shared<ValueT>(total_nb_send_ids,queue);
+      m_sbuffer = cl::sycl::malloc_shared<ValueT>(total_nb_send_ids, queue);
 #else
-      m_sbuffer.resize(total_nb_send_ids );
+      m_sbuffer.resize(total_nb_send_ids);
 #endif
       {
 #ifdef USE_SYCL_USM
-        cl::sycl::buffer<ValueType> sbuffer{{cl::sycl::buffer_allocation::empty_view(m_sbuffer, queue.get_device())}, total_nb_send_ids};
+        cl::sycl::buffer<ValueType> sbuffer{ { cl::sycl::buffer_allocation::empty_view(m_sbuffer, queue.get_device()) }, total_nb_send_ids };
 #else
-        cl::sycl::buffer<ValueType> sbuffer(m_sbuffer.data(),total_nb_send_ids);
+        cl::sycl::buffer<ValueType> sbuffer(m_sbuffer.data(), total_nb_send_ids);
 #endif
         // clang-format off
         queue.submit([&](cl::sycl::handler& cgh)
@@ -156,33 +158,34 @@ class SYCLSendRecvOp : public Alien::SimpleCSRInternal::IASynchOp
       Integer off = m_send_info.m_ids_offset[i];
       Integer nb_send_ids = m_send_info.m_ids_offset[i + 1] - off;
 #ifdef USE_SYCL_USM
-      ValueT const* ptr = m_sbuffer + off ;
+      ValueT const* ptr = m_sbuffer + off;
 #else
-      ValueT const* ptr = m_sbuffer.data() + off ;
+      ValueT const* ptr = m_sbuffer.data() + off;
 #endif
       Integer rank = m_send_info.m_ranks[i];
       if (m_send_policy == Alien::SimpleCSRInternal::CommProperty::ASynch)
         m_send_request[i] = Arccore::MessagePassing::mpSend(m_parallel_mng,
-                                                            ConstArrayView<ValueT>(nb_send_ids , ptr), rank, false);
+                                                            ConstArrayView<ValueT>(nb_send_ids, ptr), rank, false);
       else
         Arccore::MessagePassing::mpSend(m_parallel_mng,
-                                        ConstArrayView<ValueT>(nb_send_ids , ptr), rank);
+                                        ConstArrayView<ValueT>(nb_send_ids, ptr), rank);
     }
 
     //alien_debug([&] {cout()<<"END SYCLSendRecvOP START" ; });
     //Universe().traceMng()->flush() ;
   }
 
-  void end(bool insitu=false)
+  void end(bool insitu = false)
   {
     //alien_debug([&] {cout() << "SYCLSendRecvOP END : "<<m_recv_policy;});
     //Universe().traceMng()->flush() ;
 
+    // clang-format off
     auto env           = SYCLEnv::instance();
     auto& queue        = env->internal()->queue();
     auto total_threads = env->maxNumThreads() ;
-    if (m_recv_policy == Alien::SimpleCSRInternal::CommProperty::ASynch)
-    {
+    // clang-format on
+    if (m_recv_policy == Alien::SimpleCSRInternal::CommProperty::ASynch) {
       Arccore::MessagePassing::mpWaitAll(m_parallel_mng, m_recv_request);
 
       //Arccore::Integer total_recv_ids = m_recv_info.m_ids_offset[m_recv_info.m_num_neighbours] - m_recv_info.m_ids_offset[0];
@@ -196,7 +199,7 @@ class SYCLSendRecvOp : public Alien::SimpleCSRInternal::IASynchOp
 #ifdef USE_SYCL_USM
         m_rbuffer = cl::sycl::malloc_shared<ValueT>(total_recv_ids, queue);
 #else
-        m_rbuffer.resize(total_recv_ids );
+        m_rbuffer.resize(total_recv_ids);
 #endif
       }
       for (Integer i = 0; i < m_recv_info.m_num_neighbours; ++i) {
@@ -216,9 +219,9 @@ class SYCLSendRecvOp : public Alien::SimpleCSRInternal::IASynchOp
 
       {
 #ifdef USE_SYCL_USM
-        cl::sycl::buffer<ValueType> rbuffer{{cl::sycl::buffer_allocation::view(m_rbuffer, queue.get_device())}, total_nb_recv_ids};
+        cl::sycl::buffer<ValueType> rbuffer{ { cl::sycl::buffer_allocation::view(m_rbuffer, queue.get_device()) }, total_nb_recv_ids };
 #else
-        cl::sycl::buffer<ValueType> rbuffer(m_rbuffer.data(),total_nb_recv_ids);
+        cl::sycl::buffer<ValueType> rbuffer(m_rbuffer.data(), total_nb_recv_ids);
 #endif
         // clang-format off
         queue.submit([&](cl::sycl::handler& cgh)
@@ -240,8 +243,7 @@ class SYCLSendRecvOp : public Alien::SimpleCSRInternal::IASynchOp
         // clang-format on
       }
     }
-    if (m_send_policy == Alien::SimpleCSRInternal::CommProperty::ASynch)
-    {
+    if (m_send_policy == Alien::SimpleCSRInternal::CommProperty::ASynch) {
       Arccore::MessagePassing::mpWaitAll(m_parallel_mng, m_send_request);
     }
 

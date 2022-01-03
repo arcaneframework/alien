@@ -176,11 +176,13 @@ class MatrixInternal
     return m_h_csr_values.data();
   }
 
-  IndexBufferType& getSendIds() const {
-    return *m_send_ids ;
+  IndexBufferType& getSendIds() const
+  {
+    return *m_send_ids;
   }
-  IndexBufferType& getRecvIds() const {
-    return *m_recv_ids ;
+  IndexBufferType& getRecvIds() const
+  {
+    return *m_recv_ids;
   }
 
   // clang-format off

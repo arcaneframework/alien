@@ -72,7 +72,7 @@ void SYCLVector<ValueT>::setValuesFromHost()
 template <typename ValueT>
 void SYCLVector<ValueT>::setValues(std::size_t size, ValueType const* ptr)
 {
-  delete m_internal ;
+  delete m_internal;
   m_h_values.resize(m_local_size);
   std::copy(ptr, ptr + size, m_h_values.begin());
   m_internal = new VectorInternal(m_h_values.data(), m_local_size);

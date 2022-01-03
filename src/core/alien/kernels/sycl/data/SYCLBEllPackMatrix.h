@@ -123,7 +123,6 @@ class ALIEN_EXPORT SYCLBEllPackMatrix : public IMatrixImpl
 
   SYCLBEllPackMatrix* cloneTo(const MultiMatrixImpl* multi) const;
 
-
   bool isParallel() const { return m_is_parallel; }
 
   Integer getLocalSize() const { return m_local_size; }
@@ -167,7 +166,6 @@ class ALIEN_EXPORT SYCLBEllPackMatrix : public IMatrixImpl
   MatrixInternal1024 const* internal() const { return m_matrix1024; }
 
  private:
-
   class IsLocal
   {
    public:

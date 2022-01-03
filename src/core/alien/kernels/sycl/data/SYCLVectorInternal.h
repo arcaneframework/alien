@@ -61,10 +61,9 @@ class VectorInternal
 
   ValueBufferType& ghostValues(Integer ghost_size) const
   {
-    if(m_ghost_values.get()==nullptr || ghost_size > m_ghost_size)
-    {
-      m_ghost_size = ghost_size ;
-      m_ghost_values.reset(new ValueBufferType(m_ghost_size)) ;
+    if (m_ghost_values.get() == nullptr || ghost_size > m_ghost_size) {
+      m_ghost_size = ghost_size;
+      m_ghost_values.reset(new ValueBufferType(m_ghost_size));
     }
     return *m_ghost_values;
   }
