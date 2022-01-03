@@ -68,7 +68,6 @@ alien_test( BENCH krylov-simplecsr
             COMMAND krylov_example.exe 
             OPTIONS --nx 10 --ny 10 --solver bicgs --precond diag --kernel simplcsr)
             
-            
 alien_test( BENCH krylov-simplecsr
             NAME bicgs-diag-mpi
             PROCS 4 
@@ -79,7 +78,6 @@ alien_test( BENCH krylov-simplecsr
             NAME bicgs-cheb
             COMMAND krylov_example.exe 
             OPTIONS --nx 10 --ny 10 --solver bicgs --precond cheb --kernel simplcsr)
-            
             
 alien_test( BENCH krylov-simplecsr
             NAME bicgs-cheb-mpi
