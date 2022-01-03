@@ -25,6 +25,7 @@
 #include <boost/program_options/variables_map.hpp>
 
 #include <arccore/message_passing_mpi/StandaloneMpiMessagePassingMng.h>
+#include <arccore/base/StringBuilder.h>
 
 #include <alien/kernels/simple_csr/algebra/SimpleCSRLinearAlgebra.h>
 
@@ -70,10 +71,25 @@ int main(int argc, char** argv)
 
   MPI_Init(&argc, &argv);
   auto* pm = Arccore::MessagePassing::Mpi::StandaloneMpiMessagePassingMng::create(MPI_COMM_WORLD);
+  bool is_parallel = pm->commSize() > 1 ;
+
   auto* trace_mng = Arccore::arccoreCreateDefaultTraceMng();
+  Alien::Integer my_rank = pm->commRank() ;
+  Arccore::StringBuilder filename("sycl.log") ;
+  Arccore::ReferenceCounter<Arccore::ITraceStream> ofile ;
+  if(pm->commSize()>1)
+  {
+    filename += pm->commRank() ;
+    ofile = Arccore::ITraceStream::createFileStream(filename.toString()) ;
+    trace_mng->setRedirectStream(ofile.get());
+  }
+  trace_mng->finishInitialize() ;
+
 
   Alien::setTraceMng(trace_mng);
   Alien::setVerbosityLevel(Alien::Verbosity::Debug);
+
+  trace_mng->info()<<"INFO START SYCL TEST";
 
   typedef Alien::StdTimer   TimerType ;
   typedef TimerType::Sentry SentryType ;
@@ -128,7 +144,7 @@ int main(int argc, char** argv)
   {
     Alien::LocalVectorWriter writer(y);
     for (Integer i = 0; i < local_size; ++i)
-      writer[i] = i;
+      writer[i] = offset + i;
   }
 
   {
@@ -210,6 +226,10 @@ int main(int argc, char** argv)
       Alien::LocalVectorReader reader_y(y);
       for (Integer i = 0; i < local_size; ++i)
         x_dot_y_ref += reader_x[i]*reader_y[i] ;
+      if(is_parallel)
+        x_dot_y_ref = Arccore::MessagePassing::mpAllReduce(pm,
+                                                           Arccore::MessagePassing::ReduceSum,
+                                                           x_dot_y_ref);
     }
     Real x_dot_y = 0. ;
     Real x_dot_y2 = 0. ;
@@ -267,6 +287,13 @@ int main(int argc, char** argv)
       }
     }
     {
+      Alien::LocalVectorReader reader(y);
+      for (Integer i = 0; i < std::min(10,local_size); ++i)
+      {
+        trace_mng->info() <<my_rank<<" CSR Y["<<i<<"]="<<reader[i];
+      }
+    }
+    {
       auto const& sycl_A = A.impl()->get<Alien::BackEnd::tag::sycl>() ;
       auto const& sycl_x = x.impl()->get<Alien::BackEnd::tag::sycl>() ;
       auto&       sycl_y = y.impl()->get<Alien::BackEnd::tag::sycl>() ;
@@ -280,12 +307,14 @@ int main(int argc, char** argv)
       Alien::LocalVectorReader reader(y);
       for (Integer i = 0; i < std::min(10,local_size); ++i)
       {
-        trace_mng->info() << "Y["<<i<<"]="<<reader[i];
+        trace_mng->info() <<my_rank<<" SYCL Y["<<i<<"]="<<reader[i];
       }
     }
   }
 
   timer.printInfo(trace_mng->info().file(),"SYCL-BENCH") ;
+
+  trace_mng->info()<<"INFO FINALIZE SYCL TEST";
 
   MPI_Finalize();
 
