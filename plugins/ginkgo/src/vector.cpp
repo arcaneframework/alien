@@ -28,9 +28,6 @@ Vector::Vector(const MultiVectorImpl* multi_impl)
 : IVectorImpl(multi_impl, AlgebraTraits<BackEnd::tag::ginkgo>::name())
 , gko::matrix::Dense<double>(
   ginkgo_executor::exec_map.at(ginkgo_executor::target_machine)(), // throws if not valid
-  // Alien::Ginkgo::create<exec_target>(),
-  //gko::ReferenceExecutor::create(),
-  //gko::CudaExecutor::create(0, gko::OmpExecutor::create(),true),
   gko::dim<2>(multi_impl->space().size(), 1))
 , data(gko::dim<2>(multi_impl->space().size(), 1))
 {
@@ -45,8 +42,6 @@ Vector::Vector(const MultiVectorImpl* multi_impl)
 
 Vector::~Vector()
 {
-  /*if (m_vec)
-            VecDestroy(&m_vec);*/
 }
 
 void Vector::setProfile(int ilower, int iupper)
@@ -56,29 +51,14 @@ void Vector::setProfile(int ilower, int iupper)
 void Vector::setValues(Arccore::ConstArrayView<double> values)
 {
   auto ncols = values.size();
-
-  //std::clog << "[NM==========================CALL to  setValues ============== with : " << ncols << " values.\n";
-
   for (auto icol = 0; icol < ncols; ++icol) {
-    //std::clog << "data.add_value icol : " << icol << " - value : " << values[icol] << "\n";
-    //data.add_value(0, icol, values[icol]);
+
     data.add_value(icol, 0, values[icol]);
   }
-  //std::clog << "[NM==========================data contains ==============, with : " << data.get_size()[0] << " rows - " << data.get_size()[1] << " cols \n";
-
-  /*for (int i =0; i<data.get_size()[0]; i++)
-  {
-    std::cout << data.get_value(i,0) <<" ";
-  }*/
 }
 
 void Vector::getValues(Arccore::ArrayView<double> values) const
 {
-  /*auto ierr = VecGetValues(m_vec, m_rows.size(), m_rows.data(), values.data());
-
-        if (ierr) {
-            throw Arccore::FatalErrorException(A_FUNCINFO, "PETSc Vector get values failed");
-        }*/
 }
 
 void Vector::assemble()
@@ -88,17 +68,6 @@ void Vector::assemble()
   }
   else
     throw Arccore::FatalErrorException("Vec size does not match data size");
-  /*std::cout << "\n------------ data contains : -----------------" << std::endl;
-  for (int i = 0; i<data.get_size()[0]; i++) {
-    std::cout << data.get_value(i, 0) << " ";
-  }
-  std::cout << "\n------------ gko::matrix::Dense contains : -----------------" << std::endl;
-
-  std::cout << "num stored elements : " << this->get_num_stored_elements() << "\n";
-  auto vals = this->get_values();
-
-  for (int i = 0;  i < 10; i++) {
-      std::cout << vals[i] << " ";
-  }*/
 }
+
 } // namespace Alien::Ginkgo

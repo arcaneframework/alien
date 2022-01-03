@@ -77,8 +77,7 @@ void SimpleCSR_to_Ginkgo_MatrixConverter::_build(const Alien::SimpleCSRMatrix<Ar
   const auto& dist = sourceImpl.distribution();
   const auto& profile = sourceImpl.getCSRProfile();
 
-  // FIX ! => Is there a need to handle distributed Matrices since Ginkgo does not handle it ?
-  // nb rows
+  // Is there a need to handle distributed Matrices since Ginkgo does not handle it ?
   const auto localSize = profile.getNRow();
   const auto localOffset = dist.rowOffset();
 
