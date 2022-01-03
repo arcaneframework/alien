@@ -1103,7 +1103,7 @@ initMatrix(Arccore::MessagePassing::IMessagePassingMng* parallel_mng,
                       cout() << "EXT BNNZ   = "<<m_block_row_offset[ext_block_nrows];
                     });
     // clang-format on
-    
+
     delete m_ext_profile1024;
     m_ext_profile1024 = new ProfileInternal1024{ interface_nrows,
                                                  ext_kcol.data(),

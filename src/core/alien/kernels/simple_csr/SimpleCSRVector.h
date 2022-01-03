@@ -126,7 +126,7 @@ class SimpleCSRVector : public IVectorImpl
       m_local_size = m_own_distribution.localSize();
     }
     if (need_allocate) {
-      m_values.resize(m_local_size+ghost_size);
+      m_values.resize(m_local_size + ghost_size);
       m_values.fill(ValueT());
     }
   }

@@ -105,7 +105,7 @@ SYCLInternalLinearAlgebra::resource(Matrix const& A)
 
 void SYCLInternalLinearAlgebra::allocate(ResourceType const& resource, Vector& v)
 {
-  v.init(resource,true);
+  v.init(resource, true);
 }
 
 void SYCLInternalLinearAlgebra::free(Vector& v)
@@ -231,14 +231,13 @@ Real SYCLInternalLinearAlgebra::dot(const SYCLVector<Real>& vx, const SYCLVector
   SentryType s(m_timer, "SYCL-DOT");
 #endif
   auto value = m_internal->dot(vx.internal()->values(), vy.internal()->values());
-  auto& dist = vx.distribution() ;
-  if (dist.isParallel())
-  {
+  auto& dist = vx.distribution();
+  if (dist.isParallel()) {
     return Arccore::MessagePassing::mpAllReduce(dist.parallelMng(),
                                                 Arccore::MessagePassing::ReduceSum,
                                                 value);
   }
-  return value ;
+  return value;
 }
 
 void SYCLInternalLinearAlgebra::dot(const SYCLVector<Real>& vx,
@@ -250,21 +249,19 @@ void SYCLInternalLinearAlgebra::dot(const SYCLVector<Real>& vx,
 #endif
   m_internal->dot(vx.internal()->values(), vy.internal()->values(), res.deviceValue());
 
-  auto& dist = vx.distribution() ;
-  if (dist.isParallel())
-  {
-    using namespace Arccore::MessagePassing::Mpi ;
-    res.get() ;
+  auto& dist = vx.distribution();
+  if (dist.isParallel()) {
+    using namespace Arccore::MessagePassing::Mpi;
+    res.get();
     Real* x = &res();
-    auto pm = dist.parallelMng() ;
-    auto type_dispatcher = pm->dispatchers()->dispatcher(x) ;
-    MpiTypeDispatcher<Real>* ptr = dynamic_cast<MpiTypeDispatcher<Real>*>(type_dispatcher) ;
-    if(ptr)
-    {
+    auto pm = dist.parallelMng();
+    auto type_dispatcher = pm->dispatchers()->dispatcher(x);
+    MpiTypeDispatcher<Real>* ptr = dynamic_cast<MpiTypeDispatcher<Real>*>(type_dispatcher);
+    if (ptr) {
       auto datatype = ptr->datatype();
       auto op = datatype->reduceOperator(Arccore::MessagePassing::ReduceSum);
-      auto request = ptr->adapter()->nonBlockingAllReduce(x,x,1,datatype->datatype() ,op);
-      res.addRequest(pm,request) ;
+      auto request = ptr->adapter()->nonBlockingAllReduce(x, x, 1, datatype->datatype(), op);
+      res.addRequest(pm, request);
     }
   }
 }

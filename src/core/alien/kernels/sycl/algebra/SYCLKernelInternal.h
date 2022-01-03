@@ -52,13 +52,11 @@ class Future
 
   T get()
   {
-    if(m_parallel_mng)
-    {
-      Arccore::MessagePassing::mpWait(m_parallel_mng,m_request) ;
-      m_parallel_mng = nullptr ;
+    if (m_parallel_mng) {
+      Arccore::MessagePassing::mpWait(m_parallel_mng, m_request);
+      m_parallel_mng = nullptr;
     }
-    else
-    {
+    else {
       auto h_access = m_d_value.template get_access<cl::sycl::access::mode::read>();
       m_value = h_access[0];
     }
@@ -74,15 +72,15 @@ class Future
                   Arccore::MessagePassing::Request request)
   {
     m_parallel_mng = parallel_mng;
-    m_request = request ;
+    m_request = request;
   }
 
  private:
   T& m_value;
   cl::sycl::buffer<T, 1> m_d_value;
 
-  Arccore::MessagePassing::IMessagePassingMng* m_parallel_mng = nullptr ;
-  Arccore::MessagePassing::Request m_request ;
+  Arccore::MessagePassing::IMessagePassingMng* m_parallel_mng = nullptr;
+  Arccore::MessagePassing::Request m_request;
 };
 
 class KernelInternal

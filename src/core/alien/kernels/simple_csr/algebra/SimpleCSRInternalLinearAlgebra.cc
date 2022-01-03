@@ -79,7 +79,7 @@ SimpleCSRInternalLinearAlgebra::resource(Matrix const& A)
 
 void SimpleCSRInternalLinearAlgebra::allocate(ResourceType const& resource, Vector& v)
 {
-  v.init(resource,true);
+  v.init(resource, true);
 }
 
 void SimpleCSRInternalLinearAlgebra::free(Vector& v)
