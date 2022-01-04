@@ -29,13 +29,12 @@
 // tmp read from mtx
 #include <fstream>
 
-
 std::vector<double> readFromMtx(const std::string& vec_filename)
 {
   // read file
   auto stream = std::ifstream(vec_filename);
   if (!stream) {
-    std::cerr <<"readFromMatrixMarket", "Unable to read file";
+    std::cerr << "readFromMatrixMarket : Unable to read file";
     return {};
   }
 
@@ -76,9 +75,7 @@ std::vector<double> readFromMtx(const std::string& vec_filename)
   return values;
 }
 
-
-
-int test(const std::string& mat_filename, const std::string& vec_filename="")
+int test(const std::string& mat_filename, const std::string& vec_filename = "")
 {
   auto* pm = Arccore::MessagePassing::Mpi::StandaloneMpiMessagePassingMng::create(MPI_COMM_WORLD);
   auto* tm = Arccore::arccoreCreateDefaultTraceMng();
@@ -86,9 +83,9 @@ int test(const std::string& mat_filename, const std::string& vec_filename="")
   Alien::setTraceMng(tm);
   Alien::setVerbosityLevel(Alien::Verbosity::Debug);
 
-  auto A = Alien::Move::readFromMatrixMarket(pm,mat_filename);
+  auto A = Alien::Move::readFromMatrixMarket(pm, mat_filename);
 
-//  readVector(vec_filename);
+  //  readVector(vec_filename);
   /**
 	 *  Vecteur xe (ones)
 	 ********************************************/
@@ -137,7 +134,6 @@ int test(const std::string& mat_filename, const std::string& vec_filename="")
 
   Alien::Move::VectorData x(A.colSpace(), A.distribution().rowDistribution());
 
-
   Alien::Ginkgo::Options options;
   options.numIterationsMax(200);
   options.stopCriteriaValue(1e-9);
@@ -180,8 +176,6 @@ int test(const std::string& mat_filename, const std::string& vec_filename="")
   return 0;
 }
 
-
-
 int main(int argc, char** argv)
 {
 
@@ -189,9 +183,9 @@ int main(int argc, char** argv)
   auto ret = 0;
 
   try {
-  //ret = test("matrix_first.mtx", "vector_first.mtx");
-  ret = test("mesh1em6.mtx");
-  //  ret = test("msc00726.mtx");
+    //ret = test("matrix_first.mtx", "vector_first.mtx");
+    ret = test("mesh1em6.mtx");
+    //  ret = test("msc00726.mtx");
   }
   catch (const Arccore::Exception& ex) {
     std::cerr << "Exception: " << ex << '\n';
