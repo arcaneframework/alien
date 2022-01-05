@@ -137,8 +137,8 @@ int test(const std::string& mat_filename, const std::string& vec_filename = "")
   Alien::Ginkgo::Options options;
   options.numIterationsMax(200);
   options.stopCriteriaValue(1e-9);
-  options.preconditioner(Alien::Ginkgo::OptionTypes::Jacobi);
-  options.solver(Alien::Ginkgo::OptionTypes::CG);
+  options.preconditioner(Alien::Ginkgo::OptionTypes::Jacobi); // Jacobi, NoPC
+  options.solver(Alien::Ginkgo::OptionTypes::CG); //CG, GMRES, BICG, BICGSTAB
   auto solver = Alien::Ginkgo::LinearSolver(options);
   solver.solve(A, b, x);
 
