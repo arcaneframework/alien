@@ -90,14 +90,14 @@ class InternalLinearSolver
  private:
   void checkError(const Arccore::String& msg, int ierr,
                   int skipError = 0) const;
-  void solve_GMRES(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level);
-  void solve_CG(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level);
-  void solve_BICG(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level);
-  void solve_BICGSTAB(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level);
-  void solve_GMRES_jacobi(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level);
-  void solve_CG_jacobi(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level);
-  void solve_BICG_jacobi(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level);
-  void solve_BICGSTAB_jacobi(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level);
+  void solve_GMRES(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds & time);
+  void solve_CG(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds & time);
+  void solve_BICG(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds & time);
+  void solve_BICGSTAB(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds & time);
+  void solve_GMRES_jacobi(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds & time);
+  void solve_CG_jacobi(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds & time);
+  void solve_BICG_jacobi(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds & time);
+  void solve_BICGSTAB_jacobi(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds & time);
 };
 
 InternalLinearSolver::InternalLinearSolver()
@@ -166,32 +166,35 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   iter_stop->add_logger(conv_logger);
   res_stop->add_logger(conv_logger);
 
+  // init timer
+  std::chrono::nanoseconds time(0);
+
   /// --- Find a better way to switch solver ...
   switch (m_options.solver()) {
   case OptionTypes::GMRES:
     if (prec == 1)
-      solve_GMRES_jacobi(A, b, x, iter_stop, res_stop, exec, conv_logger, output_level);
+      solve_GMRES_jacobi(A, b, x, iter_stop, res_stop, exec, conv_logger, output_level, time);
     else
-      solve_GMRES(A, b, x, iter_stop, res_stop, exec, conv_logger, output_level);
+      solve_GMRES(A, b, x, iter_stop, res_stop, exec, conv_logger, output_level, time);
     break;
   case OptionTypes::CG:
     if (prec == 1)
-      solve_CG_jacobi(A, b, x, iter_stop, res_stop, exec, conv_logger, output_level);
+      solve_CG_jacobi(A, b, x, iter_stop, res_stop, exec, conv_logger, output_level, time);
     else
-      solve_CG(A, b, x, iter_stop, res_stop, exec, conv_logger, output_level);
+      solve_CG(A, b, x, iter_stop, res_stop, exec, conv_logger, output_level, time);
     break;
   case OptionTypes::BICG:
     if (prec == 1)
-      solve_BICG_jacobi(A, b, x, iter_stop, res_stop, exec, conv_logger, output_level);
+      solve_BICG_jacobi(A, b, x, iter_stop, res_stop, exec, conv_logger, output_level, time);
     else
-      solve_BICG(A, b, x, iter_stop, res_stop, exec, conv_logger, output_level);
+      solve_BICG(A, b, x, iter_stop, res_stop, exec, conv_logger, output_level, time);
 
     break;
   case OptionTypes::BICGSTAB:
     if (prec == 1)
-      solve_BICGSTAB_jacobi(A, b, x, iter_stop, res_stop, exec, conv_logger, output_level);
+      solve_BICGSTAB_jacobi(A, b, x, iter_stop, res_stop, exec, conv_logger, output_level, time);
     else
-      solve_BICGSTAB(A, b, x, iter_stop, res_stop, exec, conv_logger, output_level);
+      solve_BICGSTAB(A, b, x, iter_stop, res_stop, exec, conv_logger, output_level, time);
     break;
   default:
     alien_fatal([&] {
@@ -207,10 +210,15 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   auto res = vec_res_norm->get_const_values()[0];
 
   // Print infos
+  std::cout << "===== SOLVER  RUN INFORMATION ===== "<< std::endl;
   std::cout << "Stop criteria Value : " << m_options.stopCriteriaValue() << std::endl;
   std::cout << "Solver has converged : " << conv_logger->has_converged() << std::endl;
   std::cout << "Nb iterations : " << num_iters << std::endl;
   std::cout << "Residual norm : " << res << std::endl;
+  std::cout << "Execution time [ms]: " << static_cast<double>(time.count()) / 1000000.0 << std::endl;
+  std::cout << "Time per iteration [ms]: " << static_cast<double>(time.count()) / 1000000.0 / num_iters  << std::endl;
+  std::cout << "=================================== "<< std::endl;
+
 
   // update the counters
   m_total_iter_num += num_iters;
@@ -218,7 +226,7 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   m_total_solve_time += tsolve.elapsed();
 }
 
-void InternalLinearSolver::solve_CG_jacobi(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level)
+void InternalLinearSolver::solve_CG_jacobi(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds & time)
 {
   std::cout << "----------- Solve with CG + Jacobi : " << std::endl;
 
@@ -247,8 +255,11 @@ void InternalLinearSolver::solve_CG_jacobi(const Matrix& A, const Vector& b, Vec
   // generate the solver
   auto cg_solver = solver_factory->generate(share(pA));
 
-  // solve
+  // solve with timing
+  auto tic = std::chrono::steady_clock::now();
   cg_solver->apply(lend(b.internal()), lend(x.internal()));
+  auto toc = std::chrono::steady_clock::now();
+  time += std::chrono::duration_cast<std::chrono::nanoseconds>(toc - tic);
 
   if (output_level) {
     // Print the table of the residuals obtained from the logger
@@ -256,7 +267,7 @@ void InternalLinearSolver::solve_CG_jacobi(const Matrix& A, const Vector& b, Vec
   }
 }
 
-void InternalLinearSolver::solve_GMRES_jacobi(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level)
+void InternalLinearSolver::solve_GMRES_jacobi(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds & time)
 {
   std::cout << "----------- Solve with GMRES + Jacobi : " << std::endl;
 
@@ -285,8 +296,11 @@ void InternalLinearSolver::solve_GMRES_jacobi(const Matrix& A, const Vector& b, 
   // generate the solver
   auto cg_solver = solver_factory->generate(share(pA));
 
-  // solve
+  // solve with timing
+  auto tic = std::chrono::steady_clock::now();
   cg_solver->apply(lend(b.internal()), lend(x.internal()));
+  auto toc = std::chrono::steady_clock::now();
+  time += std::chrono::duration_cast<std::chrono::nanoseconds>(toc - tic);
 
   if (output_level) {
     // Print the table of the residuals obtained from the logger
@@ -294,7 +308,7 @@ void InternalLinearSolver::solve_GMRES_jacobi(const Matrix& A, const Vector& b, 
   }
 }
 
-void InternalLinearSolver::solve_BICG_jacobi(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level)
+void InternalLinearSolver::solve_BICG_jacobi(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds & time)
 {
   std::cout << "----------- Solve with BICG + Jacobi : " << std::endl;
 
@@ -323,8 +337,11 @@ void InternalLinearSolver::solve_BICG_jacobi(const Matrix& A, const Vector& b, V
   // generate the solver
   auto cg_solver = solver_factory->generate(share(pA));
 
-  // solve
+  // solve with timing
+  auto tic = std::chrono::steady_clock::now();
   cg_solver->apply(lend(b.internal()), lend(x.internal()));
+  auto toc = std::chrono::steady_clock::now();
+  time += std::chrono::duration_cast<std::chrono::nanoseconds>(toc - tic);
 
   if (output_level) {
     // Print the table of the residuals obtained from the logger
@@ -332,7 +349,7 @@ void InternalLinearSolver::solve_BICG_jacobi(const Matrix& A, const Vector& b, V
   }
 }
 
-void InternalLinearSolver::solve_BICGSTAB_jacobi(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level)
+void InternalLinearSolver::solve_BICGSTAB_jacobi(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds & time)
 {
   std::cout << "----------- Solve with BICGSTAB + Jacobi : " << std::endl;
 
@@ -361,8 +378,11 @@ void InternalLinearSolver::solve_BICGSTAB_jacobi(const Matrix& A, const Vector& 
   // generate the solver
   auto cg_solver = solver_factory->generate(share(pA));
 
-  // solve
+  // solve with timing
+  auto tic = std::chrono::steady_clock::now();
   cg_solver->apply(lend(b.internal()), lend(x.internal()));
+  auto toc = std::chrono::steady_clock::now();
+  time += std::chrono::duration_cast<std::chrono::nanoseconds>(toc - tic);
 
   if (output_level) {
     // Print the table of the residuals obtained from the logger
@@ -370,7 +390,7 @@ void InternalLinearSolver::solve_BICGSTAB_jacobi(const Matrix& A, const Vector& 
   }
 }
 
-void InternalLinearSolver::solve_CG(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level)
+void InternalLinearSolver::solve_CG(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds & time)
 {
   std::cout << "----------- Solve with CG + no PREC : " << std::endl;
 
@@ -396,8 +416,11 @@ void InternalLinearSolver::solve_CG(const Matrix& A, const Vector& b, Vector& x,
   // generate the solver
   auto cg_solver = solver_factory->generate(share(pA));
 
-  // solve
+  // solve with timing
+  auto tic = std::chrono::steady_clock::now();
   cg_solver->apply(lend(b.internal()), lend(x.internal()));
+  auto toc = std::chrono::steady_clock::now();
+  time += std::chrono::duration_cast<std::chrono::nanoseconds>(toc - tic);
 
   if (output_level) {
     // Print the table of the residuals obtained from the logger
@@ -405,7 +428,7 @@ void InternalLinearSolver::solve_CG(const Matrix& A, const Vector& b, Vector& x,
   }
 }
 
-void InternalLinearSolver::solve_GMRES(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level)
+void InternalLinearSolver::solve_GMRES(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds & time)
 {
   std::cout << "----------- Solve with GMRES + no PREC : " << std::endl;
 
@@ -431,8 +454,11 @@ void InternalLinearSolver::solve_GMRES(const Matrix& A, const Vector& b, Vector&
   // generate the solver
   auto cg_solver = solver_factory->generate(share(pA));
 
-  // solve
+  // solve with timing
+  auto tic = std::chrono::steady_clock::now();
   cg_solver->apply(lend(b.internal()), lend(x.internal()));
+  auto toc = std::chrono::steady_clock::now();
+  time += std::chrono::duration_cast<std::chrono::nanoseconds>(toc - tic);
 
   if (output_level) {
     // Print the table of the residuals obtained from the logger
@@ -440,7 +466,7 @@ void InternalLinearSolver::solve_GMRES(const Matrix& A, const Vector& b, Vector&
   }
 }
 
-void InternalLinearSolver::solve_BICG(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level)
+void InternalLinearSolver::solve_BICG(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds & time)
 {
   std::cout << "----------- Solve with BICG + no PREC : " << std::endl;
 
@@ -466,8 +492,11 @@ void InternalLinearSolver::solve_BICG(const Matrix& A, const Vector& b, Vector& 
   // generate the solver
   auto cg_solver = solver_factory->generate(share(pA));
 
-  // solve
+  // solve with timing
+  auto tic = std::chrono::steady_clock::now();
   cg_solver->apply(lend(b.internal()), lend(x.internal()));
+  auto toc = std::chrono::steady_clock::now();
+  time += std::chrono::duration_cast<std::chrono::nanoseconds>(toc - tic);
 
   if (output_level) {
     // Print the table of the residuals obtained from the logger
@@ -475,7 +504,7 @@ void InternalLinearSolver::solve_BICG(const Matrix& A, const Vector& b, Vector& 
   }
 }
 
-void InternalLinearSolver::solve_BICGSTAB(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level)
+void InternalLinearSolver::solve_BICGSTAB(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds & time)
 {
   std::cout << "----------- Solve with BICGSTAB + no PREC : " << std::endl;
 
@@ -501,8 +530,11 @@ void InternalLinearSolver::solve_BICGSTAB(const Matrix& A, const Vector& b, Vect
   // generate the solver
   auto cg_solver = solver_factory->generate(share(pA));
 
-  // solve
+  // solve with timing
+  auto tic = std::chrono::steady_clock::now();
   cg_solver->apply(lend(b.internal()), lend(x.internal()));
+  auto toc = std::chrono::steady_clock::now();
+  time += std::chrono::duration_cast<std::chrono::nanoseconds>(toc - tic);
 
   if (output_level) {
     // Print the table of the residuals obtained from the logger
