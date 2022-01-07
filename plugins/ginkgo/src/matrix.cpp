@@ -47,7 +47,6 @@ Matrix::~Matrix() {}
 
 void Matrix::assemble()
 {
-
   if ((this->rowSpace().size() == data.get_size()[0]) && (this->colSpace().size() == data.get_size()[1])) {
     this->read(data);
   }

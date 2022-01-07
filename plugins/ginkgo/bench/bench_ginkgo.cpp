@@ -75,7 +75,7 @@ std::vector<double> readFromMtx(const std::string& vec_filename)
   return values;
 }
 
-int test(const Alien::Ginkgo::OptionTypes::eSolver & solv, const Alien::Ginkgo::OptionTypes::ePreconditioner & prec, const std::string& mat_filename, const std::string& vec_filename)
+int test(const Alien::Ginkgo::OptionTypes::eSolver& solv, const Alien::Ginkgo::OptionTypes::ePreconditioner& prec, const std::string& mat_filename, const std::string& vec_filename)
 {
   auto* pm = Arccore::MessagePassing::Mpi::StandaloneMpiMessagePassingMng::create(MPI_COMM_WORLD);
   auto* tm = Arccore::arccoreCreateDefaultTraceMng();
@@ -85,10 +85,9 @@ int test(const Alien::Ginkgo::OptionTypes::eSolver & solv, const Alien::Ginkgo::
 
   auto A = Alien::Move::readFromMatrixMarket(pm, mat_filename);
 
-  //  readVector(vec_filename);
   /**
 	 *  Vecteur xe (ones)
-	 ********************************************/
+	 *********************/
 
   tm->info() << "* xe = 1";
   auto xe = Alien::Move::VectorData(A.distribution().colDistribution());
@@ -103,17 +102,14 @@ int test(const Alien::Ginkgo::OptionTypes::eSolver & solv, const Alien::Ginkgo::
   tm->info() << "=> Vector Distribution : " << xe.distribution();
 
   /**
-	 *  Vecteur b = A * xe 
-	 ********************************************/
-  tm->info() << "* b = A * xe";
+	 *  Vecteur b
+	 *************/
 
   Alien::Move::VectorData b(A.rowSpace(), A.distribution().rowDistribution());
+  Alien::Ginkgo::LinearAlgebra algebra;
 
-  /**
-   * Read vector data from mtx file and write it into Alien Vector
-   */
-
-  if (vec_filename != "") {
+  if (vec_filename != "") { // Read vector data from mtx file and write it into Alien Vector
+    tm->info() << "Read vector file : " << vec_filename;
     std::vector<double> values = readFromMtx(vec_filename);
     int vec_size = values.size();
 
@@ -123,22 +119,22 @@ int test(const Alien::Ginkgo::OptionTypes::eSolver & solv, const Alien::Ginkgo::
     }
     b = writer.release();
   }
-
-  Alien::Ginkgo::LinearAlgebra algebra;
-  //algebra.mult(A, xe, b);
+  else { // Init b with A * xe
+    tm->info() << "* b = A * xe";
+    algebra.mult(A, xe, b);
+  }
 
   /**
 	 *  Calcul x, tq : Ax = b 
 	 ********************************************/
   tm->info() << "* Calcul de x, tel que  :  A x = b";
-
   Alien::Move::VectorData x(A.colSpace(), A.distribution().rowDistribution());
+
+  /** Add initial guess for x ?? */
 
   Alien::Ginkgo::Options options;
   options.numIterationsMax(500);
   options.stopCriteriaValue(1e-9);
-  /*options.preconditioner(Alien::Ginkgo::OptionTypes::Jacobi); // Jacobi, NoPC
-  options.solver(Alien::Ginkgo::OptionTypes::CG); //CG, GMRES, BICG, BICGSTAB*/
   options.preconditioner(prec); // Jacobi, NoPC
   options.solver(solv); //CG, GMRES, BICG, BICGSTAB
   auto solver = Alien::Ginkgo::LinearSolver(options);
@@ -194,7 +190,7 @@ int main(int argc, char** argv)
 
   // Read the solver
   Alien::Ginkgo::OptionTypes::eSolver solver;
-  if (std::string(argv[1]) == "CG"){
+  if (std::string(argv[1]) == "CG") {
     solver = Alien::Ginkgo::OptionTypes::CG;
   }
   else if (std::string(argv[1]) == "GMRES") {
@@ -203,25 +199,25 @@ int main(int argc, char** argv)
   else if (std::string(argv[1]) == "BICG") {
     solver = Alien::Ginkgo::OptionTypes::BICG;
   }
-  else if (std::string(argv[1]) == "BICGSTAB"){
+  else if (std::string(argv[1]) == "BICGSTAB") {
     solver = Alien::Ginkgo::OptionTypes::BICGSTAB;
   }
-  else{
-    std::cerr << "Unrecognized solver : " <<  argv[1] << "\n"
+  else {
+    std::cerr << "Unrecognized solver : " << argv[1] << "\n"
               << "  - solver list : (CG|GMRES|BICG|BICGSTAB) \n";
     return -1;
   }
 
   // Read the preconditioner
   Alien::Ginkgo::OptionTypes::ePreconditioner prec;
-  if (std::string(argv[2]) == "Jacobi"){
+  if (std::string(argv[2]) == "Jacobi") {
     prec = Alien::Ginkgo::OptionTypes::Jacobi;
   }
   else if (std::string(argv[2]) == "NoPC") {
     prec = Alien::Ginkgo::OptionTypes::NoPC;
   }
-  else{
-    std::cerr << "Unrecognized preconditioner : " <<  argv[2] << "\n"
+  else {
+    std::cerr << "Unrecognized preconditioner : " << argv[2] << "\n"
               << "  - preconditioner list : (Jacobi|NoPC) \n";
     return -1;
   }
@@ -229,21 +225,19 @@ int main(int argc, char** argv)
   // Read Matrix file
   std::string matrix_file;
   // Read matrix file
-  if (argv[3]){
+  if (argv[3]) {
     matrix_file = std::string(argv[3]);
   }
-  else
-  {
+  else {
     std::cerr << "Matrix File is needed for this bench.";
     return -1;
   }
 
   // Read optional Vector file
-  std::string vec_file="";
-  if (argv[4]){
+  std::string vec_file = "";
+  if (argv[4]) {
     vec_file = std::string(argv[4]);
   }
-
 
   auto ret = 0;
   try {
