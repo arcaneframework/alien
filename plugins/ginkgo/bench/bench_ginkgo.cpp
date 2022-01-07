@@ -75,7 +75,7 @@ std::vector<double> readFromMtx(const std::string& vec_filename)
   return values;
 }
 
-int test(const std::string& mat_filename, const std::string& vec_filename = "")
+int test(const Alien::Ginkgo::OptionTypes::eSolver & solv, const Alien::Ginkgo::OptionTypes::ePreconditioner & prec, const std::string& mat_filename, const std::string& vec_filename)
 {
   auto* pm = Arccore::MessagePassing::Mpi::StandaloneMpiMessagePassingMng::create(MPI_COMM_WORLD);
   auto* tm = Arccore::arccoreCreateDefaultTraceMng();
@@ -135,10 +135,12 @@ int test(const std::string& mat_filename, const std::string& vec_filename = "")
   Alien::Move::VectorData x(A.colSpace(), A.distribution().rowDistribution());
 
   Alien::Ginkgo::Options options;
-  options.numIterationsMax(200);
+  options.numIterationsMax(500);
   options.stopCriteriaValue(1e-9);
-  options.preconditioner(Alien::Ginkgo::OptionTypes::Jacobi); // Jacobi, NoPC
-  options.solver(Alien::Ginkgo::OptionTypes::CG); //CG, GMRES, BICG, BICGSTAB
+  /*options.preconditioner(Alien::Ginkgo::OptionTypes::Jacobi); // Jacobi, NoPC
+  options.solver(Alien::Ginkgo::OptionTypes::CG); //CG, GMRES, BICG, BICGSTAB*/
+  options.preconditioner(prec); // Jacobi, NoPC
+  options.solver(solv); //CG, GMRES, BICG, BICGSTAB
   auto solver = Alien::Ginkgo::LinearSolver(options);
   solver.solve(A, b, x);
 
@@ -180,11 +182,74 @@ int main(int argc, char** argv)
 {
 
   MPI_Init(&argc, &argv);
-  auto ret = 0;
 
+  if (argc < 4) {
+    std::cerr << "Usage : ./bench_ginkgo [solver] [preconditioner] [matrix] [vector] \n"
+              << "  - solver : (CG|GMRES|BICG|BICGSTAB) \n"
+              << "  - preconditioner : (Jacobi|NoPC) \n"
+              << "  - MTX matrix file \n"
+              << "  - optional MTX vector file \n";
+    return -1;
+  }
+
+  // Read the solver
+  Alien::Ginkgo::OptionTypes::eSolver solver;
+  if (std::string(argv[1]) == "CG"){
+    solver = Alien::Ginkgo::OptionTypes::CG;
+  }
+  else if (std::string(argv[1]) == "GMRES") {
+    solver = Alien::Ginkgo::OptionTypes::GMRES;
+  }
+  else if (std::string(argv[1]) == "BICG") {
+    solver = Alien::Ginkgo::OptionTypes::BICG;
+  }
+  else if (std::string(argv[1]) == "BICGSTAB"){
+    solver = Alien::Ginkgo::OptionTypes::BICGSTAB;
+  }
+  else{
+    std::cerr << "Unrecognized solver : " <<  argv[1] << "\n"
+              << "  - solver list : (CG|GMRES|BICG|BICGSTAB) \n";
+    return -1;
+  }
+
+  // Read the preconditioner
+  Alien::Ginkgo::OptionTypes::ePreconditioner prec;
+  if (std::string(argv[2]) == "Jacobi"){
+    prec = Alien::Ginkgo::OptionTypes::Jacobi;
+  }
+  else if (std::string(argv[2]) == "NoPC") {
+    prec = Alien::Ginkgo::OptionTypes::NoPC;
+  }
+  else{
+    std::cerr << "Unrecognized preconditioner : " <<  argv[2] << "\n"
+              << "  - preconditioner list : (Jacobi|NoPC) \n";
+    return -1;
+  }
+
+  // Read Matrix file
+  std::string matrix_file;
+  // Read matrix file
+  if (argv[3]){
+    matrix_file = std::string(argv[3]);
+  }
+  else
+  {
+    std::cerr << "Matrix File is needed for this bench.";
+    return -1;
+  }
+
+  // Read optional Vector file
+  std::string vec_file="";
+  if (argv[4]){
+    vec_file = std::string(argv[4]);
+  }
+
+
+  auto ret = 0;
   try {
-    //ret = test("matrix_first.mtx", "vector_first.mtx");
-    ret = test("mesh1em6.mtx");
+    ret = test(solver, prec, matrix_file, vec_file);
+    // ret = test("matrix_first.mtx", "vector_first.mtx");
+    // ret = test("mesh1em6.mtx");
     //  ret = test("msc00726.mtx");
   }
   catch (const Arccore::Exception& ex) {

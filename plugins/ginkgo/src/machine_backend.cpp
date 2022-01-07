@@ -21,7 +21,7 @@
 namespace Alien::Ginkgo
 {
 
-std::string ginkgo_executor::target_machine = "reference";
+std::string ginkgo_executor::target_machine = "omp";
 
 std::map<std::string, std::function<std::shared_ptr<gko::Executor>()>>
 ginkgo_executor::exec_map{
