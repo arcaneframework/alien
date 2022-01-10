@@ -1,11 +1,10 @@
-.. _user:
+.. _sycl:
 
-Alien user documentation
+Alien sycl documentation
 ========================
 
 .. toctree::
     :maxdepth: 2
+   install
    build
-   concepts
-   move
-   ref
+   example
