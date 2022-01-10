@@ -1,10 +1,10 @@
 .. _sycl_build:
 
 =====================================
-Building and using Alien SYCL BackEnd
+Building and using Alien SYCL backend
 =====================================
 
-Building Alien SYCL BackEnd
+Building Alien SYCL backend
 ===========================
 
 Alien's build system is based on CMake.

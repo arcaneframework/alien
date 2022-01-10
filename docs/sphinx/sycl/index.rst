@@ -1,10 +1,11 @@
 .. _sycl:
 
-Alien sycl documentation
+Alien SYCL documentation
 ========================
 
 .. toctree::
     :maxdepth: 2
+   SYCL
    install
    build
    example
