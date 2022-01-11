@@ -7,7 +7,17 @@ How to install SYCL
 Installing SYCL
 ===============
 
-Alien's build system is based on CMake.
+Alien SYCL backend has been developped on top of the hipSYCL implementation of the SYCL API 2020 specification.
+
+hipSYCL depend on the LLVM infrastructure, Clang compiler to compile device codes.
+Our implementation still indevelopement has been tested with:
+
+- LLVM 10.0
+- Clang with GCC 10.2
+- CUDA 10.1
+
+AMD devices with ROCM and Intel device with OneAPI and DPC++ have not been already tested.
+
 
 Getting the sources
 -------------------
