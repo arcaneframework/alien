@@ -24,7 +24,6 @@
 #include <alien/ginkgo/backend.h>
 #include <alien/ginkgo/options.h>
 
-#include <alien/kernels/simple_csr/algebra/SimpleCSRLinearAlgebra.h>
 
 // tmp read from mtx
 #include <fstream>
@@ -157,16 +156,6 @@ int test(const Alien::Ginkgo::OptionTypes::eSolver& solv, const Alien::Ginkgo::O
 
     tm->info() << " => ||r|| = " << norm << " ; ||r||/||b|| = " << norm / norm_b;
   }
-
-  /*{
-    tm->info() << "|| x - xe ||";
-    algebra.axpy(-1., xe, x);
-
-    auto norm = algebra.norm2(x);
-    auto norm_xe = algebra.norm2(xe);
-
-    tm->info() << " => ||x-xe|| = " << norm << " ; ||r||/||b|| = " << norm / norm_xe;
-  }*/
 
   tm->info() << " ";
   tm->info() << "... example finished !!!";
