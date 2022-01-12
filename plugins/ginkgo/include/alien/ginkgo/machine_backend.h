@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <alien/ginkgo/GinkgoConfig.h>
 #include <ginkgo/ginkgo.hpp>
 #include <map>
 
