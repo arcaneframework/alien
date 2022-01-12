@@ -62,7 +62,13 @@ option(ALIEN_PLUGIN_HYPRE "Whether or not to compile Hypre backend" OFF)
 option(ALIEN_PLUGIN_PETSC "Whether or not to compile PETSc backend" OFF)
 option(ALIEN_PLUGIN_SUPERLU "Whether or not to compile SuperLU backend" OFF)
 option(ALIEN_PLUGIN_TRILINOS "Whether or not to compile Trilinos backend" OFF)
+
 option(ALIEN_PLUGIN_GINKGO "Whether or not to compile Ginkgo backend" OFF)
+option(ALIEN_PLUGIN_GINKGO_REF "Whether or not to compile Ginkgo REFERENCE backend" OFF)
+option(ALIEN_PLUGIN_GINKGO_OMP "Whether or not to compile Ginkgo OPENMP backend" OFF)
+option(ALIEN_PLUGIN_GINKGO_CUDA "Whether or not to compile Ginkgo CUDA backend" OFF)
+option(ALIEN_PLUGIN_GINKGO_HIP "Whether or not to compile Ginkgo HIP backend" OFF)
+option(ALIEN_PLUGIN_GINKGO_DPCPP "Whether or not to compile DPCPP Ginkgo backend" OFF)
 
 
 option(ALIEN_PLUGIN_GINKGO "Whether or not to compile Ginkgo backend" OFF)
