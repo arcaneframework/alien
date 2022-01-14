@@ -1,0 +1,167 @@
+<%! import gen_tools %>
+/*
+ * BaseOption.h Generated file
+ */
+
+#pragma once
+
+#include <cxxopts.hpp>
+
+namespace Alien {
+
+class ${options.name_}BaseOptionsSetter ;
+
+class ${options.name_}BaseOptionsEnvSetter ;
+
+class ${options.name_}BaseOptionsXMLConfigSetter ;
+
+class ${options.name_}BaseOptionsJSONConfigSetter ;
+
+class ${options.name_}BaseOptions
+{
+public:
+  % for opt in options.options.complex:
+  class ${gen_tools.toClassName(opt.name_)}BaseOptions
+  {
+  public:
+    ${gen_tools.toClassName(opt.name_)}BaseOptions(${options.name_}BaseOptions const* parent)
+    : m_parent(parent)
+    {}
+
+    ${gen_tools.toClassName(opt.name_)}BaseOptions const* operator ->() const {
+        return this ;
+    }
+
+    static void init(cxxopts::Options& options)
+    {
+       options.add_options("Group options for complex ${options.name_}")
+           // REGISTER SIMPLE OPTIONS
+         % for opt2 in opt.simple:
+           ("${opt.name_}-${opt2.name_}", " ${opt2.name_} ${opt2.type} option of complex ${opt.name_} option ", cxxopts::value<${gen_tools.toCxxArrayType(opt2.type,opt2.minOccurs,opt2.maxOccurs)}>()${gen_tools.defaultValue(opt2.default)})
+         % endfor
+           // REGISTER ENUM OPTIONS
+         % for opt2 in opt.enumeration:
+           ("${opt.name_}-${opt2.name_}", "${opt2.name_} enum option of complex ${opt.name_} option", cxxopts::value<${gen_tools.toCxxArrayType("std::string",opt2.minOccurs,opt2.maxOccurs)}>()${gen_tools.defaultValue(opt2.default)})
+         % endfor
+            ;
+    }
+
+    /*
+     * ACCESSORS
+     */
+    // SIMPLE OPTIONS ACCESSORS
+    % for opt2 in opt.simple:
+    //! ${opt2.name_} option accessor
+    ${gen_tools.toCxxArrayType(opt2.type,opt2.minOccurs,opt2.maxOccurs)} const& ${gen_tools.toMethodName(opt2.name_)}() const {
+         return m_parent->m_results["${opt.name_}-${opt2.name_}"].as<${gen_tools.toCxxArrayType(opt2.type,opt2.minOccurs,opt2.maxOccurs)}>() ;
+    }
+
+    % endfor
+
+    // ENUM OPTIONS ACCESSOR
+    % for opt2 in opt.enumeration:
+    //! ${opt2.name_} option accessor
+    ${gen_tools.toCxxArrayType(opt2.type,opt2.minOccurs,opt2.maxOccurs)} ${gen_tools.toMethodName(opt2.name_)}() const {
+          % if gen_tools.isArray(opt2.minOccurs,opt2.maxOccurs) == True :
+          ${gen_tools.toCxxArrayType(opt2.type,opt2.minOccurs,opt2.maxOccurs)} results ;
+          for( v : m_parent->m_results["${opt2.name_}"].as<std::vector<std::string>>())
+             results.push_back(${gen_tools.toClassName(options.name_)}BaseOptionsEnum::${gen_tools.toClassName(opt2.name_)}StringToEnum(v)) ;
+          return results ;
+          % else:
+          return ${gen_tools.toClassName(options.name_)}BaseOptionsEnum::${gen_tools.toClassName(opt2.name_)}StringToEnum(m_parent->m_results["${opt.name_}-${opt2.name_}"].as<std::string>()) ;
+          % endif
+    }
+
+    % endfor
+
+  private:
+    ${options.name_}BaseOptions const* m_parent = nullptr ;
+  } ;
+  friend class ${gen_tools.toClassName(opt.name_)}BaseOptions ;
+  % endfor
+
+  // Constructor
+  ${options.name_}BaseOptions()
+  : m_options("${options.name_}BaseOptions", "DataBase options for Service : ${options.name_}")
+  {
+    m_options.add_options()
+      // REGISTER SIMPLE OPTIONS
+      % for opt in options.options.simple:
+      ("${opt.name_}", "${opt.name_} simple ${opt.type} option", cxxopts::value<${gen_tools.toCxxArrayType(opt.type,opt.minOccurs,opt.maxOccurs)}>()${gen_tools.defaultValue(opt.default)})
+      % endfor
+      // REGISTER ENUM OPTIONS
+      % for opt in options.options.enumeration:
+      ("${opt.name_}", "${opt.name_} enum option", cxxopts::value<${gen_tools.toCxxArrayType("std::string",opt.minOccurs,opt.maxOccurs)}>()${gen_tools.defaultValue(opt.default)})
+      % endfor
+      ;
+
+    // REGISTER COMPLEX OPTIONS
+    % for opt in options.options.complex:
+    ${gen_tools.toClassName(opt.name_)}BaseOptions::init(m_options) ;
+    % endfor
+
+  }
+
+  virtual ~${options.name_}BaseOptions() = default ;
+
+  void init(int argc, const char* const* argv)
+  {
+    m_results = m_options.parse(argc,argv) ;
+  }
+
+  template<typename OptionSetterT>
+  void init(OptionSetterT const& setter)
+  {
+    auto const& args = setter.args() ;
+    std::vector<char const*> argv(args.size()) ;
+    int argc = 0 ;
+    for( auto const& arg : args)
+      argv[argc++] = arg.c_str() ;
+    init(argc,argv.data()) ;
+  }
+
+  /*
+   * ACCESSORS
+   */
+  // SIMPLE OPTIONS ACCESSORS
+  % for opt in options.options.simple:
+  //! ${opt.name_} option accessor
+  ${gen_tools.toCxxArrayType(opt.type,opt.minOccurs,opt.maxOccurs)} const& ${gen_tools.toMethodName(opt.name_)}() const {
+      return m_results["${opt.name_}"].as<${gen_tools.toCxxArrayType(opt.type,opt.minOccurs,opt.maxOccurs)}>() ;
+  }
+
+  % endfor
+
+  // ENUM OPTIONS ACCESSOR
+  % for opt in options.options.enumeration:
+  //! ${opt.name_} option accessor
+  ${gen_tools.toCxxArrayType(opt.type,opt.minOccurs,opt.maxOccurs)} ${gen_tools.toMethodName(opt.name_)}() const {
+      % if gen_tools.isArray(opt.minOccurs,opt.maxOccurs) == True :
+      ${gen_tools.toCxxArrayType(opt.type,opt.minOccurs,opt.maxOccurs)} results ;
+      for( v : m_results["${opt.name_}"].as<std::vector<std::string>>())
+         results.push_back(${gen_tools.toClassName(options.name_)}BaseOptionsEnum::${gen_tools.toClassName(opt.name_)}StringToEnum(v)) ;
+      return results ;
+      % else:
+      return ${gen_tools.toClassName(options.name_)}BaseOptionsEnum::${gen_tools.toClassName(opt.name_)}StringToEnum(m_results["${opt.name_}"].as<std::string>()) ;
+      % endif
+  }
+
+  % endfor
+
+
+  // COMPLEX OPTIONS ACCESSOR
+  % for opt in options.options.complex:
+  //! ${opt.name_} option accessor
+  ${gen_tools.toClassName(opt.name_)}BaseOptions ${gen_tools.toMethodName(opt.name_)}() const {
+      return ${gen_tools.toClassName(opt.name_)}BaseOptions(this) ;
+  }
+
+  % endfor
+
+private :
+  cxxopts::Options m_options;
+
+  cxxopts::ParseResult m_results;
+} ;
+
+}

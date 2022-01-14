@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<SampleSolver>
+  <max-iter>500</max-iter>
+  <tol>1.e-6</tol>
+  <stop-criteria>RB</stop-criteria>
+  <solver>CG</solver>
+  <preconditioner>Chebyshev</preconditioner>
+  <poly-order>3</poly-order>
+  <poly-factor>0.5</poly-factor>
+  <poly-factor-iter>10</poly-factor-iter>
+  <complex-opt>
+    <sopt>100</sopt>
+    <eopt>EOpt1</eopt>
+  </complex-opt>
+</SampleSolver>
+

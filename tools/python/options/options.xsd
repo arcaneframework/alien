@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
+
+  <xs:complexType name="Base">
+    <xs:sequence>
+      <xs:element ref="name" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="userclass" type="xs:string" minOccurs="0" maxOccurs="1" />
+      <xs:element ref="defaultvalue" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element ref="description" minOccurs="0" maxOccurs="1" />
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <!-- Classe de base pour toutes les options .............................. -->
+
+  <xs:complexType name="Option" abstract="true">
+    <xs:complexContent>
+      <xs:extension base="Base">
+        <xs:attribute name="optional" type="xs:boolean" use="optional" />
+        <xs:attribute name="default" type="xs:string" use="optional" />
+        <xs:attribute name="minOccurs" type="xs:string" default="1" />
+        <xs:attribute name="maxOccurs" type="xs:string" default="1" />
+        <xs:attribute name="allow-null" type="xs:boolean" use="optional" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="Simple">
+    <xs:complexContent>
+      <xs:extension base="Option">
+        <xs:attribute name="type" use="optional">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+           		<xs:enumeration value="ustring" />
+           		<xs:enumeration value="string" />
+       	    	<xs:enumeration value="real" />
+   	        	<xs:enumeration value="bool" />
+    	       	<xs:enumeration value="integer" />
+        	   	<xs:enumeration value="int16" />
+        	   	<xs:enumeration value="int32" />
+           		<xs:enumeration value="int64" />
+           		<xs:enumeration value="real2" />
+           		<xs:enumeration value="real3" />
+           		<xs:enumeration value="real2x2" />
+	           	<xs:enumeration value="real3x3" />
+    	       	<xs:enumeration value="string[]" />
+        	   	<xs:enumeration value="bool[]" />
+           		<xs:enumeration value="real[]" />
+           		<xs:enumeration value="real2[]" />
+           		<xs:enumeration value="real3[]" />
+	           	<xs:enumeration value="real2x2[]" />
+    	       	<xs:enumeration value="real3x3[]" />
+        	   	<xs:enumeration value="integer[]" />
+           		<xs:enumeration value="int16[]" />
+           		<xs:enumeration value="int32[]" />
+           		<xs:enumeration value="int64[]" />
+           	</xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="unit" type="xs:string" use="optional" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="Enumeration">
+    <xs:complexContent>
+      <xs:extension base="Option">
+        <xs:sequence minOccurs="1" maxOccurs="unbounded">
+          <xs:element name="enumvalue" type="EnumValue" />
+        </xs:sequence>
+        <xs:attribute name="type" type="xs:string" use="optional" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- Element enumvalue de l'option enumeration ........................... -->
+  <xs:complexType name="EnumValue">
+    <xs:complexContent>
+      <xs:extension base="Base">
+        <xs:attribute name="genvalue" type="xs:string" use="required" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- Option de type complex: definition. ................................. -->
+  <xs:complexType name="Complex">
+    <xs:complexContent>
+      <xs:extension base="Option">
+	      <xs:sequence minOccurs="0" maxOccurs="unbounded">
+	        <xs:choice>
+					  <xs:element name="complex" type="Complex"/>
+					  <xs:element name="enumeration" type="Enumeration"/>
+					  <xs:element name="simple" type="Simple"/>
+					  <xs:element name="attribute" type="Attribute" />
+	        </xs:choice>
+	      </xs:sequence>
+        <xs:attribute name="ref" type="xs:string" use="optional" />
+        <xs:attribute name="type" type="xs:string" use="optional" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- Elément module ...................................................... -->
+
+
+  <!-- Elément service ...................................................... -->
+  <xs:element name="service" type="Service" />  
+  
+  <xs:complexType name="Service">
+    <xs:complexContent>
+      <xs:extension base="Base">
+        <xs:sequence>
+          <xs:element ref="options" minOccurs="0" />
+        </xs:sequence>
+        <xs:attribute name="version" use="optional">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="1.0" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- Elements souvent references ........................................ -->
+
+  <!-- Element name avec attribut lang ..................................... -->
+  <xs:element name="name">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="lang" type="xs:string" use="required" />
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- Element defaultvalue ............................... -->
+  <xs:element name="defaultvalue">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="category" type="xs:string" use="required" />
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- Element description avec contenu HTML ............................... -->
+  <xs:element name="description">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any minOccurs="0" maxOccurs="unbounded" processContents="skip" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- Liste des options ................................................... -->
+  <xs:element name="options">
+    <xs:complexType>
+      <xs:sequence minOccurs="0" maxOccurs="unbounded">
+        <xs:choice>
+				  <xs:element name="complex" type="Complex"/>
+				  <xs:element name="enumeration" type="Enumeration"/>
+				  <xs:element name="simple" type="Simple"/>
+        </xs:choice>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  
+  <!-- DataType base sur Arcane::eDataType ................................. -->
+  <xs:simpleType name="DataType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="real" />
+      <xs:enumeration value="integer" />
+      <xs:enumeration value="int16" />
+      <xs:enumeration value="int32" />
+      <xs:enumeration value="int64" />
+      <xs:enumeration value="string" />
+      <xs:enumeration value="real2" />
+      <xs:enumeration value="real2x2" />
+      <xs:enumeration value="real3" />
+      <xs:enumeration value="real3x3" />
+      <xs:enumeration value="bool" />
+      <xs:enumeration value="ustring" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="Attribute">
+    <xs:complexContent>
+      <xs:extension base="Option">
+	   		<!--xs:attribute name="name" type="xs:string" use="required" /-->
+   			<xs:attribute name="type" type="xs:string" use="optional" default="string" />
+      </xs:extension>
+    </xs:complexContent>	
+  </xs:complexType>
+
+</xs:schema>
+

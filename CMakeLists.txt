@@ -45,8 +45,9 @@ option(ALIEN_EXAMPLES "Whether or not to compile examples" ON)
 option(ALIEN_UNIT_TESTS "Whether or not to enable unit tests" OFF)
 option(ALIEN_EXPAND_TESTS "Run unit tests one by one" OFF)
 
-option(ALIEN_USE_HDF5 "Enable HDF5 export" OFF)
-option(ALIEN_USE_LIBXML2 "Enable xml export" OFF)
+option(ALIEN_USE_HDF5 "Enable HDF5 import export" OFF)
+option(ALIEN_USE_LIBXML2 "Enable xml import export" OFF)
+option(ALIEN_USE_JSON "Enable json import export" OFF)
 option(ALIEN_USE_SYCL "Whether or not to compile SYCL backend" OFF)
 option(ALIEN_USE_PERF_TIMER "Whether or not to enable perf timer" OFF)
 option(ALIEN_WANT_AVX "Whether or not to enable avx flags" OFF)
@@ -56,6 +57,7 @@ option(ALIEN_DEFAULT_OPTIONS "Enable best effort to find optional dependencies" 
 
 option(ALIEN_GENERATE_DOCUMENTATION "Generate API documentation" OFF)
 option(ALIEN_GENERATE_TUTORIAL "Compile examples of Alien" ON)
+option(ALIEN_GENERATE_OPTIONSCONFIG "Enable Options config generation" OFF)
 
 option(ALIEN_PLUGIN_HYPRE "Whether or not to compile Hypre backend" OFF)
 option(ALIEN_PLUGIN_PETSC "Whether or not to compile PETSc backend" OFF)

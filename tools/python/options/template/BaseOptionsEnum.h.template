@@ -1,0 +1,73 @@
+<%! import gen_tools %>
+/*
+ * BaseOption.h Generated file
+ */
+
+#pragma once
+
+#include <cxxopts.hpp>
+
+namespace Alien {
+
+class ${options.name_}BaseOptionsEnum
+{
+public:
+
+  // ENUM TOOLS
+  % for opt in options.options.enumeration:
+  //! ${opt.name_} option accessor
+  static ${opt.type} ${gen_tools.toClassName(opt.name_)}StringToEnum(std::string const& key)
+  {
+      % for ev in opt.enumvalue:
+      if(key.compare("${ev.name_}")==0)
+        return ${ev.genvalue} ;
+      % endfor
+      return ${opt.type}(0) ;
+  }
+
+  static std::string ${gen_tools.toClassName(opt.name_)}EnumToString(${opt.type} value)
+  {
+      switch(value)
+      {
+      % for ev in opt.enumvalue:
+      case ${ev.genvalue}:
+        return std::string("${ev.name_}") ;
+      % endfor
+      default:
+        return std::string("Undefined") ;
+      }
+  }
+
+  % endfor
+
+  % for opt in options.options.complex:
+    % for opt2 in opt.enumeration:
+    //! ${opt2.name_} option accessor
+    static ${opt2.type} ${gen_tools.toClassName(opt2.name_)}StringToEnum(std::string const& key)
+    {
+      % for ev in opt2.enumvalue:
+      if(key.compare("${ev.name_}")==0)
+        return ${ev.genvalue} ;
+      % endfor
+      return ${opt2.type}(0) ;
+    }
+
+    static std::string ${gen_tools.toClassName(opt2.name_)}EnumToString(${opt2.type} value)
+    {
+      switch(value)
+      {
+      % for ev in opt2.enumvalue:
+      case ${ev.genvalue}:
+        return std::string("${ev.name_}") ;
+      % endfor
+      default:
+        return std::string("Undefined") ;
+      }
+    }
+
+    % endfor
+  % endfor
+
+} ;
+
+}
