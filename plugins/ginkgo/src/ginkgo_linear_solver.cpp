@@ -53,11 +53,8 @@ class InternalLinearSolver
 {
  public:
   typedef SolverStatus Status;
-
   InternalLinearSolver();
-
   explicit InternalLinearSolver(const Options& options);
-
   ~InternalLinearSolver() override = default;
 
  public:
@@ -66,19 +63,16 @@ class InternalLinearSolver
   Arccore::MessagePassing::IMessagePassingMng* pm) override {}
 
   bool solve(const Matrix& A, const Vector& b, Vector& x) override;
-
   bool hasParallelSupport() const override { return true; }
 
   //! Etat du solveur
   const Status& getStatus() const override;
-
   const SolverStat& getSolverStat() const override { return m_stat; }
 
   std::shared_ptr<ILinearAlgebra> algebra() const override;
 
  private:
   Status m_status;
-
   Arccore::Real m_init_time{ 0.0 };
   Arccore::Real m_total_solve_time{ 0.0 };
   Arccore::Integer m_solve_num{ 0 };
@@ -88,16 +82,15 @@ class InternalLinearSolver
   Options m_options;
 
  private:
-  void checkError(const Arccore::String& msg, int ierr,
-                  int skipError = 0) const;
-  void solve_GMRES(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds& time);
-  void solve_CG(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds& time);
-  void solve_BICG(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds& time);
-  void solve_BICGSTAB(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds& time);
-  void solve_GMRES_jacobi(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds& time);
-  void solve_CG_jacobi(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds& time);
-  void solve_BICG_jacobi(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds& time);
-  void solve_BICGSTAB_jacobi(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds& time);
+  using stop_iter_type = std::unique_ptr<gko::stop::Iteration::Factory, std::default_delete<gko::stop::Iteration::Factory>>;
+  using stop_res_type = std::unique_ptr<gko::stop::AbsoluteResidualNorm<>::Factory, std::default_delete<gko::stop::AbsoluteResidualNorm<>::Factory>>;
+  using exec_type = std::shared_ptr<const gko::Executor>;
+
+  void solve_CG(const Matrix& A, const Vector& b, Vector& x, const int& prec, stop_iter_type& iter_stop, stop_res_type& res_stop, exec_type& exec, std::chrono::nanoseconds& time);
+  void solve_GMRES(const Matrix& A, const Vector& b, Vector& x, const int& prec, stop_iter_type& iter_stop, stop_res_type& res_stop, exec_type& exec, std::chrono::nanoseconds& time);
+  void solve_BICG(const Matrix& A, const Vector& b, Vector& x, const int& prec, stop_iter_type& iter_stop, stop_res_type& res_stop, exec_type& exec, std::chrono::nanoseconds& time);
+  void solve_BICGSTAB(const Matrix& A, const Vector& b, Vector& x, const int& prec, stop_iter_type& iter_stop, stop_res_type& res_stop, exec_type& exec, std::chrono::nanoseconds& time);
+  void display_solver_infos(const Alien::Ginkgo::OptionTypes::eSolver& solver, const Alien::Ginkgo::OptionTypes::ePreconditioner& prec);
 };
 
 InternalLinearSolver::InternalLinearSolver()
@@ -113,24 +106,11 @@ InternalLinearSolver::InternalLinearSolver(const Options& options)
   m_init_time += tinit.elapsed();
 }
 
-void InternalLinearSolver::checkError(const Arccore::String& msg, int ierr, int skipError) const
-{
-  if (ierr != 0 and (ierr & ~skipError) != 0) {
-    alien_fatal([&] {
-      cout() << msg << " failed. [code=" << ierr << "]";
-      //CHKERRQ(ierr); // warning car macro qui appelle fx qui retourne un int
-    });
-  }
-}
-
 bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
 {
   // Macro "pratique" en attendant de trouver mieux
-  boost::timer tsolve;
+  // boost::timer tsolve;
 
-  int output_level = m_options.verbose() ? 1 : 0;
-
-  /// --- Find a better way to switch preconditioner ...
   // preconditioner's choice
   int prec;
   switch (m_options.preconditioner()) {
@@ -161,7 +141,7 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
                   .with_tolerance(threshold)
                   .on(exec);
 
-  // Prepare Convergence logger
+  // Add Convergence logger
   std::shared_ptr<const gko::log::Convergence<double>> conv_logger = gko::log::Convergence<double>::create(exec);
   iter_stop->add_logger(conv_logger);
   res_stop->add_logger(conv_logger);
@@ -171,30 +151,17 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
 
   /// --- Find a better way to switch solver ...
   switch (m_options.solver()) {
-  case OptionTypes::GMRES:
-    if (prec == 1)
-      solve_GMRES_jacobi(A, b, x, iter_stop, res_stop, exec, conv_logger, output_level, time);
-    else
-      solve_GMRES(A, b, x, iter_stop, res_stop, exec, conv_logger, output_level, time);
-    break;
   case OptionTypes::CG:
-    if (prec == 1)
-      solve_CG_jacobi(A, b, x, iter_stop, res_stop, exec, conv_logger, output_level, time);
-    else
-      solve_CG(A, b, x, iter_stop, res_stop, exec, conv_logger, output_level, time);
+    solve_CG(A, b, x, prec, iter_stop, res_stop, exec, time);
+    break;
+  case OptionTypes::GMRES:
+    solve_GMRES(A, b, x, prec, iter_stop, res_stop, exec, time);
     break;
   case OptionTypes::BICG:
-    if (prec == 1)
-      solve_BICG_jacobi(A, b, x, iter_stop, res_stop, exec, conv_logger, output_level, time);
-    else
-      solve_BICG(A, b, x, iter_stop, res_stop, exec, conv_logger, output_level, time);
-
+    solve_BICG(A, b, x, prec, iter_stop, res_stop, exec, time);
     break;
   case OptionTypes::BICGSTAB:
-    if (prec == 1)
-      solve_BICGSTAB_jacobi(A, b, x, iter_stop, res_stop, exec, conv_logger, output_level, time);
-    else
-      solve_BICGSTAB(A, b, x, iter_stop, res_stop, exec, conv_logger, output_level, time);
+    solve_BICGSTAB(A, b, x, prec, iter_stop, res_stop, exec, time);
     break;
   default:
     alien_fatal([&] {
@@ -203,7 +170,7 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
     break;
   }
 
-  // get nb iterations + final residual
+  // Get nb iterations + final residual
   auto num_iters = conv_logger->get_num_iterations();
   auto residual_norm = conv_logger->get_residual_norm();
   auto vec_res_norm = reinterpret_cast<const gko::matrix::Dense<double>*>(residual_norm);
@@ -211,187 +178,24 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
 
   // Print infos
   std::cout << "===== SOLVER  RUN INFORMATION ===== " << std::endl;
+  display_solver_infos(m_options.solver(), m_options.preconditioner());
   std::cout << "Stop criteria Value : " << m_options.stopCriteriaValue() << std::endl;
   std::cout << "Solver has converged : " << conv_logger->has_converged() << std::endl;
   std::cout << "Nb iterations : " << num_iters << std::endl;
   std::cout << "Residual norm : " << res << std::endl;
   std::cout << "Execution time [ms]: " << static_cast<double>(time.count()) / 1000000.0 << std::endl;
   std::cout << "Time per iteration [ms]: " << static_cast<double>(time.count()) / 1000000.0 / num_iters << std::endl;
+  std::cout << "Iterations per second : " << num_iters / (static_cast<double>(time.count()) / 1000000.0) << std::endl;
   std::cout << "=================================== " << std::endl;
 
   // update the counters
   m_total_iter_num += num_iters;
   ++m_solve_num;
-  m_total_solve_time += tsolve.elapsed();
+  //m_total_solve_time += tsolve.elapsed();
 }
 
-void InternalLinearSolver::solve_CG_jacobi(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds& time)
+void InternalLinearSolver::solve_CG(const Matrix& A, const Vector& b, Vector& x, const int& prec, stop_iter_type& iter_stop, stop_res_type& res_stop, exec_type& exec, std::chrono::nanoseconds& time)
 {
-  std::cout << "----------- Solve with CG + Jacobi : " << std::endl;
-
-  auto solver_factory =
-  gko::solver::Cg<double>::build()
-  .with_preconditioner(
-  gko::preconditioner::Jacobi<>::build()
-  .on(exec))
-  .with_criteria(
-  gko::share(iter_stop),
-  gko::share(res_stop))
-  .on(exec);
-
-  // make a shared pointer on the matrix A
-  /* make_shared does not work : loses the pointer to the gko::executor ! */
-  auto pA = std::shared_ptr<const gko::matrix::Csr<double, int>>(A.internal(), [](auto* p) { std::cout << " Did not delete the shared_pointer ! " << std::endl; });
-
-  // Instantiate a ResidualLogger logger.
-  auto res_logger = std::make_shared<ResidualLogger<double>>(exec, gko::lend(pA), gko::lend(b.internal()));
-
-  if (output_level) {
-    // Add the previously created logger to the solver factory.
-    solver_factory->add_logger(res_logger);
-  }
-
-  // generate the solver
-  auto cg_solver = solver_factory->generate(share(pA));
-
-  // solve with timing
-  auto tic = std::chrono::steady_clock::now();
-  cg_solver->apply(lend(b.internal()), lend(x.internal()));
-  auto toc = std::chrono::steady_clock::now();
-  time += std::chrono::duration_cast<std::chrono::nanoseconds>(toc - tic);
-
-  if (output_level) {
-    // Print the table of the residuals obtained from the logger
-    res_logger->write();
-  }
-}
-
-void InternalLinearSolver::solve_GMRES_jacobi(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds& time)
-{
-  std::cout << "----------- Solve with GMRES + Jacobi : " << std::endl;
-
-  auto solver_factory =
-  gko::solver::Gmres<double>::build()
-  .with_preconditioner(
-  gko::preconditioner::Jacobi<>::build()
-  .on(exec))
-  .with_criteria(
-  gko::share(iter_stop),
-  gko::share(res_stop))
-  .on(exec);
-
-  // make a shared pointer on the matrix A
-  /* make_shared does not work : loses the pointer to the gko::executor ! */
-  auto pA = std::shared_ptr<const gko::matrix::Csr<double, int>>(A.internal(), [](auto* p) { std::cout << " Did not delete the shared_pointer ! " << std::endl; });
-
-  // Instantiate a ResidualLogger logger.
-  auto res_logger = std::make_shared<ResidualLogger<double>>(exec, gko::lend(pA), gko::lend(b.internal()));
-
-  if (output_level) {
-    // Add the previously created logger to the solver factory.
-    solver_factory->add_logger(res_logger);
-  }
-
-  // generate the solver
-  auto cg_solver = solver_factory->generate(share(pA));
-
-  // solve with timing
-  auto tic = std::chrono::steady_clock::now();
-  cg_solver->apply(lend(b.internal()), lend(x.internal()));
-  auto toc = std::chrono::steady_clock::now();
-  time += std::chrono::duration_cast<std::chrono::nanoseconds>(toc - tic);
-
-  if (output_level) {
-    // Print the table of the residuals obtained from the logger
-    res_logger->write();
-  }
-}
-
-void InternalLinearSolver::solve_BICG_jacobi(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds& time)
-{
-  std::cout << "----------- Solve with BICG + Jacobi : " << std::endl;
-
-  auto solver_factory =
-  gko::solver::Bicg<double>::build()
-  .with_preconditioner(
-  gko::preconditioner::Jacobi<>::build()
-  .on(exec))
-  .with_criteria(
-  gko::share(iter_stop),
-  gko::share(res_stop))
-  .on(exec);
-
-  // make a shared pointer on the matrix A
-  /* make_shared does not work : loses the pointer to the gko::executor ! */
-  auto pA = std::shared_ptr<const gko::matrix::Csr<double, int>>(A.internal(), [](auto* p) { std::cout << " Did not delete the shared_pointer ! " << std::endl; });
-
-  // Instantiate a ResidualLogger logger.
-  auto res_logger = std::make_shared<ResidualLogger<double>>(exec, gko::lend(pA), gko::lend(b.internal()));
-
-  if (output_level) {
-    // Add the previously created logger to the solver factory.
-    solver_factory->add_logger(res_logger);
-  }
-
-  // generate the solver
-  auto cg_solver = solver_factory->generate(share(pA));
-
-  // solve with timing
-  auto tic = std::chrono::steady_clock::now();
-  cg_solver->apply(lend(b.internal()), lend(x.internal()));
-  auto toc = std::chrono::steady_clock::now();
-  time += std::chrono::duration_cast<std::chrono::nanoseconds>(toc - tic);
-
-  if (output_level) {
-    // Print the table of the residuals obtained from the logger
-    res_logger->write();
-  }
-}
-
-void InternalLinearSolver::solve_BICGSTAB_jacobi(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds& time)
-{
-  std::cout << "----------- Solve with BICGSTAB + Jacobi : " << std::endl;
-
-  auto solver_factory =
-  gko::solver::Bicgstab<double>::build()
-  .with_preconditioner(
-  gko::preconditioner::Jacobi<>::build()
-  .on(exec))
-  .with_criteria(
-  gko::share(iter_stop),
-  gko::share(res_stop))
-  .on(exec);
-
-  // make a shared pointer on the matrix A
-  /* make_shared does not work : loses the pointer to the gko::executor ! */
-  auto pA = std::shared_ptr<const gko::matrix::Csr<double, int>>(A.internal(), [](auto* p) { std::cout << " Did not delete the shared_pointer ! " << std::endl; });
-
-  // Instantiate a ResidualLogger logger.
-  auto res_logger = std::make_shared<ResidualLogger<double>>(exec, gko::lend(pA), gko::lend(b.internal()));
-
-  if (output_level) {
-    // Add the previously created logger to the solver factory.
-    solver_factory->add_logger(res_logger);
-  }
-
-  // generate the solver
-  auto cg_solver = solver_factory->generate(share(pA));
-
-  // solve with timing
-  auto tic = std::chrono::steady_clock::now();
-  cg_solver->apply(lend(b.internal()), lend(x.internal()));
-  auto toc = std::chrono::steady_clock::now();
-  time += std::chrono::duration_cast<std::chrono::nanoseconds>(toc - tic);
-
-  if (output_level) {
-    // Print the table of the residuals obtained from the logger
-    res_logger->write();
-  }
-}
-
-void InternalLinearSolver::solve_CG(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds& time)
-{
-  std::cout << "----------- Solve with CG + no PREC : " << std::endl;
 
   auto solver_factory =
   gko::solver::Cg<double>::build()
@@ -400,36 +204,28 @@ void InternalLinearSolver::solve_CG(const Matrix& A, const Vector& b, Vector& x,
   gko::share(res_stop))
   .on(exec);
 
-  // make a shared pointer on the matrix A
-  /* make_shared does not work : loses the pointer to the gko::executor ! */
+  // make a shared pointer on the matrix A, make_shared does not work : loses the pointer to the gko::executor !
   auto pA = std::shared_ptr<const gko::matrix::Csr<double, int>>(A.internal(), [](auto* p) { std::cout << " Did not delete the shared_pointer ! " << std::endl; });
 
-  // Instantiate a ResidualLogger logger.
-  auto res_logger = std::make_shared<ResidualLogger<double>>(exec, gko::lend(pA), gko::lend(b.internal()));
-
-  if (output_level) {
-    // Add the previously created logger to the solver factory.
-    solver_factory->add_logger(res_logger);
-  }
-
   // generate the solver
-  auto cg_solver = solver_factory->generate(share(pA));
+  auto solver = solver_factory->generate(pA);
+
+  // generate and set the preconditioner
+  if (prec == 1) {
+    using Preconditioner = typename gko::preconditioner::Jacobi<double>;
+    std::shared_ptr<Preconditioner> new_prec = Preconditioner::build().on(exec)->generate(pA);
+    solver->set_preconditioner(new_prec);
+  }
 
   // solve with timing
   auto tic = std::chrono::steady_clock::now();
-  cg_solver->apply(lend(b.internal()), lend(x.internal()));
+  solver->apply(lend(b.internal()), lend(x.internal()));
   auto toc = std::chrono::steady_clock::now();
   time += std::chrono::duration_cast<std::chrono::nanoseconds>(toc - tic);
-
-  if (output_level) {
-    // Print the table of the residuals obtained from the logger
-    res_logger->write();
-  }
 }
 
-void InternalLinearSolver::solve_GMRES(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds& time)
+void InternalLinearSolver::solve_GMRES(const Matrix& A, const Vector& b, Vector& x, const int& prec, stop_iter_type& iter_stop, stop_res_type& res_stop, exec_type& exec, std::chrono::nanoseconds& time)
 {
-  std::cout << "----------- Solve with GMRES + no PREC : " << std::endl;
 
   auto solver_factory =
   gko::solver::Gmres<double>::build()
@@ -438,36 +234,28 @@ void InternalLinearSolver::solve_GMRES(const Matrix& A, const Vector& b, Vector&
   gko::share(res_stop))
   .on(exec);
 
-  // make a shared pointer on the matrix A
-  /* make_shared does not work : loses the pointer to the gko::executor ! */
+  // make a shared pointer on the matrix A, make_shared does not work : loses the pointer to the gko::executor !
   auto pA = std::shared_ptr<const gko::matrix::Csr<double, int>>(A.internal(), [](auto* p) { std::cout << " Did not delete the shared_pointer ! " << std::endl; });
 
-  // Instantiate a ResidualLogger logger.
-  auto res_logger = std::make_shared<ResidualLogger<double>>(exec, gko::lend(pA), gko::lend(b.internal()));
-
-  if (output_level) {
-    // Add the previously created logger to the solver factory.
-    solver_factory->add_logger(res_logger);
-  }
-
   // generate the solver
-  auto cg_solver = solver_factory->generate(share(pA));
+  auto solver = solver_factory->generate(pA);
+
+  // generate and set the preconditioner
+  if (prec == 1) {
+    using Preconditioner = typename gko::preconditioner::Jacobi<double>;
+    std::shared_ptr<Preconditioner> new_prec = Preconditioner::build().on(exec)->generate(pA);
+    solver->set_preconditioner(new_prec);
+  }
 
   // solve with timing
   auto tic = std::chrono::steady_clock::now();
-  cg_solver->apply(lend(b.internal()), lend(x.internal()));
+  solver->apply(lend(b.internal()), lend(x.internal()));
   auto toc = std::chrono::steady_clock::now();
   time += std::chrono::duration_cast<std::chrono::nanoseconds>(toc - tic);
-
-  if (output_level) {
-    // Print the table of the residuals obtained from the logger
-    res_logger->write();
-  }
 }
 
-void InternalLinearSolver::solve_BICG(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds& time)
+void InternalLinearSolver::solve_BICG(const Matrix& A, const Vector& b, Vector& x, const int& prec, stop_iter_type& iter_stop, stop_res_type& res_stop, exec_type& exec, std::chrono::nanoseconds& time)
 {
-  std::cout << "----------- Solve with BICG + no PREC : " << std::endl;
 
   auto solver_factory =
   gko::solver::Bicg<double>::build()
@@ -476,37 +264,28 @@ void InternalLinearSolver::solve_BICG(const Matrix& A, const Vector& b, Vector& 
   gko::share(res_stop))
   .on(exec);
 
-  // make a shared pointer on the matrix A
-  /* make_shared does not work : loses the pointer to the gko::executor ! */
+  // make a shared pointer on the matrix A, make_shared does not work : loses the pointer to the gko::executor !
   auto pA = std::shared_ptr<const gko::matrix::Csr<double, int>>(A.internal(), [](auto* p) { std::cout << " Did not delete the shared_pointer ! " << std::endl; });
 
-  // Instantiate a ResidualLogger logger.
-  auto res_logger = std::make_shared<ResidualLogger<double>>(exec, gko::lend(pA), gko::lend(b.internal()));
-
-  if (output_level) {
-    // Add the previously created logger to the solver factory.
-    solver_factory->add_logger(res_logger);
-  }
-
   // generate the solver
-  auto cg_solver = solver_factory->generate(share(pA));
+  auto solver = solver_factory->generate(pA);
+
+  // generate and set the preconditioner
+  if (prec == 1) {
+    using Preconditioner = typename gko::preconditioner::Jacobi<double>;
+    std::shared_ptr<Preconditioner> new_prec = Preconditioner::build().on(exec)->generate(pA);
+    solver->set_preconditioner(new_prec);
+  }
 
   // solve with timing
   auto tic = std::chrono::steady_clock::now();
-  cg_solver->apply(lend(b.internal()), lend(x.internal()));
+  solver->apply(lend(b.internal()), lend(x.internal()));
   auto toc = std::chrono::steady_clock::now();
   time += std::chrono::duration_cast<std::chrono::nanoseconds>(toc - tic);
-
-  if (output_level) {
-    // Print the table of the residuals obtained from the logger
-    res_logger->write();
-  }
 }
 
-void InternalLinearSolver::solve_BICGSTAB(const Matrix& A, const Vector& b, Vector& x, auto& iter_stop, auto& res_stop, auto& exec, auto& conv_logger, const int& output_level, std::chrono::nanoseconds& time)
+void InternalLinearSolver::solve_BICGSTAB(const Matrix& A, const Vector& b, Vector& x, const int& prec, stop_iter_type& iter_stop, stop_res_type& res_stop, exec_type& exec, std::chrono::nanoseconds& time)
 {
-  std::cout << "----------- Solve with BICGSTAB + no PREC : " << std::endl;
-
   auto solver_factory =
   gko::solver::Bicgstab<double>::build()
   .with_criteria(
@@ -514,30 +293,58 @@ void InternalLinearSolver::solve_BICGSTAB(const Matrix& A, const Vector& b, Vect
   gko::share(res_stop))
   .on(exec);
 
-  // make a shared pointer on the matrix A
-  /* make_shared does not work : loses the pointer to the gko::executor ! */
+  // make a shared pointer on the matrix A, make_shared does not work : loses the pointer to the gko::executor !
   auto pA = std::shared_ptr<const gko::matrix::Csr<double, int>>(A.internal(), [](auto* p) { std::cout << " Did not delete the shared_pointer ! " << std::endl; });
 
-  // Instantiate a ResidualLogger logger.
-  auto res_logger = std::make_shared<ResidualLogger<double>>(exec, gko::lend(pA), gko::lend(b.internal()));
-
-  if (output_level) {
-    // Add the previously created logger to the solver factory.
-    solver_factory->add_logger(res_logger);
-  }
-
   // generate the solver
-  auto cg_solver = solver_factory->generate(share(pA));
+  auto solver = solver_factory->generate(pA);
+
+  // generate and set the preconditioner
+  if (prec == 1) {
+    using Preconditioner = typename gko::preconditioner::Jacobi<double>;
+    std::shared_ptr<Preconditioner> new_prec = Preconditioner::build().on(exec)->generate(pA);
+    solver->set_preconditioner(new_prec);
+  }
 
   // solve with timing
   auto tic = std::chrono::steady_clock::now();
-  cg_solver->apply(lend(b.internal()), lend(x.internal()));
+  solver->apply(lend(b.internal()), lend(x.internal()));
   auto toc = std::chrono::steady_clock::now();
   time += std::chrono::duration_cast<std::chrono::nanoseconds>(toc - tic);
+}
 
-  if (output_level) {
-    // Print the table of the residuals obtained from the logger
-    res_logger->write();
+void InternalLinearSolver::display_solver_infos(const Alien::Ginkgo::OptionTypes::eSolver& solver, const Alien::Ginkgo::OptionTypes::ePreconditioner& prec)
+{
+  std::cout << "Solver : ";
+  switch (solver) {
+  case OptionTypes::CG:
+    std::cout << "CG" << std::endl;
+    break;
+  case OptionTypes::GMRES:
+    std::cout << "GMRES" << std::endl;
+    break;
+  case OptionTypes::BICG:
+    std::cout << "BICG" << std::endl;
+    break;
+  case OptionTypes::BICGSTAB:
+    std::cout << "BICGSTAB" << std::endl;
+    break;
+  default:
+    std::cout << "undefined !" << std::endl;
+    break;
+  }
+
+  std::cout << "Preconditioner : ";
+  switch (prec) {
+  case OptionTypes::Jacobi:
+    std::cout << "Jacobi" << std::endl;
+    break;
+  case OptionTypes::NoPC:
+    std::cout << "No preconditioner" << std::endl;
+    break;
+  default:
+    std::cout << "undefined !" << std::endl;
+    break;
   }
 }
 

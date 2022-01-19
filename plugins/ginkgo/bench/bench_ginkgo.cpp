@@ -24,7 +24,6 @@
 #include <alien/ginkgo/backend.h>
 #include <alien/ginkgo/options.h>
 
-
 // tmp read from mtx
 #include <fstream>
 
