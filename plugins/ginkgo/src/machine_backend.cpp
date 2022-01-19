@@ -22,58 +22,51 @@ namespace Alien::Ginkgo
 {
 
 #ifdef ALIEN_PLUGIN_GINKGO_REF
-  std::string ginkgo_executor::target_machine = "reference";
+std::string ginkgo_executor::target_machine = "reference";
 #elif ALIEN_PLUGIN_GINKGO_OMP
-  std::string ginkgo_executor::target_machine = "omp";
+std::string ginkgo_executor::target_machine = "omp";
 #elif ALIEN_PLUGIN_GINKGO_CUDA
-  std::string ginkgo_executor::target_machine = "cuda";
+std::string ginkgo_executor::target_machine = "cuda";
 #elif ALIEN_PLUGIN_GINKGO_HIP
-  std::string ginkgo_executor::target_machine = "hip";
+std::string ginkgo_executor::target_machine = "hip";
 #elif ALIEN_PLUGIN_GINKGO_DPCPP
-  std::string ginkgo_executor::target_machine = "dpcpp";
+std::string ginkgo_executor::target_machine = "dpcpp";
 #else
-  std::string ginkgo_executor::target_machine = "default";
+std::string ginkgo_executor::target_machine = "default";
 #endif
-
 
 std::map<std::string, std::function<std::shared_ptr<gko::Executor>()>>
 ginkgo_executor::exec_map{
   { "omp",
     [] {
-        std::cout <<"----------- Using Alien plugin GINKGO with OMP Executor" << std::endl;
-        return gko::OmpExecutor::create();
-    }
-  },
+      std::cout << "----------- Using Alien plugin GINKGO with OMP Executor" << std::endl;
+      return gko::OmpExecutor::create();
+    } },
   { "cuda",
     [] {
-        std::cout <<"----------- Using Alien plugin GINKGO with CUDA Executor" << std::endl;
-        return gko::CudaExecutor::create(0, gko::OmpExecutor::create(), true);
-    }
-  },
+      std::cout << "----------- Using Alien plugin GINKGO with CUDA Executor" << std::endl;
+      return gko::CudaExecutor::create(0, gko::OmpExecutor::create(), true);
+    } },
   { "hip",
     [] {
-        std::cout <<"----------- Using Alien plugin GINKGO with HIP Executor" << std::endl;
-        return gko::HipExecutor::create(0, gko::OmpExecutor::create(), true);
-    }
-  },
+      std::cout << "----------- Using Alien plugin GINKGO with HIP Executor" << std::endl;
+      return gko::HipExecutor::create(0, gko::OmpExecutor::create(), true);
+    } },
   { "dpcpp",
     [] {
-        std::cout <<"----------- Using Alien plugin GINKGO with DPCPP Executor" << std::endl;
-        return gko::DpcppExecutor::create(0, gko::OmpExecutor::create());
-    }
-  },
+      std::cout << "----------- Using Alien plugin GINKGO with DPCPP Executor" << std::endl;
+      return gko::DpcppExecutor::create(0, gko::OmpExecutor::create());
+    } },
   { "reference",
-      [] {
-          std::cout <<"----------- Using Alien plugin GINKGO with REFERENCE Executor" << std::endl;
-          return gko::ReferenceExecutor::create();
-      }
-  },
-    { "default",
-      [] {
-        std::cout <<"----------- No Ginkgo Executor specified !" << std::endl;
-        std::cout <<"----------- Using FALLBACK : Alien plugin GINKGO with REFERENCE Executor" << std::endl;
-        return gko::ReferenceExecutor::create();
-      }
-    }
+    [] {
+      std::cout << "----------- Using Alien plugin GINKGO with REFERENCE Executor" << std::endl;
+      return gko::ReferenceExecutor::create();
+    } },
+  { "default",
+    [] {
+      std::cout << "----------- No Ginkgo Executor specified !" << std::endl;
+      std::cout << "----------- Using FALLBACK : Alien plugin GINKGO with REFERENCE Executor" << std::endl;
+      return gko::ReferenceExecutor::create();
+    } }
 };
 } // namespace Alien::Ginkgo
