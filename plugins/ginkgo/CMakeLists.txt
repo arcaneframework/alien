@@ -33,7 +33,8 @@ add_library(alien_ginkgo
         src/vector.cpp
         src/ginkgo_linear_algebra.cpp
         src/ginkgo_linear_solver.cpp
-        src/machine_backend.cpp
+		src/ginkgo_linear_solver.h
+		src/machine_backend.cpp
         src/converters/simplecsr_to_ginkgo_matrix.cpp
         src/converters/simplecsr_to_ginkgo_vector.cpp
         )

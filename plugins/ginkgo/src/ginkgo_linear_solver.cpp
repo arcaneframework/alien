@@ -16,101 +16,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "matrix.h"
-#include "vector.h"
-#include "ginkgo_logger.h"
-
-#include <boost/timer.hpp>
-
-#include <arccore/message_passing_mpi/MpiMessagePassingMng.h>
-
-#include <alien/expression/solver/SolverStater.h>
-#include <alien/core/backend/LinearSolverT.h>
-
-#include <alien/ginkgo/backend.h>
-#include <alien/ginkgo/options.h>
-#include <alien/ginkgo/export.h>
-
-#include <core/solver/cg.hpp>
-#include <core/stop/iteration.hpp>
-#include <core/stop/residual_norm.hpp>
-
-#include <memory>
-#include <core/log/convergence.hpp>
-
-namespace Alien
-{
-// Compile GinkgoLinearSolver.
-template class ALIEN_GINKGO_EXPORT LinearSolver<BackEnd::tag::ginkgo>;
-
-} // namespace Alien
-
-namespace Alien::Ginkgo
-{
-class InternalLinearSolver
-: public IInternalLinearSolver<Matrix, Vector>
-, public ObjectWithTrace
-{
- public:
-  typedef SolverStatus Status;
-  InternalLinearSolver();
-  explicit InternalLinearSolver(const Options& options);
-  ~InternalLinearSolver() override = default;
-
- public:
-  // Nothing to do
-  void updateParallelMng(
-  Arccore::MessagePassing::IMessagePassingMng* pm) override {}
-
-  bool solve(const Matrix& A, const Vector& b, Vector& x) override;
-  bool hasParallelSupport() const override { return true; }
-
-  //! Etat du solveur
-  const Status& getStatus() const override;
-  const SolverStat& getSolverStat() const override { return m_stat; }
-
-  std::shared_ptr<ILinearAlgebra> algebra() const override;
-
- private:
-  Status m_status;
-  Arccore::Real m_init_time{ 0.0 };
-  Arccore::Real m_total_solve_time{ 0.0 };
-  Arccore::Integer m_solve_num{ 0 };
-  Arccore::Integer m_total_iter_num{ 0 };
-
-  SolverStat m_stat;
-  Options m_options;
-
- private:
-  using stop_iter_type = std::unique_ptr<gko::stop::Iteration::Factory, std::default_delete<gko::stop::Iteration::Factory>>;
-  using stop_res_type = std::unique_ptr<gko::stop::AbsoluteResidualNorm<>::Factory, std::default_delete<gko::stop::AbsoluteResidualNorm<>::Factory>>;
-  using exec_type = std::shared_ptr<const gko::Executor>;
-
-  void solve_CG(const Matrix& A, const Vector& b, Vector& x, const int& prec, stop_iter_type& iter_stop, stop_res_type& res_stop, exec_type& exec, std::chrono::nanoseconds& time);
-  void solve_GMRES(const Matrix& A, const Vector& b, Vector& x, const int& prec, stop_iter_type& iter_stop, stop_res_type& res_stop, exec_type& exec, std::chrono::nanoseconds& time);
-  void solve_BICG(const Matrix& A, const Vector& b, Vector& x, const int& prec, stop_iter_type& iter_stop, stop_res_type& res_stop, exec_type& exec, std::chrono::nanoseconds& time);
-  void solve_BICGSTAB(const Matrix& A, const Vector& b, Vector& x, const int& prec, stop_iter_type& iter_stop, stop_res_type& res_stop, exec_type& exec, std::chrono::nanoseconds& time);
-  void display_solver_infos(const Alien::Ginkgo::OptionTypes::eSolver& solver, const Alien::Ginkgo::OptionTypes::ePreconditioner& prec);
-};
-
-InternalLinearSolver::InternalLinearSolver()
-{
-  boost::timer tinit;
-  m_init_time += tinit.elapsed();
-}
-
-InternalLinearSolver::InternalLinearSolver(const Options& options)
-: m_options(options)
-{
-  boost::timer tinit;
-  m_init_time += tinit.elapsed();
-}
+#include "ginkgo_linear_solver.h"
 
 bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
 {
-  // Macro "pratique" en attendant de trouver mieux
-  // boost::timer tsolve;
-
   // preconditioner's choice
   int prec;
   switch (m_options.preconditioner()) {
@@ -178,20 +87,29 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
 
   // Print infos
   std::cout << "===== SOLVER  RUN INFORMATION ===== " << std::endl;
+  std::cout << "Ginkgo Executor : " << Alien::Ginkgo::ginkgo_executor::target_machine << std::endl;
   display_solver_infos(m_options.solver(), m_options.preconditioner());
   std::cout << "Stop criteria Value : " << m_options.stopCriteriaValue() << std::endl;
   std::cout << "Solver has converged : " << conv_logger->has_converged() << std::endl;
   std::cout << "Nb iterations : " << num_iters << std::endl;
   std::cout << "Residual norm : " << res << std::endl;
-  std::cout << "Execution time [ms]: " << static_cast<double>(time.count()) / 1000000.0 << std::endl;
-  std::cout << "Time per iteration [ms]: " << static_cast<double>(time.count()) / 1000000.0 / num_iters << std::endl;
-  std::cout << "Iterations per second : " << num_iters / (static_cast<double>(time.count()) / 1000000.0) << std::endl;
+
+  std::cout << "Execution time [ms]: " << static_cast<double>(time.count()) / 10e6 << std::endl;
+  std::cout << "Execution time [s]: " << static_cast<double>(time.count()) / 10e9 << std::endl;
+  std::cout << "Iterations per time [s]: " << num_iters / (static_cast<double>(time.count()) / 10e9) << std::endl;
   std::cout << "=================================== " << std::endl;
 
-  // update the counters
-  m_total_iter_num += num_iters;
+  // update solver status
+  m_status.residual = res;
+  m_status.iteration_count = num_iters;
+  m_status.succeeded = conv_logger->has_converged();
+
+  // update solver infos
+  m_total_iter_num += m_status.iteration_count;
   ++m_solve_num;
-  //m_total_solve_time += tsolve.elapsed();
+  m_total_solve_time += static_cast<double>(time.count()) / 10e9;
+
+  return m_status.succeeded;
 }
 
 void InternalLinearSolver::solve_CG(const Matrix& A, const Vector& b, Vector& x, const int& prec, stop_iter_type& iter_stop, stop_res_type& res_stop, exec_type& exec, std::chrono::nanoseconds& time)
@@ -205,7 +123,7 @@ void InternalLinearSolver::solve_CG(const Matrix& A, const Vector& b, Vector& x,
   .on(exec);
 
   // make a shared pointer on the matrix A, make_shared does not work : loses the pointer to the gko::executor !
-  auto pA = std::shared_ptr<const gko::matrix::Csr<double, int>>(A.internal(), [](auto* p) { std::cout << " Did not delete the shared_pointer ! " << std::endl; });
+  auto pA = std::shared_ptr<const gko::matrix::Csr<double, int>>(A.internal(), [](auto* p) {});
 
   // generate the solver
   auto solver = solver_factory->generate(pA);
@@ -235,7 +153,7 @@ void InternalLinearSolver::solve_GMRES(const Matrix& A, const Vector& b, Vector&
   .on(exec);
 
   // make a shared pointer on the matrix A, make_shared does not work : loses the pointer to the gko::executor !
-  auto pA = std::shared_ptr<const gko::matrix::Csr<double, int>>(A.internal(), [](auto* p) { std::cout << " Did not delete the shared_pointer ! " << std::endl; });
+  auto pA = std::shared_ptr<const gko::matrix::Csr<double, int>>(A.internal(), [](auto* p) {});
 
   // generate the solver
   auto solver = solver_factory->generate(pA);
@@ -265,7 +183,7 @@ void InternalLinearSolver::solve_BICG(const Matrix& A, const Vector& b, Vector& 
   .on(exec);
 
   // make a shared pointer on the matrix A, make_shared does not work : loses the pointer to the gko::executor !
-  auto pA = std::shared_ptr<const gko::matrix::Csr<double, int>>(A.internal(), [](auto* p) { std::cout << " Did not delete the shared_pointer ! " << std::endl; });
+  auto pA = std::shared_ptr<const gko::matrix::Csr<double, int>>(A.internal(), [](auto* p) {});
 
   // generate the solver
   auto solver = solver_factory->generate(pA);
@@ -294,7 +212,7 @@ void InternalLinearSolver::solve_BICGSTAB(const Matrix& A, const Vector& b, Vect
   .on(exec);
 
   // make a shared pointer on the matrix A, make_shared does not work : loses the pointer to the gko::executor !
-  auto pA = std::shared_ptr<const gko::matrix::Csr<double, int>>(A.internal(), [](auto* p) { std::cout << " Did not delete the shared_pointer ! " << std::endl; });
+  auto pA = std::shared_ptr<const gko::matrix::Csr<double, int>>(A.internal(), [](auto* p) {});
 
   // generate the solver
   auto solver = solver_factory->generate(pA);
