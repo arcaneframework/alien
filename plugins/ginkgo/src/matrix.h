@@ -17,10 +17,15 @@
  */
 
 #pragma once
-#include <memory>
+
 #include <alien/core/impl/IMatrixImpl.h>
 
+#include <alien/ginkgo/backend.h>
+#include <alien/ginkgo/machine_backend.h>
+
 #include <ginkgo/core/matrix/csr.hpp>
+
+#include <memory>
 
 namespace Alien::Ginkgo
 {

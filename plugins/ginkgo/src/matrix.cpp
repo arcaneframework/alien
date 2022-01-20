@@ -18,8 +18,6 @@
 
 #include "matrix.h"
 
-#include <alien/ginkgo/backend.h>
-#include <alien/ginkgo/machine_backend.h>
 #include <alien/core/impl/MultiMatrixImpl.h>
 
 #include <arccore/message_passing_mpi/MpiMessagePassingMng.h>
