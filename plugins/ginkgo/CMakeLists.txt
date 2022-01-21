@@ -37,6 +37,7 @@ add_library(alien_ginkgo
 		src/machine_backend.cpp
         src/converters/simplecsr_to_ginkgo_matrix.cpp
         src/converters/simplecsr_to_ginkgo_vector.cpp
+		src/converters/ginkgo_to_simplecsr_vector.cpp
         )
 
 target_link_libraries(alien_ginkgo PUBLIC

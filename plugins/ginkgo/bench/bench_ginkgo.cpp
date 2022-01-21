@@ -77,17 +77,13 @@ int test(const Alien::Ginkgo::OptionTypes::eSolver& solv, const Alien::Ginkgo::O
 {
   auto* pm = Arccore::MessagePassing::Mpi::StandaloneMpiMessagePassingMng::create(MPI_COMM_WORLD);
   auto* tm = Arccore::arccoreCreateDefaultTraceMng();
-
   Alien::setTraceMng(tm);
-  Alien::setVerbosityLevel(Alien::Verbosity::Debug);
 
   auto A = Alien::Move::readFromMatrixMarket(pm, mat_filename);
 
   /**
 	 *  Vecteur xe (ones)
 	 *********************/
-
-  tm->info() << "* xe = 1";
   auto xe = Alien::Move::VectorData(A.distribution().colDistribution());
   {
     Alien::Move::LocalVectorWriter v_build(std::move(xe));
@@ -96,68 +92,73 @@ int test(const Alien::Ginkgo::OptionTypes::eSolver& solv, const Alien::Ginkgo::O
     }
     xe = v_build.release();
   }
-
-  tm->info() << "=> Vector Distribution : " << xe.distribution();
+  xe.distribution();
 
   /**
 	 *  Vecteur b
 	 *************/
-
   Alien::Move::VectorData b(A.rowSpace(), A.distribution().rowDistribution());
   Alien::Ginkgo::LinearAlgebra algebra;
 
   if (vec_filename != "") { // Read vector data from mtx file and write it into Alien Vector
     tm->info() << "Read vector file : " << vec_filename;
     std::vector<double> values = readFromMtx(vec_filename);
-    int vec_size = values.size();
+    size_t vec_size = values.size();
 
     Alien::Move::VectorWriter writer(std::move(b));
-    for (int i = 0; i < vec_size; i++) {
+    for (auto i = 0u; i < vec_size; i++) {
       writer[i] = values[i];
     }
     b = writer.release();
   }
-  else { // Init b with A * xe
+  else { // OR init b with A * xe
     tm->info() << "* b = A * xe";
     algebra.mult(A, xe, b);
   }
 
   /**
-	 *  Calcul x, tq : Ax = b 
+	 *  Préparation du solveur pour le calcul de x, tq : Ax = b
 	 ********************************************/
-  tm->info() << "* Calcul de x, tel que  :  A x = b";
   Alien::Move::VectorData x(A.colSpace(), A.distribution().rowDistribution());
-
-  /** Add initial guess for x ?? */
-
   Alien::Ginkgo::Options options;
   options.numIterationsMax(500);
   options.stopCriteriaValue(1e-9);
   options.preconditioner(prec); // Jacobi, NoPC
   options.solver(solv); //CG, GMRES, BICG, BICGSTAB
   auto solver = Alien::Ginkgo::LinearSolver(options);
-  solver.solve(A, b, x);
 
   /**
-	 *  Calcul du résidu ||Ax - b|| ~ 0
+	 *  BENCH
 	 ********************************************/
-  {
-    tm->info() << "* r = Ax - b";
 
+  int nbRuns = 5;
+  for (int i = 0; i < nbRuns; i++) {
+    std::cout << "\n************************************************** " << std::endl;
+    std::cout << "*                   RUN  # " << i << "                     * " << std::endl;
+    std::cout << "************************************************** \n"
+              << std::endl;
+
+    // init vector x with zeros
+    Alien::Move::VectorWriter writer(std::move(x));
+    for (int i = 0; i < writer.size(); i++) {
+      writer[i] = 0;
+    }
+    x = writer.release();
+
+    // solve
+    solver.solve(A, b, x);
+
+    // compute residual ||Ax - b|| ~ 0
     Alien::Move::VectorData r(A.rowSpace(), A.distribution().rowDistribution());
     algebra.mult(A, x, r);
-
-    tm->info() << "r -= b";
     algebra.axpy(-1., b, r);
-
     auto norm = algebra.norm2(r);
     auto norm_b = algebra.norm2(b);
-
     tm->info() << " => ||r|| = " << norm << " ; ||r||/||b|| = " << norm / norm_b;
   }
 
   tm->info() << " ";
-  tm->info() << "... example finished !!!";
+  tm->info() << "... bench finished !!!";
 
   return 0;
 }
@@ -230,9 +231,6 @@ int main(int argc, char** argv)
   auto ret = 0;
   try {
     ret = test(solver, prec, matrix_file, vec_file);
-    // ret = test("matrix_first.mtx", "vector_first.mtx");
-    // ret = test("mesh1em6.mtx");
-    //  ret = test("msc00726.mtx");
   }
   catch (const Arccore::Exception& ex) {
     std::cerr << "Exception: " << ex << '\n';

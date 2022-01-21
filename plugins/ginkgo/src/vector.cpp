@@ -36,7 +36,7 @@ Vector::Vector(const MultiVectorImpl* multi_impl)
            << multi_impl->space().size();
     cout() << "data size : "
            << data.get_size()[0] << "row "
-           << " - " << data.get_size()[0] << " cols";
+           << " - " << data.get_size()[1] << " cols";
   });
 }
 
@@ -52,13 +52,20 @@ void Vector::setValues(Arccore::ConstArrayView<double> values)
 {
   auto ncols = values.size();
   for (auto icol = 0; icol < ncols; ++icol) {
-
     data.add_value(icol, 0, values[icol]);
   }
 }
 
 void Vector::getValues(Arccore::ArrayView<double> values) const
 {
+  // get internal ginkgo values, and write them into values array.
+  const double* ginkgo_values = this->get_const_values();
+
+  int icol = data.get_size()[0];
+
+  for (int i = 0; i < icol; i++) {
+    values.setAt(i, ginkgo_values[i]);
+  }
 }
 
 void Vector::assemble()
