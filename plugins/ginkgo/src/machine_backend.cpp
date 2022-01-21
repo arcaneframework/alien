@@ -39,27 +39,22 @@ std::map<std::string, std::function<std::shared_ptr<gko::Executor>()>>
 ginkgo_executor::exec_map{
   { "omp",
     [] {
-      std::cout << "----------- Using Alien plugin GINKGO with OMP Executor" << std::endl;
       return gko::OmpExecutor::create();
     } },
   { "cuda",
     [] {
-      std::cout << "----------- Using Alien plugin GINKGO with CUDA Executor" << std::endl;
       return gko::CudaExecutor::create(0, gko::OmpExecutor::create(), true);
     } },
   { "hip",
     [] {
-      std::cout << "----------- Using Alien plugin GINKGO with HIP Executor" << std::endl;
       return gko::HipExecutor::create(0, gko::OmpExecutor::create(), true);
     } },
   { "dpcpp",
     [] {
-      std::cout << "----------- Using Alien plugin GINKGO with DPCPP Executor" << std::endl;
       return gko::DpcppExecutor::create(0, gko::OmpExecutor::create());
     } },
   { "reference",
     [] {
-      std::cout << "----------- Using Alien plugin GINKGO with REFERENCE Executor" << std::endl;
       return gko::ReferenceExecutor::create();
     } },
   { "default",
