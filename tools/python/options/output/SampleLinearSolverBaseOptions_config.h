@@ -1,4 +1,10 @@
 
+
+
+
+
+
+
 /*
  * BaseOption.h Generated file
  */
@@ -20,48 +26,140 @@ class SampleLinearSolverBaseOptionsJSONConfigSetter ;
 class SampleLinearSolverBaseOptions
 {
 public:
-  class ComplexOptBaseOptions
-  {
-  public:
-    ComplexOptBaseOptions(SampleLinearSolverBaseOptions const* parent)
-    : m_parent(parent)
-    {}
-
-    ComplexOptBaseOptions const* operator ->() const {
-        return this ;
-    }
-
-    static void init(cxxopts::Options& options)
-    {
-       options.add_options("Group options for complex SampleLinearSolver")
-           // REGISTER SIMPLE OPTIONS
-           ("complex-opt-sopt", " sopt integer option of complex complex-opt option ", cxxopts::value<Arccore::Integer>())
-           // REGISTER ENUM OPTIONS
-           ("complex-opt-eopt", "eopt enum option of complex complex-opt option", cxxopts::value<std::string>()->default_value("EOpt0"))
-            ;
-    }
-
-    /*
-     * ACCESSORS
-     */
-    // SIMPLE OPTIONS ACCESSORS
-    //! sopt option accessor
-    Arccore::Integer const& sopt() const {
-         return m_parent->m_results["complex-opt-sopt"].as<Arccore::Integer>() ;
-    }
+  
+		/*
+		 * COMPLEX OPTIONS DECLARATION
+		 */
+		class ComplexOptBaseOptions
+		{
+		public:
+                
+			/*
+			 * COMPLEX OPTIONS DECLARATION
+			 */
+			class CoptBaseOptions
+			{
+			public:
+                
+				/*
+				 * COMPLEX OPTIONS DECLARATION
+				 */
 
 
-    // ENUM OPTIONS ACCESSOR
-    //! eopt option accessor
-    SampleOptionTypes::eOpt eopt() const {
-          return SamplelinearsolverBaseOptionsEnum::EoptStringToEnum(m_parent->m_results["complex-opt-eopt"].as<std::string>()) ;
-    }
+			  CoptBaseOptions(SampleLinearSolverBaseOptions const* parent)
+			  : m_parent(parent)
+			  {}
+
+			  CoptBaseOptions const* operator ->() const {
+			      return this ;
+			  }
+
+			  static void init(cxxopts::Options& options)
+			  {
+			      options.add_options("Group options for complex complex-opt-copt")
+                      
+							// REGISTER SIMPLE OPTIONS
+							("complex-opt-copt-sopt", " sopt real option of complex copt option ", cxxopts::value<Arccore::Real>())
+							// REGISTER ENUM OPTIONS
+
+			      ;
+
+			      // REGISTER COMPLEX OPTIONS
+			  }
+
+			  void checkMissingOptions()
+			  {
+                  
+					//! sopt option
+					if(m_parent->m_results.count("complex-opt-copt-sopt") == 0)
+					     throw Arccore::FatalErrorException(A_FUNCINFO, "Error missing mandatory option : complex-opt-copt-sopt ");
+
+			  }
+
+                
+			/*
+			 * ACCESSORS
+			 */
+			// SIMPLE OPTIONS ACCESSORS
+			//! sopt option accessor
+			Arccore::Real const& sopt() const {
+			  return m_parent->m_results["complex-opt-copt-sopt"].as<Arccore::Real>() ;
+			}
+
+			// ENUM OPTIONS ACCESSOR
+
+			// COMPLEX OPTIONS ACCESSOR
 
 
-  private:
-    SampleLinearSolverBaseOptions const* m_parent = nullptr ;
-  } ;
-  friend class ComplexOptBaseOptions ;
+			private:
+			  SampleLinearSolverBaseOptions const* m_parent = nullptr ;
+			} ;
+			friend class CoptBaseOptions ;
+
+
+		  ComplexOptBaseOptions(SampleLinearSolverBaseOptions const* parent)
+		  : m_parent(parent)
+		  {}
+
+		  ComplexOptBaseOptions const* operator ->() const {
+		      return this ;
+		  }
+
+		  static void init(cxxopts::Options& options)
+		  {
+		      options.add_options("Group options for complex complex-opt")
+                      
+						// REGISTER SIMPLE OPTIONS
+						("complex-opt-sopt", " sopt integer option of complex complex-opt option ", cxxopts::value<Arccore::Integer>())
+						// REGISTER ENUM OPTIONS
+						("complex-opt-eopt", "eopt enum option of complex complex-opt option", cxxopts::value<std::string>()->default_value("EOpt0"))
+
+		      ;
+
+		      // REGISTER COMPLEX OPTIONS
+		      CoptBaseOptions::init(m_options) ;
+		  }
+
+		  void checkMissingOptions()
+		  {
+                  
+				//! sopt option
+				if(m_parent->m_results.count("complex-opt-sopt") == 0)
+				     throw Arccore::FatalErrorException(A_FUNCINFO, "Error missing mandatory option : complex-opt-sopt ");
+				//! copt option
+				if(m_results.count("complex-opt-copt") == 0)
+				     throw Arccore::FatalErrorException(A_FUNCINFO, "Error missing mandatory option : complex-opt-copt ");
+
+		  }
+
+                
+		/*
+		 * ACCESSORS
+		 */
+		// SIMPLE OPTIONS ACCESSORS
+		//! sopt option accessor
+		Arccore::Integer const& sopt() const {
+		  return m_parent->m_results["complex-opt-sopt"].as<Arccore::Integer>() ;
+		}
+
+		// ENUM OPTIONS ACCESSOR
+		//! eopt option accessor
+		SampleOptionTypes::eOpt eopt() const {
+		  return SamplelinearsolverBaseOptionsEnum::EoptStringToEnum(m_parent->m_results["complex-opt--eopt"].as<std::string>()) ;
+		}
+
+		// COMPLEX OPTIONS ACCESSOR
+		//! copt option accessor
+		CoptBaseOptions copt() const {
+		  return CoptBaseOptions(this) ;
+		}
+
+
+		private:
+		  SampleLinearSolverBaseOptions const* m_parent = nullptr ;
+		} ;
+		friend class ComplexOptBaseOptions ;
+
 
   // Constructor
   SampleLinearSolverBaseOptions()
@@ -81,7 +179,6 @@ public:
 
     // REGISTER COMPLEX OPTIONS
     ComplexOptBaseOptions::init(m_options) ;
-
   }
 
   virtual ~SampleLinearSolverBaseOptions() = default ;
@@ -89,16 +186,43 @@ public:
   void init(int argc, const char* const* argv)
   {
     m_results = m_options.parse(argc,argv) ;
+
+    // CHECK MISSING OPTIONS
+    checkMissingOptions() ;
   }
 
   template<typename OptionSetterT>
   void init(OptionSetterT const& setter)
   {
-    init(setter.argc(),setter.argv()) ;
+    auto const& args = setter.args() ;
+    std::vector<char const*> argv(args.size()) ;
+    int argc = 0 ;
+    for( auto const& arg : args)
+      argv[argc++] = arg.c_str() ;
+    init(argc,argv.data()) ;
+  }
+
+  void checkMissingOptions()
+  {
+    //! sopt option accessor
+    if(m_results.count("sopt") == 0)
+      throw Arccore::FatalErrorException(A_FUNCINFO, "Error missing mandatory option : sopt ");
+
+    //! complex-opt option accessor
+    if(m_results.count("complex-opt") == 0)
+      throw Arccore::FatalErrorException(A_FUNCINFO, "Error missing mandatory option : complex-opt ");
+    else
+    {
+      {
+         // Check missing sub options of complex option complex-opt
+         ComplexOptBaseOptions(this).checkMissingOptions() ;
+      }
+    }
+
   }
 
   /*
-   * ACCESSORS
+   * ACCESSORS DECLARATION
    */
   // SIMPLE OPTIONS ACCESSORS
   //! max-iteration-num option accessor

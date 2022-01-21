@@ -10,6 +10,21 @@ cxx_type = { "real"        : "Arccore::Real",
            	 "real[]"      : "std::vector<Arccore::Real>",
            	 "integer[]"   : "std::vector<Arccore::Integer>" }
 
+def tabs(level):
+    if level == 0:
+        return '\t'
+    if level == 1:
+        return '\t\t'
+    if level == 2:
+        return '\t\t\t'
+    if level == 3:
+        return '\t\t\t\t'
+    if level == 4:
+        return '\t\t\t\t\t'
+    if level == 5:
+        return '\t\t\t\t\t\t'
+    return '\t\t\t\t\t\t\t\t'
+
 def toClassName(xml_name):
     return ''.join([ s.capitalize() for s in xml_name.split("-")])
 
@@ -68,3 +83,16 @@ def defaultValue(value):
         return ""
     else:
         return f"->default_value(\"{value}\")"
+
+def isMandatory(opt):
+    if opt.default == None:
+        if opt.minOccurs == None:
+            return True
+        else:
+            if opt.minOccurs == 0 :
+                return False
+            else :
+                return True
+    else:
+        return False
+

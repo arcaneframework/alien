@@ -1,4 +1,121 @@
 <%! import gen_tools %>
+<%! from gen_tools import tabs %>
+<%def name="declareCheckMissingOptionsScope(options,parent_optname,level)">
+              % for subopt in options.simple:
+              % if gen_tools.isMandatory(subopt) == True :
+${tabs(level)}//! ${subopt.name_} option
+${tabs(level)}if(m_parent->m_results.count("${parent_optname}${subopt.name_}") == 0)
+${tabs(level)}     throw Arccore::FatalErrorException(A_FUNCINFO, "Error missing mandatory option : ${parent_optname}${subopt.name_} ");
+              % endif
+              % endfor
+              % for subopt in options.enumeration:
+              % if gen_tools.isMandatory(subopt) == True :
+${tabs(level)}//! ${subopt.name_} option
+${tabs(level)}if(m_parent->m_results.count("${parent_optname}${subopt.name_}") == 0)
+${tabs(level)}     throw Arccore::FatalErrorException(A_FUNCINFO, "Error missing mandatory option : ${parent_optname}${subopt.name_} ");
+              % endif
+              % endfor
+              % for subopt in options.complex:
+              % if gen_tools.isMandatory(subopt) == True :
+${tabs(level)}//! ${subopt.name_} option
+${tabs(level)}{
+               ${declareCheckMissingOptionsScope(subopt,f"{parent_optname}{subopt.name_}-",level+1)}
+${tabs(level)}}
+              % else:
+${tabs(level)}{
+               ${declareCheckMissingOptionsScope(subopt,f"{parent_optname}{subopt.name_}-",level+1)}
+${tabs(level)}}
+              % endif
+              % endfor
+</%def>
+<%def name="declareAccessors(options,opt,parent_optname,level)">
+${tabs(level)}/*
+${tabs(level)} * ACCESSORS
+${tabs(level)} */
+${tabs(level)}// SIMPLE OPTIONS ACCESSORS
+              % for subopt in opt.simple:
+${tabs(level)}//! ${subopt.name_} option accessor
+${tabs(level)}${gen_tools.toCxxArrayType(subopt.type,subopt.minOccurs,subopt.maxOccurs)} const& ${gen_tools.toMethodName(subopt.name_)}() const {
+${tabs(level)}  return m_parent->m_results["${parent_optname}${subopt.name_}"].as<${gen_tools.toCxxArrayType(subopt.type,subopt.minOccurs,subopt.maxOccurs)}>() ;
+${tabs(level)}}
+              % endfor
+
+${tabs(level)}// ENUM OPTIONS ACCESSOR
+              % for subopt in opt.enumeration:
+${tabs(level)}//! ${subopt.name_} option accessor
+${tabs(level)}${gen_tools.toCxxArrayType(subopt.type,subopt.minOccurs,subopt.maxOccurs)} ${gen_tools.toMethodName(subopt.name_)}() const {
+              % if gen_tools.isArray(subopt.minOccurs,subopt.maxOccurs) == True :
+${tabs(level)}  ${gen_tools.toCxxArrayType(subopt.type,subopt.minOccurs,subopt.maxOccurs)} results ;
+${tabs(level)}  for( v : m_parent->m_results["${parent_optname}${subopt.name_}"].as<std::vector<std::string>>())
+${tabs(level)}      results.push_back(${gen_tools.toClassName(options.name_)}BaseOptionsEnum::${gen_tools.toClassName(subopt.name_)}StringToEnum(v)) ;
+${tabs(level)}  return results ;
+              % else:
+${tabs(level)}  return ${gen_tools.toClassName(options.name_)}BaseOptionsEnum::${gen_tools.toClassName(subopt.name_)}StringToEnum(m_parent->m_results["${parent_optname}${subopt.name_}"].as<std::string>()) ;
+              % endif
+${tabs(level)}}
+              % endfor
+
+${tabs(level)}// COMPLEX OPTIONS ACCESSOR
+              % for subopt in opt.complex:
+${tabs(level)}//! ${subopt.name_} option accessor
+${tabs(level)}${gen_tools.toClassName(subopt.name_)}BaseOptions ${gen_tools.toMethodName(subopt.name_)}() const {
+${tabs(level)}  return ${gen_tools.toClassName(subopt.name_)}BaseOptions(this) ;
+${tabs(level)}}
+               % endfor
+</%def>
+<%def name="registerOption(options,opt,parent_optname,level)">
+${tabs(level)}// REGISTER SIMPLE OPTIONS
+              % for subopt in opt.simple:
+${tabs(level)}("${parent_optname}${subopt.name_}", " ${subopt.name_} ${subopt.type} option of complex ${opt.name_} option ", cxxopts::value<${gen_tools.toCxxArrayType(subopt.type,subopt.minOccurs,subopt.maxOccurs)}>()${gen_tools.defaultValue(subopt.default)})
+              % endfor
+${tabs(level)}// REGISTER ENUM OPTIONS
+              % for subopt in opt.enumeration:
+${tabs(level)}("${parent_optname}${subopt.name_}", "${subopt.name_} enum option of complex ${opt.name_} option", cxxopts::value<${gen_tools.toCxxArrayType("std::string",subopt.minOccurs,subopt.maxOccurs)}>()${gen_tools.defaultValue(subopt.default)})
+              % endfor
+</%def>
+<%def name="declareComplexBaseOption(options,opt,parent_optname,level)">
+${tabs(level)}/*
+${tabs(level)} * COMPLEX OPTIONS DECLARATION
+${tabs(level)} */
+              % for subopt in opt.complex:
+${tabs(level)}class ${gen_tools.toClassName(subopt.name_)}BaseOptions
+${tabs(level)}{
+${tabs(level)}public:
+                ${declareComplexBaseOption(options,subopt,f"{parent_optname}{subopt.name_}-",level+1)}
+
+${tabs(level)}  ${gen_tools.toClassName(subopt.name_)}BaseOptions(${options.name_}BaseOptions const* parent)
+${tabs(level)}  : m_parent(parent)
+${tabs(level)}  {}
+
+${tabs(level)}  ${gen_tools.toClassName(subopt.name_)}BaseOptions const* operator ->() const {
+${tabs(level)}      return this ;
+${tabs(level)}  }
+
+${tabs(level)}  static void init(cxxopts::Options& options)
+${tabs(level)}  {
+${tabs(level)}      options.add_options("Group options for complex ${parent_optname}${subopt.name_}")
+                      ${registerOption(options,subopt,f"{parent_optname}{subopt.name_}-",level+2)}
+${tabs(level)}      ;
+
+${tabs(level)}      // REGISTER COMPLEX OPTIONS
+                    % for subsubopt in subopt.complex:
+${tabs(level)}      ${gen_tools.toClassName(subsubopt.name_)}BaseOptions::init(m_options) ;
+                    % endfor
+${tabs(level)}  }
+
+${tabs(level)}  void checkMissingOptions()
+${tabs(level)}  {
+                  ${declareCheckMissingOptionsScope(subopt,f"{parent_optname}{subopt.name_}-",level+1)}
+${tabs(level)}  }
+
+                ${declareAccessors(options,subopt,f"{parent_optname}{subopt.name_}-",level)}
+
+${tabs(level)}private:
+${tabs(level)}  ${options.name_}BaseOptions const* m_parent = nullptr ;
+${tabs(level)}} ;
+${tabs(level)}friend class ${gen_tools.toClassName(subopt.name_)}BaseOptions ;
+              % endfor
+</%def>
 /*
  * BaseOption.h Generated file
  */
@@ -20,65 +137,8 @@ class ${options.name_}BaseOptionsJSONConfigSetter ;
 class ${options.name_}BaseOptions
 {
 public:
-  % for opt in options.options.complex:
-  class ${gen_tools.toClassName(opt.name_)}BaseOptions
-  {
-  public:
-    ${gen_tools.toClassName(opt.name_)}BaseOptions(${options.name_}BaseOptions const* parent)
-    : m_parent(parent)
-    {}
-
-    ${gen_tools.toClassName(opt.name_)}BaseOptions const* operator ->() const {
-        return this ;
-    }
-
-    static void init(cxxopts::Options& options)
-    {
-       options.add_options("Group options for complex ${options.name_}")
-           // REGISTER SIMPLE OPTIONS
-         % for opt2 in opt.simple:
-           ("${opt.name_}-${opt2.name_}", " ${opt2.name_} ${opt2.type} option of complex ${opt.name_} option ", cxxopts::value<${gen_tools.toCxxArrayType(opt2.type,opt2.minOccurs,opt2.maxOccurs)}>()${gen_tools.defaultValue(opt2.default)})
-         % endfor
-           // REGISTER ENUM OPTIONS
-         % for opt2 in opt.enumeration:
-           ("${opt.name_}-${opt2.name_}", "${opt2.name_} enum option of complex ${opt.name_} option", cxxopts::value<${gen_tools.toCxxArrayType("std::string",opt2.minOccurs,opt2.maxOccurs)}>()${gen_tools.defaultValue(opt2.default)})
-         % endfor
-            ;
-    }
-
-    /*
-     * ACCESSORS
-     */
-    // SIMPLE OPTIONS ACCESSORS
-    % for opt2 in opt.simple:
-    //! ${opt2.name_} option accessor
-    ${gen_tools.toCxxArrayType(opt2.type,opt2.minOccurs,opt2.maxOccurs)} const& ${gen_tools.toMethodName(opt2.name_)}() const {
-         return m_parent->m_results["${opt.name_}-${opt2.name_}"].as<${gen_tools.toCxxArrayType(opt2.type,opt2.minOccurs,opt2.maxOccurs)}>() ;
-    }
-
-    % endfor
-
-    // ENUM OPTIONS ACCESSOR
-    % for opt2 in opt.enumeration:
-    //! ${opt2.name_} option accessor
-    ${gen_tools.toCxxArrayType(opt2.type,opt2.minOccurs,opt2.maxOccurs)} ${gen_tools.toMethodName(opt2.name_)}() const {
-          % if gen_tools.isArray(opt2.minOccurs,opt2.maxOccurs) == True :
-          ${gen_tools.toCxxArrayType(opt2.type,opt2.minOccurs,opt2.maxOccurs)} results ;
-          for( v : m_parent->m_results["${opt2.name_}"].as<std::vector<std::string>>())
-             results.push_back(${gen_tools.toClassName(options.name_)}BaseOptionsEnum::${gen_tools.toClassName(opt2.name_)}StringToEnum(v)) ;
-          return results ;
-          % else:
-          return ${gen_tools.toClassName(options.name_)}BaseOptionsEnum::${gen_tools.toClassName(opt2.name_)}StringToEnum(m_parent->m_results["${opt.name_}-${opt2.name_}"].as<std::string>()) ;
-          % endif
-    }
-
-    % endfor
-
-  private:
-    ${options.name_}BaseOptions const* m_parent = nullptr ;
-  } ;
-  friend class ${gen_tools.toClassName(opt.name_)}BaseOptions ;
-  % endfor
+  ## DECLARE COMPLEX OPTION CLASS HELPER
+  ${declareComplexBaseOption(options,options.options,"",0)}
 
   // Constructor
   ${options.name_}BaseOptions()
@@ -99,7 +159,6 @@ public:
     % for opt in options.options.complex:
     ${gen_tools.toClassName(opt.name_)}BaseOptions::init(m_options) ;
     % endfor
-
   }
 
   virtual ~${options.name_}BaseOptions() = default ;
@@ -107,6 +166,9 @@ public:
   void init(int argc, const char* const* argv)
   {
     m_results = m_options.parse(argc,argv) ;
+
+    // CHECK MISSING OPTIONS
+    checkMissingOptions() ;
   }
 
   template<typename OptionSetterT>
@@ -120,8 +182,45 @@ public:
     init(argc,argv.data()) ;
   }
 
+  void checkMissingOptions()
+  {
+    % for opt in options.options.simple:
+    % if gen_tools.isMandatory(opt) == True :
+    //! ${opt.name_} option accessor
+    if(m_results.count("${opt.name_}") == 0)
+      throw Arccore::FatalErrorException(A_FUNCINFO, "Error missing mandatory option : ${opt.name_} ");
+
+    % endif
+    % endfor
+    % for opt in options.options.enumeration:
+    % if gen_tools.isMandatory(opt) == True :
+    //! ${opt.name_} option accessor
+    if(m_results.count("${opt.name_}") == 0)
+      throw Arccore::FatalErrorException(A_FUNCINFO, "Error missing mandatory option : ${opt.name_} ");
+
+    % endif
+    % endfor
+    % for opt in options.options.complex:
+    % if gen_tools.isMandatory(opt) == True :
+    //! ${opt.name_} option accessor
+    {
+      % if gen_tools.isArray(opt.minOccurs,opt.maxOccurs) == True :
+      {
+         // TODO  Array Complexe options not yet handle
+      }
+      % else:
+      {
+         // Check missing sub options of complex option ${opt.name_}
+         ${gen_tools.toClassName(opt.name_)}BaseOptions(this).checkMissingOptions() ;
+      }
+      % endif
+    }
+    % endif
+    % endfor
+  }
+
   /*
-   * ACCESSORS
+   * ACCESSORS DECLARATION
    */
   // SIMPLE OPTIONS ACCESSORS
   % for opt in options.options.simple:

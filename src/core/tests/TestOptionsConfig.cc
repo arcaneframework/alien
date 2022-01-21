@@ -32,8 +32,8 @@ using namespace Alien;
 
 TEST(TestOptionsConfig, InitCommandLine)
 {
-  int argc = 17 ;
-  char const*argv[17] = { "SampleOption",
+  int argc = 19 ;
+  char const*argv[19] = { "SampleOption",
                           "--max-iter",          "500",
                           "--tol",               "1.e-6",
                           "--stop-criteria",     "RB",
@@ -41,13 +41,16 @@ TEST(TestOptionsConfig, InitCommandLine)
                           "--preconditioner",    "Chebyshev",
                           "--poly-order",        "3",
                           "--poly-factor",       "0.5",
-                          "--poly-factor-iter",  "10" } ;
+                          "--poly-factor-iter",  "10",
+                          "--complex-opt-sopt",  "100"} ;
+  Alien::SampleBaseOptions sample_options{} ;
+  sample_options.init(argc,argv) ;
 }
 
 TEST(TestOptionsConfig, SimpleOptions)
 {
-  int argc = 17 ;
-  char const* argv[17] = { "SampleOption",
+  int argc = 19 ;
+  char const* argv[19] = { "SampleOption",
                            "--max-iter",          "500",
                            "--tol",               "1.e-6",
                            "--stop-criteria",     "RB",
@@ -55,7 +58,8 @@ TEST(TestOptionsConfig, SimpleOptions)
                            "--preconditioner",    "Chebyshev",
                            "--poly-order",        "3",
                            "--poly-factor",       "0.5",
-                           "--poly-factor-iter",  "10" } ;
+                           "--poly-factor-iter",  "10",
+                           "--complex-opt-sopt",  "100" } ;
   Alien::SampleBaseOptions sample_options{} ;
   sample_options.init(argc,argv) ;
 
@@ -68,8 +72,8 @@ TEST(TestOptionsConfig, SimpleOptions)
 
 TEST(TestOptionsConfig, EnumOptions)
 {
-  int argc = 17 ;
-  char const*argv[17] = { "SampleOption",
+  int argc = 19 ;
+  char const*argv[19] = { "SampleOption",
                           "--max-iter",          "500",
                           "--tol",               "1.e-6",
                           "--stop-criteria",     "RB",
@@ -77,7 +81,8 @@ TEST(TestOptionsConfig, EnumOptions)
                           "--preconditioner",    "Chebyshev",
                           "--poly-order",        "3",
                           "--poly-factor",       "0.5",
-                          "--poly-factor-iter",  "10" } ;
+                          "--poly-factor-iter",  "10",
+                          "--complex-opt-sopt",  "100" } ;
   Alien::SampleBaseOptions sample_options{} ;
   sample_options.init(argc,argv) ;
 
@@ -105,6 +110,33 @@ TEST(TestOptionsConfig, ComplexOptions)
 
   ASSERT_EQ(sample_options.complexOpt().sopt(),100) ;
   ASSERT_EQ(sample_options.complexOpt().eopt(),SampleOptionTypes::EOpt1) ;
+}
+
+TEST(TestOptionsConfig, MissingOption)
+{
+  int argc = 17 ;
+  char const*argv[17] = { "SampleOption",
+                          "--max-iter",          "500",
+                          "--tol",               "1.e-6",
+                          "--stop-criteria",     "RB",
+                          "--solver",            "CG",
+                          "--preconditioner",    "Chebyshev",
+                          "--poly-order",        "3",
+                          "--poly-factor",       "0.5",
+                          "--poly-factor-iter",  "10"} ;
+  Alien::SampleBaseOptions sample_options{} ;
+  try {
+    sample_options.init(argc,argv) ;
+    FAIL() << "Expected FatalErrorException" << std::endl ;
+  }
+  catch(Arccore::FatalErrorException const& exc)
+  {
+    EXPECT_EQ(exc.message(),Arccore::String("Error missing mandatory option : complex-opt-sopt "));
+  }
+  catch(...)
+  {
+    FAIL() << "Expected FatalErrorException" << std::endl ;
+  }
 }
 
 TEST(TestOptionsConfig, InitFromSetter)

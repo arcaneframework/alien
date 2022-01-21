@@ -20,8 +20,8 @@ include(LoadAlienOptionsConfigGenerator)
 find_package(MPI REQUIRED)
 find_package(GTest REQUIRED)
 
-configure_file(SampleOptions.xml SampleOptions.xml COPYONLY)
-configure_file(SampleOptions.json SampleOptions.json COPYONLY)
+configure_file(Sample.xml Sample.xml COPYONLY)
+configure_file(Sample.json Sample.json COPYONLY)
 
 # tests with GTest
 

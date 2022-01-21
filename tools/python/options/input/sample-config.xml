@@ -70,6 +70,12 @@
           <description>EOpt1</description>
         </enumvalue>
       </enumeration>
+      <complex name="copt">
+        <description>Complex option niv2</description>
+        <simple name="sopt" type="real">
+          <description>Simple real option</description>
+        </simple>
+      </complex>
     </complex>
     
   </options>

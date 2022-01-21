@@ -9,6 +9,17 @@
 #include <sstream>
 #include <string>
 
+#ifdef ALIEN_USE_LIBXML2
+#include <alien/utils/XML2Tools.h>
+#endif
+
+#ifdef ALIEN_USE_BOOST_PROPERTY_TREE
+#include <boost/filesystem.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/optional/optional.hpp>
+#endif
+
 namespace Alien {
 
 class SampleLinearSolverBaseOptionsSetter
@@ -30,12 +41,10 @@ public :
     //! sopt option setter
     void setSopt(Arccore::Integer value) {
           m_parent->m_str_argv.push_back("--complex-opt-sopt") ;
-          m_parent->m_argv.push_back(m_parent->m_str_argv[m_parent->m_argc++].c_str()) ;
 
           std::stringstream value_key("") ;
           value_key<<value;
           m_parent->m_str_argv.push_back(value_key.str()) ;
-          m_parent->m_argv.push_back(m_parent->m_str_argv[m_parent->m_argc++].c_str()) ;
     }
 
 
@@ -43,21 +52,17 @@ public :
     //! eopt option setter
     void setEopt(SampleOptionTypes::eOpt value) const {
           m_parent->m_str_argv.push_back("--complex-opt-eopt") ;
-          m_parent->m_argv.push_back(m_parent->m_str_argv[m_parent->m_argc++].c_str()) ;
 
           std::stringstream value_key("") ;
           value_key<<value;
           m_parent->m_str_argv.push_back(SamplelinearsolverBaseOptionsEnum::EoptEnumToString(value)) ;
-          m_parent->m_argv.push_back(m_parent->m_str_argv[m_parent->m_argc++].c_str()) ;
     }
 
 
     void setEopt(std::string const& value) const {
           m_parent->m_str_argv.push_back("--complex-opt-eopt") ;
-          m_parent->m_argv.push_back(m_parent->m_str_argv[m_parent->m_argc++].c_str()) ;
 
           m_parent->m_str_argv.push_back(value) ;
-          m_parent->m_argv.push_back(m_parent->m_str_argv[m_parent->m_argc++].c_str()) ;
     }
 
 
@@ -66,7 +71,12 @@ public :
   } ;
   friend class ComplexOptBaseOptionSetter ;
 
-  SampleLinearSolverBaseOptionsSetter() = default ;
+  SampleLinearSolverBaseOptionsSetter(std::string const& name)
+  : m_name(name)
+  {
+      m_str_argv.push_back(m_name) ;
+  }
+
   ~SampleLinearSolverBaseOptionsSetter() = default ;
 
   // SETTER
@@ -74,56 +84,46 @@ public :
   //! max-iteration-num option setter
   void setMaxIterationNum(Arccore::Integer value) {
       m_str_argv.push_back("--max-iteration-num") ;
-      m_argv.push_back(m_str_argv[m_argc++].c_str()) ;
 
       std::stringstream value_key("") ;
       value_key<<value;
       m_str_argv.push_back(value_key.str()) ;
-      m_argv.push_back(m_str_argv[m_argc++].c_str()) ;
   }
 
   //! stop-criteria-value option setter
   void setStopCriteriaValue(Arccore::Real value) {
       m_str_argv.push_back("--stop-criteria-value") ;
-      m_argv.push_back(m_str_argv[m_argc++].c_str()) ;
 
       std::stringstream value_key("") ;
       value_key<<value;
       m_str_argv.push_back(value_key.str()) ;
-      m_argv.push_back(m_str_argv[m_argc++].c_str()) ;
   }
 
   //! verbose option setter
   void setVerbose(bool value) {
       m_str_argv.push_back("--verbose") ;
-      m_argv.push_back(m_str_argv[m_argc++].c_str()) ;
 
       std::stringstream value_key("") ;
       value_key<<value;
       m_str_argv.push_back(value_key.str()) ;
-      m_argv.push_back(m_str_argv[m_argc++].c_str()) ;
   }
 
   //! output-level option setter
   void setOutputLevel(Arccore::Integer value) {
       m_str_argv.push_back("--output-level") ;
-      m_argv.push_back(m_str_argv[m_argc++].c_str()) ;
 
       std::stringstream value_key("") ;
       value_key<<value;
       m_str_argv.push_back(value_key.str()) ;
-      m_argv.push_back(m_str_argv[m_argc++].c_str()) ;
   }
 
   //! sopt option setter
   void setSopt(Arccore::Real value) {
       m_str_argv.push_back("--sopt") ;
-      m_argv.push_back(m_str_argv[m_argc++].c_str()) ;
 
       std::stringstream value_key("") ;
       value_key<<value;
       m_str_argv.push_back(value_key.str()) ;
-      m_argv.push_back(m_str_argv[m_argc++].c_str()) ;
   }
 
 
@@ -131,35 +131,27 @@ public :
   //! solver option setter
   void setSolver(SampleOptionTypes::eSolver value) {
       m_str_argv.push_back("--solver") ;
-      m_argv.push_back(m_str_argv[m_argc++].c_str()) ;
 
       m_str_argv.push_back(SamplelinearsolverBaseOptionsEnum::SolverEnumToString(value)) ;
-      m_argv.push_back(m_str_argv[m_argc++].c_str()) ;
   }
 
   void setSolver(std::string const& value) {
       m_str_argv.push_back("--solver") ;
-      m_argv.push_back(m_str_argv[m_argc++].c_str()) ;
 
       m_str_argv.push_back(value) ;
-      m_argv.push_back(m_str_argv[m_argc++].c_str()) ;
   }
 
   //! preconditioner option setter
   void setPreconditioner(SampleOptionTypes::ePreconditioner value) {
       m_str_argv.push_back("--preconditioner") ;
-      m_argv.push_back(m_str_argv[m_argc++].c_str()) ;
 
       m_str_argv.push_back(SamplelinearsolverBaseOptionsEnum::PreconditionerEnumToString(value)) ;
-      m_argv.push_back(m_str_argv[m_argc++].c_str()) ;
   }
 
   void setPreconditioner(std::string const& value) {
       m_str_argv.push_back("--preconditioner") ;
-      m_argv.push_back(m_str_argv[m_argc++].c_str()) ;
 
       m_str_argv.push_back(value) ;
-      m_argv.push_back(m_str_argv[m_argc++].c_str()) ;
   }
 
 
@@ -171,18 +163,11 @@ public :
   }
 
 
-  int argc() const {
-    return m_argc ;
-  }
-
-  char const* const* argv() const {
-    return m_argv.data() ;
+  std::vector<std::string> const& args() const {
+    return m_str_argv ;
   }
 protected :
-  int m_argc = 0 ;
-
-  std::vector<char const*> m_argv ;
-
+  std::string              m_name ;
   std::vector<std::string> m_str_argv ;
 } ;
 
@@ -191,13 +176,13 @@ class SampleLinearSolverBaseOptionsENVSetter
 {
 public:
   typedef SampleLinearSolverBaseOptionsSetter BaseType ;
-  SampleLinearSolverBaseOptionsENVSetter()
-  : BaseType()
+  SampleLinearSolverBaseOptionsENVSetter(std::string const& name)
+  : BaseType(name)
   {
     // SIMPLE OPTIONS SETTER
     //! max-iteration-num option setter
     {
-      const char* value_key = std::getenv("ALIEN_SAMPLELINEARSOLVER_MAX_ITERATION_NUM") ;
+      const char* value_key = std::getenv("ALIEN_SAMPLELINEARSOLVER.MAX_ITERATION_NUM") ;
       if(value_key)
       {
          Arccore::Integer value ;
@@ -209,7 +194,7 @@ public:
 
     //! stop-criteria-value option setter
     {
-      const char* value_key = std::getenv("ALIEN_SAMPLELINEARSOLVER_STOP_CRITERIA_VALUE") ;
+      const char* value_key = std::getenv("ALIEN_SAMPLELINEARSOLVER.STOP_CRITERIA_VALUE") ;
       if(value_key)
       {
          Arccore::Real value ;
@@ -221,7 +206,7 @@ public:
 
     //! verbose option setter
     {
-      const char* value_key = std::getenv("ALIEN_SAMPLELINEARSOLVER_VERBOSE") ;
+      const char* value_key = std::getenv("ALIEN_SAMPLELINEARSOLVER.VERBOSE") ;
       if(value_key)
       {
          bool value ;
@@ -233,7 +218,7 @@ public:
 
     //! output-level option setter
     {
-      const char* value_key = std::getenv("ALIEN_SAMPLELINEARSOLVER_OUTPUT_LEVEL") ;
+      const char* value_key = std::getenv("ALIEN_SAMPLELINEARSOLVER.OUTPUT_LEVEL") ;
       if(value_key)
       {
          Arccore::Integer value ;
@@ -245,7 +230,7 @@ public:
 
     //! sopt option setter
     {
-      const char* value_key = std::getenv("ALIEN_SAMPLELINEARSOLVER_SOPT") ;
+      const char* value_key = std::getenv("ALIEN_SAMPLELINEARSOLVER.SOPT") ;
       if(value_key)
       {
          Arccore::Real value ;
@@ -259,7 +244,7 @@ public:
     // ENUM OPTIONS ACCESSOR
     //! solver option setter
     {
-      const char* value_key = std::getenv("ALIEN_SAMPLELINEARSOLVER_SOLVER") ;
+      const char* value_key = std::getenv("ALIEN_SAMPLELINEARSOLVER.SOLVER") ;
       if(value_key)
       {
          setSolver(std::string(value_key)) ;
@@ -268,7 +253,7 @@ public:
 
     //! preconditioner option setter
     {
-      const char* value_key = std::getenv("ALIEN_SAMPLELINEARSOLVER_PRECONDITIONER") ;
+      const char* value_key = std::getenv("ALIEN_SAMPLELINEARSOLVER.PRECONDITIONER") ;
       if(value_key)
       {
          setPreconditioner(std::string(value_key)) ;
@@ -284,7 +269,7 @@ public:
 
       //! sopt option setter
       {
-        const char* value_key = std::getenv("ALIEN_SAMPLELINEARSOLVER_COMPLEX_OPT.SOPT") ;
+        const char* value_key = std::getenv("ALIEN_SAMPLELINEARSOLVER.COMPLEX_OPT.SOPT") ;
         if(value_key)
         {
            Arccore::Integer value ;
@@ -296,7 +281,7 @@ public:
 
       //! eopt option setter
       {
-        const char* value_key = std::getenv("ALIEN_SAMPLELINEARSOLVER_COMPLEX_OPT.EOPT") ;
+        const char* value_key = std::getenv("ALIEN_SAMPLELINEARSOLVER.COMPLEX_OPT.EOPT") ;
         if(value_key)
         {
            setter.setEopt(std::string(value_key)) ;
@@ -312,12 +297,95 @@ class SampleLinearSolverBaseOptionsXMLConfigSetter
 {
 public:
   typedef SampleLinearSolverBaseOptionsSetter BaseType ;
-  SampleLinearSolverBaseOptionsXMLConfigSetter(std::string const& config_file)
-  : BaseType()
+
+  SampleLinearSolverBaseOptionsXMLConfigSetter(std::string const& name, std::string const& config_file)
+  : BaseType(name)
   , m_config_file(config_file)
   {
+#ifdef ALIEN_USE_LIBXML2
+    using namespace XML2Tools ;
+
+    XMLDocument doc = openDocument(m_config_file) ;
+    FileNode root_node = openFileNode(doc,name) ;
+
+    // SIMPLE OPTIONS SETTER
+    //! max-iteration-num option setter
+    {
+      Arccore::Integer value ;
+      if(read(root_node,"max-iteration-num",value))
+        setMaxIterationNum(value) ;
+    }
+
+    //! stop-criteria-value option setter
+    {
+      Arccore::Real value ;
+      if(read(root_node,"stop-criteria-value",value))
+        setStopCriteriaValue(value) ;
+    }
+
+    //! verbose option setter
+    {
+      bool value ;
+      if(read(root_node,"verbose",value))
+        setVerbose(value) ;
+    }
+
+    //! output-level option setter
+    {
+      Arccore::Integer value ;
+      if(read(root_node,"output-level",value))
+        setOutputLevel(value) ;
+    }
+
+    //! sopt option setter
+    {
+      Arccore::Real value ;
+      if(read(root_node,"sopt",value))
+        setSopt(value) ;
+    }
+
+
+    // ENUM OPTIONS ACCESSOR
+    //! solver option setter
+    {
+      std::string value ;
+      if(read(root_node,"solver",value))
+        setSolver(value) ;
+    }
+
+    //! preconditioner option setter
+    {
+      std::string value ;
+      if(read(root_node,"preconditioner",value))
+        setPreconditioner(value) ;
+    }
+
+    // COMPLEX OPTIONS ACCESSOR
+    //! complex-opt option setter
+    {
+      auto setter = complexOptSetter() ;
+
+      FileNode opt_node = openFileNode(root_node,"complex-opt") ;
+      //! sopt option setter
+      {
+         Arccore::Integer value ;
+         if(read(opt_node,"sopt",value))
+           setter.setSopt(value) ;
+      }
+
+      //! eopt option setter
+      {
+         std::string value ;
+         if(read(opt_node,"eopt",value))
+           setter.setEopt(value) ;
+      }
+
+    }
+
+#endif
   }
 private:
+
   std::string const& m_config_file ;
 };
 
@@ -326,10 +394,109 @@ class SampleLinearSolverBaseOptionsJSONConfigSetter
 {
 public:
   typedef SampleLinearSolverBaseOptionsSetter BaseType ;
-  SampleLinearSolverBaseOptionsJSONConfigSetter(std::string const& config_file)
-  : BaseType()
+  SampleLinearSolverBaseOptionsJSONConfigSetter(std::string const& name, std::string const& config_file)
+  : BaseType(name)
   , m_config_file(config_file)
   {
+#ifdef ALIEN_USE_BOOST_PROPERTY_TREE
+    namespace pt = boost::property_tree;
+   // Create a root
+    pt::ptree root;
+
+    // Load the json file in this ptree
+    pt::read_json(m_config_file, root);
+
+    // SIMPLE OPTIONS SETTER
+    //! max-iteration-num option setter
+    {
+      if( root.count("max-iteration-num") != 0 )
+      {
+         auto value = root.get<Arccore::Integer>("max-iteration-num") ;
+         setMaxIterationNum(value) ;
+      }
+    }
+
+    //! stop-criteria-value option setter
+    {
+      if( root.count("stop-criteria-value") != 0 )
+      {
+         auto value = root.get<Arccore::Real>("stop-criteria-value") ;
+         setStopCriteriaValue(value) ;
+      }
+    }
+
+    //! verbose option setter
+    {
+      if( root.count("verbose") != 0 )
+      {
+         auto value = root.get<bool>("verbose") ;
+         setVerbose(value) ;
+      }
+    }
+
+    //! output-level option setter
+    {
+      if( root.count("output-level") != 0 )
+      {
+         auto value = root.get<Arccore::Integer>("output-level") ;
+         setOutputLevel(value) ;
+      }
+    }
+
+    //! sopt option setter
+    {
+      if( root.count("sopt") != 0 )
+      {
+         auto value = root.get<Arccore::Real>("sopt") ;
+         setSopt(value) ;
+      }
+    }
+
+
+    // ENUM OPTIONS ACCESSOR
+    //! solver option setter
+    {
+      if( root.count("solver") != 0 )
+      {
+         auto value = root.get<std::string>("solver") ;
+         setSolver(value) ;
+      }
+    }
+
+    //! preconditioner option setter
+    {
+      if( root.count("preconditioner") != 0 )
+      {
+         auto value = root.get<std::string>("preconditioner") ;
+         setPreconditioner(value) ;
+      }
+    }
+
+
+
+    // COMPLEX OPTIONS ACCESSOR
+    //! complex-opt option setter
+    {
+      auto setter = complexOptSetter() ;
+
+      if( root.count("complex-opt") != 0 )
+      {
+        //! sopt option setter
+        {
+            auto value = root.get<Arccore::Integer>("complex-opt.sopt") ;
+            setter.setSopt(value) ;
+        }
+
+        //! eopt option setter
+        {
+            auto value = root.get<std::string>("complex-opt.eopt") ;
+            setter.setEopt(value) ;
+        }
+
+      }
+
+    }
+#endif
   }
 
   ~SampleLinearSolverBaseOptionsJSONConfigSetter() = default ;
