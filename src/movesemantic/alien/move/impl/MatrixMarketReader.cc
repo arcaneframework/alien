@@ -58,13 +58,13 @@ namespace
       symmetric = (src[3] == 0);
     }
 
-    Arccore::UniqueArray<Arccore::Integer> to_array()
+    Arccore::UniqueArray<Arccore::Integer> to_array() const
     {
       Arccore::UniqueArray<Arccore::Integer> array(4);
       array[0] = n_rows;
       array[1] = n_cols;
       array[2] = n_nnz;
-      array[3] = (symmetric) ? 0 : 1;
+      array[3] = symmetric ? 0 : 1;
       return array;
     }
 
@@ -109,12 +109,10 @@ namespace
 
         if ("coordinate" != format) {
           return std::nullopt;
-          // throw Arccore::FatalErrorException("MatrixMarketReader", "format array not supported");
         }
 
         if ("real" != scalar) {
           return std::nullopt;
-          // throw Arccore::FatalErrorException("MatrixMarketReader", "pattern not supported, only scalar is available");
         }
 
         if ("general" == symmetry) {
@@ -151,8 +149,9 @@ namespace
         continue;
       }
 
-      int row, col;
-      double value;
+      int row = 0;
+      int col = 0;
+      double value = 0.0;
       std::stringstream ss;
       ss << line;
       ss >> row >> col >> value;
