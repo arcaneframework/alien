@@ -98,9 +98,16 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   b.internal()->compute_norm2(gko::lend(norm_b));
   std::cout << "Convergence : " << residual_norm / (norm_b->get_const_values()[0]) << std::endl; // Only for relative residual
 
-  //std::cout << "Execution time [ms]: " << static_cast<double>(time.count()) / 10e6 << std::endl;
-  std::cout << "Execution time [s]: " << static_cast<double>(time.count()) / 10e9 << std::endl;
-  std::cout << "Iterations per second : " << num_iters / (static_cast<double>(time.count()) / 10e9) << std::endl;
+  double ns = static_cast<double>(time.count());
+  double us = static_cast<double>(time.count()) / 1e3;
+  double ms = static_cast<double>(time.count()) / 1e6;
+  double sec = static_cast<double>(time.count()) / 1e9;
+  double it_per_sec = num_iters / sec;
+  std::cout << "Execution time [ns]: " << ns << std::endl;
+  std::cout << "Execution time [us]: " << us << std::endl;
+  std::cout << "Execution time [ms]: " << ms << std::endl;
+  std::cout << "Execution time [s]: " << sec << std::endl;
+  std::cout << "Iterations per second : " << it_per_sec << std::endl;
   std::cout << "=================================== " << std::endl;
 
   // update solver status
@@ -111,7 +118,7 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   // update solver infos
   m_total_iter_num += m_status.iteration_count;
   ++m_solve_num;
-  m_total_solve_time += static_cast<double>(time.count()) / 10e9;
+  m_total_solve_time += sec;
 
   return m_status.succeeded;
 }
@@ -143,11 +150,19 @@ void InternalLinearSolver::solve_CG(const Matrix& A, const Vector& b, Vector& x,
     solver->set_preconditioner(new_prec);
   }
 
+  // second timer
+  auto start = std::chrono::high_resolution_clock::now();
+
   // solve with timing
   auto tic = std::chrono::steady_clock::now();
   solver->apply(lend(b.internal()), lend(x.internal()));
   auto toc = std::chrono::steady_clock::now();
   time += std::chrono::duration_cast<std::chrono::nanoseconds>(toc - tic);
+
+  // second timer
+  auto stop = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count();
+  std::cout << "SECOND TIME MEASUREMENT : " << duration << " microseconds" << std::endl;
 
   // logger->write();
 }
