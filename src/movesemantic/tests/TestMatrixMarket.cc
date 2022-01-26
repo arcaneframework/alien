@@ -37,15 +37,15 @@ TEST(TestMatrixMarket, MatrixAlone)
   ASSERT_EQ(mat.colSpace().size(), 25);
 }
 
-void check_vect_simple_values(const Alien::Move::VectorData& vect) {
+void check_vect_simple_values(const Alien::Move::VectorData& vect)
+{
   // Check vector values
   Alien::Move::LocalVectorReader local_vect(vect);
   auto offset = vect.distribution().offset();
-  for (int i = 0 ; i < local_vect.size() ; i++) {
-    ASSERT_EQ(i+offset+1, ::floor(local_vect[i]));
+  for (int i = 0; i < local_vect.size(); i++) {
+    ASSERT_EQ(i + offset + 1, ::floor(local_vect[i]));
   }
 }
-
 
 TEST(TestMatrixMarket, VectorAlone)
 {
