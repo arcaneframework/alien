@@ -32,8 +32,8 @@ std::vector<double> readFromMtx(const std::string& vec_filename)
   // read file
   auto stream = std::ifstream(vec_filename);
   if (!stream) {
-    std::cerr << "readFromMatrixMarket : Unable to read file";
-    return {};
+    std::cerr << "readFromMatrixMarket -> Unable to read file : " << vec_filename;
+    exit(-1);
   }
 
   // get nb values
@@ -79,6 +79,7 @@ int test(const Alien::Ginkgo::OptionTypes::eSolver& solv, const Alien::Ginkgo::O
   auto* tm = Arccore::arccoreCreateDefaultTraceMng();
   Alien::setTraceMng(tm);
 
+  tm->info() << "Read matrix file : " << mat_filename;
   auto A = Alien::Move::readFromMatrixMarket(pm, mat_filename);
 
   /**
@@ -97,10 +98,20 @@ int test(const Alien::Ginkgo::OptionTypes::eSolver& solv, const Alien::Ginkgo::O
   /**
 	 *  Vecteur b
 	 *************/
-  Alien::Move::VectorData b(A.rowSpace(), A.distribution().rowDistribution());
   Alien::Ginkgo::LinearAlgebra algebra;
+  // methode 1
+  // auto b = Alien::Move::readFromMatrixMarket(A.distribution().rowDistribution(), vec_filename);
+
+  // methode 2
+  // Alien::Space s(25);
+  // Alien::VectorDistribution vd(s, pm);
+  // auto b = Alien::Move::readFromMatrixMarket(vd, vec_filename);
+
+  Alien::Move::VectorData b(A.rowSpace(), A.distribution().rowDistribution());
 
   if (vec_filename != "") { // Read vector data from mtx file and write it into Alien Vector
+    //b = Alien::Move::readFromMatrixMarket(A.distribution().rowDistribution(), vec_filename);
+
     tm->info() << "Read vector file : " << vec_filename;
     std::vector<double> values = readFromMtx(vec_filename);
     size_t vec_size = values.size();
@@ -111,10 +122,14 @@ int test(const Alien::Ginkgo::OptionTypes::eSolver& solv, const Alien::Ginkgo::O
     }
     b = writer.release();
   }
-  else { // OR init b with A * xe
-    tm->info() << "* b = A * xe";
-    algebra.mult(A, xe, b);
+
+  /*
+  Alien::Move::VectorReader Reader(std::move(b));
+  for (auto i = 0u; i < 25; i++) {
+    std::cout << Reader[i] << " ";
   }
+  std::cout << std::endl;
+*/
 
   /**
 	 *  Préparation du solveur pour le calcul de x, tq : Ax = b
@@ -148,17 +163,14 @@ int test(const Alien::Ginkgo::OptionTypes::eSolver& solv, const Alien::Ginkgo::O
     // solve
     solver.solve(A, b, x);
 
-    // compute residual ||Ax - b|| ~ 0
+    // compute explicit residual ||Ax - b|| ~ 0
     Alien::Move::VectorData r(A.rowSpace(), A.distribution().rowDistribution());
     algebra.mult(A, x, r);
     algebra.axpy(-1., b, r);
-    auto norm = algebra.norm2(r);
+    auto norm_r = algebra.norm2(r);
     auto norm_b = algebra.norm2(b);
-    tm->info() << " => ||r|| = " << norm << " ; ||r||/||b|| = " << norm / norm_b;
+    tm->info() << " => ||r|| = " << norm_r << " ; ||r||/||b|| = " << norm_r / norm_b;
   }
-
-  tm->info() << " ";
-  tm->info() << "... bench finished !!!";
 
   return 0;
 }

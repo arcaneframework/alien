@@ -45,8 +45,8 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
                    .with_max_iters(max_iters)
                    .on(exec);
 
-  //auto res_stop = gko::stop::RelativeResidualNorm<>::build() // relative (to ||b||) norm
-  auto res_stop = gko::stop::AbsoluteResidualNorm<>::build() // absolute norm
+  auto res_stop = gko::stop::RelativeResidualNorm<>::build() // relative (to ||b||) norm
+                  //auto res_stop = gko::stop::AbsoluteResidualNorm<>::build() // absolute norm
                   .with_tolerance(threshold)
                   .on(exec);
 
@@ -81,9 +81,8 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
 
   // Get nb iterations + final residual
   auto num_iters = conv_logger->get_num_iterations();
-  auto residual_norm = conv_logger->get_residual_norm();
-  auto vec_res_norm = reinterpret_cast<const gko::matrix::Dense<double>*>(residual_norm);
-  auto res = vec_res_norm->get_const_values()[0];
+  auto vec_res_norm = reinterpret_cast<const gko::matrix::Dense<double>*>(conv_logger->get_residual_norm());
+  auto residual_norm = vec_res_norm->get_const_values()[0];
 
   // Print infos
   std::cout << "===== SOLVER  RUN INFORMATION ===== " << std::endl;
@@ -91,16 +90,21 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   display_solver_infos(m_options.solver(), m_options.preconditioner());
   std::cout << "Stop criteria Value : " << m_options.stopCriteriaValue() << std::endl;
   std::cout << "Solver has converged : " << conv_logger->has_converged() << std::endl;
-  std::cout << "Nb iterations : " << num_iters << std::endl;
-  std::cout << "Residual norm : " << res << std::endl;
 
-  std::cout << "Execution time [ms]: " << static_cast<double>(time.count()) / 10e6 << std::endl;
+  std::cout << "Nb iterations : " << num_iters << std::endl;
+  std::cout << "Residual norm : " << residual_norm << std::endl;
+
+  auto norm_b = gko::initialize<gko::matrix::Dense<double>>({ 0.0 }, exec);
+  b.internal()->compute_norm2(gko::lend(norm_b));
+  std::cout << "Convergence : " << residual_norm / (norm_b->get_const_values()[0]) << std::endl; // Only for relative residual
+
+  //std::cout << "Execution time [ms]: " << static_cast<double>(time.count()) / 10e6 << std::endl;
   std::cout << "Execution time [s]: " << static_cast<double>(time.count()) / 10e9 << std::endl;
-  std::cout << "Iterations per time [s]: " << num_iters / (static_cast<double>(time.count()) / 10e9) << std::endl;
+  std::cout << "Iterations per second : " << num_iters / (static_cast<double>(time.count()) / 10e9) << std::endl;
   std::cout << "=================================== " << std::endl;
 
   // update solver status
-  m_status.residual = res;
+  m_status.residual = residual_norm;
   m_status.iteration_count = num_iters;
   m_status.succeeded = conv_logger->has_converged();
 
@@ -128,6 +132,10 @@ void InternalLinearSolver::solve_CG(const Matrix& A, const Vector& b, Vector& x,
   // generate the solver
   auto solver = solver_factory->generate(pA);
 
+  // convergence logger
+  // auto logger = std::make_shared<ResidualLogger<double>>(exec, gko::lend(pA), gko::lend(x.internal()));
+  // solver->add_logger(logger);
+
   // generate and set the preconditioner
   if (prec == 1) {
     using Preconditioner = typename gko::preconditioner::Jacobi<double>;
@@ -140,6 +148,8 @@ void InternalLinearSolver::solve_CG(const Matrix& A, const Vector& b, Vector& x,
   solver->apply(lend(b.internal()), lend(x.internal()));
   auto toc = std::chrono::steady_clock::now();
   time += std::chrono::duration_cast<std::chrono::nanoseconds>(toc - tic);
+
+  // logger->write();
 }
 
 void InternalLinearSolver::solve_GMRES(const Matrix& A, const Vector& b, Vector& x, const int& prec, stop_iter_type& iter_stop, stop_res_type& res_stop, exec_type& exec, std::chrono::nanoseconds& time)
