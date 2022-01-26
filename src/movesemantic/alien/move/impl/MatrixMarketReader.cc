@@ -30,7 +30,8 @@
 #include <alien/move/data/MatrixData.h>
 #include <alien/move/handlers/scalar/DoKDirectMatrixBuilder.h>
 #include <alien/move/data/VectorData.h>
-#include "alien/kernels/dok/DoKVector.h"
+#include <alien/kernels/dok/DoKVector.h>
+#include <alien/kernels/dok/DoKBackEnd.h>
 
 namespace Alien::Move
 {
@@ -206,7 +207,7 @@ VectorData ALIEN_MOVESEMANTIC_EXPORT
 readFromMatrixMarket(const VectorDistribution& distribution, const std::string& filename)
 {
   VectorData out(distribution);
-  DoKVector v(out.impl());
+  auto& v = out.impl()->template get<BackEnd::tag::DoK>(true);
 
   if (distribution.parallelMng()->commRank() == 0) { // Only rank 0 read the file
     auto stream = std::ifstream(filename);
