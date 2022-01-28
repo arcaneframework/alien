@@ -43,8 +43,8 @@ class SimpleCSR_to_Ginkgo_VectorConverter : public Alien::IVectorConverter
 void SimpleCSR_to_Ginkgo_VectorConverter::convert(const Alien::IVectorImpl* sourceImpl,
                                                   Alien::IVectorImpl* targetImpl) const
 {
-  const auto& v = cast<Alien::SimpleCSRVector<Arccore::Real>>(sourceImpl, sourceBackend());
-  auto& v2 = cast<Alien::Ginkgo::Vector>(targetImpl, targetBackend());
+  const auto& v = cast<Alien::SimpleCSRVector<Arccore::Real>>(sourceImpl, sourceBackend()); // source
+  auto& v2 = cast<Alien::Ginkgo::Vector>(targetImpl, targetBackend()); // target
 
   auto block_size = 1;
   const auto* block = v2.block();

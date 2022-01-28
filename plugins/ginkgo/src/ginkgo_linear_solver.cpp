@@ -20,6 +20,7 @@
 
 bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
 {
+
   // preconditioner's choice
   int prec;
   switch (m_options.preconditioner()) {
@@ -84,31 +85,25 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   auto vec_res_norm = reinterpret_cast<const gko::matrix::Dense<double>*>(conv_logger->get_residual_norm());
   auto residual_norm = vec_res_norm->get_const_values()[0];
 
-  // Print infos
+  // Print results infos
   std::cout << "===== SOLVER  RUN INFORMATION ===== " << std::endl;
   std::cout << "Ginkgo Executor : " << Alien::Ginkgo::ginkgo_executor::target_machine << std::endl;
   display_solver_infos(m_options.solver(), m_options.preconditioner());
   std::cout << "Stop criteria Value : " << m_options.stopCriteriaValue() << std::endl;
   std::cout << "Solver has converged : " << conv_logger->has_converged() << std::endl;
-
   std::cout << "Nb iterations : " << num_iters << std::endl;
   std::cout << "Residual norm : " << residual_norm << std::endl;
-
   auto norm_b = gko::initialize<gko::matrix::Dense<double>>({ 0.0 }, exec);
   b.internal()->compute_norm2(gko::lend(norm_b));
   std::cout << "Convergence : " << residual_norm / (norm_b->get_const_values()[0]) << std::endl; // Only for relative residual
 
-  double ns = static_cast<double>(time.count());
-  double us = static_cast<double>(time.count()) / 1e3;
+  // Print timing infos
   double ms = static_cast<double>(time.count()) / 1e6;
   double sec = static_cast<double>(time.count()) / 1e9;
   double it_per_sec = num_iters / sec;
-  std::cout << "Execution time [ns]: " << ns << std::endl;
-  std::cout << "Execution time [us]: " << us << std::endl;
   std::cout << "Execution time [ms]: " << ms << std::endl;
   std::cout << "Execution time [s]: " << sec << std::endl;
   std::cout << "Iterations per second : " << it_per_sec << std::endl;
-  std::cout << "=================================== " << std::endl;
 
   // update solver status
   m_status.residual = residual_norm;
@@ -151,7 +146,7 @@ void InternalLinearSolver::solve_CG(const Matrix& A, const Vector& b, Vector& x,
   }
 
   // second timer
-  auto start = std::chrono::high_resolution_clock::now();
+  // auto start = std::chrono::high_resolution_clock::now();
 
   // solve with timing
   auto tic = std::chrono::steady_clock::now();
@@ -160,9 +155,9 @@ void InternalLinearSolver::solve_CG(const Matrix& A, const Vector& b, Vector& x,
   time += std::chrono::duration_cast<std::chrono::nanoseconds>(toc - tic);
 
   // second timer
-  auto stop = std::chrono::high_resolution_clock::now();
+  /*auto stop = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count();
-  std::cout << "SECOND TIME MEASUREMENT : " << duration << " microseconds" << std::endl;
+  std::cout << "SECOND TIME MEASUREMENT : " << duration << " microseconds" << std::endl;*/
 
   // logger->write();
 }

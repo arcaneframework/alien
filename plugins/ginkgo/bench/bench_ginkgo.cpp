@@ -26,6 +26,7 @@
 
 // tmp read from mtx
 #include <fstream>
+#include <cmath>
 
 std::vector<double> readFromMtx(const std::string& vec_filename)
 {
@@ -73,6 +74,52 @@ std::vector<double> readFromMtx(const std::string& vec_filename)
   return values;
 }
 
+double vecMax(const Alien::Move::VectorData& v)
+{
+  Alien::Move::VectorReader R(std::move(v));
+  double max = R[0];
+  for (auto i = 1; i < R.size(); i++) {
+    if (R[i] > max)
+      max = R[i];
+  }
+  return max;
+}
+
+double vecMin(const Alien::Move::VectorData& v)
+{
+  Alien::Move::VectorReader R(std::move(v));
+  double min = R[0];
+  for (auto i = 1; i < R.size(); i++) {
+    if (R[i] < min)
+      min = R[i];
+  }
+  return min;
+}
+
+double vecMaxAbs(const Alien::Move::VectorData& v)
+{
+  Alien::Move::VectorReader R(std::move(v));
+  double absmax;
+  absmax = std::abs(R[0]);
+  for (auto i = 1; i < R.size(); i++) {
+    if (std::abs(R[i]) > absmax)
+      absmax = std::abs(R[i]);
+  }
+  return absmax;
+}
+
+double vecMinAbs(const Alien::Move::VectorData& v)
+{
+  Alien::Move::VectorReader R(std::move(v));
+  double absmin;
+  absmin = std::abs(R[0]);
+  for (auto i = 1; i < R.size(); i++) {
+    if (std::abs(R[i]) < absmin)
+      absmin = std::abs(R[i]);
+  }
+  return absmin;
+}
+
 int test(const Alien::Ginkgo::OptionTypes::eSolver& solv, const Alien::Ginkgo::OptionTypes::ePreconditioner& prec, const std::string& mat_filename, const std::string& vec_filename)
 {
   auto* pm = Arccore::MessagePassing::Mpi::StandaloneMpiMessagePassingMng::create(MPI_COMM_WORLD);
@@ -99,14 +146,6 @@ int test(const Alien::Ginkgo::OptionTypes::eSolver& solv, const Alien::Ginkgo::O
 	 *  Vecteur b
 	 *************/
   Alien::Ginkgo::LinearAlgebra algebra;
-  // methode 1
-  // auto b = Alien::Move::readFromMatrixMarket(A.distribution().rowDistribution(), vec_filename);
-
-  // methode 2
-  // Alien::Space s(25);
-  // Alien::VectorDistribution vd(s, pm);
-  // auto b = Alien::Move::readFromMatrixMarket(vd, vec_filename);
-
   Alien::Move::VectorData b(A.rowSpace(), A.distribution().rowDistribution());
 
   if (vec_filename != "") { // Read vector data from mtx file and write it into Alien Vector
@@ -123,21 +162,13 @@ int test(const Alien::Ginkgo::OptionTypes::eSolver& solv, const Alien::Ginkgo::O
     b = writer.release();
   }
 
-  /*
-  Alien::Move::VectorReader Reader(std::move(b));
-  for (auto i = 0u; i < 25; i++) {
-    std::cout << Reader[i] << " ";
-  }
-  std::cout << std::endl;
-*/
-
   /**
 	 *  Préparation du solveur pour le calcul de x, tq : Ax = b
 	 ********************************************/
   Alien::Move::VectorData x(A.colSpace(), A.distribution().rowDistribution());
   Alien::Ginkgo::Options options;
   options.numIterationsMax(500);
-  options.stopCriteriaValue(1e-9);
+  options.stopCriteriaValue(1e-8);
   options.preconditioner(prec); // Jacobi, NoPC
   options.solver(solv); //CG, GMRES, BICG, BICGSTAB
   auto solver = Alien::Ginkgo::LinearSolver(options);
@@ -163,13 +194,28 @@ int test(const Alien::Ginkgo::OptionTypes::eSolver& solv, const Alien::Ginkgo::O
     // solve
     solver.solve(A, b, x);
 
-    // compute explicit residual ||Ax - b|| ~ 0
+    // compute explicit residual r = ||Ax - b|| ~ 0
     Alien::Move::VectorData r(A.rowSpace(), A.distribution().rowDistribution());
     algebra.mult(A, x, r);
     algebra.axpy(-1., b, r);
     auto norm_r = algebra.norm2(r);
     auto norm_b = algebra.norm2(b);
     tm->info() << " => ||r|| = " << norm_r << " ; ||r||/||b|| = " << norm_r / norm_b;
+
+    /* Check results :
+     * min(x), max(x), min|x|, max|x|
+     * err_max : ||Ax-b||_{inf}
+     * rerr_max :||Ax-b||_{inf} / ||b|| _{inf}
+     */
+
+    std::cout << "max(x) : " << vecMax(x) << std::endl;
+    std::cout << "min(x) : " << vecMin(x) << std::endl;
+    std::cout << "maxAbs(x) : " << vecMaxAbs(x) << std::endl;
+    std::cout << "minAbs(x) : " << vecMinAbs(x) << std::endl;
+    std::cout << "max_error : " << vecMaxAbs(r) << std::endl;
+    // std::cout << "absmaxB(b) : " << vecMaxAbs(b) << std::endl;
+    std::cout << "rmax_error : " << vecMaxAbs(r) / vecMaxAbs(b) << std::endl;
+    std::cout << "=================================== " << std::endl;
   }
 
   return 0;
