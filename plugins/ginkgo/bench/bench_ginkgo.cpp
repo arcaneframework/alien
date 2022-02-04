@@ -161,6 +161,9 @@ int test(const Alien::Ginkgo::OptionTypes::eSolver& solv, const Alien::Ginkgo::O
     }
     b = writer.release();
   }
+  else {
+    algebra.mult(A, xe, b);
+  }
 
   /**
 	 *  Préparation du solveur pour le calcul de x, tq : Ax = b
@@ -200,7 +203,9 @@ int test(const Alien::Ginkgo::OptionTypes::eSolver& solv, const Alien::Ginkgo::O
     algebra.axpy(-1., b, r);
     auto norm_r = algebra.norm2(r);
     auto norm_b = algebra.norm2(b);
-    tm->info() << " => ||r|| = " << norm_r << " ; ||r||/||b|| = " << norm_r / norm_b;
+    tm->info() << " => ||Ax-b|| = " << norm_r;
+    //tm->info() << " => ||b|| = " << norm_b;
+    //tm->info() << " => ||Ax-b||/||b|| = " << norm_r / norm_b;
 
     /* Check results :
      * min(x), max(x), min|x|, max|x|

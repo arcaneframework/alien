@@ -27,9 +27,7 @@ namespace Alien::Ginkgo
 Matrix::Matrix(const MultiMatrixImpl* multi_impl)
 : IMatrixImpl(multi_impl, AlgebraTraits<BackEnd::tag::ginkgo>::name())
 , gko::matrix::Csr<double, int>(
-  ginkgo_executor::exec_map.at(ginkgo_executor::target_machine)(), // throws if not valid
-  //gko::ReferenceExecutor::create(),
-  //gko::CudaExecutor::create(0, gko::OmpExecutor::create(),true),
+  ginkgo_executor::exec_map.at(ginkgo_executor::target_machine)(), // "at" throws if not valid
   gko::dim<2>(multi_impl->rowSpace().size(), multi_impl->colSpace().size()))
 , data(gko::dim<2>{ (multi_impl->rowSpace().size(), multi_impl->colSpace().size()) })
 {

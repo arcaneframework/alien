@@ -46,8 +46,8 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
                    .with_max_iters(max_iters)
                    .on(exec);
 
-  auto res_stop = gko::stop::RelativeResidualNorm<>::build() // relative (to ||b||) norm
-                  //auto res_stop = gko::stop::AbsoluteResidualNorm<>::build() // absolute norm
+  //auto res_stop = gko::stop::RelativeResidualNorm<>::build() // relative (to ||b||) norm
+  auto res_stop = gko::stop::AbsoluteResidualNorm<>::build() // absolute norm
                   .with_tolerance(threshold)
                   .on(exec);
 
@@ -95,7 +95,7 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   std::cout << "Residual norm : " << residual_norm << std::endl;
   auto norm_b = gko::initialize<gko::matrix::Dense<double>>({ 0.0 }, exec);
   b.internal()->compute_norm2(gko::lend(norm_b));
-  std::cout << "Convergence : " << residual_norm / (norm_b->get_const_values()[0]) << std::endl; // Only for relative residual
+  // std::cout << "Convergence : " << residual_norm / (norm_b->get_const_values()[0]) << std::endl; // Only for relative residual
 
   // Print timing infos
   double ms = static_cast<double>(time.count()) / 1e6;
@@ -134,10 +134,6 @@ void InternalLinearSolver::solve_CG(const Matrix& A, const Vector& b, Vector& x,
   // generate the solver
   auto solver = solver_factory->generate(pA);
 
-  // convergence logger
-  // auto logger = std::make_shared<ResidualLogger<double>>(exec, gko::lend(pA), gko::lend(x.internal()));
-  // solver->add_logger(logger);
-
   // generate and set the preconditioner
   if (prec == 1) {
     using Preconditioner = typename gko::preconditioner::Jacobi<double>;
@@ -145,21 +141,11 @@ void InternalLinearSolver::solve_CG(const Matrix& A, const Vector& b, Vector& x,
     solver->set_preconditioner(new_prec);
   }
 
-  // second timer
-  // auto start = std::chrono::high_resolution_clock::now();
-
   // solve with timing
   auto tic = std::chrono::steady_clock::now();
   solver->apply(lend(b.internal()), lend(x.internal()));
   auto toc = std::chrono::steady_clock::now();
   time += std::chrono::duration_cast<std::chrono::nanoseconds>(toc - tic);
-
-  // second timer
-  /*auto stop = std::chrono::high_resolution_clock::now();
-  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count();
-  std::cout << "SECOND TIME MEASUREMENT : " << duration << " microseconds" << std::endl;*/
-
-  // logger->write();
 }
 
 void InternalLinearSolver::solve_GMRES(const Matrix& A, const Vector& b, Vector& x, const int& prec, stop_iter_type& iter_stop, stop_res_type& res_stop, exec_type& exec, std::chrono::nanoseconds& time)
