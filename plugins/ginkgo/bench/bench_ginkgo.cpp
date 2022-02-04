@@ -24,56 +24,6 @@
 #include <alien/ginkgo/backend.h>
 #include <alien/ginkgo/options.h>
 
-// tmp read from mtx
-#include <fstream>
-#include <cmath>
-
-std::vector<double> readFromMtx(const std::string& vec_filename)
-{
-  // read file
-  auto stream = std::ifstream(vec_filename);
-  if (!stream) {
-    std::cerr << "readFromMatrixMarket -> Unable to read file : " << vec_filename;
-    exit(-1);
-  }
-
-  // get nb values
-  std::string line;
-  int nbvalues = 0;
-
-  while (std::getline(stream, line)) {
-
-    if ('%' == line[0]) {
-      // skip comment
-      continue;
-    }
-    else {
-      //first line is vector size, then done with banner
-      std::stringstream ss;
-      ss << line;
-      ss >> nbvalues;
-      break;
-    }
-  }
-
-  // read values into std::vector
-  std::vector<double> values(nbvalues);
-  int cpt = 0;
-  while (std::getline(stream, line)) {
-    if ('%' == line[0]) {
-      continue;
-    }
-
-    double value;
-    std::stringstream ss;
-    ss << line;
-    ss >> value;
-    values[cpt] = value;
-    cpt++;
-  }
-  return values;
-}
-
 double vecMax(const Alien::Move::VectorData& v)
 {
   Alien::Move::VectorReader R(std::move(v));
@@ -148,18 +98,9 @@ int test(const Alien::Ginkgo::OptionTypes::eSolver& solv, const Alien::Ginkgo::O
   Alien::Ginkgo::LinearAlgebra algebra;
   Alien::Move::VectorData b(A.rowSpace(), A.distribution().rowDistribution());
 
-  if (vec_filename != "") { // Read vector data from mtx file and write it into Alien Vector
-    //b = Alien::Move::readFromMatrixMarket(A.distribution().rowDistribution(), vec_filename);
-
+  if (vec_filename != "") {
     tm->info() << "Read vector file : " << vec_filename;
-    std::vector<double> values = readFromMtx(vec_filename);
-    size_t vec_size = values.size();
-
-    Alien::Move::VectorWriter writer(std::move(b));
-    for (auto i = 0u; i < vec_size; i++) {
-      writer[i] = values[i];
-    }
-    b = writer.release();
+    b = Alien::Move::readFromMatrixMarket(A.distribution().rowDistribution(), vec_filename);
   }
   else {
     algebra.mult(A, xe, b);
