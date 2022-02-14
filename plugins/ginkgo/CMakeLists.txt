@@ -5,26 +5,6 @@ message("GINKGO :" ${GINKGO_INCLUDE_DIRS})
 
 # ----------------------------------------------------------------------------
 
-if (ALIEN_PLUGIN_GINKGO_OMP)
-	message("------ COMPILING GINKGO *OPENMP* BACKEND  ------- ")
-elseif (ALIEN_PLUGIN_GINKGO_CUDA)
-	message("------ COMPILING GINKGO *CUDA* BACKEND  ------- ")
-elseif (ALIEN_PLUGIN_GINKGO_HIP)
-	message("------ COMPILING GINKGO *HIP* BACKEND  ------- ")
-elseif (ALIEN_PLUGIN_GINKGO_DPCPP)
-	message("------ COMPILING GINKGO *DPCPP* BACKEND  ------- ")
-elseif (ALIEN_PLUGIN_GINKGO_REF)
-	message("------ COMPILING GINKGO *REFERENCE* BACKEND  ------- ")
-else()
-	message("------ NO HARDWARE EXECUTOR SPECIFIED FOR GINKGO PLUGIN  ------- ")
-	message("------ FALLBACK : COMPILING GINKGO *REF* BACKEND  ------- ")
-endif()
-
-configure_file(
-		GinkgoConfig.h.in
-		${CMAKE_CURRENT_BINARY_DIR}/include/alien/ginkgo/GinkgoConfig.h
-)
-
 # ----------------------------------------------------------------------------
 add_library(alien_ginkgo
         src/matrix.h
@@ -33,28 +13,53 @@ add_library(alien_ginkgo
         src/vector.cpp
         src/ginkgo_linear_algebra.cpp
         src/ginkgo_linear_solver.cpp
-		src/ginkgo_linear_solver.h
-		src/machine_backend.cpp
+        src/ginkgo_linear_solver.h
+        src/machine_backend.cpp
         src/converters/simplecsr_to_ginkgo_matrix.cpp
         src/converters/simplecsr_to_ginkgo_vector.cpp
-		src/converters/ginkgo_to_simplecsr_vector.cpp
+        src/converters/ginkgo_to_simplecsr_vector.cpp
         )
 
 target_link_libraries(alien_ginkgo PUBLIC
-	Alien::alien_core
-	)
+        Alien::alien_core
+        )
 
 target_link_libraries(alien_ginkgo PRIVATE
         Arccore::arccore_trace
         Arccore::arccore_collections
         Arccore::arccore_base
         Arccore::arccore_message_passing_mpi
-        arccon::Ginkgo
+        Ginkgo::ginkgo
         )
 
+if (ALIEN_PLUGIN_GINKGO_OMP)
+    target_link_libraries(alien_ginkgo PRIVATE Ginkgo::ginkgo_omp)
+    message("------ COMPILING GINKGO *OPENMP* BACKEND  ------- ")
+elseif (ALIEN_PLUGIN_GINKGO_CUDA)
+    target_link_libraries(alien_ginkgo PRIVATE Ginkgo::ginkgo_cuda)
+    message("------ COMPILING GINKGO *CUDA* BACKEND  ------- ")
+elseif (ALIEN_PLUGIN_GINKGO_HIP)
+    target_link_libraries(alien_ginkgo PRIVATE Ginkgo::ginkgo_hip)
+    message("------ COMPILING GINKGO *HIP* BACKEND  ------- ")
+elseif (ALIEN_PLUGIN_GINKGO_DPCPP)
+    target_link_libraries(alien_ginkgo PRIVATE Ginkgo::ginkgo_dpcpp)
+    message("------ COMPILING GINKGO *DPCPP* BACKEND  ------- ")
+elseif (ALIEN_PLUGIN_GINKGO_REF)
+    target_link_libraries(alien_ginkgo PRIVATE Ginkgo::ginkgo_reference)
+    message("------ COMPILING GINKGO *REFERENCE* BACKEND  ------- ")
+else ()
+    message("------ NO HARDWARE EXECUTOR SPECIFIED FOR GINKGO PLUGIN  ------- ")
+    message("------ FALLBACK : COMPILING GINKGO *REF* BACKEND  ------- ")
+endif ()
+
+configure_file(
+        GinkgoConfig.h.in
+        ${CMAKE_CURRENT_BINARY_DIR}/include/alien/ginkgo/GinkgoConfig.h
+)
+
 target_include_directories(alien_ginkgo PUBLIC
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
         $<BUILD_INTERFACE:${GINKGO_INCLUDE_DIRS}/..>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         )
@@ -68,7 +73,7 @@ generate_export_header(alien_ginkgo
         )
 
 # Examples
-set (ALIEN_GINKGO_BENCHMARK ON)
+set(ALIEN_GINKGO_BENCHMARK ON)
 add_subdirectory(bench)
 
 # Tests
@@ -97,7 +102,7 @@ install(
 
 install(EXPORT ${ALIENGINKGO_EXPORT_TARGET}
         NAMESPACE ${namespace}
-		DESTINATION ${config_install_dir})
+        DESTINATION ${config_install_dir})
 
 # ----------------------------------------------------------------------------
 # ----------------------------------------------------------------------------

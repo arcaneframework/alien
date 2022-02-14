@@ -30,10 +30,10 @@
 #include "vector.h"
 
 // ginkgo
-#include <core/solver/cg.hpp>
-#include <core/stop/iteration.hpp>
-#include <core/stop/residual_norm.hpp>
-#include <core/log/convergence.hpp>
+#include <ginkgo/core/solver/cg.hpp>
+#include <ginkgo/core/stop/iteration.hpp>
+#include <ginkgo/core/stop/residual_norm.hpp>
+#include <ginkgo/core/log/convergence.hpp>
 
 // modify to <>
 #include "ginkgo_logger.h"

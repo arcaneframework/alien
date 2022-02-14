@@ -70,23 +70,6 @@ option(ALIEN_PLUGIN_GINKGO_CUDA "Whether or not to compile Ginkgo CUDA backend" 
 option(ALIEN_PLUGIN_GINKGO_HIP "Whether or not to compile Ginkgo HIP backend" OFF)
 option(ALIEN_PLUGIN_GINKGO_DPCPP "Whether or not to compile DPCPP Ginkgo backend" OFF)
 
-
-option(ALIEN_PLUGIN_GINKGO "Whether or not to compile Ginkgo backend" OFF)
-option(ALIEN_PLUGIN_GINKGO_REF "Whether or not to compile Ginkgo REFERENCE backend" OFF)
-option(ALIEN_PLUGIN_GINKGO_OMP "Whether or not to compile Ginkgo OPENMP backend" OFF)
-option(ALIEN_PLUGIN_GINKGO_CUDA "Whether or not to compile Ginkgo CUDA backend" OFF)
-option(ALIEN_PLUGIN_GINKGO_HIP "Whether or not to compile Ginkgo HIP backend" OFF)
-option(ALIEN_PLUGIN_GINKGO_DPCPP "Whether or not to compile DPCPP Ginkgo backend" OFF)
-
-
-option(ALIEN_PLUGIN_GINKGO "Whether or not to compile Ginkgo backend" OFF)
-option(ALIEN_PLUGIN_GINKGO_REF "Whether or not to compile Ginkgo REFERENCE backend" OFF)
-option(ALIEN_PLUGIN_GINKGO_OMP "Whether or not to compile Ginkgo OPENMP backend" OFF)
-option(ALIEN_PLUGIN_GINKGO_CUDA "Whether or not to compile Ginkgo CUDA backend" OFF)
-option(ALIEN_PLUGIN_GINKGO_HIP "Whether or not to compile Ginkgo HIP backend" OFF)
-option(ALIEN_PLUGIN_GINKGO_DPCPP "Whether or not to compile DPCPP Ginkgo backend" OFF)
-
-
 get_filename_component(_fp_framework "framework/CMake" REALPATH)
 if (EXISTS ${_fp_framework})
     option(ALIENDEV_EMBEDDED "[dev] forbid to compile Arcon and Arccore" ${ALIEN_DEFAULT_OPTIONS})
@@ -202,9 +185,6 @@ endif (ALIEN_PLUGIN_SUPERLU)
 if (ALIEN_PLUGIN_TRILINOS)
     add_subdirectory(plugins/trilinos)
 endif (ALIEN_PLUGIN_TRILINOS)
-if (ALIEN_PLUGIN_GINKGO)
-    add_subdirectory(plugins/ginkgo)
-endif (ALIEN_PLUGIN_GINKGO)
 
 if (ALIEN_PLUGIN_GINKGO)
     add_subdirectory(plugins/ginkgo)
