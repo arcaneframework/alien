@@ -116,40 +116,43 @@ void InternalLinearAlgebra::copy(const Vector& vx, Vector& vr) const
 Arccore::Real
 InternalLinearAlgebra::dot(const Vector& vx, const Vector& vy) const
 {
-  //~ PetscScalar dot_prod;
-  //~ VecDot(vx.internal(), vy.internal(), &dot_prod);
-  //~ return static_cast<Arccore::Real>(dot_prod);
-  return {};
+  using vec = gko::matrix::Dense<double>;
+  auto exec = vx.internal()->get_executor();
+  auto res = gko::initialize<vec>({ 1.0 }, exec);
+
+  vx.internal()->compute_dot(lend(vy.internal()),lend(res));
+  return res->get_values()[0];
 }
 
 void InternalLinearAlgebra::diagonal(Matrix const& m ALIEN_UNUSED_PARAM, Vector& v ALIEN_UNUSED_PARAM) const
 {
-  //~ MatGetDiagonal(m.internal(), v.internal());
-  // return{};
+  throw Arccore::NotImplementedException(A_FUNCINFO, "GinkgoLinearAlgebra::diagonal not implemented");
+
 }
 
 void InternalLinearAlgebra::reciprocal(Vector& v ALIEN_UNUSED_PARAM) const
 {
-  //~ VecReciprocal(v.internal());
+  throw Arccore::NotImplementedException(A_FUNCINFO, "GinkgoLinearAlgebra::reciprocal not implemented");
 }
 
 void InternalLinearAlgebra::aypx(
 Arccore::Real alpha, Vector& y, const Vector& x) const
 {
-  //~ VecAYPX(y.internal(), alpha, x.internal()); // y = x + alpha y
+  throw Arccore::NotImplementedException(A_FUNCINFO, "GinkgoLinearAlgebra::aypx not implemented");
 }
 
 void InternalLinearAlgebra::pointwiseMult(
 const Vector& x, const Vector& y, Vector& w) const
 {
-  //VecPointwiseMult(
-  //~ w.internal(), x.internal(),
-  //~ y.internal()); // Computes the componentwise multiplication w = x*y.
+  throw Arccore::NotImplementedException(A_FUNCINFO, "GinkgoLinearAlgebra::pointwiseMult not implemented");
 }
 
 void InternalLinearAlgebra::scal(Arccore::Real alpha, Vector& x) const
 {
-  //   VecScale(x.internal(), alpha);
+  using vec = gko::matrix::Dense<double>;
+  auto exec = x.internal()->get_executor();
+  auto a = gko::initialize<vec>({alpha}, exec);
+  x.internal()->scale(a.get());
 }
 
 ALIEN_GINKGO_EXPORT
