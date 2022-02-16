@@ -22,21 +22,21 @@ namespace Alien::Ginkgo
 {
 
 #ifdef ALIEN_PLUGIN_GINKGO_REF
-std::string ginkgo_executor::target_machine = "reference";
+std::string Ginkgo_executor::target_machine = "reference";
 #elif ALIEN_PLUGIN_GINKGO_OMP
-std::string ginkgo_executor::target_machine = "omp";
+std::string Ginkgo_executor::target_machine = "omp";
 #elif ALIEN_PLUGIN_GINKGO_CUDA
-std::string ginkgo_executor::target_machine = "cuda";
+std::string Ginkgo_executor::target_machine = "cuda";
 #elif ALIEN_PLUGIN_GINKGO_HIP
-std::string ginkgo_executor::target_machine = "hip";
+std::string Ginkgo_executor::target_machine = "hip";
 #elif ALIEN_PLUGIN_GINKGO_DPCPP
-std::string ginkgo_executor::target_machine = "dpcpp";
+std::string Ginkgo_executor::target_machine = "dpcpp";
 #else
-std::string ginkgo_executor::target_machine = "default";
+std::string Ginkgo_executor::target_machine = "default";
 #endif
 
 std::map<std::string, std::function<std::shared_ptr<gko::Executor>()>>
-ginkgo_executor::exec_map{
+Ginkgo_executor::exec_map{
   { "omp",
     [] {
       return gko::OmpExecutor::create();

@@ -27,7 +27,7 @@ namespace Alien::Ginkgo
 Vector::Vector(const MultiVectorImpl* multi_impl)
 : IVectorImpl(multi_impl, AlgebraTraits<BackEnd::tag::ginkgo>::name())
 , gko::matrix::Dense<double>(
-  ginkgo_executor::exec_map.at(ginkgo_executor::target_machine)(), // throws if not valid
+  Ginkgo_executor::exec_map.at(Ginkgo_executor::target_machine)(), // throws if not valid
   gko::dim<2>(multi_impl->space().size(), 1))
 , data(gko::dim<2>(multi_impl->space().size(), 1))
 {

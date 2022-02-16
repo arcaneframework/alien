@@ -20,15 +20,29 @@
 
 #include <alien/ginkgo/GinkgoConfig.h>
 #include <ginkgo/ginkgo.hpp>
+
 #include <map>
 
 namespace Alien::Ginkgo
 {
+class Matrix;
+class Vector;
 
-struct ginkgo_executor
+class Ginkgo_executor
 {
+ private:
   static std::string target_machine;
   static std::map<std::string, std::function<std::shared_ptr<gko::Executor>()>> exec_map;
+
+ public:
+  static std::string get_target_machine()
+  {
+    return target_machine;
+  }
+
+  friend class Alien::Ginkgo::Matrix;
+  friend class Alien::Ginkgo::Vector;
 };
+
 
 } // namespace Alien::Ginkgo

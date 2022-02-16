@@ -87,7 +87,7 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
 
   // Print results infos
   std::cout << "===== SOLVER  RUN INFORMATION ===== " << std::endl;
-  std::cout << "Ginkgo Executor : " << Alien::Ginkgo::ginkgo_executor::target_machine << std::endl;
+  std::cout << "Ginkgo Executor : " << Alien::Ginkgo::Ginkgo_executor::get_target_machine() << std::endl;
   display_solver_infos(m_options.solver(), m_options.preconditioner());
   std::cout << "Stop criteria Value : " << m_options.stopCriteriaValue() << std::endl;
   std::cout << "Solver has converged : " << conv_logger->has_converged() << std::endl;
