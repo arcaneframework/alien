@@ -103,75 +103,7 @@ void SimpleCSR_to_Ginkgo_MatrixConverter::_build(const Alien::SimpleCSRMatrix<Ar
 void SimpleCSR_to_Ginkgo_MatrixConverter::_buildBlock(const Alien::SimpleCSRMatrix<Arccore::Real>& sourceImpl,
                                                       Alien::Ginkgo::Matrix& targetImpl) const
 {
-
-  /*
-  const auto& dist = sourceImpl.distribution();
-  const auto& profile = sourceImpl.getCSRProfile();
-  const auto localSize = profile.getNRow();
-  const auto block_size = targetImpl.block()->size();
-  const auto localOffset = dist.rowOffset();
-  const auto& matrixInternal = sourceImpl.internal();
-
-  auto max_line_size = localSize * block_size;
-  auto pos = 0;
-  Arccore::UniqueArray<int> sizes(localSize * block_size);
-  for (auto row = 0; row < localSize; ++row) {
-    auto row_size = profile.getRowSize(row) * block_size;
-    for (auto ieq = 0; ieq < block_size; ++ieq) {
-      sizes[pos] = row_size;
-      ++pos;
-    }
-    max_line_size = std::max(max_line_size, row_size);
-  }
-
-  auto ilower = localOffset * block_size;
-  auto iupper = (localOffset + localSize) * block_size - 1;
-  auto jlower = ilower;
-  auto jupper = iupper;
-
-  alien_debug([&] {
-    cout() << "Matrix range : "
-           << "[" << ilower << ":" << iupper << "]"
-           << "x"
-           << "[" << jlower << ":" << jupper << "]";
-  });
-
-  // Buffer de construction
-  Arccore::UniqueArray2<Arccore::Real> values;
-  values.resize(block_size, max_line_size);
-  Arccore::UniqueArray<int>& indices = sizes; // réutilisation du buffer
-  indices.resize(std::max(max_line_size, localSize * block_size));
-
-  targetImpl.setProfile(ilower, iupper, jlower, jupper, sizes);
-
-  auto cols = profile.getCols();
-  auto m_values = matrixInternal.getValues();
-  auto col_count = 0;
-  auto mat_count = 0;
-  for (auto irow = 0; irow < localSize; ++irow) {
-    int row = localOffset + irow;
-    int ncols = profile.getRowSize(irow);
-    auto jcol = 0;
-    for (auto k = 0; k < ncols; ++k)
-      for (auto j = 0; j < block_size; ++j)
-        indices[jcol++] = cols[col_count + k] * block_size + j;
-    for (auto k = 0; k < ncols; ++k) {
-      const auto kk = k * block_size * block_size;
-      for (auto i = 0; i < block_size; ++i)
-        for (auto j = 0; j < block_size; ++j)
-          values[i][k * block_size + j] = m_values[mat_count + kk + i * block_size + j];
-    }
-    col_count += ncols;
-    mat_count += ncols * block_size * block_size;
-
-    for (auto i = 0; i < block_size; ++i) {
-      auto rows = row * block_size + i;
-      auto num_cols = ncols * block_size;
-      targetImpl.setRowValues(rows, indices.subConstView(0, num_cols), values[i].subConstView(0, num_cols));
-    }
-  }
-
-  targetImpl.assemble();*/
+  throw Arccore::NotImplementedException(A_FUNCINFO, "SimpleCSR_to_Ginkgo_MatrixConverter::_buildBlock not implemented yet.");
 }
 
 REGISTER_MATRIX_CONVERTER(SimpleCSR_to_Ginkgo_MatrixConverter);

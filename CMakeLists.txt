@@ -1,4 +1,4 @@
-# Copyright 2020 IFPEN-CEA
+﻿# Copyright 2020 IFPEN-CEA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.13)
 cmake_policy(SET CMP0079 NEW)
 
 # MUST be done before call to 'project'

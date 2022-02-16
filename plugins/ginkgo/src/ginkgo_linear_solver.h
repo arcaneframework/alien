@@ -35,9 +35,6 @@
 #include <ginkgo/core/stop/residual_norm.hpp>
 #include <ginkgo/core/log/convergence.hpp>
 
-// modify to <>
-#include "ginkgo_logger.h"
-
 #include <memory>
 
 namespace Alien
