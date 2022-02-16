@@ -77,9 +77,25 @@ void SimpleCSR_to_Ginkgo_MatrixConverter::_build(const Alien::SimpleCSRMatrix<Ar
   const auto& dist = sourceImpl.distribution();
   const auto& profile = sourceImpl.getCSRProfile();
 
-  // Is there a need to handle distributed Matrices since Ginkgo does not handle it ?
   const auto localSize = profile.getNRow();
   const auto localOffset = dist.rowOffset();
+
+  const auto ilower = localOffset;
+  const auto iupper = localOffset + localSize - 1;
+  const auto jlower = ilower;
+  const auto jupper = iupper;
+
+  alien_debug([&] {
+    cout() << "Matrix range : "
+           << "[" << ilower << ":" << iupper << "]"
+           << "x"
+           << "[" << jlower << ":" << jupper << "]";
+  });
+
+  auto sizes = Arccore::UniqueArray<int>(localSize);
+  for (auto row = 0; row < localSize; ++row) {
+    sizes[row] = profile.getRowSize(row);
+  }
 
   auto values = sourceImpl.internal().getValues();
   auto cols = profile.getCols();
