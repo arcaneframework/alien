@@ -120,14 +120,13 @@ InternalLinearAlgebra::dot(const Vector& vx, const Vector& vy) const
   auto exec = vx.internal()->get_executor();
   auto res = gko::initialize<vec>({ 1.0 }, exec);
 
-  vx.internal()->compute_dot(lend(vy.internal()),lend(res));
+  vx.internal()->compute_dot(lend(vy.internal()), lend(res));
   return res->get_values()[0];
 }
 
 void InternalLinearAlgebra::diagonal(Matrix const& m ALIEN_UNUSED_PARAM, Vector& v ALIEN_UNUSED_PARAM) const
 {
   throw Arccore::NotImplementedException(A_FUNCINFO, "GinkgoLinearAlgebra::diagonal not implemented");
-
 }
 
 void InternalLinearAlgebra::reciprocal(Vector& v ALIEN_UNUSED_PARAM) const
@@ -151,7 +150,7 @@ void InternalLinearAlgebra::scal(Arccore::Real alpha, Vector& x) const
 {
   using vec = gko::matrix::Dense<double>;
   auto exec = x.internal()->get_executor();
-  auto a = gko::initialize<vec>({alpha}, exec);
+  auto a = gko::initialize<vec>({ alpha }, exec);
   x.internal()->scale(a.get());
 }
 

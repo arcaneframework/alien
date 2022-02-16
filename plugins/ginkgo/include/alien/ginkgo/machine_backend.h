@@ -44,5 +44,4 @@ class Ginkgo_executor
   friend class Alien::Ginkgo::Vector;
 };
 
-
 } // namespace Alien::Ginkgo

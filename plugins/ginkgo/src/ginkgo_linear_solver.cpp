@@ -47,7 +47,7 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
                    .on(exec);
 
   auto res_stop = gko::stop::RelativeResidualNorm<>::build() // relative (to ||b||) norm
-  //auto res_stop = gko::stop::AbsoluteResidualNorm<>::build() // absolute norm
+                  //auto res_stop = gko::stop::AbsoluteResidualNorm<>::build() // absolute norm
                   .with_tolerance(threshold)
                   .on(exec);
 
