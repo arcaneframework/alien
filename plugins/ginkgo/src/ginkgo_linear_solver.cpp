@@ -46,8 +46,8 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
                    .with_max_iters(max_iters)
                    .on(exec);
 
-  //auto res_stop = gko::stop::RelativeResidualNorm<>::build() // relative (to ||b||) norm
-  auto res_stop = gko::stop::AbsoluteResidualNorm<>::build() // absolute norm
+  auto res_stop = gko::stop::RelativeResidualNorm<>::build() // relative (to ||b||) norm
+  //auto res_stop = gko::stop::AbsoluteResidualNorm<>::build() // absolute norm
                   .with_tolerance(threshold)
                   .on(exec);
 
@@ -95,7 +95,7 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   std::cout << "Residual norm : " << residual_norm << std::endl;
   auto norm_b = gko::initialize<gko::matrix::Dense<double>>({ 0.0 }, exec);
   b.internal()->compute_norm2(gko::lend(norm_b));
-  // std::cout << "Convergence : " << residual_norm / (norm_b->get_const_values()[0]) << std::endl; // Only for relative residual
+  std::cout << "Convergence : " << residual_norm / (norm_b->get_const_values()[0]) << std::endl; // Only for relative residual
 
   // Print timing infos
   double ms = static_cast<double>(time.count()) / 1e6;

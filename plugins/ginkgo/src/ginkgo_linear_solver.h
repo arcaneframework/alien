@@ -91,8 +91,8 @@ class InternalLinearSolver
 
  private:
   using stop_iter_type = std::unique_ptr<gko::stop::Iteration::Factory, std::default_delete<gko::stop::Iteration::Factory>>;
-  using stop_res_type = std::unique_ptr<gko::stop::AbsoluteResidualNorm<>::Factory, std::default_delete<gko::stop::AbsoluteResidualNorm<>::Factory>>;
-  //using stop_res_type = std::unique_ptr<gko::stop::RelativeResidualNorm<>::Factory, std::default_delete<gko::stop::RelativeResidualNorm<>::Factory>>;
+  //using stop_res_type = std::unique_ptr<gko::stop::AbsoluteResidualNorm<>::Factory, std::default_delete<gko::stop::AbsoluteResidualNorm<>::Factory>>;
+  using stop_res_type = std::unique_ptr<gko::stop::RelativeResidualNorm<>::Factory, std::default_delete<gko::stop::RelativeResidualNorm<>::Factory>>;
   using exec_type = std::shared_ptr<const gko::Executor>;
 
   void solve_CG(const Matrix& A, const Vector& b, Vector& x, const int& prec, stop_iter_type& iter_stop, stop_res_type& res_stop, exec_type& exec, std::chrono::nanoseconds& time);
