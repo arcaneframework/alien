@@ -50,24 +50,6 @@
                 "CMAKE_BUILD_TYPE": "Debug",
                 "ALIEN_EXPAND_TESTS": "ON"
             }
-        },
-        {
-            "name": "ginkgo-omp",
-            "generator": "Unix Makefiles",
-            "binaryDir": "${sourceDir}/build-ginkgo-omp",
-            "cacheVariables": {
-                "ALIEN_PLUGIN_GINKGO": "ON",
-                "ALIEN_PLUGIN_GINKGO_OMP": "ON"
-            }
-        },
-        {
-            "name": "ginkgo-ref",
-            "generator": "Unix Makefiles",
-            "binaryDir": "${sourceDir}/build-ginkgo-ref",
-            "cacheVariables": {
-                "ALIEN_PLUGIN_GINKGO": "ON",
-                "ALIEN_PLUGIN_GINKGO_REF": "ON"
-            }
         }
     ],
     "buildPresets": [
@@ -82,14 +64,6 @@
         {
             "name": "debug",
             "configurePreset": "debug-ccache"
-        },
-        {
-            "name": "ginkgo-omp",
-            "configurePreset": "ginkgo-omp"
-        },
-        {
-            "name": "ginkgo-ref",
-            "configurePreset": "ginkgo-ref"
         }
     ]
 }
