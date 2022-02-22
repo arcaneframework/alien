@@ -41,3 +41,5 @@ target_link_libraries(alien_benchmark PUBLIC
         Alien::alien_core
         Alien::alien_semantic_move
         )
+
+add_library(Alien::benchmark ALIAS alien_benchmark)
