@@ -49,7 +49,6 @@ namespace Move
    public:
     typedef Real ValueType;
 
-   public:
     /*! @defgroup constructor Vector Constructor
          * @{
          */
@@ -88,7 +87,7 @@ namespace Move
            * \param dist Parallel distribution.
            *
            * This vector is directly ready to use. */
-    VectorData(const VectorDistribution& dist);
+    explicit VectorData(const VectorDistribution& dist);
 
     /*! Move constructor for Vector
          *
@@ -100,14 +99,14 @@ namespace Move
     /*! Destructor
          * All internal data structures will be deleted.
          */
-    virtual ~VectorData();
+    virtual ~VectorData() = default;
 
     /*! Move assignment
          * \brief Move from Vector
          *
          * @param matrix Vector to move from.
          */
-    void operator=(VectorData&& vector);
+    VectorData& operator=(VectorData&& vector);
 
     /*! Initialize a Vector with a Space.
          *
@@ -116,16 +115,17 @@ namespace Move
          */
     void init(const ISpace& space, const VectorDistribution& dist);
 
+    /*! Only support move semantic */
     VectorData(const VectorData&) = delete;
+    /*! Only support move semantic */
+    VectorData& operator=(const VectorData&) = delete;
 
-    void operator=(const VectorData&) = delete;
+    VectorData clone() const;
 
-   public:
     /*! @defgroup block Block related API
          * @{ */
     void setBlockInfos(const Integer block_size);
 
-    // void setBlockInfos(const IBlockBuilder& block_size);
     void setBlockInfos(const Block* block);
 
     void setBlockInfos(const VBlock* block);
@@ -176,7 +176,6 @@ namespace Move
     bool hasUserFeature(String feature) const;
     /*! }@ */
 
-   public:
     /*! @defgroup impl Internal data structure access.
          *
          * Access multi-representation object.
