@@ -17,35 +17,29 @@
  */
 
 //
-// Created by chevalierc on 22/02/2022.
+// Created by chevalierc on 23/02/22.
 //
 
-#ifndef ALIEN_MATRIXMARKETPROBLEM_H
-#define ALIEN_MATRIXMARKETPROBLEM_H
+#ifndef ALIEN_VECTORANALYTICS_H
+#define ALIEN_VECTORANALYTICS_H
 
-#include <string>
+#include <alien/benchmark/export.h>
 
-#include <arccore/message_passing/IMessagePassingMng.h>
-
-#include <alien/benchmark/ILinearProblem.h>
+#include <alien/move/data/VectorData.h>
 
 namespace Alien::Benchmark
 {
-
-class MatrixMarketProblem : public ILinearProblem
+struct VectorAnalytics
 {
  public:
-  MatrixMarketProblem(Arccore::MessagePassing::IMessagePassingMng* pm, const std::string& matrix_filename, const std::string& rhs_filename);
-
-  virtual ~MatrixMarketProblem() = default;
-
-  Alien::Move::MatrixData matrix() const override;
-
-  Alien::Move::VectorData vector() const override;
-
- private:
-  Alien::Move::MatrixData m_matrix;
-  Alien::Move::VectorData m_rhs;
+  Arccore::Real min;
+  Arccore::Real max;
+  Arccore::Real abs_min;
+  Arccore::Real abs_max;
 };
+
+ALIEN_BENCHMARK_EXPORT VectorAnalytics computeAnalytics(const Alien::Move::VectorData& v);
+
 } // namespace Alien::Benchmark
-#endif //ALIEN_MATRIXMARKETPROBLEM_H
+
+#endif //ALIEN_VECTORANALYTICS_H

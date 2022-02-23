@@ -23,14 +23,17 @@
 #ifndef ALIEN_LINEARBENCH_H
 #define ALIEN_LINEARBENCH_H
 
+#include <alien/expression/solver/ILinearSolver.h>
+
 #include <alien/benchmark/export.h>
 #include <alien/benchmark/ILinearProblem.h>
-#include <alien/expression/solver/ILinearSolver.h>
+#include <alien/benchmark/VectorAnalytics.h>
 
 namespace Alien::Benchmark
 {
+class LinearBenchResults;
 
-ALIEN_BENCHMARK_EXPORT class LinearBench
+class ALIEN_BENCHMARK_EXPORT LinearBench
 {
  public:
   explicit LinearBench(std::unique_ptr<ILinearProblem>&& lp)
@@ -40,10 +43,31 @@ ALIEN_BENCHMARK_EXPORT class LinearBench
 
   ~LinearBench() = default;
 
-  ALIEN_BENCHMARK_EXPORT void solve(ILinearSolver* solver) const;
+  Alien::Move::VectorData solve(ILinearSolver* solver) const;
 
  private:
   std::unique_ptr<ILinearProblem> m_lp;
+  friend LinearBenchResults;
+};
+
+class ALIEN_BENCHMARK_EXPORT LinearBenchResults
+{
+ public:
+  LinearBenchResults(const Alien::Benchmark::LinearBench& bench, Alien::Move::VectorData&& solution);
+
+  VectorAnalytics analyzeSolution() const
+  {
+    return m_solution;
+  }
+
+  VectorAnalytics analyzeRhs() const
+  {
+    return m_rhs;
+  }
+
+ private:
+  VectorAnalytics m_solution;
+  VectorAnalytics m_rhs;
 };
 
 } // namespace Alien::Benchmark

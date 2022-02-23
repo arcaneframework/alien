@@ -21,18 +21,21 @@
 //
 
 #include "LinearBench.h"
-#include "alien/move/handlers/scalar/VectorWriter.h"
+
+#include <alien/move/handlers/scalar/VectorWriter.h>
+
+#include <alien/kernels/simple_csr/algebra/SimpleCSRLinearAlgebra.h>
 
 namespace Alien::Benchmark
 {
-void LinearBench::solve(ILinearSolver* solver) const
+Alien::Move::VectorData LinearBench::solve(ILinearSolver* solver) const
 {
   auto A = m_lp->matrix();
   auto b = m_lp->vector();
   /**
 	 *  Préparation du solveur pour le calcul de x, tq : Ax = b
 	 ********************************************/
-  Alien::Move::VectorData x(A.distribution().rowDistribution());
+  Alien::Move::VectorData x(A.distribution().colDistribution());
 
   // init vector x with zeros
   Alien::Move::LocalVectorWriter writer(std::move(x));
@@ -43,5 +46,24 @@ void LinearBench::solve(ILinearSolver* solver) const
 
   // solve
   solver->solve(A, b, x);
+
+  return x;
+}
+
+LinearBenchResults::LinearBenchResults(const LinearBench& bench, Alien::Move::VectorData&& solution)
+{
+  SimpleCSRLinearAlgebra algebra;
+
+  auto linop = bench.m_lp->matrix();
+
+  Alien::Move::VectorData residual(linop.distribution().rowDistribution());
+
+  auto rhs = bench.m_lp->vector();
+
+  algebra.mult(linop, solution, residual);
+  algebra.axpy(-1., rhs, residual);
+
+  m_solution = computeAnalytics(solution);
+  m_rhs = computeAnalytics(rhs);
 }
 } // namespace Alien::Benchmark

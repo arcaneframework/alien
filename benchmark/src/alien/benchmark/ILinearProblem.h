@@ -31,14 +31,14 @@
 namespace Alien::Benchmark
 {
 
-ALIEN_BENCHMARK_EXPORT class ILinearProblem
+class ILinearProblem
 {
  public:
   virtual ~ILinearProblem() = default;
 
-  virtual Alien::Move::MatrixData matrix() const = 0;
+  ALIEN_BENCHMARK_EXPORT virtual Alien::Move::MatrixData matrix() const = 0;
 
-  virtual Alien::Move::VectorData vector() const = 0;
+  ALIEN_BENCHMARK_EXPORT virtual Alien::Move::VectorData vector() const = 0;
 };
 
 ALIEN_BENCHMARK_EXPORT std::unique_ptr<ILinearProblem> buildFromMatrixMarket(Arccore::MessagePassing::IMessagePassingMng* pm, const std::string& matrix_name, std::string_view rhs_name = "");
