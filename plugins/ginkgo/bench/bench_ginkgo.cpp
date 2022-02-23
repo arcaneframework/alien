@@ -44,67 +44,16 @@ int test(const Alien::Ginkgo::OptionTypes::eSolver& solv, const Alien::Ginkgo::O
 
   auto bench = Alien::Benchmark::LinearBench(std::move(problem));
 
-  auto solution = bench.solve(&solver);
-
-  auto results = Alien::Benchmark::LinearBenchResults(bench, std::move(solution));
-  //
-  //
-  //
-  //  xe.distribution();
-  //
-  //  /**
-  //	 *  Vecteur b
-  //	 *************/
-  //
-  //  auto b = problem->vector();
-  //
-  //  /**
-  //	 *  Préparation du solveur pour le calcul de x, tq : Ax = b
-  //	 ********************************************/
-  //  Alien::Move::VectorData x(A.colSpace(), A.distribution().rowDistribution());
-
-  //
-  //  /**
-  //	 *  BENCH
-  //	 ********************************************/
-  //
-  //  int nbRuns = 5;
-  //  for (int i = 0; i < nbRuns; i++) {
-  //    std::cout << "\n************************************************** " << std::endl;
-  //    std::cout << "*                   RUN  # " << i << "                     * " << std::endl;
-  //    std::cout << "************************************************** \n"
-  //              << std::endl;
-  //
-  //
-  //
-  //
-  //
-  //    Alien::Ginkgo::LinearAlgebra algebra;
-  //    // compute explicit residual r = ||Ax - b|| ~ 0
-  //    Alien::Move::VectorData r(A.rowSpace(), A.distribution().rowDistribution());
-  //    algebra.mult(A, x, r);
-  //    algebra.axpy(-1., b, r);
-  //    auto norm_r = algebra.norm2(r);
-  //    auto norm_b = algebra.norm2(b);
-  //    tm->info() << " => ||Ax-b|| = " << norm_r;
-  //    tm->info() << " => ||b|| = " << norm_b;
-  //    tm->info() << " => ||Ax-b||/||b|| = " << norm_r / norm_b;
-  //
-  //    /* Check results :
-  //     * min(x), max(x), min|x|, max|x|
-  //     * err_max : ||Ax-b||_{inf}
-  //     * rerr_max :||Ax-b||_{inf} / ||b|| _{inf}
-  //     */
-  //
-  //    std::cout << "max(x) : " << vecMax(x) << std::endl;
-  //    std::cout << "min(x) : " << vecMin(x) << std::endl;
-  //    std::cout << "maxAbs(x) : " << vecMaxAbs(x) << std::endl;
-  //    std::cout << "minAbs(x) : " << vecMinAbs(x) << std::endl;
-  //    std::cout << "max_error : " << vecMaxAbs(r) << std::endl;
-  //    // std::cout << "absmaxB(b) : " << vecMaxAbs(b) << std::endl;
-  //    std::cout << "rmax_error : " << vecMaxAbs(r) / vecMaxAbs(b) << std::endl;
-  //    std::cout << "=================================== " << std::endl;
-  //  }
+  if (pm->commSize() == 1) {
+    tm->info() << "Running Ginkgo";
+    auto solution = bench.solve(&solver);
+  }
+  else {
+    tm->info() << "Running Ginkgo on a reduced communicator";
+    // Run ginkgo from a sequential communicator.
+    auto ginkgo_pm = mpSplit(pm, pm->commRank() == 0);
+    auto solution = bench.solveWithRedistribution(&solver, ginkgo_pm);
+  }
 
   return 0;
 }
