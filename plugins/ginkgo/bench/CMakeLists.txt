@@ -36,7 +36,13 @@ configure_file(../../../src/movesemantic/tests/simple_rhs.mtx rhs.mtx COPYONLY)
 # Tests
 #-----------------------------------------------------------
 
-add_test(
-        NAME ginkgo.bench
-        COMMAND bench_ginkgo GMRES Jacobi matrix.mtx rhs.mtx
+alien_test(
+        BENCH ginkgo
+        NAME ginkgo.benchmark
+        PROCS 2
+        COMMAND bench_ginkgo
 )
+
+#~ #-----------------------------------------------------------
+#~ # Bench recap
+#~ #-----------------------------------------------------------

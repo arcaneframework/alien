@@ -67,7 +67,7 @@ int main(int argc, char** argv)
 
   MPI_Init(&argc, &argv);
 
-  if (argc < 4) {
+  if (argc != 4 && argc != 1) {
     std::cerr << "Usage : ./bench_ginkgo [solver] [preconditioner] [matrix] [vector] \n"
               << "  - solver : (CG|GMRES|BICG|BICGSTAB) \n"
               << "  - preconditioner : (Jacobi|NoPC) \n"
@@ -76,56 +76,65 @@ int main(int argc, char** argv)
     return -1;
   }
 
-  // Read the solver
-  Alien::Ginkgo::OptionTypes::eSolver solver;
-  if (std::string(argv[1]) == "CG") {
-    solver = Alien::Ginkgo::OptionTypes::CG;
-  }
-  else if (std::string(argv[1]) == "GMRES") {
-    solver = Alien::Ginkgo::OptionTypes::GMRES;
-  }
-  else if (std::string(argv[1]) == "BICG") {
-    solver = Alien::Ginkgo::OptionTypes::BICG;
-  }
-  else if (std::string(argv[1]) == "BICGSTAB") {
-    solver = Alien::Ginkgo::OptionTypes::BICGSTAB;
+  // Default options, to run as test
+  auto solver = Alien::Ginkgo::OptionTypes::GMRES;
+  auto prec = Alien::Ginkgo::OptionTypes::Jacobi;
+  std::string matrix_file = "matrix.mtx";
+  std::string vec_file = "rhs.mtx";
+
+  if (argc == 1) {
+    // do nothing
   }
   else {
-    std::cerr << "Unrecognized solver : " << argv[1] << "\n"
-              << "  - solver list : (CG|GMRES|BICG|BICGSTAB) \n";
-    return -1;
+    // Read the solver
+    if (std::string(argv[1]) == "CG") {
+      solver = Alien::Ginkgo::OptionTypes::CG;
+    }
+    else if (std::string(argv[1]) == "GMRES") {
+      solver = Alien::Ginkgo::OptionTypes::GMRES;
+    }
+    else if (std::string(argv[1]) == "BICG") {
+      solver = Alien::Ginkgo::OptionTypes::BICG;
+    }
+    else if (std::string(argv[1]) == "BICGSTAB") {
+      solver = Alien::Ginkgo::OptionTypes::BICGSTAB;
+    }
+    else {
+      std::cerr << "Unrecognized solver : " << argv[1] << "\n"
+                << "  - solver list : (CG|GMRES|BICG|BICGSTAB) \n";
+      return -1;
+    }
+
+    if (std::string(argv[2]) == "Jacobi") {
+      prec = Alien::Ginkgo::OptionTypes::Jacobi;
+    }
+    else if (std::string(argv[2]) == "NoPC") {
+      prec = Alien::Ginkgo::OptionTypes::NoPC;
+    }
+    else {
+      std::cerr << "Unrecognized preconditioner : " << argv[2] << "\n"
+                << "  - preconditioner list : (Jacobi|NoPC) \n";
+      return -1;
+    }
+
+    // Read Matrix file
+
+    // Read matrix file
+    if (argv[3]) {
+      matrix_file = std::string(argv[3]);
+    }
+    else {
+      std::cerr << "Matrix File is needed for this bench.";
+      return -1;
+    }
+
+    // Read optional Vector file
+
+    if (argv[4]) {
+      vec_file = std::string(argv[4]);
+    }
   }
 
-  // Read the preconditioner
-  Alien::Ginkgo::OptionTypes::ePreconditioner prec;
-  if (std::string(argv[2]) == "Jacobi") {
-    prec = Alien::Ginkgo::OptionTypes::Jacobi;
-  }
-  else if (std::string(argv[2]) == "NoPC") {
-    prec = Alien::Ginkgo::OptionTypes::NoPC;
-  }
-  else {
-    std::cerr << "Unrecognized preconditioner : " << argv[2] << "\n"
-              << "  - preconditioner list : (Jacobi|NoPC) \n";
-    return -1;
-  }
-
-  // Read Matrix file
-  std::string matrix_file;
-  // Read matrix file
-  if (argv[3]) {
-    matrix_file = std::string(argv[3]);
-  }
-  else {
-    std::cerr << "Matrix File is needed for this bench.";
-    return -1;
-  }
-
-  // Read optional Vector file
-  std::string vec_file = "";
-  if (argv[4]) {
-    vec_file = std::string(argv[4]);
-  }
 
   auto ret = 0;
   try {
