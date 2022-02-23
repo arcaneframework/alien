@@ -23,6 +23,7 @@
 #include "LinearBench.h"
 
 #include <alien/move/handlers/scalar/VectorWriter.h>
+#include <alien/move/data/Redistribution.h>
 
 #include <alien/kernels/simple_csr/algebra/SimpleCSRLinearAlgebra.h>
 
@@ -30,12 +31,29 @@ namespace Alien::Benchmark
 {
 Alien::Move::VectorData LinearBench::solve(ILinearSolver* solver) const
 {
-  auto A = m_lp->matrix();
-  auto b = m_lp->vector();
+  return _solve(m_lp->matrix(), m_lp->vector(), solver);
+}
+
+Alien::Move::VectorData LinearBench::solveWithRedistribution(ILinearSolver* solver, Arccore::MessagePassing::IMessagePassingMng* target_pm)
+{
+  auto src_linop = m_lp->matrix();
+
+  Alien::Redistributor redist(src_linop.distribution().globalRowSize(), src_linop.distribution().parallelMng(), target_pm);
+
+  auto tgt_linop = Move::redistribute_matrix(redist, std::move(src_linop));
+  auto tgt_rhs = Move::redistribute_vector(redist, m_lp->vector());
+
+  auto tgt_solution = _solve(std::move(tgt_linop), std::move(tgt_rhs), solver);
+
+  return Move::redistribute_back_vector(redist, std::move(tgt_solution));
+}
+
+Alien::Move::VectorData LinearBench::_solve(Alien::Move::MatrixData&& linop, Alien::Move::VectorData rhs, ILinearSolver* solver) const
+{
   /**
 	 *  Préparation du solveur pour le calcul de x, tq : Ax = b
 	 ********************************************/
-  Alien::Move::VectorData x(A.distribution().colDistribution());
+  Alien::Move::VectorData x(linop.distribution().colDistribution());
 
   // init vector x with zeros
   Alien::Move::LocalVectorWriter writer(std::move(x));
@@ -45,7 +63,7 @@ Alien::Move::VectorData LinearBench::solve(ILinearSolver* solver) const
   x = writer.release();
 
   // solve
-  solver->solve(A, b, x);
+  solver->solve(linop, rhs, x);
 
   return x;
 }

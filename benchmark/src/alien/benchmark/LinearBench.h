@@ -45,8 +45,13 @@ class ALIEN_BENCHMARK_EXPORT LinearBench
 
   Alien::Move::VectorData solve(ILinearSolver* solver) const;
 
+  Alien::Move::VectorData solveWithRedistribution(ILinearSolver* solver, Arccore::MessagePassing::IMessagePassingMng* target_pm);
+
  private:
+  Alien::Move::VectorData _solve(Alien::Move::MatrixData&& linop, Alien::Move::VectorData rhs, ILinearSolver* solver) const;
+
   std::unique_ptr<ILinearProblem> m_lp;
+
   friend LinearBenchResults;
 };
 

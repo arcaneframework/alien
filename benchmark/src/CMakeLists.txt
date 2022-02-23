@@ -29,6 +29,7 @@ target_link_libraries(alien_benchmark PUBLIC
         Arccore::arccore_trace
         Alien::alien_core
         Alien::alien_semantic_move
+        Alien::alien_semantic_ref
         )
 
 add_library(Alien::benchmark ALIAS alien_benchmark)
