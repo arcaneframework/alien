@@ -17,7 +17,7 @@
 add_library(alien_benchmark
         alien/benchmark/MatrixMarketProblem.cpp
         alien/benchmark/MatrixMarketProblem.h
-        alien/benchmark/ILinearProblem.h)
+        alien/benchmark/ILinearProblem.h alien/benchmark/LinearBench.cpp alien/benchmark/LinearBench.h)
 
 target_include_directories(alien_benchmark PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>

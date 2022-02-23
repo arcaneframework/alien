@@ -20,29 +20,28 @@
 // Created by chevalierc on 23/02/22.
 //
 
-#ifndef ALIEN_ILINEARPROBLEM_H
-#define ALIEN_ILINEARPROBLEM_H
-
-#include <alien/move/data/MatrixData.h>
-#include <alien/move/data/VectorData.h>
-
-#include <alien/benchmark/export.h>
+#include "LinearBench.h"
+#include "alien/move/handlers/scalar/VectorWriter.h"
 
 namespace Alien::Benchmark
 {
-
-ALIEN_BENCHMARK_EXPORT class ILinearProblem
+void LinearBench::solve(ILinearSolver* solver) const
 {
- public:
-  virtual ~ILinearProblem() = default;
+  auto A = m_lp->matrix();
+  auto b = m_lp->vector();
+  /**
+	 *  Préparation du solveur pour le calcul de x, tq : Ax = b
+	 ********************************************/
+  Alien::Move::VectorData x(A.distribution().rowDistribution());
 
-  virtual Alien::Move::MatrixData matrix() const = 0;
+  // init vector x with zeros
+  Alien::Move::LocalVectorWriter writer(std::move(x));
+  for (int i = 0; i < writer.size(); i++) {
+    writer[i] = 0;
+  }
+  x = writer.release();
 
-  virtual Alien::Move::VectorData vector() const = 0;
-};
-
-ALIEN_BENCHMARK_EXPORT std::unique_ptr<ILinearProblem> buildFromMatrixMarket(Arccore::MessagePassing::IMessagePassingMng* pm, const std::string& matrix_name, std::string_view rhs_name = "");
-
+  // solve
+  solver->solve(A, b, x);
+}
 } // namespace Alien::Benchmark
-
-#endif //ALIEN_ILINEARPROBLEM_H

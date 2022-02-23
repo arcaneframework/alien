@@ -22,6 +22,7 @@
 #include <alien/move/handlers/scalar/VectorWriter.h>
 
 #include <alien/benchmark/ILinearProblem.h>
+#include <alien/benchmark/LinearBench.h>
 
 #include <alien/ginkgo/backend.h>
 #include <alien/ginkgo/options.h>
@@ -80,31 +81,6 @@ int test(const Alien::Ginkgo::OptionTypes::eSolver& solv, const Alien::Ginkgo::O
 
   auto problem = Alien::Benchmark::buildFromMatrixMarket(pm, mat_filename, vec_filename);
 
-  auto A = problem->matrix();
-
-  /**
-	 *  Vecteur xe (ones)
-	 *********************/
-  auto xe = Alien::Move::VectorData(A.distribution().colDistribution());
-  {
-    Alien::Move::LocalVectorWriter v_build(std::move(xe));
-    for (int i = 0; i < v_build.size(); i++) {
-      v_build[i] = 1.0;
-    }
-    xe = v_build.release();
-  }
-  xe.distribution();
-
-  /**
-	 *  Vecteur b
-	 *************/
-
-  auto b = problem->vector();
-
-  /**
-	 *  Préparation du solveur pour le calcul de x, tq : Ax = b
-	 ********************************************/
-  Alien::Move::VectorData x(A.colSpace(), A.distribution().rowDistribution());
   Alien::Ginkgo::Options options;
   options.numIterationsMax(500);
   options.stopCriteriaValue(1e-8);
@@ -112,53 +88,67 @@ int test(const Alien::Ginkgo::OptionTypes::eSolver& solv, const Alien::Ginkgo::O
   options.solver(solv); //CG, GMRES, BICG, BICGSTAB
   auto solver = Alien::Ginkgo::LinearSolver(options);
 
-  /**
-	 *  BENCH
-	 ********************************************/
+  auto bench = Alien::Benchmark::LinearBench(std::move(problem));
 
-  int nbRuns = 5;
-  for (int i = 0; i < nbRuns; i++) {
-    std::cout << "\n************************************************** " << std::endl;
-    std::cout << "*                   RUN  # " << i << "                     * " << std::endl;
-    std::cout << "************************************************** \n"
-              << std::endl;
+  bench.solve(&solver);
+//
+//
+//
+//  xe.distribution();
+//
+//  /**
+//	 *  Vecteur b
+//	 *************/
+//
+//  auto b = problem->vector();
+//
+//  /**
+//	 *  Préparation du solveur pour le calcul de x, tq : Ax = b
+//	 ********************************************/
+//  Alien::Move::VectorData x(A.colSpace(), A.distribution().rowDistribution());
 
-    // init vector x with zeros
-    Alien::Move::VectorWriter writer(std::move(x));
-    for (int i = 0; i < writer.size(); i++) {
-      writer[i] = 0;
-    }
-    x = writer.release();
-
-    // solve
-    solver.solve(A, b, x);
-
-    Alien::Ginkgo::LinearAlgebra algebra;
-    // compute explicit residual r = ||Ax - b|| ~ 0
-    Alien::Move::VectorData r(A.rowSpace(), A.distribution().rowDistribution());
-    algebra.mult(A, x, r);
-    algebra.axpy(-1., b, r);
-    auto norm_r = algebra.norm2(r);
-    auto norm_b = algebra.norm2(b);
-    tm->info() << " => ||Ax-b|| = " << norm_r;
-    tm->info() << " => ||b|| = " << norm_b;
-    tm->info() << " => ||Ax-b||/||b|| = " << norm_r / norm_b;
-
-    /* Check results :
-     * min(x), max(x), min|x|, max|x|
-     * err_max : ||Ax-b||_{inf}
-     * rerr_max :||Ax-b||_{inf} / ||b|| _{inf}
-     */
-
-    std::cout << "max(x) : " << vecMax(x) << std::endl;
-    std::cout << "min(x) : " << vecMin(x) << std::endl;
-    std::cout << "maxAbs(x) : " << vecMaxAbs(x) << std::endl;
-    std::cout << "minAbs(x) : " << vecMinAbs(x) << std::endl;
-    std::cout << "max_error : " << vecMaxAbs(r) << std::endl;
-    // std::cout << "absmaxB(b) : " << vecMaxAbs(b) << std::endl;
-    std::cout << "rmax_error : " << vecMaxAbs(r) / vecMaxAbs(b) << std::endl;
-    std::cout << "=================================== " << std::endl;
-  }
+//
+//  /**
+//	 *  BENCH
+//	 ********************************************/
+//
+//  int nbRuns = 5;
+//  for (int i = 0; i < nbRuns; i++) {
+//    std::cout << "\n************************************************** " << std::endl;
+//    std::cout << "*                   RUN  # " << i << "                     * " << std::endl;
+//    std::cout << "************************************************** \n"
+//              << std::endl;
+//
+//
+//
+//
+//
+//    Alien::Ginkgo::LinearAlgebra algebra;
+//    // compute explicit residual r = ||Ax - b|| ~ 0
+//    Alien::Move::VectorData r(A.rowSpace(), A.distribution().rowDistribution());
+//    algebra.mult(A, x, r);
+//    algebra.axpy(-1., b, r);
+//    auto norm_r = algebra.norm2(r);
+//    auto norm_b = algebra.norm2(b);
+//    tm->info() << " => ||Ax-b|| = " << norm_r;
+//    tm->info() << " => ||b|| = " << norm_b;
+//    tm->info() << " => ||Ax-b||/||b|| = " << norm_r / norm_b;
+//
+//    /* Check results :
+//     * min(x), max(x), min|x|, max|x|
+//     * err_max : ||Ax-b||_{inf}
+//     * rerr_max :||Ax-b||_{inf} / ||b|| _{inf}
+//     */
+//
+//    std::cout << "max(x) : " << vecMax(x) << std::endl;
+//    std::cout << "min(x) : " << vecMin(x) << std::endl;
+//    std::cout << "maxAbs(x) : " << vecMaxAbs(x) << std::endl;
+//    std::cout << "minAbs(x) : " << vecMinAbs(x) << std::endl;
+//    std::cout << "max_error : " << vecMaxAbs(r) << std::endl;
+//    // std::cout << "absmaxB(b) : " << vecMaxAbs(b) << std::endl;
+//    std::cout << "rmax_error : " << vecMaxAbs(r) / vecMaxAbs(b) << std::endl;
+//    std::cout << "=================================== " << std::endl;
+//  }
 
   return 0;
 }

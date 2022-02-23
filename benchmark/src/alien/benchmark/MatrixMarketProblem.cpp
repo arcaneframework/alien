@@ -43,7 +43,7 @@ Alien::Move::VectorData MatrixMarketProblem::vector() const
   return m_rhs.clone();
 }
 
-ILinearProblem* buildFromMatrixMarket(Arccore::MessagePassing::IMessagePassingMng* pm, const std::string& matrix_name, std::string_view rhs_name) {
+std::unique_ptr<ILinearProblem> buildFromMatrixMarket(Arccore::MessagePassing::IMessagePassingMng* pm, const std::string& matrix_name, std::string_view rhs_name) {
   std::string real_rhs_name;
 
   if (rhs_name == "") {
@@ -53,7 +53,7 @@ ILinearProblem* buildFromMatrixMarket(Arccore::MessagePassing::IMessagePassingMn
     real_rhs_name = rhs_name;
   }
 
-  return new MatrixMarketProblem(pm, matrix_name, real_rhs_name);
+  return std::make_unique<MatrixMarketProblem>(pm, matrix_name, real_rhs_name);
 }
 
 } // namespace Alien::Benchmark
