@@ -67,7 +67,7 @@ int main(int argc, char** argv)
 
   MPI_Init(&argc, &argv);
 
-  if (argc != 4 && argc != 1) {
+  if (argc != 5 && argc != 1) {
     std::cerr << "Usage : ./bench_ginkgo [solver] [preconditioner] [matrix] [vector] \n"
               << "  - solver : (CG|GMRES|BICG|BICGSTAB) \n"
               << "  - preconditioner : (Jacobi|NoPC) \n"
@@ -117,22 +117,8 @@ int main(int argc, char** argv)
       return -1;
     }
 
-    // Read Matrix file
-
-    // Read matrix file
-    if (argv[3]) {
-      matrix_file = std::string(argv[3]);
-    }
-    else {
-      std::cerr << "Matrix File is needed for this bench.";
-      return -1;
-    }
-
-    // Read optional Vector file
-
-    if (argv[4]) {
-      vec_file = std::string(argv[4]);
-    }
+    matrix_file = std::string(argv[3]);
+    vec_file = std::string(argv[4]);
   }
 
   auto ret = 0;
