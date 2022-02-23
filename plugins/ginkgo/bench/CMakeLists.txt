@@ -26,7 +26,8 @@ add_executable(bench_ginkgo bench_ginkgo.cpp)
 
 target_link_libraries(bench_ginkgo PUBLIC
         Alien::alien_ginkgo
-        Alien::alien_semantic_move)
+        Alien::alien_semantic_move
+        Alien::benchmark)
 
 configure_file(../../../src/movesemantic/tests/simple.mtx matrix.mtx COPYONLY)
 configure_file(../../../src/movesemantic/tests/simple_rhs.mtx rhs.mtx COPYONLY)

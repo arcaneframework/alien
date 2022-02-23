@@ -17,35 +17,32 @@
  */
 
 //
-// Created by chevalierc on 22/02/2022.
+// Created by chevalierc on 23/02/22.
 //
 
-#ifndef ALIEN_MATRIXMARKETPROBLEM_H
-#define ALIEN_MATRIXMARKETPROBLEM_H
+#ifndef ALIEN_ILINEARPROBLEM_H
+#define ALIEN_ILINEARPROBLEM_H
 
-#include <string>
+#include <alien/move/data/MatrixData.h>
+#include <alien/move/data/VectorData.h>
 
-#include <arccore/message_passing/IMessagePassingMng.h>
-
-#include <alien/benchmark/ILinearProblem.h>
+#include <alien/benchmark/export.h>
 
 namespace Alien::Benchmark
 {
 
-class MatrixMarketProblem: public ILinearProblem
+ALIEN_BENCHMARK_EXPORT class ILinearProblem
 {
  public:
-  MatrixMarketProblem(Arccore::MessagePassing::IMessagePassingMng* pm, const std::string& matrix_filename, const std::string& rhs_filename);
+  virtual ~ILinearProblem() = default;
 
-  virtual ~MatrixMarketProblem() = default;
+  virtual Alien::Move::MatrixData matrix() const = 0;
 
-  Alien::Move::MatrixData matrix() const override;
-
-  Alien::Move::VectorData vector() const override;
-
- private:
-  Alien::Move::MatrixData m_matrix;
-  Alien::Move::VectorData m_rhs;
+  virtual Alien::Move::VectorData vector() const = 0;
 };
+
+ALIEN_BENCHMARK_EXPORT ILinearProblem* buildFromMatrixMarket(Arccore::MessagePassing::IMessagePassingMng* pm, const std::string& matrix_name, std::string_view rhs_name = "");
+
 } // namespace Alien::Benchmark
-#endif //ALIEN_MATRIXMARKETPROBLEM_H
+
+#endif //ALIEN_ILINEARPROBLEM_H

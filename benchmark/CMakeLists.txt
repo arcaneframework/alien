@@ -30,16 +30,4 @@ project(AlienBenchmark VERSION 1.0 LANGUAGES CXX)
 find_package(Alien REQUIRED)
 find_package(Arccore REQUIRED)
 
-add_library(alien_benchmark
-        src/alien/benchmark/MatrixMarketProblem.cpp
-        src/alien/benchmark/MatrixMarketProblem.h
-        )
-
-target_link_libraries(alien_benchmark PUBLIC
-        Arccore::arccore_message_passing_mpi
-        Arccore::arccore_trace
-        Alien::alien_core
-        Alien::alien_semantic_move
-        )
-
-add_library(Alien::benchmark ALIAS alien_benchmark)
+add_subdirectory(src)
