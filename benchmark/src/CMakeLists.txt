@@ -40,3 +40,13 @@ generate_export_header(alien_benchmark
         BASE_NAME ALIEN_BENCHMARK
         EXPORT_FILE_NAME alien/benchmark/export.h
         )
+
+install(TARGETS alien_benchmark EXPORT Alien
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        )
+
+install(
+        FILES ${CMAKE_CURRENT_BINARY_DIR}/alien/benchmark/export.h
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/alien/benchmark
+)

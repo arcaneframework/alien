@@ -135,7 +135,6 @@ int main(int argc, char** argv)
     }
   }
 
-
   auto ret = 0;
   try {
     ret = test(solver, prec, matrix_file, vec_file);

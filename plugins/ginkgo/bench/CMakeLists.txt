@@ -29,20 +29,25 @@ target_link_libraries(bench_ginkgo PUBLIC
         Alien::alien_semantic_move
         Alien::benchmark)
 
-configure_file(../../../src/movesemantic/tests/simple.mtx matrix.mtx COPYONLY)
-configure_file(../../../src/movesemantic/tests/simple_rhs.mtx rhs.mtx COPYONLY)
+include(GNUInstallDirs)
 
-#-----------------------------------------------------------
-# Tests
-#-----------------------------------------------------------
+install(TARGETS alien_benchmark EXPORT Alien
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        )
 
-alien_test(
-        BENCH ginkgo
-        NAME ginkgo.benchmark
-        PROCS 2
-        COMMAND bench_ginkgo
-)
+if (ALIEN_UNIT_TESTS)
 
-#~ #-----------------------------------------------------------
-#~ # Bench recap
-#~ #-----------------------------------------------------------
+    configure_file(../../../src/movesemantic/tests/simple.mtx matrix.mtx COPYONLY)
+    configure_file(../../../src/movesemantic/tests/simple_rhs.mtx rhs.mtx COPYONLY)
+
+    #-----------------------------------------------------------
+    # Tests
+    #-----------------------------------------------------------
+
+    alien_test(
+            BENCH ginkgo
+            NAME ginkgo.benchmark
+            PROCS 2
+            COMMAND bench_ginkgo
+    )
+endif ()
