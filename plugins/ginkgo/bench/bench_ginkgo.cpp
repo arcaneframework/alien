@@ -27,6 +27,8 @@
 #include <alien/ginkgo/backend.h>
 #include <alien/ginkgo/options.h>
 
+constexpr int NB_RUNS = 5;
+
 int test(const Alien::Ginkgo::OptionTypes::eSolver& solv, const Alien::Ginkgo::OptionTypes::ePreconditioner& prec, const std::string& mat_filename, const std::string& vec_filename)
 {
   auto* pm = Arccore::MessagePassing::Mpi::StandaloneMpiMessagePassingMng::create(MPI_COMM_WORLD);
@@ -35,24 +37,26 @@ int test(const Alien::Ginkgo::OptionTypes::eSolver& solv, const Alien::Ginkgo::O
 
   auto problem = Alien::Benchmark::buildFromMatrixMarket(pm, mat_filename, vec_filename);
 
-  Alien::Ginkgo::Options options;
-  options.numIterationsMax(500);
-  options.stopCriteriaValue(1e-8);
-  options.preconditioner(prec); // Jacobi, NoPC
-  options.solver(solv); //CG, GMRES, BICG, BICGSTAB
-  auto solver = Alien::Ginkgo::LinearSolver(options);
-
   auto bench = Alien::Benchmark::LinearBench(std::move(problem));
 
-  if (pm->commSize() == 1) {
-    tm->info() << "Running Ginkgo";
-    auto solution = bench.solve(&solver);
-  }
-  else {
-    tm->info() << "Running Ginkgo on a reduced communicator";
-    // Run ginkgo from a sequential communicator.
-    auto ginkgo_pm = mpSplit(pm, pm->commRank() == 0);
-    auto solution = bench.solveWithRedistribution(&solver, ginkgo_pm);
+  for (int i = 0; i < NB_RUNS; i++) {
+    Alien::Ginkgo::Options options;
+    options.numIterationsMax(500);
+    options.stopCriteriaValue(1e-8);
+    options.preconditioner(prec); // Jacobi, NoPC
+    options.solver(solv); //CG, GMRES, BICG, BICGSTAB
+    auto solver = Alien::Ginkgo::LinearSolver(options);
+
+    if (pm->commSize() == 1) {
+      tm->info() << "Running Ginkgo";
+      auto solution = bench.solve(&solver);
+    }
+    else {
+      tm->info() << "Running Ginkgo on a reduced communicator";
+      // Run ginkgo from a sequential communicator.
+      auto ginkgo_pm = mpSplit(pm, pm->commRank() == 0);
+      auto solution = bench.solveWithRedistribution(&solver, ginkgo_pm);
+    }
   }
 
   return 0;
