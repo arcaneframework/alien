@@ -236,6 +236,13 @@ MatrixData::clone() const
   return out;
 }
 
+MatrixData createMatrixData(std::shared_ptr<MultiMatrixImpl> multi)
+{
+  MatrixData out;
+  out.m_impl = multi;
+  return out;
+}
+
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 

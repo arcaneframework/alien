@@ -186,6 +186,8 @@ namespace Move
     const MultiVectorImpl* impl() const;
     /*! }@ */
 
+    friend VectorData createVectorData(std::shared_ptr<MultiVectorImpl> multi);
+
    private:
     std::shared_ptr<MultiVectorImpl> m_impl;
   };
@@ -193,6 +195,8 @@ namespace Move
   VectorData ALIEN_MOVESEMANTIC_EXPORT
   readFromMatrixMarket(const VectorDistribution& distribution, const std::string& filename);
 
+  // Do not export this factory.
+  VectorData createVectorData(std::shared_ptr<MultiVectorImpl> multi);
 } // namespace Move
 
 /*---------------------------------------------------------------------------*/

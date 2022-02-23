@@ -24,14 +24,22 @@
 
 namespace Alien::Move
 {
-MatrixData redistribute_matrix(Redistributor& redis, MatrixData&& src){
-  return std::move(src);
+MatrixData redistribute_matrix(Redistributor& redis, MatrixData&& src)
+{
+  auto multi = redis.redistribute(src.impl());
+  auto forgotten = std::move(src); // Take ownership of src
+  return createMatrixData(multi);
 }
 
-VectorData redistribute_vector(Redistributor& redis, VectorData&& src) {
+VectorData redistribute_vector(Redistributor& redis, VectorData&& src)
+{
+  auto multi = redis.redistribute(src.impl());
+  auto forgotten = std::move(src); // Take ownership of src
+  return createVectorData(multi);
+}
+
+VectorData redistribute_back_vector(Redistributor& redis, VectorData&& src)
+{
   return std::move(src);
 }
-VectorData redistribute_back_vector(Redistributor& redis, VectorData&& src) {
-  return std::move(src);
-}
-}
+} // namespace Alien::Move

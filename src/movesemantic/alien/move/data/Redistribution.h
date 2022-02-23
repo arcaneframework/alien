@@ -30,13 +30,14 @@
 #include <alien/move/data/MatrixData.h>
 #include <alien/move/data/VectorData.h>
 
-namespace Alien::Move {
+namespace Alien::Move
+{
 
 ALIEN_MOVESEMANTIC_EXPORT MatrixData redistribute_matrix(Redistributor& redis, MatrixData&& src);
 
 ALIEN_MOVESEMANTIC_EXPORT VectorData redistribute_vector(Redistributor& redis, VectorData&& src);
 ALIEN_MOVESEMANTIC_EXPORT VectorData redistribute_back_vector(Redistributor& redis, VectorData&& src);
 
-}
+} // namespace Alien::Move
 
 #endif //ALIEN_REDISTRIBUTOR_H

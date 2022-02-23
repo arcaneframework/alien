@@ -212,6 +212,13 @@ VectorData::clone() const
   out.m_impl.reset(m_impl->clone());
   return out;
 }
+
+VectorData createVectorData(std::shared_ptr<MultiVectorImpl> multi)
+{
+  VectorData out;
+  out.m_impl = multi;
+  return out;
+}
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 

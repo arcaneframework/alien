@@ -240,6 +240,8 @@ namespace Move
     const MultiMatrixImpl* impl() const;
     /*! } @ */
 
+    friend MatrixData createMatrixData(std::shared_ptr<MultiMatrixImpl> multi);
+
    private:
     std::shared_ptr<MultiMatrixImpl> m_impl;
   };
@@ -247,6 +249,7 @@ namespace Move
   MatrixData ALIEN_MOVESEMANTIC_EXPORT
   readFromMatrixMarket(Arccore::MessagePassing::IMessagePassingMng* pm, const std::string& filename);
 
+  MatrixData createMatrixData(std::shared_ptr<MultiMatrixImpl> multi);
 } // namespace Move
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
