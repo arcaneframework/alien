@@ -31,8 +31,8 @@ find_package(Alien REQUIRED)
 find_package(Arccore REQUIRED)
 
 add_library(alien_benchmark
-        src/MatrixMarketProblem.cpp
-        src/MatrixMarketProblem.h
+        src/alien/benchmark/MatrixMarketProblem.cpp
+        src/alien/benchmark/MatrixMarketProblem.h
         )
 
 target_link_libraries(alien_benchmark PUBLIC
