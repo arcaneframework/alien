@@ -26,6 +26,7 @@
 #include <alien/move/data/Redistribution.h>
 
 #include <alien/kernels/simple_csr/algebra/SimpleCSRLinearAlgebra.h>
+#include <chrono>
 
 namespace Alien::Benchmark
 {
@@ -38,14 +39,31 @@ Alien::Move::VectorData LinearBench::solveWithRedistribution(ILinearSolver* solv
 {
   auto src_linop = m_lp->matrix();
 
+  // init timer
+  auto first = std::chrono::steady_clock::now();
+
   Alien::Redistributor redist(src_linop.distribution().globalRowSize(), src_linop.distribution().parallelMng(), target_pm);
 
+  auto second = std::chrono::steady_clock::now();
+
   auto tgt_linop = Move::redistribute_matrix(redist, std::move(src_linop));
+
+  auto third = std::chrono::steady_clock::now();
+
   auto tgt_rhs = Move::redistribute_vector(redist, m_lp->vector());
 
-  auto tgt_solution = _solve(std::move(tgt_linop), std::move(tgt_rhs), solver);
+  auto fourth = std::chrono::steady_clock::now();
 
-  return Move::redistribute_back_vector(redist, std::move(tgt_solution));
+  if (src_linop.distribution().parallelMng()->commRank() == 0) {
+    std::cerr << "redistributor build = " << std::chrono::duration_cast<std::chrono::nanoseconds>(second - first).count()/1.e-9 << std::endl;
+    std::cerr << "matrix redistribution = " << std::chrono::duration_cast<std::chrono::nanoseconds>(third - second).count()/1.e-9 << std::endl;
+    std::cerr << "vector redistribution = " << std::chrono::duration_cast<std::chrono::nanoseconds>(fourth - third).count()/1.e-9 << std::endl;
+  }
+  if (target_pm) {
+    auto tgt_solution = _solve(std::move(tgt_linop), std::move(tgt_rhs), solver);
+  }
+
+//  return Move::redistribute_back_vector(redist, std::move(tgt_solution));
 }
 
 Alien::Move::VectorData LinearBench::_solve(Alien::Move::MatrixData&& linop, Alien::Move::VectorData rhs, ILinearSolver* solver) const
