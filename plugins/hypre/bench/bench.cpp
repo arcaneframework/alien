@@ -51,11 +51,15 @@ int test(const Alien::Hypre::OptionTypes::eSolver& solv, const Alien::Hypre::Opt
     tm->info() << "Running Hypre";
     auto solution = bench.solve(&solver);
 
-    {
-      tm->info() << "Running Hypre on a reduced communicator";
+    auto commsize = pm->commSize();
+    for (auto mask = 1; commsize >> mask; mask++) {
       // Run Hypre from a sequential communicator.
-      auto Hypre_pm = mpSplit(pm, pm->commRank() % 2);
-      auto solution = bench.solveWithRedistribution(&solver, Hypre_pm);
+      auto hypre_pm = mpSplit(pm, !(pm->commRank() % (1 << mask)));
+      if (hypre_pm && hypre_pm->commRank() == 0) {
+        tm->info() << "Running Hypre on a reduced communicator of size = " << hypre_pm->commSize();
+      }
+      auto solution = bench.solveWithRedistribution(&solver, hypre_pm);
+      delete hypre_pm;
     }
   }
 
