@@ -50,7 +50,6 @@ int test(const Alien::Hypre::OptionTypes::eSolver& solv, const Alien::Hypre::Opt
 
     tm->info() << "Running Hypre";
     auto solution = bench.solve(&solver);
-    auto stats = solver.getSolverStat();
 
     {
       tm->info() << "Running Hypre on a reduced communicator";
@@ -105,6 +104,9 @@ int main(int argc, char** argv)
     }
     else if (std::string(argv[2]) == "NoPC") {
       prec = Alien::Hypre::OptionTypes::NoPC;
+    }
+    else if (std::string(argv[2]) == "AMG") {
+      prec = Alien::Hypre::OptionTypes::AMGPC;
     }
     else {
       std::cerr << "Unrecognized preconditioner : " << argv[2] << "\n"
