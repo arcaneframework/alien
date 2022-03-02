@@ -22,6 +22,7 @@
 
 #include "MatrixMarketProblem.h"
 
+#include <alien/move/handlers/scalar/VectorWriter.h>
 #include <alien/distribution/MatrixDistribution.h>
 
 namespace Alien::Benchmark
@@ -31,6 +32,17 @@ MatrixMarketProblem::MatrixMarketProblem(Arccore::MessagePassing::IMessagePassin
 : m_matrix(Alien::Move::readFromMatrixMarket(pm, matrix_filename))
 , m_rhs(Alien::Move::readFromMatrixMarket(m_matrix.distribution().rowDistribution(), rhs_filename))
 {
+}
+
+MatrixMarketProblem::MatrixMarketProblem(Arccore::MessagePassing::IMessagePassingMng* pm, const std::string& matrix_filename)
+: m_matrix(Alien::Move::readFromMatrixMarket(pm, matrix_filename))
+, m_rhs(m_matrix.distribution().rowDistribution())
+{
+  Alien::Move::LocalVectorWriter v_builder = std::move(m_rhs);
+  for (int i = 0 ; i < v_builder.size() ; i++) {
+    v_builder[i] = 1.0;
+  }
+  m_rhs = v_builder.release();
 }
 
 Alien::Move::MatrixData MatrixMarketProblem::matrix() const
@@ -43,18 +55,15 @@ Alien::Move::VectorData MatrixMarketProblem::vector() const
   return m_rhs.clone();
 }
 
-std::unique_ptr<ILinearProblem> buildFromMatrixMarket(Arccore::MessagePassing::IMessagePassingMng* pm, const std::string& matrix_name, std::string_view rhs_name)
-{
-  std::string real_rhs_name;
 
+std::unique_ptr<ILinearProblem> buildFromMatrixMarket(Arccore::MessagePassing::IMessagePassingMng* pm, const std::string& matrix_name, const std::string& rhs_name)
+{
   if (rhs_name == "") {
-    real_rhs_name = matrix_name;
+    return std::make_unique<MatrixMarketProblem>(pm, matrix_name);
   }
   else {
-    real_rhs_name = rhs_name;
+    return std::make_unique<MatrixMarketProblem>(pm, matrix_name, rhs_name);
   }
-
-  return std::make_unique<MatrixMarketProblem>(pm, matrix_name, real_rhs_name);
 }
 
 } // namespace Alien::Benchmark

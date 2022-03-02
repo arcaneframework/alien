@@ -67,7 +67,7 @@ int main(int argc, char** argv)
 
   MPI_Init(&argc, &argv);
 
-  if (argc != 5 && argc != 1) {
+  if (argc != 5 && argc != 4 && argc != 1) {
     std::cerr << "Usage : ./bench_ginkgo [solver] [preconditioner] [matrix] [vector] \n"
               << "  - solver : (CG|GMRES|BICG|BICGSTAB) \n"
               << "  - preconditioner : (Jacobi|NoPC) \n"
@@ -118,7 +118,11 @@ int main(int argc, char** argv)
     }
 
     matrix_file = std::string(argv[3]);
-    vec_file = std::string(argv[4]);
+    if (argc == 5) {
+      vec_file = std::string(argv[4]);
+    } else {
+      vec_file = "";
+    }
   }
 
   auto ret = 0;

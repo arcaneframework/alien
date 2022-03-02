@@ -41,7 +41,7 @@ class ILinearProblem
   ALIEN_BENCHMARK_EXPORT virtual Alien::Move::VectorData vector() const = 0;
 };
 
-ALIEN_BENCHMARK_EXPORT std::unique_ptr<ILinearProblem> buildFromMatrixMarket(Arccore::MessagePassing::IMessagePassingMng* pm, const std::string& matrix_name, std::string_view rhs_name = "");
+ALIEN_BENCHMARK_EXPORT std::unique_ptr<ILinearProblem> buildFromMatrixMarket(Arccore::MessagePassing::IMessagePassingMng* pm, const std::string& matrix_name, const std::string& rhs_name = "");
 
 } // namespace Alien::Benchmark
 

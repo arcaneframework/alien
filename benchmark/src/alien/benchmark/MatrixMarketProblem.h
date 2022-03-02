@@ -36,6 +36,7 @@ class MatrixMarketProblem : public ILinearProblem
 {
  public:
   MatrixMarketProblem(Arccore::MessagePassing::IMessagePassingMng* pm, const std::string& matrix_filename, const std::string& rhs_filename);
+  MatrixMarketProblem(Arccore::MessagePassing::IMessagePassingMng* pm, const std::string& matrix_filename);
 
   virtual ~MatrixMarketProblem() = default;
 
