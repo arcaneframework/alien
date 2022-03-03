@@ -30,6 +30,8 @@
 #include <alien/core/impl/MultiMatrixImpl.h>
 #include <alien/core/impl/MultiVectorImpl.h>
 
+#include <memory>
+
 #include "RedistributorBackEnd.h"
 #include "RedistributorMatrix.h"
 #include "RedistributorVector.h"
@@ -43,9 +45,9 @@ namespace Alien
 Redistributor::Redistributor(
 int globalSize, Arccore::MessagePassing::IMessagePassingMng* super, bool keep)
 : m_super_pm(super)
+, m_target_comm(Arccore::MessagePassing::mpSplit(super, keep))
 {
-  m_distributor.reset(new RedistributorCommPlan(
-  globalSize, m_super_pm, Arccore::MessagePassing::mpSplit(super, keep)));
+  m_distributor = std::make_unique<RedistributorCommPlan>(globalSize, m_super_pm, m_target_comm.get());
 }
 
 Redistributor::Redistributor(
