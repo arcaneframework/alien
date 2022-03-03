@@ -54,8 +54,8 @@ int test(const Alien::Ginkgo::OptionTypes::eSolver& solv, const Alien::Ginkgo::O
     else {
       tm->info() << "Running Ginkgo on a reduced communicator";
       // Run ginkgo from a sequential communicator.
-      auto ginkgo_pm = mpSplit(pm, pm->commRank() == 0);
-      auto solution = bench.solveWithRedistribution(&solver, ginkgo_pm);
+      std::unique_ptr<Arccore::MessagePassing::IMessagePassingMng> ginkgo_pm(mpSplit(pm, pm->commRank() == 0));
+      auto solution = bench.solveWithRedistribution(&solver, ginkgo_pm.get());
     }
   }
 
@@ -120,7 +120,8 @@ int main(int argc, char** argv)
     matrix_file = std::string(argv[3]);
     if (argc == 5) {
       vec_file = std::string(argv[4]);
-    } else {
+    }
+    else {
       vec_file = "";
     }
   }
