@@ -48,7 +48,12 @@ int globalSize, Arccore::MessagePassing::IMessagePassingMng* super, bool keep)
   globalSize, m_super_pm, Arccore::MessagePassing::mpSplit(super, keep)));
 }
 
-Redistributor::~Redistributor() {}
+Redistributor::Redistributor(
+int globalSize, Arccore::MessagePassing::IMessagePassingMng* super, Arccore::MessagePassing::IMessagePassingMng* target)
+: m_super_pm(super)
+, m_distributor(std::make_unique<RedistributorCommPlan>(globalSize, m_super_pm, target))
+{
+}
 
 std::shared_ptr<MultiMatrixImpl>
 Redistributor::redistribute(MultiMatrixImpl* mat)
