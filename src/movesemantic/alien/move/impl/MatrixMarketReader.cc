@@ -30,7 +30,8 @@
 #include <alien/move/data/MatrixData.h>
 #include <alien/move/handlers/scalar/DoKDirectMatrixBuilder.h>
 #include <alien/move/data/VectorData.h>
-#include "alien/kernels/dok/DoKVector.h"
+#include <alien/kernels/dok/DoKVector.h>
+#include <alien/kernels/dok/DoKBackEnd.h>
 
 namespace Alien::Move
 {
@@ -58,13 +59,13 @@ namespace
       symmetric = (src[3] == 0);
     }
 
-    Arccore::UniqueArray<Arccore::Integer> to_array()
+    Arccore::UniqueArray<Arccore::Integer> to_array() const
     {
       Arccore::UniqueArray<Arccore::Integer> array(4);
       array[0] = n_rows;
       array[1] = n_cols;
       array[2] = n_nnz;
-      array[3] = (symmetric) ? 0 : 1;
+      array[3] = symmetric ? 0 : 1;
       return array;
     }
 
@@ -85,19 +86,26 @@ namespace
 
     MatrixDescription out;
 
+    auto try_header = true;
+
     while (std::getline(fstream, line)) {
+      std::stringstream ss;
+      ss << line;
 
-      if ('%' == line[0] && '%' == line[1]) {
-
+      if (try_header) {
+        std::string matrix;
         std::string _; // junk
         std::string format; // (coordinate, array)
         std::string scalar; // (pattern, real, complex, integer)
         std::string symmetry; // (general, symmetric, skew-symmetric, hermitian)
 
         // get matrix kind
-        std::stringstream ss;
-        ss << line;
-        ss >> _; // skip '%%MatrixMarket
+        ss >> matrix; // skip '%%MatrixMarket
+
+        if ("%%MatrixMarket" != matrix) {
+          continue;
+        }
+
         ss >> _; // skip matrix
         ss >> format;
         ss >> scalar;
@@ -109,12 +117,10 @@ namespace
 
         if ("coordinate" != format) {
           return std::nullopt;
-          // throw Arccore::FatalErrorException("MatrixMarketReader", "format array not supported");
         }
 
         if ("real" != scalar) {
           return std::nullopt;
-          // throw Arccore::FatalErrorException("MatrixMarketReader", "pattern not supported, only scalar is available");
         }
 
         if ("general" == symmetry) {
@@ -123,6 +129,7 @@ namespace
         else {
           out.symmetric = true;
         }
+        try_header = false;
       }
       else if ('%' == line[0]) {
         // skip comment
@@ -130,9 +137,6 @@ namespace
       }
       else {
         //first line is matrix size, then done with banner
-        std::stringstream ss;
-        ss << line;
-
         ss >> out.n_rows;
         ss >> out.n_cols;
         ss >> out.n_nnz;
@@ -151,8 +155,9 @@ namespace
         continue;
       }
 
-      int row, col;
-      double value;
+      int row = 0;
+      int col = 0;
+      double value = 0.0;
       std::stringstream ss;
       ss << line;
       ss >> row >> col >> value;
@@ -207,7 +212,7 @@ VectorData ALIEN_MOVESEMANTIC_EXPORT
 readFromMatrixMarket(const VectorDistribution& distribution, const std::string& filename)
 {
   VectorData out(distribution);
-  DoKVector v(out.impl());
+  auto& v = out.impl()->template get<BackEnd::tag::DoK>(true);
 
   if (distribution.parallelMng()->commRank() == 0) { // Only rank 0 read the file
     auto stream = std::ifstream(filename);
@@ -216,12 +221,53 @@ readFromMatrixMarket(const VectorDistribution& distribution, const std::string& 
     }
     std::string line;
     Arccore::Int32 row = 0;
+
+    auto try_header = true;
     while (std::getline(stream, line)) {
+      // get matrix kind
+      std::stringstream ss;
+      ss << line;
 
-      if ('%' == line[0]) {
-        continue;
+      if (try_header) {
+        std::string matrix;
+        std::string _; // junk
+        std::string format; // (coordinate, array)
+        std::string scalar; // (pattern, real, complex, integer)
+
+        ss >> matrix; // skip '%%MatrixMarket
+
+        if ("%%MatrixMarket" != matrix)
+          continue;
+
+        ss >> _; // skip matrix
+        ss >> format;
+        ss >> scalar;
+        ss >> _;
+
+        tolower(format);
+        tolower(scalar);
+
+        if ("array" != format || "real" != scalar) {
+          throw Arccore::FatalErrorException("mtx vector must be in 'array' and 'real' formats.");
+        }
+        try_header = false;
       }
+      if ('%' == line[0])
+        continue;
 
+      int rows = 0;
+      int vectors = 0;
+      ss >> rows;
+      ss >> vectors;
+      if (vectors != 1) {
+        throw Arccore::FatalErrorException("mtx vector reader does not support multiple vectors.");
+      }
+      if (distribution.globalSize() != rows) {
+        throw Arccore::FatalErrorException("mtx vector is not of correct size");
+      }
+      break;
+    }
+    while (std::getline(stream, line)) {
       double value;
       std::stringstream ss;
       ss << line;

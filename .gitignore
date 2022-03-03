@@ -96,6 +96,10 @@ flycheck_*.el
 
 # CMake
 cmake-build-*/
+build/
+
+# Spack
+spack-*
 
 # Mongo Explorer plugin
 .idea/**/mongoSettings.xml
@@ -409,4 +413,7 @@ DerivedData/
 
 ## Gcc Patch
 /*.gcno
+
+# CMake profile
+CMakeUserPresets.json
 
