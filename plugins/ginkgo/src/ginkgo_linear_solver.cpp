@@ -24,6 +24,9 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   // preconditioner's choice
   int prec;
   switch (m_options.preconditioner()) {
+  case OptionTypes::Ilu:
+    prec = 2;
+    break;
   case OptionTypes::Jacobi:
     prec = 1;
     break;
@@ -135,10 +138,28 @@ void InternalLinearSolver::solve_CG(const Matrix& A, const Vector& b, Vector& x,
   auto solver = solver_factory->generate(pA);
 
   // generate and set the preconditioner
+  std::shared_ptr<gko::LinOpFactory> prec_factory;
+
   if (prec == 1) {
-    using Preconditioner = typename gko::preconditioner::Jacobi<double>;
-    std::shared_ptr<Preconditioner> new_prec = Preconditioner::build().on(exec)->generate(pA);
-    solver->set_preconditioner(new_prec);
+    prec_factory = gko::preconditioner::Jacobi<double>::build().on(exec);
+    solver->set_preconditioner(prec_factory->generate(pA));
+  }
+  else if (prec == 2) { //ILU
+    // Generate incomplete factors using ParILU
+    auto par_ilu_fact = gko::factorization::ParIlu<double>::build().on(exec);
+    // Generate concrete factorization for input matrix
+    auto par_ilu = par_ilu_fact->generate(pA);
+
+    // Generate an ILU preconditioner factory by setting lower and upper triangular solver
+    // - in this case the exact triangular solves
+    auto prec_factory = gko::preconditioner::Ilu<
+                        gko::solver::LowerTrs<double>,
+                        gko::solver::UpperTrs<double>,
+                        false>::build()
+                        .on(exec);
+
+    // Use incomplete factors to generate ILU preconditioner
+    solver->set_preconditioner(prec_factory->generate(gko::share(par_ilu)));
   }
 
   // solve with timing
@@ -165,10 +186,28 @@ void InternalLinearSolver::solve_GMRES(const Matrix& A, const Vector& b, Vector&
   auto solver = solver_factory->generate(pA);
 
   // generate and set the preconditioner
+  std::shared_ptr<gko::LinOpFactory> prec_factory;
+
   if (prec == 1) {
-    using Preconditioner = typename gko::preconditioner::Jacobi<double>;
-    std::shared_ptr<Preconditioner> new_prec = Preconditioner::build().on(exec)->generate(pA);
-    solver->set_preconditioner(new_prec);
+    prec_factory = gko::preconditioner::Jacobi<double>::build().on(exec);
+    solver->set_preconditioner(prec_factory->generate(pA));
+  }
+  else if (prec == 2) { //ILU
+    // Generate incomplete factors using ParILU
+    auto par_ilu_fact = gko::factorization::ParIlu<double>::build().on(exec);
+    // Generate concrete factorization for input matrix
+    auto par_ilu = par_ilu_fact->generate(pA);
+
+    // Generate an ILU preconditioner factory by setting lower and upper triangular solver
+    // - in this case the exact triangular solves
+    auto prec_factory = gko::preconditioner::Ilu<
+                        gko::solver::LowerTrs<double>,
+                        gko::solver::UpperTrs<double>,
+                        false>::build()
+                        .on(exec);
+
+    // Use incomplete factors to generate ILU preconditioner
+    solver->set_preconditioner(prec_factory->generate(gko::share(par_ilu)));
   }
 
   // solve with timing
@@ -195,10 +234,28 @@ void InternalLinearSolver::solve_BICG(const Matrix& A, const Vector& b, Vector& 
   auto solver = solver_factory->generate(pA);
 
   // generate and set the preconditioner
+  std::shared_ptr<gko::LinOpFactory> prec_factory;
+
   if (prec == 1) {
-    using Preconditioner = typename gko::preconditioner::Jacobi<double>;
-    std::shared_ptr<Preconditioner> new_prec = Preconditioner::build().on(exec)->generate(pA);
-    solver->set_preconditioner(new_prec);
+    prec_factory = gko::preconditioner::Jacobi<double>::build().on(exec);
+    solver->set_preconditioner(prec_factory->generate(pA));
+  }
+  else if (prec == 2) { //ILU
+    // Generate incomplete factors using ParILU
+    auto par_ilu_fact = gko::factorization::ParIlu<double>::build().on(exec);
+    // Generate concrete factorization for input matrix
+    auto par_ilu = par_ilu_fact->generate(pA);
+
+    // Generate an ILU preconditioner factory by setting lower and upper triangular solver
+    // - in this case the exact triangular solves
+    auto prec_factory = gko::preconditioner::Ilu<
+                        gko::solver::LowerTrs<double>,
+                        gko::solver::UpperTrs<double>,
+                        false>::build()
+                        .on(exec);
+
+    // Use incomplete factors to generate ILU preconditioner
+    solver->set_preconditioner(prec_factory->generate(gko::share(par_ilu)));
   }
 
   // solve with timing
@@ -224,10 +281,28 @@ void InternalLinearSolver::solve_BICGSTAB(const Matrix& A, const Vector& b, Vect
   auto solver = solver_factory->generate(pA);
 
   // generate and set the preconditioner
+  std::shared_ptr<gko::LinOpFactory> prec_factory;
+
   if (prec == 1) {
-    using Preconditioner = typename gko::preconditioner::Jacobi<double>;
-    std::shared_ptr<Preconditioner> new_prec = Preconditioner::build().on(exec)->generate(pA);
-    solver->set_preconditioner(new_prec);
+    prec_factory = gko::preconditioner::Jacobi<double>::build().on(exec);
+    solver->set_preconditioner(prec_factory->generate(pA));
+  }
+  else if (prec == 2) { //ILU
+    // Generate incomplete factors using ParILU
+    auto par_ilu_fact = gko::factorization::ParIlu<double>::build().on(exec);
+    // Generate concrete factorization for input matrix
+    auto par_ilu = par_ilu_fact->generate(pA);
+
+    // Generate an ILU preconditioner factory by setting lower and upper triangular solver
+    // - in this case the exact triangular solves
+    auto prec_factory = gko::preconditioner::Ilu<
+                        gko::solver::LowerTrs<double>,
+                        gko::solver::UpperTrs<double>,
+                        false>::build()
+                        .on(exec);
+
+    // Use incomplete factors to generate ILU preconditioner
+    solver->set_preconditioner(prec_factory->generate(gko::share(par_ilu)));
   }
 
   // solve with timing
@@ -262,6 +337,9 @@ void InternalLinearSolver::display_solver_infos(const Alien::Ginkgo::OptionTypes
   switch (prec) {
   case OptionTypes::Jacobi:
     std::cout << "Jacobi" << std::endl;
+    break;
+  case OptionTypes::Ilu:
+    std::cout << "Ilu" << std::endl;
     break;
   case OptionTypes::NoPC:
     std::cout << "No preconditioner" << std::endl;

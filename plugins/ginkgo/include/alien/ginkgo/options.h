@@ -37,6 +37,7 @@ struct OptionTypes
   enum ePreconditioner
   {
     Jacobi,
+    Ilu,
     NoPC,
   };
 };
