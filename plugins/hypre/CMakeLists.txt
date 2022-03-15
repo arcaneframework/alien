@@ -1,4 +1,5 @@
 option(ALIEN_HYPRE_UNIT_TESTS "Enable Hypre wrapper tests" ${ALIEN_UNIT_TESTS})
+option(ALIEN_HYPRE_CUDA "Enable hypre's CUDA backend" OFF)
 
 find_package(Hypre REQUIRED)
 
@@ -22,6 +23,10 @@ add_library(hypre_wrapper
         src/converters/simplecsr_to_hypre_vector.cpp
         src/converters/simplecsr_to_hypre_matrix.cpp
         src/hypre_linear_solver.h)
+
+if (ALIEN_HYPRE_CUDA)
+    target_compile_definitions(hypre_wrapper PRIVATE ALIEN_HYPRE_CUDA)
+endif ()
 
 target_link_libraries(hypre_wrapper PUBLIC
         Alien::alien_core
