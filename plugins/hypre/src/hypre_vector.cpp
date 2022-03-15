@@ -17,6 +17,7 @@
  */
 
 #include "hypre_vector.h"
+#include "hypre_instance.h"
 
 #include <alien/hypre/backend.h>
 
@@ -30,6 +31,7 @@ Vector::Vector(const MultiVectorImpl* multi_impl)
 : IVectorImpl(multi_impl, AlgebraTraits<BackEnd::tag::hypre>::name())
 , m_hypre(nullptr)
 {
+  hypre_init_if_needed();
   auto block_size = 1;
   const auto* block = this->block();
   if (block)

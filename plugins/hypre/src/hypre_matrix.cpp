@@ -17,6 +17,7 @@
  */
 
 #include "hypre_matrix.h"
+#include "hypre_instance.h"
 
 #include <alien/hypre/backend.h>
 #include <alien/core/impl/MultiMatrixImpl.h>
@@ -32,6 +33,7 @@ Matrix::Matrix(const MultiMatrixImpl* multi_impl)
 : IMatrixImpl(multi_impl, AlgebraTraits<BackEnd::tag::hypre>::name())
 , m_hypre(nullptr)
 {
+  hypre_init_if_needed();
   const auto& row_space = multi_impl->rowSpace();
   const auto& col_space = multi_impl->colSpace();
   if (row_space.size() != col_space.size())
