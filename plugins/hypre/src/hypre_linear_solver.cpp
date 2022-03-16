@@ -21,6 +21,9 @@
 #include <HYPRE_parcsr_ls.h>
 #include <HYPRE_parcsr_mv.h>
 
+#include <_hypre_utilities.h>
+#include <_hypre_parcsr_mv.h>
+
 namespace Alien
 {
 // Compile HypreLinearSolver.
@@ -256,6 +259,15 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
              HYPRE_IJVectorGetObject(bij_vector, (void**)&par_rhs));
   checkError("Hypre Unknown Vector GetObject",
              HYPRE_IJVectorGetObject(xij_vector, (void**)&par_x));
+
+#ifdef ALIEN_HYPRE_CUDA
+  /*-----------------------------------------------------------
+   * Migrate the system to the wanted memory space
+   *-----------------------------------------------------------*/
+  hypre_ParCSRMatrixMigrate(par_a, hypre_HandleMemoryLocation(hypre_handle()));
+  hypre_ParVectorMigrate(par_rhs, hypre_HandleMemoryLocation(hypre_handle()));
+  hypre_ParVectorMigrate(par_x, hypre_HandleMemoryLocation(hypre_handle()));
+#endif // ALIEN_HYPRE_CUDA
 
   checkError("Hypre " + solver_name + " solver Setup",
              (*solver_setup_function)(solver, par_a, par_rhs, par_x));

@@ -24,6 +24,8 @@
 #include <arccore/message_passing_mpi/MpiMessagePassingMng.h>
 
 #include <HYPRE.h>
+// For hypre_*Alloc
+#include <_hypre_utilities.h>
 
 namespace Alien::Hypre
 {
@@ -77,20 +79,77 @@ void Vector::setProfile(int ilower, int iupper)
 
 void Vector::setValues(Arccore::ConstArrayView<double> values)
 {
-  auto ierr = HYPRE_IJVectorSetValues(m_hypre, m_rows.size(), m_rows.data(), values.data());
+  HYPRE_BigInt* rows = nullptr;
+  const HYPRE_Real* data = nullptr;
+
+#ifdef ALIEN_HYPRE_CUDA
+  HYPRE_MemoryLocation memory_location;
+  HYPRE_GetMemoryLocation(&memory_location);
+  if (memory_location != HYPRE_MEMORY_HOST) {
+    HYPRE_BigInt* d_rows = hypre_CTAlloc(HYPRE_BigInt, m_rows.size(), memory_location);
+    HYPRE_Real* d_values = hypre_CTAlloc(HYPRE_Real, values.size(), memory_location);
+
+    hypre_TMemcpy(d_rows, m_rows.data(), HYPRE_BigInt, m_rows.size(), memory_location, HYPRE_MEMORY_HOST);
+    hypre_TMemcpy(d_values, values.data(), HYPRE_Real, values.size(), memory_location, HYPRE_MEMORY_HOST);
+    rows = d_rows;
+    data = d_values;
+  }
+  else
+#endif // ALIEN_HYPRE_CUDA
+  {
+    rows = m_rows.data();
+    data = values.data();
+  }
+
+  auto ierr = HYPRE_IJVectorSetValues(m_hypre, m_rows.size(), rows, data);
 
   if (ierr) {
     throw Arccore::FatalErrorException(A_FUNCINFO, "Hypre set values failed");
   }
+
+#ifdef ALIEN_HYPRE_CUDA
+  if (memory_location != HYPRE_MEMORY_HOST) {
+    hypre_TFree(rows, memory_location);
+    hypre_TFree(data, memory_location);
+  }
+#endif // ALIEN_HYPRE_CUDA
 }
 
 void Vector::getValues(Arccore::ArrayView<double> values) const
 {
-  auto ierr = HYPRE_IJVectorGetValues(m_hypre, m_rows.size(), m_rows.data(), values.data());
+  const HYPRE_BigInt* rows = nullptr;
+  HYPRE_Real* data = nullptr;
+
+#ifdef ALIEN_HYPRE_CUDA
+  HYPRE_MemoryLocation memory_location;
+  HYPRE_GetMemoryLocation(&memory_location);
+  if (memory_location != HYPRE_MEMORY_HOST) {
+    HYPRE_BigInt* d_rows = hypre_CTAlloc(HYPRE_BigInt, m_rows.size(), memory_location);
+    HYPRE_Real* d_values = hypre_CTAlloc(HYPRE_Real, values.size(), memory_location);
+
+    hypre_TMemcpy(d_rows, m_rows.data(), HYPRE_BigInt, m_rows.size(), memory_location, HYPRE_MEMORY_HOST);
+    rows = d_rows;
+    data = d_values;
+  }
+  else
+#endif // ALIEN_HYPRE_CUDA
+  {
+    rows = m_rows.data();
+    data = values.data();
+  }
+  auto ierr = HYPRE_IJVectorGetValues(m_hypre, m_rows.size(), rows, data);
 
   if (ierr) {
     throw Arccore::FatalErrorException(A_FUNCINFO, "Hypre get values failed");
   }
+
+#ifdef ALIEN_HYPRE_CUDA
+  if (memory_location != HYPRE_MEMORY_HOST) {
+    hypre_TMemcpy(values.data(), data, HYPRE_Real, values.size(), HYPRE_MEMORY_HOST, memory_location);
+    hypre_TFree(rows, memory_location);
+    hypre_TFree(data, memory_location);
+  }
+#endif // ALIEN_HYPRE_CUDA
 }
 
 void Vector::assemble()
