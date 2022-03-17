@@ -29,6 +29,8 @@
 // For hypre_*Alloc
 #include <_hypre_utilities.h>
 
+#undef ALIEN_HYPRE_CUDA
+
 namespace Alien::Hypre
 {
 Matrix::Matrix(const MultiMatrixImpl* multi_impl)

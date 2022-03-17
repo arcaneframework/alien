@@ -24,7 +24,6 @@
 #include <cuda_runtime.h>
 #endif // ALIEN_HYPRE_CUDA
 
-
 // Function is not always defined in HYPRE_utilities.h
 extern "C" HYPRE_Int HYPRE_Init();
 
@@ -50,7 +49,7 @@ void hypre_init_if_needed()
 
 #ifdef ALIEN_HYPRE_CUDA
   /* AMG in GPU memory (default) */
-  HYPRE_SetMemoryLocation(HYPRE_MEMORY_DEVICE);
+  //HYPRE_SetMemoryLocation(HYPRE_MEMORY_DEVICE);
   /* setup AMG on GPUs */
   HYPRE_SetExecutionPolicy(HYPRE_EXEC_DEVICE);
   /* use hypre's SpGEMM instead of cuSPARSE */

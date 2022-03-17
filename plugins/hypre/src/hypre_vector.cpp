@@ -27,6 +27,8 @@
 // For hypre_*Alloc
 #include <_hypre_utilities.h>
 
+#undef ALIEN_HYPRE_CUDA
+
 namespace Alien::Hypre
 {
 Vector::Vector(const MultiVectorImpl* multi_impl)

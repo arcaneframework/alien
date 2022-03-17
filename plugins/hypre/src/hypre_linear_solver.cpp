@@ -264,9 +264,9 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   /*-----------------------------------------------------------
    * Migrate the system to the wanted memory space
    *-----------------------------------------------------------*/
-  hypre_ParCSRMatrixMigrate(par_a, hypre_HandleMemoryLocation(hypre_handle()));
-  hypre_ParVectorMigrate(par_rhs, hypre_HandleMemoryLocation(hypre_handle()));
-  hypre_ParVectorMigrate(par_x, hypre_HandleMemoryLocation(hypre_handle()));
+  hypre_ParCSRMatrixMigrate(par_a, HYPRE_MEMORY_DEVICE);
+  hypre_ParVectorMigrate(par_rhs, HYPRE_MEMORY_DEVICE);
+  hypre_ParVectorMigrate(par_x, HYPRE_MEMORY_DEVICE);
 #endif // ALIEN_HYPRE_CUDA
 
   checkError("Hypre " + solver_name + " solver Setup",
