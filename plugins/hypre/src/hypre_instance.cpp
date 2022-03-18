@@ -46,18 +46,6 @@ void hypre_init_if_needed()
 
   HYPRE_Init();
   hypre_initialized = true;
-
-#ifdef ALIEN_HYPRE_CUDA
-  /* AMG in GPU memory (default) */
-  //HYPRE_SetMemoryLocation(HYPRE_MEMORY_DEVICE);
-  /* setup AMG on GPUs */
-  HYPRE_SetExecutionPolicy(HYPRE_EXEC_DEVICE);
-  /* use hypre's SpGEMM instead of cuSPARSE */
-  HYPRE_SetSpGemmUseCusparse(false);
-  /* use GPU RNG */
-  HYPRE_SetUseGpuRand(true);
-  HYPRE_PrintDeviceInfo();
-#endif //ALIEN_HYPRE_CUDA
 }
 
 } // namespace Alien::Hypre
