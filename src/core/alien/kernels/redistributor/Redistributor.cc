@@ -43,14 +43,6 @@ namespace Alien
 {
 
 Redistributor::Redistributor(
-int globalSize, Arccore::MessagePassing::IMessagePassingMng* super, bool keep)
-: m_super_pm(super)
-, m_target_comm(Arccore::MessagePassing::mpSplit(super, keep))
-{
-  m_distributor = std::make_unique<RedistributorCommPlan>(globalSize, m_super_pm, m_target_comm.get());
-}
-
-Redistributor::Redistributor(
 int globalSize, Arccore::MessagePassing::IMessagePassingMng* super, Arccore::MessagePassing::IMessagePassingMng* target)
 : m_super_pm(super)
 , m_distributor(std::make_unique<RedistributorCommPlan>(globalSize, m_super_pm, target))

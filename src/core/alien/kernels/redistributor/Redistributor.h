@@ -41,8 +41,6 @@ class MultiVectorImpl;
 class ALIEN_EXPORT Redistributor
 {
  public:
-  // TODO : pass a distribution
-  Redistributor(int globalSize, IMessagePassingMng* super, bool keep = true);
   Redistributor(int globalSize, IMessagePassingMng* super, IMessagePassingMng* target);
   virtual ~Redistributor() = default;
 
