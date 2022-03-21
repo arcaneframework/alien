@@ -54,18 +54,6 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   // Clear all Hypre error for this session
   HYPRE_ClearAllErrors();
 
-#ifdef ALIEN_HYPRE_CUDA
-  /* AMG in GPU memory (default) */
-  //HYPRE_SetMemoryLocation(HYPRE_MEMORY_DEVICE);
-  /* setup AMG on GPUs */
-  HYPRE_SetExecutionPolicy(HYPRE_EXEC_DEVICE);
-  /* use hypre's SpGEMM instead of cuSPARSE */
-  HYPRE_SetSpGemmUseCusparse(false);
-  /* use GPU RNG */
-  HYPRE_SetUseGpuRand(true);
-  HYPRE_PrintDeviceInfo();
-#endif //ALIEN_HYPRE_CUDA
-
   // Macro "pratique" en attendant de trouver mieux
   auto tsolve = MPI_Wtime();
 
@@ -272,14 +260,14 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   checkError("Hypre Unknown Vector GetObject",
              HYPRE_IJVectorGetObject(xij_vector, (void**)&par_x));
 
-#ifdef ALIEN_HYPRE_CUDA
-  /*-----------------------------------------------------------
-   * Migrate the system to the wanted memory space
-   *-----------------------------------------------------------*/
-  hypre_ParCSRMatrixMigrate(par_a, HYPRE_MEMORY_DEVICE);
-  hypre_ParVectorMigrate(par_rhs, HYPRE_MEMORY_DEVICE);
-  hypre_ParVectorMigrate(par_x, HYPRE_MEMORY_DEVICE);
-#endif // ALIEN_HYPRE_CUDA
+//#ifdef ALIEN_HYPRE_CUDA
+//  /*-----------------------------------------------------------
+//   * Migrate the system to the wanted memory space
+//   *-----------------------------------------------------------*/
+//  hypre_ParCSRMatrixMigrate(par_a, HYPRE_MEMORY_DEVICE);
+//  hypre_ParVectorMigrate(par_rhs, HYPRE_MEMORY_DEVICE);
+//  hypre_ParVectorMigrate(par_x, HYPRE_MEMORY_DEVICE);
+//#endif // ALIEN_HYPRE_CUDA
 
   checkError("Hypre " + solver_name + " solver Setup",
              (*solver_setup_function)(solver, par_a, par_rhs, par_x));
@@ -297,18 +285,6 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
     // Solver is not converged. Clear Hypre errors for subsequent calls.
     HYPRE_ClearAllErrors();
   }
-
-#ifdef ALIEN_HYPRE_CUDA
-  /* AMG in GPU memory (default) */
-  HYPRE_SetMemoryLocation(HYPRE_MEMORY_HOST);
-  /* setup AMG on GPUs */
-  HYPRE_SetExecutionPolicy(HYPRE_EXEC_HOST);
-  /* use hypre's SpGEMM instead of cuSPARSE */
-  HYPRE_SetSpGemmUseCusparse(false);
-  /* use GPU RNG */
-  HYPRE_SetUseGpuRand(true);
-  HYPRE_PrintDeviceInfo();
-#endif //ALIEN_HYPRE_CUDA
 
   checkError(
   "Hypre " + solver_name + " solver Destroy", (*solver_destroy_function)(solver));

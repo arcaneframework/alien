@@ -21,7 +21,7 @@
 #include <HYPRE_utilities.h>
 
 #ifdef ALIEN_HYPRE_CUDA
-#include <cuda_runtime.h>
+
 #endif // ALIEN_HYPRE_CUDA
 
 // Function is not always defined in HYPRE_utilities.h
@@ -41,11 +41,25 @@ void hypre_init_if_needed()
     return;
 
 #ifdef ALIEN_HYPRE_CUDA
-  cudaSetDevice(0);
+  HYPRE_Int num_devices;
+  hypre_GetDevice(&num_devices);
+  hypre_SetDevice(0);
 #endif // ALIEN_HYPRE_CUDA
 
   HYPRE_Init();
   hypre_initialized = true;
+
+#ifdef ALIEN_HYPRE_CUDA
+  /* AMG in GPU memory (default) */
+  HYPRE_SetMemoryLocation(HYPRE_MEMORY_DEVICE);
+  /* setup AMG on GPUs */
+  HYPRE_SetExecutionPolicy(HYPRE_EXEC_DEVICE);
+  /* use hypre's SpGEMM instead of cuSPARSE */
+  HYPRE_SetSpGemmUseCusparse(false);
+  /* use GPU RNG */
+  HYPRE_SetUseGpuRand(true);
+  HYPRE_PrintDeviceInfo();
+#endif //ALIEN_HYPRE_CUDA
 }
 
 } // namespace Alien::Hypre
