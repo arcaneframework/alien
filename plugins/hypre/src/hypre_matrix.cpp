@@ -29,8 +29,6 @@
 // For hypre_*Alloc
 #include <_hypre_utilities.h>
 
-#undef ALIEN_HYPRE_CUDA
-
 namespace Alien::Hypre
 {
 Matrix::Matrix(const MultiMatrixImpl* multi_impl)
@@ -104,7 +102,7 @@ void Matrix::setRowValues(int rows, Arccore::ConstArrayView<int> cols, Arccore::
 
     hypre_TMemcpy(d_ids, cols.data(), HYPRE_BigInt, cols.size(), memory_location, HYPRE_MEMORY_HOST);
     hypre_TMemcpy(d_values, values.data(), HYPRE_Real, values.size(), memory_location, HYPRE_MEMORY_HOST);
-    hypre_TMemcpy(d_ncols, &ncols, HYPRE_Int, 1, memory_location, HYPRE_MEMORY_HOST);
+    hypre_TMemcpy(d_ncols, &col_size, HYPRE_Int, 1, memory_location, HYPRE_MEMORY_HOST);
     hypre_TMemcpy(d_rows, &h_rows, HYPRE_BigInt, 1, memory_location, HYPRE_MEMORY_HOST);
 
     ids = d_ids;
