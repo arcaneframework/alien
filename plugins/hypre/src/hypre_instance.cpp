@@ -19,9 +19,12 @@
 #include "hypre_instance.h"
 
 #include <HYPRE_utilities.h>
+#include <iostream>
+#include <cmath>
 
 #ifdef ALIEN_HYPRE_CUDA
-
+#include <_hypre_utilities.h>
+#include <cuda_runtime.h>
 #endif // ALIEN_HYPRE_CUDA
 
 // Function is not always defined in HYPRE_utilities.h
@@ -35,15 +38,26 @@ bool hypre_initialized = false;
 namespace Alien::Hypre
 {
 
-void hypre_init_if_needed()
+void hypre_init_if_needed(MPI_Comm comm)
 {
   if (hypre_initialized)
     return;
 
 #ifdef ALIEN_HYPRE_CUDA
+  MPI_Comm shmcomm;
+  MPI_Comm_split_type(comm, MPI_COMM_TYPE_SHARED, 0,
+                      MPI_INFO_NULL, &shmcomm);
+  int shmrank;
+  int shmsize;
+  MPI_Comm_rank(shmcomm, &shmrank);
+  MPI_Comm_rank(shmcomm, &shmsize);
+  MPI_Comm_free(&shmcomm);
+
   HYPRE_Int num_devices;
-  hypre_GetDevice(&num_devices);
-  hypre_SetDevice(0);
+  cudaGetDeviceCount(&num_devices);
+
+  HYPRE_Int device = shmrank % num_devices;
+  cudaSetDevice(device);
 #endif // ALIEN_HYPRE_CUDA
 
   HYPRE_Init();

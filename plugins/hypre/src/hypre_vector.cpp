@@ -33,7 +33,10 @@ Vector::Vector(const MultiVectorImpl* multi_impl)
 : IVectorImpl(multi_impl, AlgebraTraits<BackEnd::tag::hypre>::name())
 , m_hypre(nullptr)
 {
-  hypre_init_if_needed();
+  auto* pm = dynamic_cast<Arccore::MessagePassing::Mpi::MpiMessagePassingMng*>(distribution().parallelMng());
+  m_comm = pm ? (*pm->getMPIComm()) : MPI_COMM_WORLD;
+
+  hypre_init_if_needed(m_comm);
   auto block_size = 1;
   const auto* block = this->block();
   if (block)
@@ -45,9 +48,6 @@ Vector::Vector(const MultiVectorImpl* multi_impl)
   const auto localSize = distribution().localSize();
   const auto ilower = localOffset * block_size;
   const auto iupper = ilower + localSize * block_size - 1;
-
-  auto* pm = dynamic_cast<Arccore::MessagePassing::Mpi::MpiMessagePassingMng*>(distribution().parallelMng());
-  m_comm = pm ? (*pm->getMPIComm()) : MPI_COMM_WORLD;
 
   setProfile(ilower, iupper);
 }

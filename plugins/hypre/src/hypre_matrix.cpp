@@ -35,14 +35,16 @@ Matrix::Matrix(const MultiMatrixImpl* multi_impl)
 : IMatrixImpl(multi_impl, AlgebraTraits<BackEnd::tag::hypre>::name())
 , m_hypre(nullptr)
 {
-  hypre_init_if_needed();
+  auto* pm = dynamic_cast<Arccore::MessagePassing::Mpi::MpiMessagePassingMng*>(distribution().parallelMng());
+  m_comm = pm ? (*pm->getMPIComm()) : MPI_COMM_WORLD;
+
+  hypre_init_if_needed(m_comm);
   const auto& row_space = multi_impl->rowSpace();
   const auto& col_space = multi_impl->colSpace();
   if (row_space.size() != col_space.size())
     throw Arccore::FatalErrorException("Hypre matrix must be square");
 
-  auto* pm = dynamic_cast<Arccore::MessagePassing::Mpi::MpiMessagePassingMng*>(distribution().parallelMng());
-  m_comm = pm ? (*pm->getMPIComm()) : MPI_COMM_WORLD;
+
 }
 
 Matrix::~Matrix()

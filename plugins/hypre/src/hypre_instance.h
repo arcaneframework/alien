@@ -18,9 +18,11 @@
 
 #pragma once
 
+#include <mpi.h>
+
 namespace Alien::Hypre
 {
 
-void hypre_init_if_needed();
+void hypre_init_if_needed(MPI_Comm comm);
 
 } // namespace Alien::Hypre
