@@ -27,12 +27,14 @@
 
 #include <alien/hypre/backend.h>
 
+namespace
+{
 class SimpleCSR_to_Hypre_MatrixConverter final : public Alien::IMatrixConverter
 {
  public:
   SimpleCSR_to_Hypre_MatrixConverter() = default;
 
-  ~SimpleCSR_to_Hypre_MatrixConverter() final = default;
+  ~SimpleCSR_to_Hypre_MatrixConverter() override = default;
 
   BackEndId sourceBackend() const override
   {
@@ -175,5 +177,6 @@ void SimpleCSR_to_Hypre_MatrixConverter::_buildBlock(const Alien::SimpleCSRMatri
 
   targetImpl.assemble();
 }
+} // namespace
 
 REGISTER_MATRIX_CONVERTER(SimpleCSR_to_Hypre_MatrixConverter);

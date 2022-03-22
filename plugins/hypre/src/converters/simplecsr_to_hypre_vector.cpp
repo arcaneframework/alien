@@ -25,12 +25,14 @@
 
 #include <alien/hypre/backend.h>
 
+namespace
+{
 class SimpleCSR_to_Hypre_VectorConverter final : public Alien::IVectorConverter
 {
  public:
   SimpleCSR_to_Hypre_VectorConverter() = default;
 
-  ~SimpleCSR_to_Hypre_VectorConverter() final = default;
+  ~SimpleCSR_to_Hypre_VectorConverter() override = default;
 
   Alien::BackEndId sourceBackend() const override { return Alien::AlgebraTraits<Alien::BackEnd::tag::simplecsr>::name(); }
 
@@ -72,5 +74,6 @@ void SimpleCSR_to_Hypre_VectorConverter::convert(const Alien::IVectorImpl* sourc
 
   v2.assemble();
 }
+} // namespace
 
 REGISTER_VECTOR_CONVERTER(SimpleCSR_to_Hypre_VectorConverter);
