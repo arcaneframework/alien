@@ -61,11 +61,10 @@ class ALIEN_HYPRE_EXPORT InternalLinearAlgebra
 : public IInternalLinearAlgebra<Matrix, Vector>
 {
  public:
-  InternalLinearAlgebra() {}
+  InternalLinearAlgebra() = default;
 
-  virtual ~InternalLinearAlgebra() {}
-
- public:
+  ~InternalLinearAlgebra() final = default;
+  
   // IInternalLinearAlgebra interface.
   Arccore::Real norm0(const Vector& x) const override;
 

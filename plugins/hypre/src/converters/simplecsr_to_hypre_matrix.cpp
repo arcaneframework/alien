@@ -27,22 +27,21 @@
 
 #include <alien/hypre/backend.h>
 
-class SimpleCSR_to_Hypre_MatrixConverter : public Alien::IMatrixConverter
+class SimpleCSR_to_Hypre_MatrixConverter final : public Alien::IMatrixConverter
 {
  public:
-  SimpleCSR_to_Hypre_MatrixConverter() {}
+  SimpleCSR_to_Hypre_MatrixConverter() = default;
 
-  virtual ~SimpleCSR_to_Hypre_MatrixConverter() {}
+  ~SimpleCSR_to_Hypre_MatrixConverter() final = default;
 
- public:
-  BackEndId sourceBackend() const
+  BackEndId sourceBackend() const override
   {
     return Alien::AlgebraTraits<Alien::BackEnd::tag::simplecsr>::name();
   }
 
-  BackEndId targetBackend() const { return Alien::AlgebraTraits<Alien::BackEnd::tag::hypre>::name(); }
+  BackEndId targetBackend() const override { return Alien::AlgebraTraits<Alien::BackEnd::tag::hypre>::name(); }
 
-  void convert(const Alien::IMatrixImpl* sourceImpl, Alien::IMatrixImpl* targetImpl) const;
+  void convert(const Alien::IMatrixImpl* sourceImpl, Alien::IMatrixImpl* targetImpl) const override;
 
   void _build(const Alien::SimpleCSRMatrix<Arccore::Real>& sourceImpl, Alien::Hypre::Matrix& targetImpl) const;
 

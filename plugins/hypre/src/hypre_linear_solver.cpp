@@ -36,7 +36,7 @@ namespace Alien::Hypre
 void InternalLinearSolver::checkError(
 const Arccore::String& msg, int ierr, int skipError) const
 {
-  if (ierr != 0 and (ierr & ~skipError) != 0) {
+  if (ierr != 0 && (ierr & ~skipError) != 0) {
     char hypre_error_msg[256];
     HYPRE_DescribeError(ierr, hypre_error_msg);
     alien_fatal([&] {
@@ -67,8 +67,8 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   HYPRE_PtrToParSolverFcn precond_setup_function = nullptr;
   int (*precond_destroy_function)(HYPRE_Solver) = nullptr;
 
-  MPI_Comm comm = MPI_COMM_WORLD;
-  auto* mpi_comm_mng = dynamic_cast<Arccore::MessagePassing::Mpi::MpiMessagePassingMng*>(
+  auto comm = MPI_COMM_WORLD;
+  const auto* mpi_comm_mng = dynamic_cast<Arccore::MessagePassing::Mpi::MpiMessagePassingMng*>(
   A.distribution().parallelMng());
   if (mpi_comm_mng)
     comm = *(mpi_comm_mng->getMPIComm());
@@ -252,7 +252,8 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   }
 
   HYPRE_ParCSRMatrix par_a;
-  HYPRE_ParVector par_rhs, par_x;
+  HYPRE_ParVector par_rhs;
+  HYPRE_ParVector par_x;
   checkError(
   "Hypre Matrix GetObject", HYPRE_IJMatrixGetObject(ij_matrix, (void**)&par_a));
   checkError("Hypre RHS Vector GetObject",
@@ -260,14 +261,14 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   checkError("Hypre Unknown Vector GetObject",
              HYPRE_IJVectorGetObject(xij_vector, (void**)&par_x));
 
-//#ifdef ALIEN_HYPRE_CUDA
-//  /*-----------------------------------------------------------
-//   * Migrate the system to the wanted memory space
-//   *-----------------------------------------------------------*/
-//  hypre_ParCSRMatrixMigrate(par_a, HYPRE_MEMORY_DEVICE);
-//  hypre_ParVectorMigrate(par_rhs, HYPRE_MEMORY_DEVICE);
-//  hypre_ParVectorMigrate(par_x, HYPRE_MEMORY_DEVICE);
-//#endif // ALIEN_HYPRE_CUDA
+  //#ifdef ALIEN_HYPRE_CUDA
+  //  /*-----------------------------------------------------------
+  //   * Migrate the system to the wanted memory space
+  //   *-----------------------------------------------------------*/
+  //  hypre_ParCSRMatrixMigrate(par_a, HYPRE_MEMORY_DEVICE);
+  //  hypre_ParVectorMigrate(par_rhs, HYPRE_MEMORY_DEVICE);
+  //  hypre_ParVectorMigrate(par_x, HYPRE_MEMORY_DEVICE);
+  //#endif // ALIEN_HYPRE_CUDA
 
   checkError("Hypre " + solver_name + " solver Setup",
              (*solver_setup_function)(solver, par_a, par_rhs, par_x));
@@ -296,7 +297,7 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   m_total_iter_num += m_status.iteration_count;
   tsolve = MPI_Wtime() - tsolve;
 
-  if (mpi_comm_mng->commRank() == 0) {
+  if (mpi_comm_mng && mpi_comm_mng->commRank() == 0) {
     std::cerr << "solve = " << tsolve << std::endl;
   }
   m_total_solve_time += tsolve;

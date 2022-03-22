@@ -27,29 +27,31 @@
 // For hypre_*Alloc
 #include <_hypre_utilities.h>
 
+#include <alien/core/impl/MultiVectorImpl.h>
+
 namespace Alien::Hypre
 {
 Vector::Vector(const MultiVectorImpl* multi_impl)
 : IVectorImpl(multi_impl, AlgebraTraits<BackEnd::tag::hypre>::name())
-, m_hypre(nullptr)
 {
-  auto* pm = dynamic_cast<Arccore::MessagePassing::Mpi::MpiMessagePassingMng*>(distribution().parallelMng());
+  auto distribution = multi_impl->distribution();
+  auto const* pm = dynamic_cast<Arccore::MessagePassing::Mpi::MpiMessagePassingMng*>(distribution.parallelMng());
   m_comm = pm ? (*pm->getMPIComm()) : MPI_COMM_WORLD;
 
   hypre_init_if_needed(m_comm);
   auto block_size = 1;
-  const auto* block = this->block();
-  if (block)
+
+  if (const auto* block = this->block(); block)
     block_size *= block->size();
   else if (this->vblock())
     throw Arccore::FatalErrorException(A_FUNCINFO, "Not implemented yet");
 
-  const auto localOffset = distribution().offset();
-  const auto localSize = distribution().localSize();
-  const auto ilower = localOffset * block_size;
-  const auto iupper = ilower + localSize * block_size - 1;
+  const auto localOffset = distribution.offset();
+  const auto localSize = distribution.localSize();
+  const auto row_lower = localOffset * block_size;
+  const auto row_upper = row_lower + localSize * block_size - 1;
 
-  setProfile(ilower, iupper);
+  setProfile(row_lower, row_upper);
 }
 
 Vector::~Vector()

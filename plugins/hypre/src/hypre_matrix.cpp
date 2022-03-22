@@ -33,9 +33,8 @@ namespace Alien::Hypre
 {
 Matrix::Matrix(const MultiMatrixImpl* multi_impl)
 : IMatrixImpl(multi_impl, AlgebraTraits<BackEnd::tag::hypre>::name())
-, m_hypre(nullptr)
 {
-  auto* pm = dynamic_cast<Arccore::MessagePassing::Mpi::MpiMessagePassingMng*>(distribution().parallelMng());
+  auto const* pm = dynamic_cast<Arccore::MessagePassing::Mpi::MpiMessagePassingMng*>(multi_impl->distribution().parallelMng());
   m_comm = pm ? (*pm->getMPIComm()) : MPI_COMM_WORLD;
 
   hypre_init_if_needed(m_comm);
@@ -43,8 +42,6 @@ Matrix::Matrix(const MultiMatrixImpl* multi_impl)
   const auto& col_space = multi_impl->colSpace();
   if (row_space.size() != col_space.size())
     throw Arccore::FatalErrorException("Hypre matrix must be square");
-
-
 }
 
 Matrix::~Matrix()
@@ -79,10 +76,10 @@ void Matrix::assemble()
   }
 }
 
-void Matrix::setRowValues(int rows, Arccore::ConstArrayView<int> cols, Arccore::ConstArrayView<double> values)
+void Matrix::setRowValues(int row, Arccore::ConstArrayView<int> cols, Arccore::ConstArrayView<double> values)
 {
   HYPRE_Int col_size = cols.size();
-  HYPRE_BigInt h_rows = rows;
+  HYPRE_BigInt h_rows = row;
 
   if (col_size != values.size()) {
     throw Arccore::FatalErrorException(A_FUNCINFO, "sizes are not equal");
@@ -124,7 +121,7 @@ void Matrix::setRowValues(int rows, Arccore::ConstArrayView<int> cols, Arccore::
   auto ierr = HYPRE_IJMatrixSetValues(m_hypre, 1, ncols, p_rows, ids, data);
 
   if (ierr) {
-    auto msg = Arccore::String::format("Cannot set Hypre Matrix Values for row {0}", rows);
+    auto msg = Arccore::String::format("Cannot set Hypre Matrix Values for row {0}", row);
     throw Arccore::FatalErrorException(A_FUNCINFO, msg);
   }
 #ifdef ALIEN_HYPRE_CUDA

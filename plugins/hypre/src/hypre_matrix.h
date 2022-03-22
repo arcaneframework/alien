@@ -29,14 +29,13 @@ class Matrix : public IMatrixImpl
  public:
   explicit Matrix(const MultiMatrixImpl* multi_impl);
 
-  virtual ~Matrix();
+  ~Matrix() override;
 
- public:
   void setProfile(int ilower, int iupper,
                   int jlower, int jupper,
                   Arccore::ConstArrayView<int> row_sizes);
 
-  void setRowValues(int rows,
+  void setRowValues(int row,
                     Arccore::ConstArrayView<int> cols,
                     Arccore::ConstArrayView<double> values);
 
@@ -45,7 +44,7 @@ class Matrix : public IMatrixImpl
   HYPRE_IJMatrix internal() const { return m_hypre; }
 
  private:
-  HYPRE_IJMatrix m_hypre;
+  HYPRE_IJMatrix m_hypre = nullptr;
   MPI_Comm m_comm;
 };
 

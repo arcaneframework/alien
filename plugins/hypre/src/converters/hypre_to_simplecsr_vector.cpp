@@ -25,19 +25,18 @@
 
 #include <alien/hypre/backend.h>
 
-class Hypre_to_SimpleCSR_VectorConverter : public Alien::IVectorConverter
+class Hypre_to_SimpleCSR_VectorConverter final : public Alien::IVectorConverter
 {
  public:
-  Hypre_to_SimpleCSR_VectorConverter() {}
+  Hypre_to_SimpleCSR_VectorConverter() = default;
 
-  virtual ~Hypre_to_SimpleCSR_VectorConverter() {}
+  ~Hypre_to_SimpleCSR_VectorConverter() final = default;
 
- public:
-  Alien::BackEndId sourceBackend() const { return Alien::AlgebraTraits<Alien::BackEnd::tag::hypre>::name(); }
+  Alien::BackEndId sourceBackend() const override { return Alien::AlgebraTraits<Alien::BackEnd::tag::hypre>::name(); }
 
-  Alien::BackEndId targetBackend() const { return Alien::AlgebraTraits<Alien::BackEnd::tag::simplecsr>::name(); }
+  Alien::BackEndId targetBackend() const override { return Alien::AlgebraTraits<Alien::BackEnd::tag::simplecsr>::name(); }
 
-  void convert(const Alien::IVectorImpl* sourceImpl, Alien::IVectorImpl* targetImpl) const;
+  void convert(const Alien::IVectorImpl* sourceImpl, Alien::IVectorImpl* targetImpl) const override;
 };
 
 void Hypre_to_SimpleCSR_VectorConverter::convert(
