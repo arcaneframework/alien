@@ -70,8 +70,6 @@ class ALIEN_EXPORT Redistributor
  private:
   IMessagePassingMng* m_super_pm;
   std::unique_ptr<RedistributorCommPlan> m_distributor;
-  //! Used only if `Redistributor` is responsible for its creation
-  std::unique_ptr<Arccore::MessagePassing::IMessagePassingMng> m_target_comm;
 };
 
 } // namespace Alien
