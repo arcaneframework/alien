@@ -29,6 +29,12 @@
 
 #include <alien/core/impl/MultiVectorImpl.h>
 
+#ifdef HYPRE_MPI_BIG_INT
+using HypreId = HYPRE_BigInt;
+#else
+using HypreId = HYPRE_Int;
+#endif
+
 namespace Alien::Hypre
 {
 Vector::Vector(const MultiVectorImpl* multi_impl)
@@ -81,17 +87,17 @@ void Vector::setProfile(int ilower, int iupper)
 
 void Vector::setValues(Arccore::ConstArrayView<double> values)
 {
-  HYPRE_BigInt* rows = nullptr;
+  HypreId* rows = nullptr;
   const HYPRE_Real* data = nullptr;
 
 #ifdef ALIEN_HYPRE_DEVICE
   HYPRE_MemoryLocation memory_location;
   HYPRE_GetMemoryLocation(&memory_location);
   if (memory_location != HYPRE_MEMORY_HOST) {
-    HYPRE_BigInt* d_rows = hypre_CTAlloc(HYPRE_BigInt, m_rows.size(), memory_location);
+    HypreId* d_rows = hypre_CTAlloc(HypreId, m_rows.size(), memory_location);
     HYPRE_Real* d_values = hypre_CTAlloc(HYPRE_Real, values.size(), memory_location);
 
-    hypre_TMemcpy(d_rows, m_rows.data(), HYPRE_BigInt, m_rows.size(), memory_location, HYPRE_MEMORY_HOST);
+    hypre_TMemcpy(d_rows, m_rows.data(), HypreId, m_rows.size(), memory_location, HYPRE_MEMORY_HOST);
     hypre_TMemcpy(d_values, values.data(), HYPRE_Real, values.size(), memory_location, HYPRE_MEMORY_HOST);
     rows = d_rows;
     data = d_values;
@@ -119,17 +125,17 @@ void Vector::setValues(Arccore::ConstArrayView<double> values)
 
 void Vector::getValues(Arccore::ArrayView<double> values) const
 {
-  const HYPRE_BigInt* rows = nullptr;
+  const HypreId* rows = nullptr;
   HYPRE_Real* data = nullptr;
 
 #ifdef ALIEN_HYPRE_DEVICE
   HYPRE_MemoryLocation memory_location;
   HYPRE_GetMemoryLocation(&memory_location);
   if (memory_location != HYPRE_MEMORY_HOST) {
-    HYPRE_BigInt* d_rows = hypre_CTAlloc(HYPRE_BigInt, m_rows.size(), memory_location);
+    HypreId* d_rows = hypre_CTAlloc(HypreId, m_rows.size(), memory_location);
     HYPRE_Real* d_values = hypre_CTAlloc(HYPRE_Real, values.size(), memory_location);
 
-    hypre_TMemcpy(d_rows, m_rows.data(), HYPRE_BigInt, m_rows.size(), memory_location, HYPRE_MEMORY_HOST);
+    hypre_TMemcpy(d_rows, m_rows.data(), HypreId, m_rows.size(), memory_location, HYPRE_MEMORY_HOST);
     rows = d_rows;
     data = d_values;
   }

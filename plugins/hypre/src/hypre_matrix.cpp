@@ -85,7 +85,7 @@ void Matrix::assemble()
 void Matrix::setRowValues(int row, Arccore::ConstArrayView<int> cols, Arccore::ConstArrayView<double> values)
 {
   HYPRE_Int col_size = cols.size();
-  HYPRE_BigInt h_rows = row;
+  HypreId h_rows = row;
 
   if (col_size != values.size()) {
     throw Arccore::FatalErrorException(A_FUNCINFO, "sizes are not equal");
@@ -94,7 +94,7 @@ void Matrix::setRowValues(int row, Arccore::ConstArrayView<int> cols, Arccore::C
   const HypreId* ids = nullptr;
   const HYPRE_Real* data = nullptr;
   HYPRE_Int* ncols;
-  HypreId* p_rows;
+  const HypreId* p_rows;
 
 #ifdef ALIEN_HYPRE_DEVICE
   HYPRE_MemoryLocation memory_location;
