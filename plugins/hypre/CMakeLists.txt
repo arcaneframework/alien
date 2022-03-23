@@ -1,5 +1,5 @@
 option(ALIEN_HYPRE_UNIT_TESTS "Enable Hypre wrapper tests" ${ALIEN_UNIT_TESTS})
-option(ALIEN_HYPRE_CUDA "Enable hypre's CUDA backend" OFF)
+option(ALIEN_HYPRE_DEVICE "Enable hypre's GPU backend" OFF)
 
 find_package(Hypre REQUIRED)
 
@@ -24,8 +24,8 @@ add_library(hypre_wrapper
         src/converters/simplecsr_to_hypre_matrix.cpp
         src/hypre_linear_solver.h)
 
-if (ALIEN_HYPRE_CUDA)
-    target_compile_definitions(hypre_wrapper PRIVATE ALIEN_HYPRE_CUDA)
+if (ALIEN_HYPRE_DEVICE)
+    target_compile_definitions(hypre_wrapper PRIVATE ALIEN_HYPRE_DEVICE)
 endif ()
 
 target_link_libraries(hypre_wrapper PUBLIC

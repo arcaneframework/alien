@@ -261,14 +261,14 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   checkError("Hypre Unknown Vector GetObject",
              HYPRE_IJVectorGetObject(xij_vector, (void**)&par_x));
 
-  //#ifdef ALIEN_HYPRE_CUDA
+  //#ifdef ALIEN_HYPRE_DEVICE
   //  /*-----------------------------------------------------------
   //   * Migrate the system to the wanted memory space
   //   *-----------------------------------------------------------*/
   //  hypre_ParCSRMatrixMigrate(par_a, HYPRE_MEMORY_DEVICE);
   //  hypre_ParVectorMigrate(par_rhs, HYPRE_MEMORY_DEVICE);
   //  hypre_ParVectorMigrate(par_x, HYPRE_MEMORY_DEVICE);
-  //#endif // ALIEN_HYPRE_CUDA
+  //#endif // ALIEN_HYPRE_DEVICE
 
   checkError("Hypre " + solver_name + " solver Setup",
              (*solver_setup_function)(solver, par_a, par_rhs, par_x));

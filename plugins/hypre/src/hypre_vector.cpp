@@ -84,7 +84,7 @@ void Vector::setValues(Arccore::ConstArrayView<double> values)
   HYPRE_BigInt* rows = nullptr;
   const HYPRE_Real* data = nullptr;
 
-#ifdef ALIEN_HYPRE_CUDA
+#ifdef ALIEN_HYPRE_DEVICE
   HYPRE_MemoryLocation memory_location;
   HYPRE_GetMemoryLocation(&memory_location);
   if (memory_location != HYPRE_MEMORY_HOST) {
@@ -97,7 +97,7 @@ void Vector::setValues(Arccore::ConstArrayView<double> values)
     data = d_values;
   }
   else
-#endif // ALIEN_HYPRE_CUDA
+#endif // ALIEN_HYPRE_DEVICE
   {
     rows = m_rows.data();
     data = values.data();
@@ -109,12 +109,12 @@ void Vector::setValues(Arccore::ConstArrayView<double> values)
     throw Arccore::FatalErrorException(A_FUNCINFO, "Hypre set values failed");
   }
 
-#ifdef ALIEN_HYPRE_CUDA
+#ifdef ALIEN_HYPRE_DEVICE
   if (memory_location != HYPRE_MEMORY_HOST) {
     hypre_TFree(rows, memory_location);
     hypre_TFree(data, memory_location);
   }
-#endif // ALIEN_HYPRE_CUDA
+#endif // ALIEN_HYPRE_DEVICE
 }
 
 void Vector::getValues(Arccore::ArrayView<double> values) const
@@ -122,7 +122,7 @@ void Vector::getValues(Arccore::ArrayView<double> values) const
   const HYPRE_BigInt* rows = nullptr;
   HYPRE_Real* data = nullptr;
 
-#ifdef ALIEN_HYPRE_CUDA
+#ifdef ALIEN_HYPRE_DEVICE
   HYPRE_MemoryLocation memory_location;
   HYPRE_GetMemoryLocation(&memory_location);
   if (memory_location != HYPRE_MEMORY_HOST) {
@@ -134,7 +134,7 @@ void Vector::getValues(Arccore::ArrayView<double> values) const
     data = d_values;
   }
   else
-#endif // ALIEN_HYPRE_CUDA
+#endif // ALIEN_HYPRE_DEVICE
   {
     rows = m_rows.data();
     data = values.data();
@@ -145,13 +145,13 @@ void Vector::getValues(Arccore::ArrayView<double> values) const
     throw Arccore::FatalErrorException(A_FUNCINFO, "Hypre get values failed");
   }
 
-#ifdef ALIEN_HYPRE_CUDA
+#ifdef ALIEN_HYPRE_DEVICE
   if (memory_location != HYPRE_MEMORY_HOST) {
     hypre_TMemcpy(values.data(), data, HYPRE_Real, values.size(), HYPRE_MEMORY_HOST, memory_location);
     hypre_TFree(rows, memory_location);
     hypre_TFree(data, memory_location);
   }
-#endif // ALIEN_HYPRE_CUDA
+#endif // ALIEN_HYPRE_DEVICE
 }
 
 void Vector::assemble()

@@ -22,10 +22,9 @@
 #include <iostream>
 #include <cmath>
 
-#ifdef ALIEN_HYPRE_CUDA
+#ifdef ALIEN_HYPRE_DEVICE
 #include <_hypre_utilities.h>
-#include <cuda_runtime.h>
-#endif // ALIEN_HYPRE_CUDA
+#endif // ALIEN_HYPRE_DEVICE
 
 // Function is not always defined in HYPRE_utilities.h
 extern "C" HYPRE_Int HYPRE_Init();
@@ -43,7 +42,7 @@ void hypre_init_if_needed([[maybe_unused]] MPI_Comm comm)
   if (hypre_initialized)
     return;
 
-#ifdef ALIEN_HYPRE_CUDA
+#ifdef ALIEN_HYPRE_DEVICE
   MPI_Comm shmcomm;
   MPI_Comm_split_type(comm, MPI_COMM_TYPE_SHARED, 0,
                       MPI_INFO_NULL, &shmcomm);
@@ -54,16 +53,16 @@ void hypre_init_if_needed([[maybe_unused]] MPI_Comm comm)
   MPI_Comm_free(&shmcomm);
 
   HYPRE_Int num_devices;
-  cudaGetDeviceCount(&num_devices);
+  hypre_GetDeviceCount(&num_devices);
 
   HYPRE_Int device = shmrank % num_devices;
-  cudaSetDevice(device);
-#endif // ALIEN_HYPRE_CUDA
+  hypre_SetDevice(device, nullptr);
+#endif // ALIEN_HYPRE_DEVICE
 
   HYPRE_Init();
   hypre_initialized = true;
 
-#ifdef ALIEN_HYPRE_CUDA
+#ifdef ALIEN_HYPRE_DEVICE
   /* AMG in GPU memory (default) */
   HYPRE_SetMemoryLocation(HYPRE_MEMORY_DEVICE);
   /* setup AMG on GPUs */
@@ -73,7 +72,7 @@ void hypre_init_if_needed([[maybe_unused]] MPI_Comm comm)
   /* use GPU RNG */
   HYPRE_SetUseGpuRand(true);
   HYPRE_PrintDeviceInfo();
-#endif //ALIEN_HYPRE_CUDA
+#endif //ALIEN_HYPRE_DEVICE
 }
 
 } // namespace Alien::Hypre

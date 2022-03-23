@@ -96,7 +96,7 @@ void Matrix::setRowValues(int row, Arccore::ConstArrayView<int> cols, Arccore::C
   HYPRE_Int* ncols;
   HypreId* p_rows;
 
-#ifdef ALIEN_HYPRE_CUDA
+#ifdef ALIEN_HYPRE_DEVICE
   HYPRE_MemoryLocation memory_location;
   HYPRE_GetMemoryLocation(&memory_location);
   if (memory_location != HYPRE_MEMORY_HOST) {
@@ -116,7 +116,7 @@ void Matrix::setRowValues(int row, Arccore::ConstArrayView<int> cols, Arccore::C
     p_rows = d_rows;
   }
   else
-#endif // ALIEN_HYPRE_CUDA
+#endif // ALIEN_HYPRE_DEVICE
   {
     ids = cols.data();
     data = values.data();
@@ -130,14 +130,14 @@ void Matrix::setRowValues(int row, Arccore::ConstArrayView<int> cols, Arccore::C
     auto msg = Arccore::String::format("Cannot set Hypre Matrix Values for row {0}", row);
     throw Arccore::FatalErrorException(A_FUNCINFO, msg);
   }
-#ifdef ALIEN_HYPRE_CUDA
+#ifdef ALIEN_HYPRE_DEVICE
   if (memory_location != HYPRE_MEMORY_HOST) {
     hypre_TFree(p_rows, memory_location);
     hypre_TFree(ncols, memory_location);
     hypre_TFree(data, memory_location);
     hypre_TFree(ids, memory_location);
   }
-#endif // ALIEN_HYPRE_CUDA
+#endif // ALIEN_HYPRE_DEVICE
 }
 
 } // namespace Alien::Hypre
