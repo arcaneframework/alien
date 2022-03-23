@@ -29,6 +29,12 @@
 // For hypre_*Alloc
 #include <_hypre_utilities.h>
 
+#ifdef HYPRE_MPI_BIG_INT
+using HypreId = HYPRE_BigInt;
+#else
+using HypreId = HYPRE_Int;
+#endif
+
 namespace Alien::Hypre
 {
 Matrix::Matrix(const MultiMatrixImpl* multi_impl)
@@ -85,24 +91,24 @@ void Matrix::setRowValues(int row, Arccore::ConstArrayView<int> cols, Arccore::C
     throw Arccore::FatalErrorException(A_FUNCINFO, "sizes are not equal");
   }
 
-  const HYPRE_BigInt* ids = nullptr;
+  const HypreId* ids = nullptr;
   const HYPRE_Real* data = nullptr;
   HYPRE_Int* ncols;
-  HYPRE_BigInt* p_rows;
+  HypreId* p_rows;
 
 #ifdef ALIEN_HYPRE_CUDA
   HYPRE_MemoryLocation memory_location;
   HYPRE_GetMemoryLocation(&memory_location);
   if (memory_location != HYPRE_MEMORY_HOST) {
-    HYPRE_BigInt* d_ids = hypre_CTAlloc(HYPRE_BigInt, cols.size(), memory_location);
+    HypreId* d_ids = hypre_CTAlloc(HypreId, cols.size(), memory_location);
     HYPRE_Real* d_values = hypre_CTAlloc(HYPRE_Real, values.size(), memory_location);
     HYPRE_Int* d_ncols = hypre_CTAlloc(HYPRE_Int, 1, memory_location);
-    HYPRE_BigInt* d_rows = hypre_CTAlloc(HYPRE_BigInt, 1, memory_location);
+    HypreId* d_rows = hypre_CTAlloc(HypreId, 1, memory_location);
 
-    hypre_TMemcpy(d_ids, cols.data(), HYPRE_BigInt, cols.size(), memory_location, HYPRE_MEMORY_HOST);
+    hypre_TMemcpy(d_ids, cols.data(), HypreId, cols.size(), memory_location, HYPRE_MEMORY_HOST);
     hypre_TMemcpy(d_values, values.data(), HYPRE_Real, values.size(), memory_location, HYPRE_MEMORY_HOST);
     hypre_TMemcpy(d_ncols, &col_size, HYPRE_Int, 1, memory_location, HYPRE_MEMORY_HOST);
-    hypre_TMemcpy(d_rows, &h_rows, HYPRE_BigInt, 1, memory_location, HYPRE_MEMORY_HOST);
+    hypre_TMemcpy(d_rows, &h_rows, HypreId, 1, memory_location, HYPRE_MEMORY_HOST);
 
     ids = d_ids;
     data = d_values;
