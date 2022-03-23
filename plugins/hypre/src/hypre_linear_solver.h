@@ -71,7 +71,7 @@ class InternalLinearSolver : public IInternalLinearSolver<Matrix, Vector>
 
   SolverStat m_stat;
   Options m_options;
-  
+
   void checkError(const Arccore::String& msg, int ierr, int skipError = 0) const;
 };
 } // namespace Alien::Hypre
