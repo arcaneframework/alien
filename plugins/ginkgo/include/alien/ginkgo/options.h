@@ -50,6 +50,7 @@ struct Options
   bool verbose_ = false;
   Alien::Ginkgo::OptionTypes::eSolver solver_ = Alien::Ginkgo::OptionTypes::CG;
   Alien::Ginkgo::OptionTypes::ePreconditioner preconditioner_ = Alien::Ginkgo::OptionTypes::Jacobi;
+  Arccore::Integer blockSize_ = 1;
 
   // methods
   Arccore::Integer numIterationsMax() const { return numIterationsMax_; }
@@ -84,6 +85,13 @@ struct Options
   Options& preconditioner(Alien::Ginkgo::OptionTypes::ePreconditioner n)
   {
     preconditioner_ = n;
+    return *this;
+  }
+
+  Arccore::Integer blockSize() const { return blockSize_; }
+  Options& blockSize(Arccore::Integer n)
+  {
+    blockSize_ = n;
     return *this;
   }
 };

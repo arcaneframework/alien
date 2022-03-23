@@ -20,6 +20,9 @@
 
 bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
 {
+  /*************************************
+  *     Get executor and Matrix
+  **************************************/
 
   // get the executor from the Matrix A
   auto exec = A.internal()->get_executor();
@@ -27,44 +30,9 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   // make a shared pointer on the matrix A
   auto pA = std::shared_ptr<const gko::matrix::Csr<double, int>>(A.internal(), [](auto* p) {});
 
-  /**
-   handle preconditioner choice
-  **/
-
-  // use LinOpFactory for factorizing
-  std::shared_ptr<gko::LinOpFactory> prec_factory;
-
-  // for ilu, generate concrete factorization for input matrix
-  auto par_ilu_fact = gko::factorization::ParIlu<double>::build().on(exec);
-  auto par_ilu = par_ilu_fact->generate(pA);
-
-  int prec;
-  switch (m_options.preconditioner()) {
-  case OptionTypes::Ilu:
-    prec = 2;
-    // Generate an ILU preconditioner factory by setting lower and upper triangular solver
-    // - in this case the exact triangular solves
-    prec_factory = gko::preconditioner::Ilu<
-                   gko::solver::LowerTrs<double>,
-                   gko::solver::UpperTrs<double>,
-                   false>::build()
-                   .on(exec);
-    break;
-  case OptionTypes::Jacobi:
-    prec = 1;
-    prec_factory = gko::preconditioner::Jacobi<double>::build().on(exec);
-    break;
-  case OptionTypes::NoPC:
-    prec = 0;
-    break;
-  default:
-    alien_fatal([&] { cout() << "Undefined Ginkgo preconditioner option"; });
-    break;
-  }
-
-  /**
-   Prepare the stopping criteria
-  **/
+  /*************************************
+  *     Prepare the stopping criteria
+  **************************************/
 
   const double threshold{ m_options.stopCriteriaValue() };
   const unsigned long max_iters = static_cast<unsigned int>(m_options.numIterationsMax());
@@ -78,98 +46,85 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
                   .with_tolerance(threshold)
                   .on(exec);
 
-  /**
-   Add Convergence logger
-  **/
+  /*************************************
+  *     Add Convergence logger
+  **************************************/
 
   std::shared_ptr<const gko::log::Convergence<double>> conv_logger = gko::log::Convergence<double>::create(exec);
   iter_stop->add_logger(conv_logger);
   res_stop->add_logger(conv_logger);
 
-  /**
-   handle solver choice
-  **/
+  /*************************************
+  *     Prepare Preconditioner Factories
+  **************************************/
 
-  // Factorize with LinOpFactory and LinOp
-  std::shared_ptr<gko::LinOpFactory> solver_factory;
+  // Ilu preconditioner : generate concrete factorization for input matrix, and declare preconditioner factory
+  auto par_ilu_fact = gko::factorization::ParIlu<double>::build().on(exec);
+  std::unique_ptr<gko::factorization::ParIlu<double>> par_ilu;
+  if (m_options.preconditioner() == OptionTypes::Ilu) {
+    par_ilu = par_ilu_fact->generate(pA);
+  }
+  auto ilu_prec_factory = gko::preconditioner::Ilu<gko::solver::LowerTrs<double>, gko::solver::UpperTrs<double>, false>::build().on(exec);
+
+  // Jacobi preconditioner : declare factory with blockSize parameter
+  auto jacobi_prec_factory = gko::preconditioner::Jacobi<double>::build().on(exec);
+  jacobi_prec_factory->get_parameters().max_block_size = m_options.blockSize();
+
+  /*************************************
+  *     Handle Solver Choice
+  **************************************/
+
+  // declare generic solver
   std::shared_ptr<gko::LinOp> solver;
 
+  // create the solver
   switch (m_options.solver()) {
   case OptionTypes::CG: {
-    auto solver_factory =
-    gko::solver::Cg<double>::build()
-    .with_criteria(
-    gko::share(iter_stop),
-    gko::share(res_stop))
-    .on(exec);
-
     // generate the solver
-    solver = solver_factory->generate(pA);
+    solver = gko::solver::Cg<double>::build().with_criteria(gko::share(iter_stop), gko::share(res_stop)).on(exec)->generate(pA);
 
     // set the preconditioner
-    if (prec == 1) { //Jacobi
-      gko::as<gko::solver::Cg<double>>(solver)->set_preconditioner(prec_factory->generate(pA));
+    if (m_options.preconditioner() == OptionTypes::Jacobi) { //Jacobi
+      gko::as<gko::solver::Cg<double>>(solver)->set_preconditioner(jacobi_prec_factory->generate(pA));
     }
-    else if (prec == 2) { //ILU
-      gko::as<gko::solver::Cg<double>>(solver)->set_preconditioner(prec_factory->generate(gko::share(par_ilu)));
+    else if (m_options.preconditioner() == OptionTypes::Ilu) { //ILU
+      gko::as<gko::solver::Cg<double>>(solver)->set_preconditioner(ilu_prec_factory->generate(gko::share(par_ilu)));
     }
-
   } break;
   case OptionTypes::GMRES: {
-    auto solver_factory =
-    gko::solver::Gmres<double>::build()
-    .with_criteria(
-    gko::share(iter_stop),
-    gko::share(res_stop))
-    .on(exec);
-
     // generate the solver
-    solver = solver_factory->generate(pA);
+    solver = gko::solver::Gmres<double>::build().with_criteria(gko::share(iter_stop), gko::share(res_stop)).on(exec)->generate(pA);
 
     // set the preconditioner
-    if (prec == 1) { //Jacobi
-      gko::as<gko::solver::Gmres<double>>(solver)->set_preconditioner(prec_factory->generate(pA));
+    if (m_options.preconditioner() == OptionTypes::Jacobi) { //Jacobi
+      gko::as<gko::solver::Gmres<double>>(solver)->set_preconditioner(jacobi_prec_factory->generate(pA));
     }
-    else if (prec == 2) { //ILU
-      gko::as<gko::solver::Gmres<double>>(solver)->set_preconditioner(prec_factory->generate(gko::share(par_ilu)));
+    else if (m_options.preconditioner() == OptionTypes::Ilu) { //ILU
+      gko::as<gko::solver::Gmres<double>>(solver)->set_preconditioner(ilu_prec_factory->generate(gko::share(par_ilu)));
     }
   } break;
   case OptionTypes::BICG: {
-    auto solver_factory =
-    gko::solver::Bicg<double>::build()
-    .with_criteria(
-    gko::share(iter_stop),
-    gko::share(res_stop))
-    .on(exec);
-
     // generate the solver
-    solver = solver_factory->generate(pA);
+    solver = gko::solver::Bicg<double>::build().with_criteria(gko::share(iter_stop), gko::share(res_stop)).on(exec)->generate(pA);
 
     // set the preconditioner
-    if (prec == 1) { //Jacobi
-      gko::as<gko::solver::Bicg<double>>(solver)->set_preconditioner(prec_factory->generate(pA));
+    if (m_options.preconditioner() == OptionTypes::Jacobi) { //Jacobi
+      gko::as<gko::solver::Bicg<double>>(solver)->set_preconditioner(jacobi_prec_factory->generate(pA));
     }
-    else if (prec == 2) { //ILU
-      gko::as<gko::solver::Bicg<double>>(solver)->set_preconditioner(prec_factory->generate(gko::share(par_ilu)));
+    else if (m_options.preconditioner() == OptionTypes::Ilu) { //ILU
+      gko::as<gko::solver::Bicg<double>>(solver)->set_preconditioner(ilu_prec_factory->generate(gko::share(par_ilu)));
     }
   } break;
   case OptionTypes::BICGSTAB: {
-    auto solver_factory =
-    gko::solver::Bicgstab<double>::build()
-    .with_criteria(
-    gko::share(iter_stop),
-    gko::share(res_stop))
-    .on(exec);
-
     // generate the solver
-    solver = solver_factory->generate(pA);
+    solver = gko::solver::Bicgstab<double>::build().with_criteria(gko::share(iter_stop), gko::share(res_stop)).on(exec)->generate(pA);
 
     // set the preconditioner
-    if (prec == 1) { //Jacobi
-      gko::as<gko::solver::Bicgstab<double>>(solver)->set_preconditioner(prec_factory->generate(pA));
+    if (m_options.preconditioner() == OptionTypes::Jacobi) { //Jacobi
+      gko::as<gko::solver::Bicgstab<double>>(solver)->set_preconditioner(jacobi_prec_factory->generate(pA));
     }
-    else if (prec == 2) { //ILU
-      gko::as<gko::solver::Bicgstab<double>>(solver)->set_preconditioner(prec_factory->generate(gko::share(par_ilu)));
+    else if (m_options.preconditioner() == OptionTypes::Ilu) { //ILU
+      gko::as<gko::solver::Bicgstab<double>>(solver)->set_preconditioner(ilu_prec_factory->generate(gko::share(par_ilu)));
     }
   } break;
   default:
@@ -256,6 +211,7 @@ void InternalLinearSolver::display_solver_infos(const Alien::Ginkgo::OptionTypes
   switch (prec) {
   case OptionTypes::Jacobi:
     std::cout << "Jacobi" << std::endl;
+    std::cout << "Jacobi block size : " << m_options.blockSize() << std::endl;
     break;
   case OptionTypes::Ilu:
     std::cout << "Ilu" << std::endl;
