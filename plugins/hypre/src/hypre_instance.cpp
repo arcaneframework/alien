@@ -26,9 +26,6 @@
 #include <_hypre_utilities.h>
 #endif // ALIEN_HYPRE_DEVICE
 
-// Function is not always defined in HYPRE_utilities.h
-extern "C" HYPRE_Int HYPRE_Init();
-
 namespace
 {
 bool hypre_initialized = false;
@@ -59,7 +56,9 @@ void hypre_init_if_needed([[maybe_unused]] MPI_Comm comm)
   hypre_SetDevice(device, nullptr);
 #endif // ALIEN_HYPRE_DEVICE
 
+#ifdef HAVE_HYPRE_INIT
   HYPRE_Init();
+#endif
   hypre_initialized = true;
 
 #ifdef ALIEN_HYPRE_DEVICE

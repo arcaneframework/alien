@@ -29,7 +29,7 @@
 
 #include <alien/core/impl/MultiVectorImpl.h>
 
-#ifdef HYPRE_MPI_BIG_INT
+#ifdef HAVE_HYPRE_BIGINT
 using HypreId = HYPRE_BigInt;
 #else
 using HypreId = HYPRE_Int;
@@ -87,7 +87,7 @@ void Vector::setProfile(int ilower, int iupper)
 
 void Vector::setValues(Arccore::ConstArrayView<double> values)
 {
-  HypreId* rows = nullptr;
+  const HypreId* rows = nullptr;
   const HYPRE_Real* data = nullptr;
 
 #ifdef ALIEN_HYPRE_DEVICE

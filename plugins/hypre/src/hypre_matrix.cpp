@@ -29,7 +29,7 @@
 // For hypre_*Alloc
 #include <_hypre_utilities.h>
 
-#ifdef HYPRE_MPI_BIG_INT
+#ifdef HAVE_HYPRE_BIGINT
 using HypreId = HYPRE_BigInt;
 #else
 using HypreId = HYPRE_Int;
