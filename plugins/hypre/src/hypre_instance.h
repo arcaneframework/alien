@@ -23,6 +23,6 @@
 namespace Alien::Hypre
 {
 
-void hypre_init_if_needed([[maybe_unused]] MPI_Comm comm);
+void hypre_init_if_needed(MPI_Comm comm);
 
 } // namespace Alien::Hypre
