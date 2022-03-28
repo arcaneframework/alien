@@ -135,7 +135,6 @@ int main(int argc, char** argv)
   }
 
   // Read the optional block size
-  int block_size;
   if (argv[5]) {
     block_size = atoi(argv[5]);
   }
