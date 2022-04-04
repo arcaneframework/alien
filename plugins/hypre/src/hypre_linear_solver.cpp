@@ -298,7 +298,7 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   tsolve = MPI_Wtime() - tsolve;
 
   if (mpi_comm_mng && mpi_comm_mng->commRank() == 0) {
-    std::cerr << "solve = " << tsolve << std::endl;
+    std::cerr << "on " << mpi_comm_mng->commSize() << " solve = " << tsolve << " s, iter = " << m_status.iteration_count << " and res = " << m_status.residual << std::endl;
   }
   m_total_solve_time += tsolve;
   return m_status.succeeded;
