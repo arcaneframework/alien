@@ -94,9 +94,8 @@ void SimpleCSR_to_Hypre_MatrixConverter::_build(const Alien::SimpleCSRMatrix<Arc
   auto values = sourceImpl.internal().getValues();
   auto cols = profile.getCols();
 
-  auto hypre_matrix = targetImpl.internal();
-
-  HYPRE_IJMatrixSetValues(hypre_matrix, localSize, ncols.data(), rows.data(), cols.data(), values.data());
+  // understand why values and cols can have different sizes !
+  targetImpl.setRowsValues(rows, ncols, cols, values.subConstView(0, cols.size()));
 
   targetImpl.assemble();
 }

@@ -18,6 +18,7 @@
 
 #include "hypre_matrix.h"
 #include "hypre_instance.h"
+#include "hypre_vector.h"
 
 #include <alien/hypre/backend.h>
 #include <alien/core/impl/MultiMatrixImpl.h>
@@ -28,6 +29,7 @@
 #include <HYPRE.h>
 // For hypre_*Alloc
 #include <_hypre_utilities.h>
+#include <numeric>
 
 #ifdef HAVE_HYPRE_BIGINT
 using HypreId = HYPRE_BigInt;
@@ -84,58 +86,73 @@ void Matrix::assemble()
 
 void Matrix::setRowValues(int row, Arccore::ConstArrayView<int> cols, Arccore::ConstArrayView<double> values)
 {
-  HYPRE_Int col_size = cols.size();
-  HypreId h_rows = row;
+  int one = 1;
+  auto rows = ArrayView<int>(1, &row);
+  auto ncols = ArrayView<int>(1, &one);
 
-  if (col_size != values.size()) {
-    throw Arccore::FatalErrorException(A_FUNCINFO, "sizes are not equal");
+  return setRowsValues(rows, ncols, cols, values);
+}
+
+void Matrix::setRowsValues(Arccore::ConstArrayView<int> rows, Arccore::ArrayView<int> ncols, Arccore::ConstArrayView<int> cols, Arccore::ConstArrayView<double> values)
+{
+  // First, check parameters consistency
+  if (rows.size() != ncols.size()) {
+    throw Arccore::FatalErrorException(A_FUNCINFO, "rows and n_cols should have the same size");
+  }
+  if (cols.size() != values.size()) {
+    throw Arccore::FatalErrorException(A_FUNCINFO, "cols and values should have the same size");
+  }
+  if (auto g_size = std::accumulate(ncols.begin(), ncols.end(), 0); g_size != cols.size()) {
+    throw Arccore::FatalErrorException(A_FUNCINFO, "Sum(ncols) != cols.size()");
   }
 
-  const HypreId* ids = nullptr;
-  const HYPRE_Real* data = nullptr;
-  HYPRE_Int* ncols;
-  const HypreId* p_rows;
+  // Second, create hypre data accessor
+  const HypreId* hypre_cols = nullptr;
+  const HYPRE_Real* hypre_values = nullptr;
+  HYPRE_Int* hypre_ncols = nullptr;
+  const HypreId* hypre_rows = nullptr;
 
 #ifdef ALIEN_HYPRE_DEVICE
   HYPRE_MemoryLocation memory_location;
   HYPRE_GetMemoryLocation(&memory_location);
   if (memory_location != HYPRE_MEMORY_HOST) {
-    HypreId* d_ids = hypre_CTAlloc(HypreId, cols.size(), memory_location);
+    HypreId* d_cols = hypre_CTAlloc(HypreId, cols.size(), memory_location);
     HYPRE_Real* d_values = hypre_CTAlloc(HYPRE_Real, values.size(), memory_location);
-    HYPRE_Int* d_ncols = hypre_CTAlloc(HYPRE_Int, 1, memory_location);
-    HypreId* d_rows = hypre_CTAlloc(HypreId, 1, memory_location);
+    HYPRE_Int* d_ncols = hypre_CTAlloc(HYPRE_Int, ncols.size(), memory_location);
+    HypreId* d_rows = hypre_CTAlloc(HypreId, rows.size(), memory_location);
 
-    hypre_TMemcpy(d_ids, cols.data(), HypreId, cols.size(), memory_location, HYPRE_MEMORY_HOST);
+    hypre_TMemcpy(d_cols, cols.data(), HypreId, cols.size(), memory_location, HYPRE_MEMORY_HOST);
     hypre_TMemcpy(d_values, values.data(), HYPRE_Real, values.size(), memory_location, HYPRE_MEMORY_HOST);
-    hypre_TMemcpy(d_ncols, &col_size, HYPRE_Int, 1, memory_location, HYPRE_MEMORY_HOST);
-    hypre_TMemcpy(d_rows, &h_rows, HypreId, 1, memory_location, HYPRE_MEMORY_HOST);
+    hypre_TMemcpy(d_ncols, ncols.data(), HYPRE_Int, ncols.size(), memory_location, HYPRE_MEMORY_HOST);
+    hypre_TMemcpy(d_rows, rows.data(), HypreId, rows.size(), memory_location, HYPRE_MEMORY_HOST);
 
-    ids = d_ids;
-    data = d_values;
-    ncols = d_ncols;
-    p_rows = d_rows;
+    hypre_cols = d_cols;
+    hypre_values = d_values;
+    hypre_ncols = d_ncols;
+    hypre_rows = d_rows;
   }
   else
 #endif // ALIEN_HYPRE_DEVICE
   {
-    ids = cols.data();
-    data = values.data();
-    ncols = &col_size;
-    p_rows = &h_rows;
+    hypre_cols = cols.data();
+    hypre_values = values.data();
+    hypre_ncols = ncols.data();
+    hypre_rows = rows.data();
   }
 
-  auto ierr = HYPRE_IJMatrixSetValues(m_hypre, 1, ncols, p_rows, ids, data);
+  // Third call hypre.
+  auto ierr = HYPRE_IJMatrixSetValues(m_hypre, rows.size(), hypre_ncols, hypre_rows, hypre_cols, hypre_values);
 
   if (ierr) {
-    auto msg = Arccore::String::format("Cannot set Hypre Matrix Values for row {0}", row);
+    auto msg = Arccore::String::format("Cannot set Hypre Matrix Values");
     throw Arccore::FatalErrorException(A_FUNCINFO, msg);
   }
 #ifdef ALIEN_HYPRE_DEVICE
   if (memory_location != HYPRE_MEMORY_HOST) {
-    hypre_TFree(p_rows, memory_location);
-    hypre_TFree(ncols, memory_location);
-    hypre_TFree(data, memory_location);
-    hypre_TFree(ids, memory_location);
+    hypre_TFree(hypre_rows, memory_location);
+    hypre_TFree(hypre_ncols, memory_location);
+    hypre_TFree(hypre_values, memory_location);
+    hypre_TFree(hypre_cols, memory_location);
   }
 #endif // ALIEN_HYPRE_DEVICE
 }
