@@ -95,6 +95,8 @@ Matrix::Matrix(const MultiMatrixImpl* multi_impl)
   const auto& col_space = multi_impl->colSpace();
   if (row_space.size() != col_space.size())
     throw Arccore::FatalErrorException("Hypre matrix must be square");
+
+  init();
 }
 
 Matrix::~Matrix()
@@ -103,20 +105,27 @@ Matrix::~Matrix()
     HYPRE_IJMatrixDestroy(m_hypre);
 }
 
-void Matrix::setProfile(int ilower, int iupper,
-                        int jlower, int jupper,
-                        Arccore::ConstArrayView<int> row_sizes)
+void Matrix::init()
+{
+  auto ilower = this->distribution().rowOffset();
+  auto iupper = ilower + this->distribution().localRowSize() - 1;
+  auto ierr = HYPRE_IJMatrixCreate(m_comm, ilower, iupper, ilower, iupper, &m_hypre);
+  ierr |= HYPRE_IJMatrixSetObjectType(m_hypre, HYPRE_PARCSR);
+  ierr |= HYPRE_IJMatrixInitialize(m_hypre);
+
+  if (ierr) {
+    throw Arccore::FatalErrorException(A_FUNCINFO, "Hypre Initialisation failed");
+  }
+}
+
+void Matrix::setProfile(Arccore::ConstArrayView<int> row_sizes)
 {
   if (m_hypre)
     HYPRE_IJMatrixDestroy(m_hypre);
 
-  auto ierr = HYPRE_IJMatrixCreate(m_comm, ilower, iupper, jlower, jupper, &m_hypre);
-  ierr |= HYPRE_IJMatrixSetObjectType(m_hypre, HYPRE_PARCSR);
-  ierr |= HYPRE_IJMatrixInitialize(m_hypre);
-  ierr |= HYPRE_IJMatrixSetRowSizes(m_hypre, row_sizes.data());
-
-  if (ierr) {
-    throw Arccore::FatalErrorException(A_FUNCINFO, "Hypre Initialisation failed");
+  init();
+  if (HYPRE_IJMatrixSetRowSizes(m_hypre, row_sizes.data())) {
+    throw Arccore::FatalErrorException(A_FUNCINFO, "Hypre set profile failed");
   }
 }
 

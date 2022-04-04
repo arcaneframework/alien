@@ -75,11 +75,6 @@ void SimpleCSR_to_Hypre_MatrixConverter::_build(const Alien::SimpleCSRMatrix<Arc
   const auto localSize = profile.getNRow();
   const auto localOffset = dist.rowOffset();
 
-  const auto ilower = localOffset;
-  const auto iupper = localOffset + localSize - 1;
-  const auto jlower = ilower;
-  const auto jupper = iupper;
-
   // Number of columns for each row
   auto ncols = Arccore::UniqueArray<int>(localSize);
   // Global Id for each row
@@ -89,7 +84,7 @@ void SimpleCSR_to_Hypre_MatrixConverter::_build(const Alien::SimpleCSRMatrix<Arc
     rows[irow] = localOffset + irow;
   }
 
-  targetImpl.setProfile(ilower, iupper, jlower, jupper, ncols);
+  targetImpl.setProfile(ncols);
 
   auto values = sourceImpl.internal().getValues();
   auto cols = profile.getCols();
@@ -140,7 +135,7 @@ void SimpleCSR_to_Hypre_MatrixConverter::_buildBlock(const Alien::SimpleCSRMatri
   Arccore::UniqueArray<int>& indices = sizes; // réutilisation du buffer
   indices.resize(std::max(max_line_size, localSize * block_size));
 
-  targetImpl.setProfile(ilower, iupper, jlower, jupper, sizes);
+  targetImpl.setProfile(sizes);
 
   auto cols = profile.getCols();
   auto m_values = matrixInternal.getValues();
