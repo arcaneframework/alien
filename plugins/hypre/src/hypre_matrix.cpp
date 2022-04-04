@@ -39,6 +39,51 @@ using HypreId = HYPRE_Int;
 
 namespace Alien::Hypre
 {
+
+namespace
+{
+  template <typename HypreType>
+  class ArccoreHypreBufferConverter
+  {
+   public:
+    template <typename ArccoreArray> explicit ArccoreHypreBufferConverter(ArccoreArray array)
+    : ptr(array.data())
+    {
+      assert(sizeof(typename ArccoreArray::value_type) == sizeof(HypreType));
+#ifdef ALIEN_HYPRE_DEVICE
+      HYPRE_MemoryLocation memory_location;
+      HYPRE_GetMemoryLocation(&memory_location);
+      if (memory_location != HYPRE_MEMORY_HOST) {
+        // Must copy data from host to device
+        ptr = hypre_CTAlloc(HypreType, array.size(), memory_location);
+        hypre_TMemcpy(ptr, array.data(), HypreType, array.size(), memory_location, HYPRE_MEMORY_HOST);
+      }
+#endif // ALIEN_HYPRE_DEVICE
+    }
+
+    HypreType* get()
+    {
+      return ptr;
+    }
+
+    ~ArccoreHypreBufferConverter()
+    {
+#ifdef ALIEN_HYPRE_DEVICE
+      if (memory_location != HYPRE_MEMORY_HOST) {
+        hypre_TFree(ptr, memory_location);
+      }
+#endif // ALIEN_HYPRE_DEVICE
+    }
+
+   private:
+    HypreType* ptr = nullptr;
+#ifdef ALIEN_HYPRE_DEVICE
+    HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
+#endif // ALIEN_HYPRE_DEVICE
+  };
+
+} // namespace
+
 Matrix::Matrix(const MultiMatrixImpl* multi_impl)
 : IMatrixImpl(multi_impl, AlgebraTraits<BackEnd::tag::hypre>::name())
 {
@@ -107,54 +152,18 @@ void Matrix::setRowsValues(Arccore::ConstArrayView<int> rows, Arccore::ArrayView
   }
 
   // Second, create hypre data accessor
-  const HypreId* hypre_cols = nullptr;
-  const HYPRE_Real* hypre_values = nullptr;
-  HYPRE_Int* hypre_ncols = nullptr;
-  const HypreId* hypre_rows = nullptr;
-
-#ifdef ALIEN_HYPRE_DEVICE
-  HYPRE_MemoryLocation memory_location;
-  HYPRE_GetMemoryLocation(&memory_location);
-  if (memory_location != HYPRE_MEMORY_HOST) {
-    HypreId* d_cols = hypre_CTAlloc(HypreId, cols.size(), memory_location);
-    HYPRE_Real* d_values = hypre_CTAlloc(HYPRE_Real, values.size(), memory_location);
-    HYPRE_Int* d_ncols = hypre_CTAlloc(HYPRE_Int, ncols.size(), memory_location);
-    HypreId* d_rows = hypre_CTAlloc(HypreId, rows.size(), memory_location);
-
-    hypre_TMemcpy(d_cols, cols.data(), HypreId, cols.size(), memory_location, HYPRE_MEMORY_HOST);
-    hypre_TMemcpy(d_values, values.data(), HYPRE_Real, values.size(), memory_location, HYPRE_MEMORY_HOST);
-    hypre_TMemcpy(d_ncols, ncols.data(), HYPRE_Int, ncols.size(), memory_location, HYPRE_MEMORY_HOST);
-    hypre_TMemcpy(d_rows, rows.data(), HypreId, rows.size(), memory_location, HYPRE_MEMORY_HOST);
-
-    hypre_cols = d_cols;
-    hypre_values = d_values;
-    hypre_ncols = d_ncols;
-    hypre_rows = d_rows;
-  }
-  else
-#endif // ALIEN_HYPRE_DEVICE
-  {
-    hypre_cols = cols.data();
-    hypre_values = values.data();
-    hypre_ncols = ncols.data();
-    hypre_rows = rows.data();
-  }
+  auto hypre_cols = ArccoreHypreBufferConverter<const HypreId>(cols);
+  auto hypre_values = ArccoreHypreBufferConverter<const HYPRE_Real>(values);
+  auto hypre_ncols = ArccoreHypreBufferConverter<HYPRE_Int>(ncols);
+  auto hypre_rows = ArccoreHypreBufferConverter<const HypreId>(rows);
 
   // Third call hypre.
-  auto ierr = HYPRE_IJMatrixSetValues(m_hypre, rows.size(), hypre_ncols, hypre_rows, hypre_cols, hypre_values);
+  auto ierr = HYPRE_IJMatrixSetValues(m_hypre, rows.size(), hypre_ncols.get(), hypre_rows.get(), hypre_cols.get(), hypre_values.get());
 
   if (ierr) {
     auto msg = Arccore::String::format("Cannot set Hypre Matrix Values");
     throw Arccore::FatalErrorException(A_FUNCINFO, msg);
   }
-#ifdef ALIEN_HYPRE_DEVICE
-  if (memory_location != HYPRE_MEMORY_HOST) {
-    hypre_TFree(hypre_rows, memory_location);
-    hypre_TFree(hypre_ncols, memory_location);
-    hypre_TFree(hypre_values, memory_location);
-    hypre_TFree(hypre_cols, memory_location);
-  }
-#endif // ALIEN_HYPRE_DEVICE
 }
 
 } // namespace Alien::Hypre
