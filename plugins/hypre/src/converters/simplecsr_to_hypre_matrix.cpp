@@ -80,28 +80,23 @@ void SimpleCSR_to_Hypre_MatrixConverter::_build(const Alien::SimpleCSRMatrix<Arc
   const auto jlower = ilower;
   const auto jupper = iupper;
 
-  alien_debug([&] {
-    cout() << "Matrix range : "
-           << "[" << ilower << ":" << iupper << "]"
-           << "x"
-           << "[" << jlower << ":" << jupper << "]";
-  });
-
-  auto sizes = Arccore::UniqueArray<int>(localSize);
-  for (auto row = 0; row < localSize; ++row) {
-    sizes[row] = profile.getRowSize(row);
+  // Number of columns for each row
+  auto ncols = Arccore::UniqueArray<int>(localSize);
+  // Global Id for each row
+  auto rows = Arccore::UniqueArray<int>(localSize);
+  for (auto irow = 0; irow < localSize; ++irow) {
+    ncols[irow] = profile.getRowSize(irow);
+    rows[irow] = localOffset + irow;
   }
 
-  targetImpl.setProfile(ilower, iupper, jlower, jupper, sizes);
+  targetImpl.setProfile(ilower, iupper, jlower, jupper, ncols);
 
   auto values = sourceImpl.internal().getValues();
   auto cols = profile.getCols();
-  for (auto irow = 0; irow < localSize; ++irow) {
-    const auto row = localOffset + irow;
-    const auto ncols = profile.getRowSize(irow);
-    const auto col_offset = profile.getRowOffset()[irow];
-    targetImpl.setRowValues(row, cols.subConstView(col_offset, ncols), values.subConstView(col_offset, ncols));
-  }
+
+  auto hypre_matrix = targetImpl.internal();
+
+  HYPRE_IJMatrixSetValues(hypre_matrix, localSize, ncols.data(), rows.data(), cols.data(), values.data());
 
   targetImpl.assemble();
 }
