@@ -75,7 +75,7 @@ void DoKDistributorComm::computeCommPlan(const Arccore::Span<Int32> base)
   }
 }
 
-void DoKDistributorComm::computeCommPlan(IReverseIndexer* rev_index)
+void DoKDistributorComm::computeCommPlan(DoKReverseIndexer* rev_index)
 {
   // Now, all processors know the target data distribution.
   Int32 size = 0;
@@ -87,7 +87,7 @@ void DoKDistributorComm::computeCommPlan(IReverseIndexer* rev_index)
   UniqueArray<Int32> snd_rows(size, 0);
   UniqueArray<Int32> snd_cols(size, 0);
 
-  for (IReverseIndexer::Offset offset = 0; offset < size; ++offset) {
+  for (DoKReverseIndexer::Offset offset = 0; offset < size; ++offset) {
     auto ij = (*rev_index)[offset].value();
     snd_rows[offset] = ij.first;
     snd_cols[offset] = ij.second;

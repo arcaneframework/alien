@@ -19,27 +19,35 @@
 #pragma once
 
 #include <unordered_map>
+#include <optional>
 
 #include <alien/utils/Precomp.h>
-
-#include <alien/kernels/dok/IReverseIndexer.h>
 
 namespace Alien
 {
 //! ReverseIndexer based on a HashTable
-class ALIEN_EXPORT DoKReverseIndexer : public IReverseIndexer
+class ALIEN_EXPORT DoKReverseIndexer
 {
  public:
+  typedef std::pair<Arccore::Int32, Arccore::Int32> Index;
+  typedef Arccore::Integer Offset;
+
   DoKReverseIndexer()
   : m_map()
   {}
   virtual ~DoKReverseIndexer() = default;
 
-  std::optional<Index> operator[](Offset off) const override;
+  //! Returns the Index (i,j) corresponding to an offset
+  //! \param off
+  //! \return Index (i,j)
+  std::optional<Index> operator[](Offset off) const;
 
-  void record(Offset off, Index i) override;
+  //! Registers a offset and its corresponding index
+  //! \param off
+  //! \param i
+  void record(Offset off, Index i);
 
-  Int32 size() const override { return static_cast<Int32>(m_map.size()); }
+  Int32 size() const { return static_cast<Int32>(m_map.size()); }
 
  private:
   typedef std::unordered_map<Offset, Index> HashTable;

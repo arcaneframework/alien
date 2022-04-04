@@ -34,7 +34,6 @@ add_library(alien_kernel_dok OBJECT
         DoKMatrixT.h
         DoKReverseIndexer.cc
         DoKReverseIndexer.h
-        IReverseIndexer.h
         BaseDoKDirectMatrixBuilder.cpp
         BaseDoKDirectMatrixBuilder.h
         DoKVector.h DoKVector.cc)

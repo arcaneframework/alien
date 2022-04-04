@@ -21,8 +21,7 @@
 #include <memory>
 
 #include <alien/kernels/dok/DoKLocalMatrixIndexer.h>
-#include <alien/kernels/dok/DoKLocalMatrixIndexer.h>
-#include <alien/kernels/dok/IReverseIndexer.h>
+#include <alien/kernels/dok/DoKReverseIndexer.h>
 
 namespace Alien
 {
@@ -92,7 +91,7 @@ class DoKLocalMatrixT
     }
   }
 
-  IReverseIndexer* getReverseIndexer() const { return m_r_indexer.get(); }
+  DoKReverseIndexer* getReverseIndexer() const { return m_r_indexer.get(); }
 
   ConstArrayView<NNZValue> getValues() const { return m_values; }
 
@@ -134,7 +133,7 @@ class DoKLocalMatrixT
   std::unique_ptr<DoKLocalMatrixIndexer> m_indexer;
   DoKLocalMatrixIndexer::Offset m_offset;
   UniqueArray<NNZValue> m_values;
-  std::unique_ptr<IReverseIndexer> m_r_indexer;
+  std::unique_ptr<DoKReverseIndexer> m_r_indexer;
 };
 
 } // namespace Alien

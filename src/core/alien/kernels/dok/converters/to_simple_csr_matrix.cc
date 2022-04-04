@@ -92,7 +92,7 @@ void DoKtoSimpleCSRMatrixConverter::_buildProfile(const SrcMatrix& src, TgtMatri
   const Integer local_offset = dist.rowOffset();
 
   const DoKLocalMatrixT<Real>& dokMatrix = src.data();
-  IReverseIndexer* dokMatrixRIndexer = dokMatrix.getReverseIndexer();
+  auto dokMatrixRIndexer = dokMatrix.getReverseIndexer();
 
   UniqueArray<Integer> offsets(nproc + 1);
   for (int p = 0; p < nproc; p++) {

@@ -27,7 +27,7 @@
 namespace Alien
 {
 
-class IReverseIndexer;
+class DoKReverseIndexer;
 
 //! Local matrix indexer using HashMap
 class ALIEN_EXPORT DoKLocalMatrixIndexer
@@ -62,7 +62,7 @@ class ALIEN_EXPORT DoKLocalMatrixIndexer
   //! Creates a new indexer, based on offset permutations.
   //! \param perm permutation array, to be filled by this function.
   //! \return new indexer, used to compact matrix
-  IReverseIndexer* sort(Arccore::Array<Renumbering>& perm);
+  Alien::DoKReverseIndexer* sort(Arccore::Array<std::pair<Offset, Offset>>& perm);
 
   DoKLocalMatrixIndexer* clone() const;
 

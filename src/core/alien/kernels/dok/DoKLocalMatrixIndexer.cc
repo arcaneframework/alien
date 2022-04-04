@@ -83,7 +83,7 @@ namespace
   };
 } // namespace
 
-IReverseIndexer*
+DoKReverseIndexer*
 DoKLocalMatrixIndexer::sort(Arccore::Array<DoKLocalMatrixIndexer::Renumbering>& perm)
 {
   std::vector<HashTable::iterator> src(m_data.size());

@@ -33,7 +33,7 @@ class RedistributorCommPlan;
 class ALIEN_EXPORT DoKDistributorComm
 {
  public:
-  typedef IReverseIndexer::Index Index;
+  typedef DoKReverseIndexer::Index Index;
 
  public:
   /*!
@@ -51,7 +51,7 @@ class ALIEN_EXPORT DoKDistributorComm
   DoKDistributorComm(const DoKDistributorComm&& src) = delete;
   DoKDistributorComm& operator=(DoKDistributorComm&& src) = delete;
 
-  void computeCommPlan(IReverseIndexer* rev_index);
+  void computeCommPlan(DoKReverseIndexer* rev_index);
 
   void computeCommPlan(Arccore::Span<Int32>);
 
