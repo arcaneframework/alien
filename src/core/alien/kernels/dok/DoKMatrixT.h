@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <unordered_map>
+
 #include <alien/core/impl/IMatrixImpl.h>
 #include <alien/core/impl/MultiMatrixImpl.h>
 
@@ -38,12 +40,10 @@ namespace Alien
 class DoKMatrix : public IMatrixImpl
 {
  public:
-  typedef Real ValueType;
+  using ValueType = Real;
 
- public:
   explicit DoKMatrix(const MultiMatrixImpl* multi_impl = nullptr)
   : IMatrixImpl(multi_impl, "DoK")
-  , m_data()
   {}
 
   DoKMatrix(const DoKMatrix&) = delete;
@@ -59,7 +59,7 @@ class DoKMatrix : public IMatrixImpl
   //! \return
   bool setNNZ(Int32 row, Int32 col, const ValueType& value)
   {
-    m_data.set(row, col, value);
+    m_map[std::make_pair(row, col)] = value;
     m_need_update = true;
     return true;
   }
@@ -72,7 +72,7 @@ class DoKMatrix : public IMatrixImpl
   ValueType addNNZ(Int32 row, Int32 col, const ValueType& value)
   {
     m_need_update = true;
-    return m_data.add(row, col, value);
+    return m_map[std::make_pair(row, col)] += value;
   }
 
   //! Dispatch matrix elements
@@ -107,6 +107,20 @@ class DoKMatrix : public IMatrixImpl
  private:
   // TODO remove mutable !
   mutable DoKLocalMatrixT<ValueType> m_data;
+  using Index = std::pair<Arccore::Int32, Arccore::Int32>;
+  struct HashKey
+  {
+    size_t operator()(const Index& k) const
+    {
+      size_t seed = 42;
+      std::hash<Integer> h;
+      // Magic numbers from boost::hash_combine
+      seed ^= h(k.first) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+      seed ^= h(k.second) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+      return seed;
+    }
+  };
+  std::unordered_map<std::pair<Arccore::Int32, Arccore::Int32>, Arccore::Real, HashKey> m_map;
   bool m_need_update = true;
 };
 

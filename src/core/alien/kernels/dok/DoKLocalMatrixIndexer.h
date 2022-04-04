@@ -33,7 +33,7 @@ class DoKReverseIndexer;
 class ALIEN_EXPORT DoKLocalMatrixIndexer
 {
  public:
-  typedef Integer Offset;
+  using Offset = Integer;
   typedef std::pair<Offset, Offset> Renumbering;
   typedef std::pair<Int32, Int32> Key;
 
