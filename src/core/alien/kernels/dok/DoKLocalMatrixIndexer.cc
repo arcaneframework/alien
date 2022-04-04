@@ -35,12 +35,7 @@ namespace Alien
 {
 using namespace Arccore;
 
-void DoKLocalMatrixIndexer::associate(Integer i, Integer j, Offset offset)
-{
-  m_data[Key(i, j)] = offset;
-}
-
-std::optional<ILocalMatrixIndexer::Offset>
+std::optional<DoKLocalMatrixIndexer::Offset>
 DoKLocalMatrixIndexer::find(Integer i, Integer j)
 {
   try {
@@ -63,7 +58,7 @@ Integer i, Integer j, DoKLocalMatrixIndexer::Offset& tentative_offset)
   return index->second;
 }
 
-ILocalMatrixIndexer*
+DoKLocalMatrixIndexer*
 DoKLocalMatrixIndexer::clone() const
 {
   return new DoKLocalMatrixIndexer(*this);

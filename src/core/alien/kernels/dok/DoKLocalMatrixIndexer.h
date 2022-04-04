@@ -20,10 +20,9 @@
 
 #include <algorithm>
 #include <unordered_map>
+#include <optional>
 
 #include <alien/utils/Precomp.h>
-
-#include <alien/kernels/dok/ILocalMatrixIndexer.h>
 
 namespace Alien
 {
@@ -31,11 +30,15 @@ namespace Alien
 class IReverseIndexer;
 
 //! Local matrix indexer using HashMap
-class ALIEN_EXPORT DoKLocalMatrixIndexer : public ILocalMatrixIndexer
+class ALIEN_EXPORT DoKLocalMatrixIndexer
 {
  public:
+  typedef Integer Offset;
+  typedef std::pair<Offset, Offset> Renumbering;
+  typedef std::pair<Int32, Int32> Key;
+
   DoKLocalMatrixIndexer() = default;
-  virtual ~DoKLocalMatrixIndexer() = default;
+  ~DoKLocalMatrixIndexer() = default;
 
   DoKLocalMatrixIndexer(const DoKLocalMatrixIndexer& src) = default;
   DoKLocalMatrixIndexer(DoKLocalMatrixIndexer&& src) = default;
@@ -43,13 +46,25 @@ class ALIEN_EXPORT DoKLocalMatrixIndexer : public ILocalMatrixIndexer
   DoKLocalMatrixIndexer& operator=(const DoKLocalMatrixIndexer& src) = default;
   DoKLocalMatrixIndexer& operator=(DoKLocalMatrixIndexer&& src) = default;
 
-  void associate(Integer i, Integer j, Offset offset) override;
-  std::optional<Offset> find(Integer i, Integer j) override;
-  Offset create(Integer i, Integer j, Offset& tentative_offset) override;
+  //! Finds the offset associated with a matrix position (i,j)
+  //! \param i
+  //! \param j
+  //! \return offset if found
+  std::optional<Offset> find(Integer i, Integer j);
 
-  IReverseIndexer* sort(Arccore::Array<Renumbering>& perm) override;
+  //! Creates a new offset for matrix position (i,j)
+  //! \param i
+  //! \param j
+  //! \param tentative_offset hint on what the offset should be
+  //! \return the offset (can be different from tentative_offset)
+  Offset create(Integer i, Integer j, Offset& tentative_offset);
 
-  ILocalMatrixIndexer* clone() const override;
+  //! Creates a new indexer, based on offset permutations.
+  //! \param perm permutation array, to be filled by this function.
+  //! \return new indexer, used to compact matrix
+  IReverseIndexer* sort(Arccore::Array<Renumbering>& perm);
+
+  DoKLocalMatrixIndexer* clone() const;
 
  private:
   class HashKey

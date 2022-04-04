@@ -21,7 +21,7 @@
 #include <memory>
 
 #include <alien/kernels/dok/DoKLocalMatrixIndexer.h>
-#include <alien/kernels/dok/ILocalMatrixIndexer.h>
+#include <alien/kernels/dok/DoKLocalMatrixIndexer.h>
 #include <alien/kernels/dok/IReverseIndexer.h>
 
 namespace Alien
@@ -84,7 +84,7 @@ class DoKLocalMatrixT
   //! Group non-zeros according to indexer
   void compact()
   {
-    UniqueArray<ILocalMatrixIndexer::Renumbering> perm(m_offset);
+    UniqueArray<DoKLocalMatrixIndexer::Renumbering> perm(m_offset);
     m_r_indexer.reset(m_indexer->sort(perm));
     UniqueArray<NNZValue> old_vals = m_values;
     for (auto curr : perm) {
@@ -93,8 +93,6 @@ class DoKLocalMatrixT
   }
 
   IReverseIndexer* getReverseIndexer() const { return m_r_indexer.get(); }
-
-  ILocalMatrixIndexer* getIndexer() const { return m_indexer.get(); }
 
   ConstArrayView<NNZValue> getValues() const { return m_values; }
 
@@ -123,7 +121,7 @@ class DoKLocalMatrixT
     m_values.resize(size);
   }
 
-  ILocalMatrixIndexer::Offset findOffset(Int32 i, Int32 j)
+  DoKLocalMatrixIndexer::Offset findOffset(Int32 i, Int32 j)
   {
     auto offset = m_indexer->create(i, j, m_offset);
     if (offset == (Integer)m_values.size()) {
@@ -133,8 +131,8 @@ class DoKLocalMatrixT
   }
 
  private:
-  std::unique_ptr<ILocalMatrixIndexer> m_indexer;
-  ILocalMatrixIndexer::Offset m_offset;
+  std::unique_ptr<DoKLocalMatrixIndexer> m_indexer;
+  DoKLocalMatrixIndexer::Offset m_offset;
   UniqueArray<NNZValue> m_values;
   std::unique_ptr<IReverseIndexer> m_r_indexer;
 };

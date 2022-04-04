@@ -32,7 +32,6 @@ add_library(alien_kernel_dok OBJECT
         DoKLocalMatrixIndexer.h
         DoKLocalMatrixT.h
         DoKMatrixT.h
-        ILocalMatrixIndexer.h
         DoKReverseIndexer.cc
         DoKReverseIndexer.h
         IReverseIndexer.h
