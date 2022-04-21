@@ -18,76 +18,76 @@
 
 #include "trilinos_matrix.h"
 
+#include <alien/trilinos/backend.h>
 #include <alien/core/impl/MultiMatrixImpl.h>
 #include <alien/data/ISpace.h>
+
 #include <arccore/message_passing_mpi/MpiMessagePassingMng.h>
+
+//#include <HYPRE.h>
 
 namespace Alien::Trilinos
 {
 Matrix::Matrix(const MultiMatrixImpl* multi_impl)
 : IMatrixImpl(multi_impl, AlgebraTraits<BackEnd::tag::trilinos>::name())
-, mtx(nullptr)
+//, m_hypre(nullptr)
 {
-  // Checks that the matrix is square
-  const auto& row_space = multi_impl->rowSpace();
+  std::cout << "ctor";
+  /*const auto& row_space = multi_impl->rowSpace();
   const auto& col_space = multi_impl->colSpace();
   if (row_space.size() != col_space.size())
-    throw Arccore::FatalErrorException("Matrix must be square");
+    throw Arccore::FatalErrorException("Hypre matrix must be square");
 
-  // communicator
-  using Teuchos::Comm;
-  using Teuchos::MpiComm;
-  using Teuchos::RCP;
-  MPI_Comm yourComm = MPI_COMM_WORLD;
-  t_comm = RCP<const Comm<int>>(new MpiComm<int>(yourComm)); // Récupérer le communicateur Arcane ?
+  auto* pm = dynamic_cast<Arccore::MessagePassing::Mpi::MpiMessagePassingMng*>(distribution().parallelMng());
+  m_comm = pm ? (*pm->getMPIComm()) : MPI_COMM_WORLD;*/
 }
 
-void Matrix::setProfile(int numLocalRows, int numGlobalRows, const Arccore::UniqueArray<int>& rowSizes)
+Matrix::~Matrix()
 {
+  /*if (m_hypre)
+    HYPRE_IJMatrixDestroy(m_hypre);*/
+}
 
-  using Teuchos::RCP;
-  using Teuchos::rcp;
+void Matrix::setProfile(int ilower, int iupper,
+                        int jlower, int jupper,
+                        Arccore::ConstArrayView<int> row_sizes)
+{
+ /* if (m_hypre)
+    HYPRE_IJMatrixDestroy(m_hypre);
 
-  //if already exists, dealloc
-  if (mtx)
-    mtx.release();
+  auto ierr = HYPRE_IJMatrixCreate(m_comm, ilower, iupper, jlower, jupper, &m_hypre);
+  ierr |= HYPRE_IJMatrixSetObjectType(m_hypre, HYPRE_PARCSR);
+  ierr |= HYPRE_IJMatrixInitialize(m_hypre);
+  ierr |= HYPRE_IJMatrixSetRowSizes(m_hypre, row_sizes.data());
 
-  // map
-  RCP<const map_type> rowMap = rcp(new map_type(numGlobalRows, numLocalRows, 0, t_comm));
-
-  // matrix
-  Teuchos::Array<size_t> entriesPerRow(numLocalRows);
-  for (size_t i = 0; i < numLocalRows; i++)
-    entriesPerRow[i] = rowSizes[i];
-
-  mtx = rcp(new crs_matrix_type(rowMap, entriesPerRow()));
+  if (ierr) {
+    throw Arccore::FatalErrorException(A_FUNCINFO, "Hypre Initialisation failed");
+  }*/
 }
 
 void Matrix::assemble()
 {
-  mtx->fillComplete();
+  /*auto ierr = HYPRE_IJMatrixAssemble(m_hypre);
+
+  if (ierr) {
+    throw Arccore::FatalErrorException(A_FUNCINFO, "Hypre assembling failed");
+  }*/
 }
 
-void Matrix::setRowValues(int row, Arccore::ConstArrayView<int> columns, Arccore::ConstArrayView<double> values)
+void Matrix::setRowValues(int rows, Arccore::ConstArrayView<int> cols, Arccore::ConstArrayView<double> values)
 {
-  auto ncols = columns.size();
+  /*auto ncols = cols.size();
 
   if (ncols != values.size()) {
     throw Arccore::FatalErrorException(A_FUNCINFO, "sizes are not equal");
   }
 
-  Teuchos::Array<SC> vals(ncols);
-  Teuchos::Array<GO> cols(ncols);
+  auto ierr = HYPRE_IJMatrixSetValues(m_hypre, 1, &ncols, &rows, cols.data(), values.data());
 
-  for (size_t i = 0; i < ncols; i++) {
-    cols[i] = columns[i];
-    vals[i] = values[i];
-  }
-
-  auto valsView = vals();
-  auto colsView = cols();
-
-  mtx->insertGlobalValues(row, ncols, values.data(), cols.data()); // insertLocal possible but needs colmap
+  if (ierr) {
+    auto msg = Arccore::String::format("Cannot set Hypre Matrix Values for row {0}", rows);
+    throw Arccore::FatalErrorException(A_FUNCINFO, msg);
+  }*/
 }
 
 } // namespace Alien::Trilinos

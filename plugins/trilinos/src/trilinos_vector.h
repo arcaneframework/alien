@@ -18,13 +18,9 @@
 
 #pragma once
 
-#include <alien/trilinos/backend.h>
-#include <alien/trilinos/trilinos_config.h>
-
 #include <alien/core/impl/IVectorImpl.h>
-#include <Tpetra_Core.hpp>
-#include <Tpetra_CrsMatrix.hpp>
-#include <Teuchos_DefaultMpiComm.hpp>
+
+//#include <HYPRE_IJ_mv.h>
 
 namespace Alien::Trilinos
 {
@@ -35,20 +31,26 @@ class Vector : public IVectorImpl
  public:
   explicit Vector(const MultiVectorImpl* multi_impl);
 
-  ~Vector() final = default;
+  virtual ~Vector();
 
-  void setProfile(int ilower, int iupper, int numGlobalElts, int numLocalElts);
+ public:
+  void setProfile(int ilower, int iupper);
 
   void setValues(Arccore::ConstArrayView<double> values);
 
   void getValues(Arccore::ArrayView<double> values) const;
 
-  Teuchos::RCP<MV> const& internal() const { return vec; }
-  Teuchos::RCP<MV>& internal() { return vec; }
+  void assemble();
+
+  //HYPRE_IJVector internal() { return m_hypre; }
+
+  //HYPRE_IJVector internal() const { return m_hypre; }
 
  private:
-  Teuchos::RCP<MV> vec;
-  Teuchos::RCP<const Teuchos::Comm<int>> t_comm;
+  //HYPRE_IJVector m_hypre;
+  //MPI_Comm m_comm;
+
+  Arccore::UniqueArray<Arccore::Integer> m_rows;
 };
 
-} // namespace Alien::Trilinos
+} // namespace Alien::Hypre

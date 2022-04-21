@@ -18,24 +18,19 @@
 
 #include "trilinos_vector.h"
 
+#include <alien/trilinos/backend.h>
+
 #include <arccore/message_passing_mpi/MpiMessagePassingMng.h>
+
+//#include <HYPRE.h>
 
 namespace Alien::Trilinos
 {
 Vector::Vector(const MultiVectorImpl* multi_impl)
 : IVectorImpl(multi_impl, AlgebraTraits<BackEnd::tag::trilinos>::name())
-, vec(nullptr)
+//, m_hypre(nullptr)
 {
-
-  // communicator
-  using Teuchos::Comm;
-  using Teuchos::MpiComm;
-  using Teuchos::RCP;
-  MPI_Comm yourComm = MPI_COMM_WORLD;
-  t_comm = RCP<const Comm<int>>(new MpiComm<int>(yourComm)); // Récupérer le communicateur Arcane ?
-
-  // allocate by calling setProfile
-  auto block_size = 1;
+ /* auto block_size = 1;
   const auto* block = this->block();
   if (block)
     block_size *= block->size();
@@ -46,48 +41,62 @@ Vector::Vector(const MultiVectorImpl* multi_impl)
   const auto localSize = distribution().localSize();
   const auto ilower = localOffset * block_size;
   const auto iupper = ilower + localSize * block_size - 1;
-  const int globalSize = distribution().globalSize();
 
-  setProfile(ilower, iupper, globalSize, localSize);
+  auto* pm = dynamic_cast<Arccore::MessagePassing::Mpi::MpiMessagePassingMng*>(distribution().parallelMng());
+  m_comm = pm ? (*pm->getMPIComm()) : MPI_COMM_WORLD;
+
+  setProfile(ilower, iupper);*/
 }
 
-void Vector::setProfile(int ilower, int iupper, int numGlobalElts, int numLocalElts)
+Vector::~Vector()
 {
-  //if already exists, dealloc
-  if (vec)
-    vec.release();
+  /*if (m_hypre)
+    HYPRE_IJVectorDestroy(m_hypre);*/
+}
 
-  // map
-  Teuchos::RCP<const map_type> map = rcp(new map_type(numGlobalElts, numLocalElts, 0, t_comm));
-  vec = rcp(new MV(map, 1, true)); /* map, numvec, init 0)*/
+void Vector::setProfile(int ilower, int iupper)
+{
+ /* if (m_hypre)
+    HYPRE_IJVectorDestroy(m_hypre);
+
+  // -- B Vector --
+  auto ierr = HYPRE_IJVectorCreate(m_comm, ilower, iupper, &m_hypre);
+  ierr |= HYPRE_IJVectorSetObjectType(m_hypre, HYPRE_PARCSR);
+  ierr |= HYPRE_IJVectorInitialize(m_hypre);
+
+  if (ierr) {
+    throw Arccore::FatalErrorException(A_FUNCINFO, "Hypre Initialisation failed");
+  }
+
+  m_rows.resize(iupper - ilower + 1);
+  for (int i = 0; i < m_rows.size(); ++i)
+    m_rows[i] = ilower + i;*/
 }
 
 void Vector::setValues(Arccore::ConstArrayView<double> values)
 {
-  auto ncols = values.size();
+ /* auto ierr = HYPRE_IJVectorSetValues(m_hypre, m_rows.size(), m_rows.data(), values.data());
 
-  // Locally, with Tpetra vector methods
-  for (size_t i = 0; i < ncols; i++) {
-    vec->replaceLocalValue(i, 0, values[i]); /*lclRow, colIdx, value*/
-  }
+  if (ierr) {
+    throw Arccore::FatalErrorException(A_FUNCINFO, "Hypre set values failed");
+  }*/
 }
 
 void Vector::getValues(Arccore::ArrayView<double> values) const
 {
-  // get trilinos data
-  auto trilinos_vec = vec->getDataNonConst(0);
+  /*auto ierr = HYPRE_IJVectorGetValues(m_hypre, m_rows.size(), m_rows.data(), values.data());
 
-  // check sizes
-  auto csr_cols = values.size();
-  auto trilinos_cols = trilinos_vec.size();
-  if (csr_cols != trilinos_cols) {
-    throw Arccore::FatalErrorException(A_FUNCINFO, "sizes are not equal");
-  }
-
-  // update alien data with trilinos data
-  for (size_t i = 0; i < csr_cols; i++) {
-    values[i] = trilinos_vec[i];
-  }
+  if (ierr) {
+    throw Arccore::FatalErrorException(A_FUNCINFO, "Hypre get values failed");
+  }*/
 }
 
-} // namespace Alien::Trilinos
+void Vector::assemble()
+{
+  /*auto ierr = HYPRE_IJVectorAssemble(m_hypre);
+
+  if (ierr) {
+    throw Arccore::FatalErrorException(A_FUNCINFO, "Hypre assembling failed");
+  }*/
+}
+} // namespace Alien::Hypre
