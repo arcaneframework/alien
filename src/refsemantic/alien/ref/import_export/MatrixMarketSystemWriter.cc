@@ -62,7 +62,6 @@ void MatrixMarketSystemWriter::dump(Matrix const& A)
   const SimpleCSRMatrix<Real>& csr = A.impl()->get<BackEnd::tag::simplecsr>();
   const SimpleCSRMatrix<Real>::ProfileType& profile = csr.getProfile();
   int nrows = profile.getNRows();
-  int blk_size = 1;
   int nnz = profile.getNnz();
 
   const int* cols = profile.cols();
