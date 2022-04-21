@@ -352,19 +352,20 @@ class CSRStructInfo
     return bande_size;
   }
 
-  Integer computeMaxRowSize() const {
-    m_max_row_size = 0 ;
-    for(int irow=0;irow<m_nrow;++irow)
-      m_max_row_size = std::max(m_max_row_size,m_row_offset[irow+1]-m_row_offset[irow]) ;
-    return m_max_row_size ;
+  Integer computeMaxRowSize() const
+  {
+    m_max_row_size = 0;
+    for (int irow = 0; irow < m_nrow; ++irow)
+      m_max_row_size = std::max(m_max_row_size, m_row_offset[irow + 1] - m_row_offset[irow]);
+    return m_max_row_size;
   }
 
-  Integer getMaxRowSize() const {
-    if(m_max_row_size==-1)
-      computeMaxRowSize() ;
-    return m_max_row_size ;
+  Integer getMaxRowSize() const
+  {
+    if (m_max_row_size == -1)
+      computeMaxRowSize();
+    return m_max_row_size;
   }
-
 
   void copy(const CSRStructInfo& profile)
   {
