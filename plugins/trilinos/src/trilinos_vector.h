@@ -19,8 +19,9 @@
 #pragma once
 
 #include <alien/core/impl/IVectorImpl.h>
-
-//#include <HYPRE_IJ_mv.h>
+#include <Tpetra_Core.hpp>
+#include <Tpetra_CrsMatrix.hpp> // en inclure moins ?
+#include <Teuchos_DefaultMpiComm.hpp> // wrapper for MPI_Comm
 
 namespace Alien::Trilinos
 {
@@ -28,13 +29,20 @@ class VectorInternal;
 
 class Vector : public IVectorImpl
 {
+  // typedefs
+  typedef Kokkos::Compat::KokkosOpenMPWrapperNode Node;
+  typedef double                                          SC;
+  typedef typename Tpetra::Map<>::local_ordinal_type      LO;
+  typedef typename Tpetra::Map<>::global_ordinal_type     GO;
+  typedef Tpetra::Vector<SC, LO, GO, Node>                vec_type;
+
  public:
   explicit Vector(const MultiVectorImpl* multi_impl);
 
   virtual ~Vector();
 
  public:
-  void setProfile(int ilower, int iupper);
+  void setProfile(int ilower, int iupper,int numGlobalElts, int numLocalElts);
 
   void setValues(Arccore::ConstArrayView<double> values);
 
@@ -43,14 +51,17 @@ class Vector : public IVectorImpl
   void assemble();
 
   //HYPRE_IJVector internal() { return m_hypre; }
-
   //HYPRE_IJVector internal() const { return m_hypre; }
 
+  Teuchos::RCP<vec_type> internal() const { return *vec; }
+
  private:
+  std::unique_ptr<Teuchos::RCP<vec_type>> vec;
+  Teuchos::RCP<const Teuchos::Comm<int>> t_comm;
   //HYPRE_IJVector m_hypre;
   //MPI_Comm m_comm;
 
-  Arccore::UniqueArray<Arccore::Integer> m_rows;
+  //Arccore::UniqueArray<Arccore::Integer> m_rows;
 };
 
 } // namespace Alien::Hypre

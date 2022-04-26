@@ -30,7 +30,7 @@ Matrix::Matrix(const MultiMatrixImpl* multi_impl)
 : IMatrixImpl(multi_impl, AlgebraTraits<BackEnd::tag::trilinos>::name())
 , mtx(nullptr)
 {
-  std::cout << " -------------------------- >>> ctor !!! " << std::endl;
+  std::cout << " -------------------------- >>> MTX ctor !!! " << std::endl;
 
   // Checks that the matrix is square
   const auto& row_space = multi_impl->rowSpace();
@@ -79,9 +79,7 @@ void Matrix::setProfile(int ilower, int iupper,
   for(size_t i = 0; i < numLocalRows; i++)
     entriesPerRow[i] = rowSizes[i];
 
-  RCP<crs_matrix_type> A (new crs_matrix_type (rowMap, entriesPerRow()));
   mtx = std::make_unique<Teuchos::RCP<crs_matrix_type>> (new crs_matrix_type (rowMap, entriesPerRow()));
-
 
 }
 
@@ -100,7 +98,7 @@ void Matrix::setRowValues(int row, Arccore::ConstArrayView<int> columns, Arccore
     throw Arccore::FatalErrorException(A_FUNCINFO, "sizes are not equal");
   }
 
-  std::cout << "row : " << row << std::endl;
+  //std::cout << "row : " << row << std::endl;
 
   Teuchos::Array<SC> vals(ncols);
   Teuchos::Array<GO> cols(ncols);

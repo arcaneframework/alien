@@ -28,22 +28,27 @@
 class SimpleCSR_to_Trilinos_VectorConverter : public Alien::IVectorConverter
 {
  public:
-  SimpleCSR_to_Trilinos_VectorConverter() = default;
+  SimpleCSR_to_Trilinos_VectorConverter() {}
 
-  ~SimpleCSR_to_Trilinos_VectorConverter() final = default;
+  virtual ~SimpleCSR_to_Trilinos_VectorConverter() {}
 
-  Alien::BackEndId sourceBackend() const final { return Alien::AlgebraTraits<Alien::BackEnd::tag::simplecsr>::name(); }
+ public:
+  Alien::BackEndId sourceBackend() const { return Alien::AlgebraTraits<Alien::BackEnd::tag::simplecsr>::name(); }
 
-  Alien::BackEndId targetBackend() const final { return Alien::AlgebraTraits<Alien::BackEnd::tag::trilinos>::name(); }
+  Alien::BackEndId targetBackend() const { return Alien::AlgebraTraits<Alien::BackEnd::tag::trilinos>::name(); }
 
-  void convert(const Alien::IVectorImpl* sourceImpl, Alien::IVectorImpl* targetImpl) const final;
+  void convert(const Alien::IVectorImpl* sourceImpl, Alien::IVectorImpl* targetImpl) const;
 };
 
 void SimpleCSR_to_Trilinos_VectorConverter::convert(const Alien::IVectorImpl* sourceImpl,
-                                                    Alien::IVectorImpl* targetImpl) const
+                                                 Alien::IVectorImpl* targetImpl) const
 {
   const auto& v = cast<Alien::SimpleCSRVector<Arccore::Real>>(sourceImpl, sourceBackend());
   auto& v2 = cast<Alien::Trilinos::Vector>(targetImpl, targetBackend());
+
+  std:: cout << "Converting Alien::SimpleCSRVector: " << &v << " to Trilinos::Vector " << &v2 << std::endl;
+
+
 
   auto block_size = 1;
   const auto* block = v2.block();
@@ -52,11 +57,32 @@ void SimpleCSR_to_Trilinos_VectorConverter::convert(const Alien::IVectorImpl* so
   else if (v2.vblock())
     throw Arccore::FatalErrorException(A_FUNCINFO, "Not implemented yet");
 
-  // get data from source (Alien)
-  auto values = v.values();
+  std:: cout << "block_size : " << block_size << std::endl;
 
-  // write into dest (Trilinos)
+  // destination
+  const auto localOffset = v2.distribution().offset();
+  const auto localSize = v2.distribution().localSize();
+  const auto ilower = localOffset * block_size;
+  const auto iupper = ilower + localSize * block_size - 1;
+
+  // source
+  const auto& dist = sourceImpl->distribution();
+  const int globalSize = dist.globalSize();  //dist.rowSpace().size() ;
+
+
+  std:: cout  << "Vector range : "
+           << "[" << ilower << ":" << iupper << "]"
+           << "LocalSize : " << localSize
+           << "GlobalSize : " << globalSize
+           << std::endl;
+
+  v2.setProfile(ilower, iupper, localSize, globalSize);
+
+  /*auto values = v.values();
+
   v2.setValues(values);
+
+//  v2.assemble();*/
 }
 
 REGISTER_VECTOR_CONVERTER(SimpleCSR_to_Trilinos_VectorConverter);
