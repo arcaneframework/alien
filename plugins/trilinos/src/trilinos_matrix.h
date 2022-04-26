@@ -20,21 +20,32 @@
 
 #include <alien/core/impl/IMatrixImpl.h>
 
-//#include <HYPRE_IJ_mv.h>
+#include <Tpetra_CrsMatrix.hpp>
+#include <Tpetra_Core.hpp>
+#include <Teuchos_ParameterXMLFileReader.hpp>
+#include <Teuchos_TimeMonitor.hpp>
+#include <Teuchos_DefaultMpiComm.hpp> // wrapper for MPI_Comm
 
 namespace Alien::Trilinos
 {
 class Matrix : public IMatrixImpl
 {
+  // typedefs
+  typedef Kokkos::Compat::KokkosOpenMPWrapperNode Node;
+  typedef double                                          SC;
+  typedef typename Tpetra::Map<>::local_ordinal_type      LO;
+  typedef typename Tpetra::Map<>::global_ordinal_type     GO;
+  typedef Tpetra::CrsMatrix<SC,LO,GO,Node>                crs_matrix_type;
+
  public:
   explicit Matrix(const MultiMatrixImpl* multi_impl);
 
   virtual ~Matrix();
 
- public:
   void setProfile(int ilower, int iupper,
-                  int jlower, int jupper,
-                  Arccore::ConstArrayView<int> row_sizes);
+                  int numLocalRows,
+                  int numGlobalRows,
+                  const Arccore::UniqueArray<int> & rowSizes);
 
   void setRowValues(int rows,
                     Arccore::ConstArrayView<int> cols,
@@ -42,11 +53,11 @@ class Matrix : public IMatrixImpl
 
   void assemble();
 
-  //HYPRE_IJMatrix internal() const { return m_hypre; }
+  Teuchos::RCP<crs_matrix_type> internal() const { return *mtx; }
 
  private:
-  //HYPRE_IJMatrix m_hypre;
-  //MPI_Comm m_comm;
+  std::unique_ptr<Teuchos::RCP<crs_matrix_type>> mtx;
+  Teuchos::RCP<const Teuchos::Comm<int>> t_comm;
 };
 
 } // namespace Alien::Trilinos
