@@ -28,8 +28,17 @@ namespace Alien::Trilinos
 {
 Vector::Vector(const MultiVectorImpl* multi_impl)
 : IVectorImpl(multi_impl, AlgebraTraits<BackEnd::tag::trilinos>::name())
-//, m_hypre(nullptr)
+, vec(nullptr)
 {
+  std::cout << " -------------------------- >>> VEC ctor !!! " << std::endl;
+
+  // communicator
+  using Teuchos::RCP;
+  using Teuchos::Comm;
+  using Teuchos::MpiComm;
+  MPI_Comm yourComm = MPI_COMM_WORLD;
+  t_comm = RCP<const Comm<int>>(new MpiComm<int> (yourComm)); // Récupérer le communicateur Arcane ?
+
  /* auto block_size = 1;
   const auto* block = this->block();
   if (block)
@@ -50,53 +59,52 @@ Vector::Vector(const MultiVectorImpl* multi_impl)
 
 Vector::~Vector()
 {
-  /*if (m_hypre)
-    HYPRE_IJVectorDestroy(m_hypre);*/
+  if(vec)
+    vec.release();
 }
 
-void Vector::setProfile(int ilower, int iupper)
+void Vector::setProfile(int ilower, int iupper, int numGlobalElts, int numLocalElts)
 {
- /* if (m_hypre)
-    HYPRE_IJVectorDestroy(m_hypre);
 
-  // -- B Vector --
-  auto ierr = HYPRE_IJVectorCreate(m_comm, ilower, iupper, &m_hypre);
-  ierr |= HYPRE_IJVectorSetObjectType(m_hypre, HYPRE_PARCSR);
-  ierr |= HYPRE_IJVectorInitialize(m_hypre);
+  using Teuchos::RCP;
+  using Teuchos::rcp;
+  typedef Kokkos::Compat::KokkosOpenMPWrapperNode Node;
+  typedef typename Tpetra::Map<>::local_ordinal_type      LO;
+  typedef typename Tpetra::Map<>::global_ordinal_type     GO;
+  typedef Tpetra::Map<LO,GO,Node>                         map_type;
 
-  if (ierr) {
-    throw Arccore::FatalErrorException(A_FUNCINFO, "Hypre Initialisation failed");
-  }
+  typedef Tpetra::Vector<SC, LO, GO, Node>                vec_type;
 
-  m_rows.resize(iupper - ilower + 1);
-  for (int i = 0; i < m_rows.size(); ++i)
-    m_rows[i] = ilower + i;*/
+  //if already exists, dealloc
+  if (vec)
+    vec.release();
+
+  // map
+  RCP<const map_type> map = rcp (new map_type (numGlobalElts,numLocalElts,0,t_comm));
+  vec = std::make_unique<Teuchos::RCP<vec_type>> (new vec_type (map, numLocalElts));
+
 }
 
 void Vector::setValues(Arccore::ConstArrayView<double> values)
 {
- /* auto ierr = HYPRE_IJVectorSetValues(m_hypre, m_rows.size(), m_rows.data(), values.data());
-
-  if (ierr) {
-    throw Arccore::FatalErrorException(A_FUNCINFO, "Hypre set values failed");
-  }*/
+  auto ncols = values.size();
+  for(size_t i = 0; i < ncols; i++) {
+    (*vec)->replaceLocalValue(i,values[i]);
+  }
 }
 
 void Vector::getValues(Arccore::ArrayView<double> values) const
 {
-  /*auto ierr = HYPRE_IJVectorGetValues(m_hypre, m_rows.size(), m_rows.data(), values.data());
-
-  if (ierr) {
-    throw Arccore::FatalErrorException(A_FUNCINFO, "Hypre get values failed");
-  }*/
+  auto data = (*vec)->getDataNonConst();
+  auto ncols = values.size();
+  for(size_t i = 0; i < ncols; i++) {
+    values[i]=data[i];
+  }
 }
 
 void Vector::assemble()
 {
-  /*auto ierr = HYPRE_IJVectorAssemble(m_hypre);
-
-  if (ierr) {
-    throw Arccore::FatalErrorException(A_FUNCINFO, "Hypre assembling failed");
-  }*/
+  // not needed ?
 }
+
 } // namespace Alien::Hypre
