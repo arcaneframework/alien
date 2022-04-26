@@ -24,70 +24,98 @@
 
 #include <arccore/message_passing_mpi/MpiMessagePassingMng.h>
 
-//#include <HYPRE.h>
-
 namespace Alien::Trilinos
 {
 Matrix::Matrix(const MultiMatrixImpl* multi_impl)
 : IMatrixImpl(multi_impl, AlgebraTraits<BackEnd::tag::trilinos>::name())
-//, m_hypre(nullptr)
+, mtx(nullptr)
 {
-  std::cout << "ctor";
-  /*const auto& row_space = multi_impl->rowSpace();
+  std::cout << " -------------------------- >>> ctor !!! " << std::endl;
+
+  // Checks that the matrix is square
+  const auto& row_space = multi_impl->rowSpace();
   const auto& col_space = multi_impl->colSpace();
   if (row_space.size() != col_space.size())
-    throw Arccore::FatalErrorException("Hypre matrix must be square");
+    throw Arccore::FatalErrorException("Matrix must be square");
 
-  auto* pm = dynamic_cast<Arccore::MessagePassing::Mpi::MpiMessagePassingMng*>(distribution().parallelMng());
-  m_comm = pm ? (*pm->getMPIComm()) : MPI_COMM_WORLD;*/
+  // communicator
+  using Teuchos::RCP;
+  using Teuchos::Comm;
+  using Teuchos::MpiComm;
+  MPI_Comm yourComm = MPI_COMM_WORLD;
+  t_comm = RCP<const Comm<int>>(new MpiComm<int> (yourComm)); // Récupérer le communicateur Arcane ?
+
 }
 
 Matrix::~Matrix()
 {
-  /*if (m_hypre)
-    HYPRE_IJMatrixDestroy(m_hypre);*/
+  if (mtx)
+    mtx.release();
 }
 
 void Matrix::setProfile(int ilower, int iupper,
-                        int jlower, int jupper,
-                        Arccore::ConstArrayView<int> row_sizes)
+                        int numLocalRows,
+                        int numGlobalRows,
+                        const Arccore::UniqueArray<int> & rowSizes)
 {
- /* if (m_hypre)
-    HYPRE_IJMatrixDestroy(m_hypre);
+  std::cout << " -------------------------- >>> set profile !!! " << std::endl;
 
-  auto ierr = HYPRE_IJMatrixCreate(m_comm, ilower, iupper, jlower, jupper, &m_hypre);
-  ierr |= HYPRE_IJMatrixSetObjectType(m_hypre, HYPRE_PARCSR);
-  ierr |= HYPRE_IJMatrixInitialize(m_hypre);
-  ierr |= HYPRE_IJMatrixSetRowSizes(m_hypre, row_sizes.data());
+  using Teuchos::RCP;
+  using Teuchos::rcp;
+  typedef Kokkos::Compat::KokkosOpenMPWrapperNode Node;
+  typedef typename Tpetra::Map<>::local_ordinal_type      LO;
+  typedef typename Tpetra::Map<>::global_ordinal_type     GO;
+  typedef Tpetra::Map<LO,GO,Node>                         map_type;
 
-  if (ierr) {
-    throw Arccore::FatalErrorException(A_FUNCINFO, "Hypre Initialisation failed");
-  }*/
+  //if already exists, dealloc
+  if (mtx)
+    mtx.release();
+
+  // map
+  RCP<const map_type> rowMap = rcp (new map_type (numGlobalRows,numLocalRows,0,t_comm));
+
+  // matrix
+  Teuchos::Array<size_t> entriesPerRow(numLocalRows);
+  for(size_t i = 0; i < numLocalRows; i++)
+    entriesPerRow[i] = rowSizes[i];
+
+  RCP<crs_matrix_type> A (new crs_matrix_type (rowMap, entriesPerRow()));
+  mtx = std::make_unique<Teuchos::RCP<crs_matrix_type>> (new crs_matrix_type (rowMap, entriesPerRow()));
+
+
 }
 
 void Matrix::assemble()
 {
-  /*auto ierr = HYPRE_IJMatrixAssemble(m_hypre);
+  (*mtx)->fillComplete();
+  std::cout << "Fill Completed ! " << std::endl;
 
-  if (ierr) {
-    throw Arccore::FatalErrorException(A_FUNCINFO, "Hypre assembling failed");
-  }*/
 }
 
-void Matrix::setRowValues(int rows, Arccore::ConstArrayView<int> cols, Arccore::ConstArrayView<double> values)
+void Matrix::setRowValues(int row, Arccore::ConstArrayView<int> columns, Arccore::ConstArrayView<double> values)
 {
-  /*auto ncols = cols.size();
+  auto ncols = columns.size();
 
   if (ncols != values.size()) {
     throw Arccore::FatalErrorException(A_FUNCINFO, "sizes are not equal");
   }
 
-  auto ierr = HYPRE_IJMatrixSetValues(m_hypre, 1, &ncols, &rows, cols.data(), values.data());
+  std::cout << "row : " << row << std::endl;
 
-  if (ierr) {
-    auto msg = Arccore::String::format("Cannot set Hypre Matrix Values for row {0}", rows);
-    throw Arccore::FatalErrorException(A_FUNCINFO, msg);
-  }*/
+  Teuchos::Array<SC> vals(ncols);
+  Teuchos::Array<GO> cols(ncols);
+
+  for(size_t i = 0; i < ncols; i++) {
+    cols[i] = columns[i];
+    vals[i] = values[i];
+  }
+
+  auto valsView = vals();
+  auto colsView = cols();
+
+  (*mtx)->insertGlobalValues(row, ncols, values.data(), cols.data()/*reinterpret_cast<const long long int*>(columns.data())*/); // insertLocal possible but needs colmap
+  std::cout << "row : " << row << " inserted ! " << std::endl;
+
 }
 
 } // namespace Alien::Trilinos

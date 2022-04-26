@@ -18,112 +18,33 @@
 
 #include "trilinos_linear_solver.h"
 
+/*#include <HYPRE_parcsr_ls.h>
+#include <HYPRE_parcsr_mv.h>*/
+
 namespace Alien
 {
 // Compile TrilinosLinearSolver.
 template class ALIEN_TRILINOS_EXPORT LinearSolver<BackEnd::tag::trilinos>;
+
 } // namespace Alien
 
 namespace Alien::Trilinos
 {
+void InternalLinearSolver::checkError(
+const Arccore::String& msg, int ierr, int skipError) const
+{
+/*  if (ierr != 0 and (ierr & ~skipError) != 0) {
+    char hypre_error_msg[256];
+    HYPRE_DescribeError(ierr, hypre_error_msg);
+    alien_fatal([&] {
+      cout() << msg << " failed : " << hypre_error_msg << "[code=" << ierr << "]";
+    });
+  }*/
+}
 
 bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
 {
-  using Teuchos::ParameterList;
-  using Teuchos::RCP;
-  using Teuchos::rcp;
-
-  // Create the linear problem instance.
-  Belos::LinearProblem<SC, MV, OP> problem(A.internal(), x.internal(), b.internal());
-  Teuchos::RCP<prec_type> M;
-
-  // Ifpack2 preconditioner.
-  switch (m_options.preconditioner()) {
-  case OptionTypes::Relaxation: {
-    M = Ifpack2::Factory::create<row_matrix_type>("RELAXATION", A.internal());
-    if (M.is_null()) {
-      std::cerr << "Failed to create Ifpack2 preconditioner !" << std::endl;
-      return -1;
-    }
-    M->initialize();
-    M->compute();
-  }
-    problem.setRightPrec(M);
-    break;
-  case OptionTypes::NoPC:
-    break;
-  default:
-    alien_fatal([this] { cout() << "Undefined IFPACK2 preconditioner option"; });
-    break;
-  }
-
-  // Set the problem
-  if (!problem.setProblem()) {
-    std::cout << std::endl
-              << "ERROR:  Belos::LinearProblem failed to set up correctly !" << std::endl;
-    return -1;
-  }
-
-  // Create the solver
-  ParameterList belosList;
-  belosList.set("Maximum Iterations", m_options.numIterationsMax());
-  belosList.set("Convergence Tolerance", m_options.stopCriteriaValue());
-
-  std::unique_ptr<Belos::SolverManager<SC, MV, OP>> solver;
-
-  // allocate solver
-  switch (m_options.solver()) {
-  case OptionTypes::CG:
-    solver = std::make_unique<Belos::BlockCGSolMgr<SC, MV, OP>>(rcpFromRef(problem), rcpFromRef(belosList));
-    break;
-  case OptionTypes::GMRES:
-    solver = std::make_unique<Belos::BlockGmresSolMgr<SC, MV, OP>>(rcpFromRef(problem), rcpFromRef(belosList));
-    break;
-  case OptionTypes::BICGSTAB:
-    solver = std::make_unique<Belos::BiCGStabSolMgr<SC, MV, OP>>(rcpFromRef(problem), rcpFromRef(belosList));
-    break;
-  default:
-    alien_fatal([this] {
-      cout() << "Undefined solver option";
-    });
-    break;
-  }
-
-  // Init timer
-  double tic = MPI_Wtime();
-  Belos::ReturnType ret = solver->solve();
-  double toc = MPI_Wtime();
-  double sec = toc - tic;
-
-  // Check
-  if (ret == Belos::Converged) {
-    // Get solver and timing infos
-    const int numIters = solver->getNumIters();
-    double itPerSec = numIters / sec;
-
-    // Print
-    if (int rank = A.internal()->getComm()->getRank(); rank == 0) {
-      std::cout << "Belos Solver has converged." << std::endl;
-      kokkos_node_verbose();
-      std::cout << "numIters : " << numIters << std::endl;
-      std::cout << "achieved tol : " << solver->achievedTol() << std::endl;
-      std::cout << "Execution time [s]: " << sec << std::endl;
-      std::cout << "Iterations per second : " << itPerSec << std::endl;
-    }
-
-    // update solver infos
-    /*m_status.residual = residual_norm;*/
-    m_status.iteration_count = numIters;
-    m_status.succeeded = true;
-    m_total_iter_num += m_status.iteration_count;
-    ++m_solve_num;
-    m_total_solve_time += sec;
-  }
-  else if (ret == Belos::Unconverged) {
-    m_status.succeeded = false;
-    std::cout << "Belos Solver did not converge !" << std::endl;
-  }
-
+  std::cout << "call to solver : " ;
   return m_status.succeeded;
 }
 

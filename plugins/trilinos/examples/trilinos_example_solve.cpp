@@ -16,16 +16,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 #include <arccore/message_passing_mpi/StandaloneMpiMessagePassingMng.h>
 
-#include <alien/move/AlienMoveSemantic.h>
-#include <alien/move/handlers/scalar/VectorWriter.h>
-#include <alien/move/data/VectorData.h>
+//#include <alien/move/AlienMoveSemantic.h>
+#include </home/mollern/Documents/Dev/cea-ifpen/alien/src/movesemantic/alien/move/AlienMoveSemantic.h>
+//#include <alien/move/handlers/scalar/VectorWriter.h>
+#include </home/mollern/Documents/Dev/cea-ifpen/alien/src/movesemantic/alien/move/handlers/scalar/VectorWriter.h>
+#include </home/mollern/Documents/Dev/cea-ifpen/alien/src/movesemantic/alien/move/data/VectorData.h>
+#include <alien/kernels/simple_csr/algebra/SimpleCSRLinearAlgebra.h>
 
 #include <alien/trilinos/backend.h>
 #include <alien/trilinos/options.h>
 
 #include <alien/core/backend/IMatrixConverter.h>
+#include <alien/core/backend/MatrixConverterRegisterer.h>
+#include <alien/kernels/simple_csr/SimpleCSRMatrix.h>
 #include <alien/kernels/simple_csr/SimpleCSRBackEnd.h>
 
 int test(const Alien::Trilinos::OptionTypes::eSolver& solv, const Alien::Trilinos::OptionTypes::ePreconditioner& prec, const std::string& mat_filename, const std::string& vec_filename)
@@ -34,9 +40,9 @@ int test(const Alien::Trilinos::OptionTypes::eSolver& solv, const Alien::Trilino
   auto* tm = Arccore::arccoreCreateDefaultTraceMng();
   Alien::setTraceMng(tm);
 
-  if (pm->commRank() == 0)
-    tm->info() << "Read matrix file : " << mat_filename;
+  tm->info() << "Read matrix file : " << mat_filename;
   auto A = Alien::Move::readFromMatrixMarket(pm, mat_filename);
+
 
   /**
 	 *  Vecteur xe (ones)
@@ -54,18 +60,15 @@ int test(const Alien::Trilinos::OptionTypes::eSolver& solv, const Alien::Trilino
   /**
 	 *  Vecteur b
 	 *************/
-  //Alien::SimpleCSRLinearAlgebra algebra;
-  Alien::Trilinos::LinearAlgebra algebra;
+  Alien::SimpleCSRLinearAlgebra algebra;
   Alien::Move::VectorData b(A.rowSpace(), A.distribution().rowDistribution());
 
   if (vec_filename != "") {
-    if (pm->commRank() == 0)
-      tm->info() << "Read vector file : " << vec_filename;
+    tm->info() << "Read vector file : " << vec_filename;
     b = Alien::Move::readFromMatrixMarket(A.distribution().rowDistribution(), vec_filename);
   }
   else {
-    if (pm->commRank() == 0)
-      tm->info() << "Vector b is computed  : b = A * xe";
+    tm->info() << "Vector b is computed  : b = A * xe";
     algebra.mult(A, xe, b);
   }
 
@@ -84,21 +87,19 @@ int test(const Alien::Trilinos::OptionTypes::eSolver& solv, const Alien::Trilino
 	 *  BENCH
 	 ********************************************/
 
-  int nbRuns = 5;
+  int nbRuns = 1;
   for (int i = 0; i < nbRuns; i++) {
-    if (pm->commRank() == 0) {
-      std::cout << "\n************************************************** " << std::endl;
-      std::cout << "*                   RUN  # " << i << "                     * " << std::endl;
-      std::cout << "************************************************** \n"
-                << std::endl;
-    }
+    std::cout << "\n************************************************** " << std::endl;
+    std::cout << "*                   RUN  # " << i << "                     * " << std::endl;
+    std::cout << "************************************************** \n"
+              << std::endl;
 
     // init vector x with zeros
-    Alien::Move::LocalVectorWriter writer(std::move(x));
+    /*Alien::Move::VectorWriter writer(std::move(x));
     for (int i = 0; i < writer.size(); i++) {
       writer[i] = 0;
     }
-    x = writer.release();
+    x = writer.release();*/
 
     // solve
     solver.solve(A, b, x);
@@ -109,12 +110,9 @@ int test(const Alien::Trilinos::OptionTypes::eSolver& solv, const Alien::Trilino
     algebra.axpy(-1., b, r);
     auto norm_r = algebra.norm2(r);
     auto norm_b = algebra.norm2(b);
-
-    if (pm->commRank() == 0) {
-      std::cout << "||Ax-b|| = " << norm_r << std::endl;
-      std::cout << "||b|| = " << norm_b << std::endl;
-      std::cout << "||Ax-b||/||b|| = " << norm_r / norm_b << std::endl;
-    }
+    tm->info() << " => ||Ax-b|| = " << norm_r;
+    tm->info() << " => ||b|| = " << norm_b;
+    tm->info() << " => ||Ax-b||/||b|| = " << norm_r / norm_b;
 
     /* Check results :
      * min(x), max(x), min|x|, max|x|
@@ -122,7 +120,7 @@ int test(const Alien::Trilinos::OptionTypes::eSolver& solv, const Alien::Trilino
      * rerr_max :||Ax-b||_{inf} / ||b|| _{inf}
      */
 
-    /* std::cout << "max(x) : " << vecMax(x) << std::endl;
+   /* std::cout << "max(x) : " << vecMax(x) << std::endl;
     std::cout << "min(x) : " << vecMin(x) << std::endl;
     std::cout << "maxAbs(x) : " << vecMaxAbs(x) << std::endl;
     std::cout << "minAbs(x) : " << vecMinAbs(x) << std::endl;
@@ -142,27 +140,22 @@ int main(int argc, char** argv)
 
   if (argc < 4) {
     std::cerr << "Usage : ./example_trilinos [solver] [preconditioner] [matrix] [vector] \n"
-              << "  - solver : (Relaxation|*) \n"
+              << "  - solver : (CG|*) \n"
               << "  - preconditioner : (Relaxation|NoPC) \n"
               << "  - MTX matrix file \n"
               << "  - optional MTX vector file \n";
     return -1;
   }
 
+
   // Read the solver
   Alien::Trilinos::OptionTypes::eSolver solver;
   if (std::string(argv[1]) == "CG") {
     solver = Alien::Trilinos::OptionTypes::CG;
   }
-  else if (std::string(argv[1]) == "GMRES") {
-    solver = Alien::Trilinos::OptionTypes::GMRES;
-  }
-  else if (std::string(argv[1]) == "BICGSTAB") {
-    solver = Alien::Trilinos::OptionTypes::BICGSTAB;
-  }
   else {
     std::cerr << "Unrecognized solver : " << argv[1] << "\n"
-              << "  - solver list : (CG|GMRES|BICGSTAB) \n";
+              << "  - solver list : (CG|*toBeCompleted) \n";
     return -1;
   }
 

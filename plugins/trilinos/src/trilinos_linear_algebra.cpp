@@ -19,6 +19,11 @@
 #include "trilinos_matrix.h"
 #include "trilinos_vector.h"
 
+#include <cmath>
+
+
+
+#include <arccore/message_passing_mpi/MpiMessagePassingMng.h>
 #include <arccore/base/NotImplementedException.h>
 #include <arccore/base/TraceInfo.h>
 
@@ -37,15 +42,12 @@ namespace Alien::Trilinos
 class ALIEN_TRILINOS_EXPORT InternalLinearAlgebra
 : public IInternalLinearAlgebra<Matrix, Vector>
 {
+ public:
+  InternalLinearAlgebra() {}
 
-  //typedefs
-  using SC = double;
+  virtual ~InternalLinearAlgebra() {}
 
  public:
-  InternalLinearAlgebra() = default;
-
-  ~InternalLinearAlgebra() = default;
-
   // IInternalLinearAlgebra interface.
   Arccore::Real norm0(const Vector& x) const override;
 
@@ -53,7 +55,7 @@ class ALIEN_TRILINOS_EXPORT InternalLinearAlgebra
 
   Arccore::Real norm2(const Vector& x) const override;
 
-  void mult(const Matrix& a, const Vector& x, Vector& r) const final;
+  void mult(const Matrix& a, const Vector& x, Vector& r) const override;
 
   void axpy(Arccore::Real alpha, const Vector& x, Vector& r) const override;
 
@@ -75,76 +77,73 @@ class ALIEN_TRILINOS_EXPORT InternalLinearAlgebra
 Arccore::Real
 InternalLinearAlgebra::norm0(const Vector& vx ALIEN_UNUSED_PARAM) const
 {
-  throw Arccore::NotImplementedException(A_FUNCINFO, "TrilinosLinearAlgebra::norm0 not implemented");
+  //throw Arccore::NotImplementedException(A_FUNCINFO, "HypreLinearAlgebra::norm0 not implemented");
 }
 
 Arccore::Real
 InternalLinearAlgebra::norm1(const Vector& vx ALIEN_UNUSED_PARAM) const
 {
-  Teuchos::Array<Teuchos::ScalarTraits<SC>::magnitudeType> norms(1);
-  vx.internal()->norm1(norms);
-  return norms.at(0);
+  //throw Arccore::NotImplementedException(A_FUNCINFO, "HypreLinearAlgebra::norm1 not implemented");
 }
 
 Arccore::Real
 InternalLinearAlgebra::norm2(const Vector& vx) const
 {
-  Teuchos::Array<Teuchos::ScalarTraits<SC>::magnitudeType> norms(1);
-  vx.internal()->norm2(norms);
-  return norms.at(0);
+  //return std::sqrt(dot(vx, vx));
 }
 
 void InternalLinearAlgebra::mult(const Matrix& ma, const Vector& vx, Vector& vr) const
 {
-  ma.internal()->apply(*(vx.internal()), *(vr.internal()), Teuchos::NO_TRANS, 1, 0);
+  //HYPRE_ParCSRMatrixMatvec(1.0, hypre_implem(ma), hypre_implem(vx), 0.0, hypre_implem(vr));
 }
 
 void InternalLinearAlgebra::axpy(
 Arccore::Real alpha, const Vector& vx, Vector& vr) const
 {
-  // y = y + ax , vr = vr + alpha * vx
-  vr.internal()->update(alpha, *(vx.internal()), 1);
+  //HYPRE_ParVectorAxpy(alpha, hypre_implem(vx), hypre_implem(vr));
 }
 
-void InternalLinearAlgebra::copy(const Vector& vx /*src*/, Vector& vr /*dest*/) const
+void InternalLinearAlgebra::copy(const Vector& vx, Vector& vr) const
 {
-  Tpetra::deep_copy(*(vr.internal()), *(vx.internal()));
+  //HYPRE_ParVectorCopy(hypre_implem(vx), hypre_implem(vr));
 }
 
 Arccore::Real
 InternalLinearAlgebra::dot(const Vector& vx, const Vector& vy) const
 {
-  std::vector<SC> results(1); // dot product result
-  vx.internal()->dot(*(vx.internal()), results);
+  /*double dot_prod = 0;
+  HYPRE_ParVectorInnerProd(hypre_implem(vx), hypre_implem(vy), &dot_prod);
+  return static_cast<Arccore::Real>(dot_prod);*/
 }
 
 void InternalLinearAlgebra::diagonal(Matrix const& m ALIEN_UNUSED_PARAM, Vector& v ALIEN_UNUSED_PARAM) const
 {
-  throw Arccore::NotImplementedException(
-  A_FUNCINFO, "TrilinosLinearAlgebra::diagonal not implemented");
+  /*throw Arccore::NotImplementedException(
+  A_FUNCINFO, "HypreLinearAlgebra::diagonal not implemented");*/
 }
 
 void InternalLinearAlgebra::reciprocal(Vector& v ALIEN_UNUSED_PARAM) const
 {
-  //element-wise reciprocal values : this(i,j) = 1/A(i,j).
-  v.internal()->reciprocal(*(v.internal()));
+  /*throw Arccore::NotImplementedException(
+  A_FUNCINFO, "HypreLinearAlgebra::reciprocal not implemented");*/
 }
 
 void InternalLinearAlgebra::aypx(
 Arccore::Real alpha ALIEN_UNUSED_PARAM, Vector& y ALIEN_UNUSED_PARAM, const Vector& x ALIEN_UNUSED_PARAM) const
 {
-  y.internal()->update(1, *(x.internal()), alpha); // y = alpha * y
+  //throw Arccore::NotImplementedException(A_FUNCINFO, "HypreLinearAlgebra::aypx not implemented");
 }
 
 void InternalLinearAlgebra::pointwiseMult(
 const Vector& x ALIEN_UNUSED_PARAM, const Vector& y ALIEN_UNUSED_PARAM, Vector& w ALIEN_UNUSED_PARAM) const
 {
-  w.internal()->elementWiseMultiply(1, *(y.internal()->getVector(0)), *(x.internal()), 0);
+  /*throw Arccore::NotImplementedException(
+  A_FUNCINFO, "HypreLinearAlgebra::pointwiseMult not implemented");*/
 }
 
 void InternalLinearAlgebra::scal(Arccore::Real alpha, Vector& x) const
 {
-  x.internal()->scale(alpha);
+  //HYPRE_ParVectorScale(static_cast<double>(alpha), hypre_implem(x));
 }
 
 ALIEN_TRILINOS_EXPORT
@@ -153,4 +152,4 @@ InternalLinearAlgebraFactory()
 {
   return new Trilinos::InternalLinearAlgebra();
 }
-} // namespace Alien::Trilinos
+} // namespace Alien::Hypre
