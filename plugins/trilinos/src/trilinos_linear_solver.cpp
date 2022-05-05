@@ -44,7 +44,14 @@ const Arccore::String& msg, int ierr, int skipError) const
 
 bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
 {
-  std::cout << "call to solver : " ;
+  std::cout << "call to solver, with Matrix A : " << &A << ", Vector b : " << b.ptr() << ", Vector x : " << x.ptr() << std::endl;
+
+
+  auto trilinos_vec = (b.internal())->getDataNonConst();
+  for(size_t i = 0; i < trilinos_vec.size(); i++) {
+    std::cout << "trilinos_vec " << i << " : " << trilinos_vec[i] << std::endl;
+    //std::cout << "values " << i << " : " << values[i] << std::endl;
+  }
   return m_status.succeeded;
 }
 

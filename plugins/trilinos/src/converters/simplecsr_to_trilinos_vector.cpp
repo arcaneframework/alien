@@ -57,7 +57,7 @@ void SimpleCSR_to_Trilinos_VectorConverter::convert(const Alien::IVectorImpl* so
   else if (v2.vblock())
     throw Arccore::FatalErrorException(A_FUNCINFO, "Not implemented yet");
 
-  std:: cout << "block_size : " << block_size << std::endl;
+  //std:: cout << "block_size : " << block_size << std::endl;
 
   // destination
   const auto localOffset = v2.distribution().offset();
@@ -70,19 +70,22 @@ void SimpleCSR_to_Trilinos_VectorConverter::convert(const Alien::IVectorImpl* so
   const int globalSize = dist.globalSize();  //dist.rowSpace().size() ;
 
 
-  std:: cout  << "Vector range : "
+  /*std:: cout  << "Vector range : "
            << "[" << ilower << ":" << iupper << "]"
            << "LocalSize : " << localSize
            << "GlobalSize : " << globalSize
-           << std::endl;
+           << std::endl;*/
 
-  v2.setProfile(ilower, iupper, localSize, globalSize);
+ // v2.setProfile(ilower, iupper, localSize, globalSize);
 
-  /*auto values = v.values();
+  auto values = v.values();
 
   v2.setValues(values);
 
-//  v2.assemble();*/
+
+
+
+//  v2.assemble();
 }
 
 REGISTER_VECTOR_CONVERTER(SimpleCSR_to_Trilinos_VectorConverter);

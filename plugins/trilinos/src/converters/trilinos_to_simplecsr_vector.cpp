@@ -28,15 +28,16 @@
 class Trilinos_to_SimpleCSR_VectorConverter : public Alien::IVectorConverter
 {
  public:
-  Trilinos_to_SimpleCSR_VectorConverter() = default;
+  Trilinos_to_SimpleCSR_VectorConverter() {}
 
-  ~Trilinos_to_SimpleCSR_VectorConverter() final = default;
+  virtual ~Trilinos_to_SimpleCSR_VectorConverter() {}
 
-  Alien::BackEndId sourceBackend() const final { return Alien::AlgebraTraits<Alien::BackEnd::tag::trilinos>::name(); }
+ public:
+  Alien::BackEndId sourceBackend() const { return Alien::AlgebraTraits<Alien::BackEnd::tag::trilinos>::name(); }
 
-  Alien::BackEndId targetBackend() const final { return Alien::AlgebraTraits<Alien::BackEnd::tag::simplecsr>::name(); }
+  Alien::BackEndId targetBackend() const { return Alien::AlgebraTraits<Alien::BackEnd::tag::simplecsr>::name(); }
 
-  void convert(const Alien::IVectorImpl* sourceImpl, Alien::IVectorImpl* targetImpl) const final;
+  void convert(const Alien::IVectorImpl* sourceImpl, Alien::IVectorImpl* targetImpl) const;
 };
 
 void Trilinos_to_SimpleCSR_VectorConverter::convert(
@@ -45,10 +46,13 @@ const Alien::IVectorImpl* sourceImpl, Alien::IVectorImpl* targetImpl) const
   const auto& v = cast<Alien::Trilinos::Vector>(sourceImpl, sourceBackend());
   auto& v2 = cast<Alien::SimpleCSRVector<Arccore::Real>>(targetImpl, targetBackend());
 
-  // get target data (Alien)
+
+  std::cout << "Converting Trilinos::Vector: " << &v << " to Alien::SimpleCSRVector " << &v2;
+
+  // target values (simpleCSR)
   auto values = v2.values();
 
-  // update target data (Alien), with data from Trilinos
+  // update v (trilinos values)
   v.getValues(values);
 }
 

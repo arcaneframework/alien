@@ -52,7 +52,7 @@ add_library(trilinos_wrapper
         src/trilinos_linear_algebra.cpp
         src/trilinos_linear_solver.cpp
         src/trilinos_linear_solver.h
-        #src/converters/hypre_to_simplecsr_vector.cpp
+        src/converters/trilinos_to_simplecsr_vector.cpp
         src/converters/simplecsr_to_trilinos_vector.cpp
         src/converters/simplecsr_to_trilinos_matrix.cpp
 
