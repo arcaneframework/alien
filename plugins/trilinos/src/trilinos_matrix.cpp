@@ -30,7 +30,7 @@ Matrix::Matrix(const MultiMatrixImpl* multi_impl)
 : IMatrixImpl(multi_impl, AlgebraTraits<BackEnd::tag::trilinos>::name())
 , mtx(nullptr)
 {
-  std::cout << " -------------------------- >>> MTX ctor !!! " << std::endl;
+  //std::cout << " -------------------------- >>> MTX ctor !!! " << std::endl;
 
   // Checks that the matrix is square
   const auto& row_space = multi_impl->rowSpace();
@@ -58,7 +58,7 @@ void Matrix::setProfile(int ilower, int iupper,
                         int numGlobalRows,
                         const Arccore::UniqueArray<int> & rowSizes)
 {
-  std::cout << " -------------------------- >>> set profile !!! " << std::endl;
+  //std::cout << " -------------------------- >>> set profile !!! " << std::endl;
 
   using Teuchos::RCP;
   using Teuchos::rcp;
@@ -86,7 +86,7 @@ void Matrix::setProfile(int ilower, int iupper,
 void Matrix::assemble()
 {
   (*mtx)->fillComplete();
-  std::cout << "Fill Completed ! " << std::endl;
+  //std::cout << "Fill Completed ! " << std::endl;
 
 }
 
@@ -97,8 +97,6 @@ void Matrix::setRowValues(int row, Arccore::ConstArrayView<int> columns, Arccore
   if (ncols != values.size()) {
     throw Arccore::FatalErrorException(A_FUNCINFO, "sizes are not equal");
   }
-
-  //std::cout << "row : " << row << std::endl;
 
   Teuchos::Array<SC> vals(ncols);
   Teuchos::Array<GO> cols(ncols);
@@ -111,8 +109,8 @@ void Matrix::setRowValues(int row, Arccore::ConstArrayView<int> columns, Arccore
   auto valsView = vals();
   auto colsView = cols();
 
-  (*mtx)->insertGlobalValues(row, ncols, values.data(), cols.data()/*reinterpret_cast<const long long int*>(columns.data())*/); // insertLocal possible but needs colmap
-  std::cout << "row : " << row << " inserted ! " << std::endl;
+  (*mtx)->insertGlobalValues(row, ncols, values.data(), cols.data()); // insertLocal possible but needs colmap
+  //std::cout << "row : " << row << " inserted ! " << std::endl;
 
 }
 

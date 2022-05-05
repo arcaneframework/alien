@@ -36,6 +36,7 @@ class Vector : public IVectorImpl
   typedef typename Tpetra::Map<>::global_ordinal_type     GO;
   typedef Tpetra::Vector<SC, LO, GO, Node>                vec_type;
 
+
  public:
   explicit Vector(const MultiVectorImpl* multi_impl);
 
@@ -54,9 +55,13 @@ class Vector : public IVectorImpl
   //HYPRE_IJVector internal() const { return m_hypre; }
 
   Teuchos::RCP<vec_type> internal() const { return *vec; }
+  Teuchos::RCP<vec_type> * ptr() const { return vec; }
+
 
  private:
-  std::unique_ptr<Teuchos::RCP<vec_type>> vec;
+  //std::unique_ptr<Teuchos::RCP<vec_type>> vec;
+  Teuchos::RCP<vec_type> * vec;
+
   Teuchos::RCP<const Teuchos::Comm<int>> t_comm;
   //HYPRE_IJVector m_hypre;
   //MPI_Comm m_comm;
