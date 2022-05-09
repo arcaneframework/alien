@@ -28,7 +28,6 @@ target_link_libraries(example_trilinos PUBLIC
         Alien::trilinos_wrapper
         Alien::alien_semantic_move)
 
-
 target_include_directories(trilinos_wrapper PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>

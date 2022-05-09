@@ -18,10 +18,9 @@
 
 #include "trilinos_matrix.h"
 
-#include <alien/trilinos/backend.h>
+
 #include <alien/core/impl/MultiMatrixImpl.h>
 #include <alien/data/ISpace.h>
-
 #include <arccore/message_passing_mpi/MpiMessagePassingMng.h>
 
 namespace Alien::Trilinos
@@ -30,8 +29,6 @@ Matrix::Matrix(const MultiMatrixImpl* multi_impl)
 : IMatrixImpl(multi_impl, AlgebraTraits<BackEnd::tag::trilinos>::name())
 , mtx(nullptr)
 {
-  //std::cout << " -------------------------- >>> MTX ctor !!! " << std::endl;
-
   // Checks that the matrix is square
   const auto& row_space = multi_impl->rowSpace();
   const auto& col_space = multi_impl->colSpace();
@@ -44,7 +41,6 @@ Matrix::Matrix(const MultiMatrixImpl* multi_impl)
   using Teuchos::MpiComm;
   MPI_Comm yourComm = MPI_COMM_WORLD;
   t_comm = RCP<const Comm<int>>(new MpiComm<int> (yourComm)); // Récupérer le communicateur Arcane ?
-
 }
 
 Matrix::~Matrix()
@@ -58,14 +54,9 @@ void Matrix::setProfile(int ilower, int iupper,
                         int numGlobalRows,
                         const Arccore::UniqueArray<int> & rowSizes)
 {
-  //std::cout << " -------------------------- >>> set profile !!! " << std::endl;
 
   using Teuchos::RCP;
   using Teuchos::rcp;
-  typedef Kokkos::Compat::KokkosOpenMPWrapperNode Node;
-  typedef typename Tpetra::Map<>::local_ordinal_type      LO;
-  typedef typename Tpetra::Map<>::global_ordinal_type     GO;
-  typedef Tpetra::Map<LO,GO,Node>                         map_type;
 
   //if already exists, dealloc
   if (mtx)
@@ -80,14 +71,11 @@ void Matrix::setProfile(int ilower, int iupper,
     entriesPerRow[i] = rowSizes[i];
 
   mtx = std::make_unique<Teuchos::RCP<crs_matrix_type>> (new crs_matrix_type (rowMap, entriesPerRow()));
-
 }
 
 void Matrix::assemble()
 {
   (*mtx)->fillComplete();
-  //std::cout << "Fill Completed ! " << std::endl;
-
 }
 
 void Matrix::setRowValues(int row, Arccore::ConstArrayView<int> columns, Arccore::ConstArrayView<double> values)
@@ -110,8 +98,6 @@ void Matrix::setRowValues(int row, Arccore::ConstArrayView<int> columns, Arccore
   auto colsView = cols();
 
   (*mtx)->insertGlobalValues(row, ncols, values.data(), cols.data()); // insertLocal possible but needs colmap
-  //std::cout << "row : " << row << " inserted ! " << std::endl;
-
 }
 
 } // namespace Alien::Trilinos

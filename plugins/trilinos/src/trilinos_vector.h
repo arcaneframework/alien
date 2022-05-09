@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <alien/trilinos/backend.h>
+
 #include <alien/core/impl/IVectorImpl.h>
 #include <Tpetra_Core.hpp>
 #include <Tpetra_CrsMatrix.hpp> // en inclure moins ?
@@ -34,8 +36,8 @@ class Vector : public IVectorImpl
   typedef double                                          SC;
   typedef typename Tpetra::Map<>::local_ordinal_type      LO;
   typedef typename Tpetra::Map<>::global_ordinal_type     GO;
-  typedef Tpetra::Vector<SC, LO, GO, Node>                vec_type;
-
+  typedef Tpetra::MultiVector<SC, LO, GO, Node>           MV;
+  typedef Tpetra::Map<LO,GO,Node>                         map_type;
 
  public:
   explicit Vector(const MultiVectorImpl* multi_impl);
@@ -49,24 +51,12 @@ class Vector : public IVectorImpl
 
   void getValues(Arccore::ArrayView<double> values) const;
 
-  void assemble();
-
-  //HYPRE_IJVector internal() { return m_hypre; }
-  //HYPRE_IJVector internal() const { return m_hypre; }
-
-  Teuchos::RCP<vec_type> internal() const { return *vec; }
-  Teuchos::RCP<vec_type> * ptr() const { return vec; }
-
+  Teuchos::RCP<MV> internal() const { return *vec; }
 
  private:
-  //std::unique_ptr<Teuchos::RCP<vec_type>> vec;
-  Teuchos::RCP<vec_type> * vec;
-
+  std::unique_ptr<Teuchos::RCP<MV>> vec;
   Teuchos::RCP<const Teuchos::Comm<int>> t_comm;
-  //HYPRE_IJVector m_hypre;
-  //MPI_Comm m_comm;
 
-  //Arccore::UniqueArray<Arccore::Integer> m_rows;
 };
 
-} // namespace Alien::Hypre
+} // namespace Alien::Trilinos

@@ -46,13 +46,10 @@ const Alien::IVectorImpl* sourceImpl, Alien::IVectorImpl* targetImpl) const
   const auto& v = cast<Alien::Trilinos::Vector>(sourceImpl, sourceBackend());
   auto& v2 = cast<Alien::SimpleCSRVector<Arccore::Real>>(targetImpl, targetBackend());
 
-
-  std::cout << "Converting Trilinos::Vector: " << &v << " to Alien::SimpleCSRVector " << &v2;
-
-  // target values (simpleCSR)
+  // get target data (Alien)
   auto values = v2.values();
 
-  // update v (trilinos values)
+  // update target data (Alien), with data from Trilinos
   v.getValues(values);
 }
 

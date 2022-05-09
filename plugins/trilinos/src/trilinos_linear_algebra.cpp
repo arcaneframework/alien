@@ -19,11 +19,6 @@
 #include "trilinos_matrix.h"
 #include "trilinos_vector.h"
 
-#include <cmath>
-
-
-
-#include <arccore/message_passing_mpi/MpiMessagePassingMng.h>
 #include <arccore/base/NotImplementedException.h>
 #include <arccore/base/TraceInfo.h>
 

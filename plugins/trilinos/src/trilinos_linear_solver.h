@@ -28,12 +28,30 @@
 #include "trilinos_matrix.h"
 #include "trilinos_vector.h"
 
+#include <Ifpack2_Factory.hpp>
+#include <BelosBlockCGSolMgr.hpp>
+//#include <BelosSolverFactory.hpp>
+//#include <BelosTpetraAdapter.hpp>
+#include <BelosSolverFactory_Tpetra.hpp>
+
+
 namespace Alien::Trilinos
 {
 class InternalLinearSolver : public IInternalLinearSolver<Matrix, Vector>
 , public ObjectWithTrace
 {
  public:
+
+  //typedefs
+  typedef Kokkos::Compat::KokkosOpenMPWrapperNode         Node;
+  typedef double                                          SC;
+  typedef typename Tpetra::Map<>::local_ordinal_type      LO;
+  typedef typename Tpetra::Map<>::global_ordinal_type     GO;
+  typedef Tpetra::RowMatrix<SC,LO,GO,Node>                row_matrix_type;
+  typedef Tpetra::MultiVector<SC,LO,GO,Node>              MV;
+  typedef Tpetra::Operator<SC,LO,GO,Node>                 OP;
+  typedef Ifpack2::Preconditioner<SC,LO,GO,Node>          prec_type;
+
   typedef SolverStatus Status;
 
   InternalLinearSolver() = default;
@@ -79,4 +97,4 @@ class InternalLinearSolver : public IInternalLinearSolver<Matrix, Vector>
  private:
   void checkError(const Arccore::String& msg, int ierr, int skipError = 0) const;
 };
-} // namespace Alien::Hypre
+} // namespace Alien::Trilinos

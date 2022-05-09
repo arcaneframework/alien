@@ -19,7 +19,7 @@
 #pragma once
 
 #include <alien/core/impl/IMatrixImpl.h>
-
+#include <alien/trilinos/backend.h>
 #include <Tpetra_CrsMatrix.hpp>
 #include <Tpetra_Core.hpp>
 #include <Teuchos_ParameterXMLFileReader.hpp>
@@ -36,6 +36,8 @@ class Matrix : public IMatrixImpl
   typedef typename Tpetra::Map<>::local_ordinal_type      LO;
   typedef typename Tpetra::Map<>::global_ordinal_type     GO;
   typedef Tpetra::CrsMatrix<SC,LO,GO,Node>                crs_matrix_type;
+  typedef Tpetra::Map<LO,GO,Node>                         map_type;
+
 
  public:
   explicit Matrix(const MultiMatrixImpl* multi_impl);
