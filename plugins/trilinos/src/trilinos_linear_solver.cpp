@@ -18,40 +18,82 @@
 
 #include "trilinos_linear_solver.h"
 
-/*#include <HYPRE_parcsr_ls.h>
-#include <HYPRE_parcsr_mv.h>*/
-
 namespace Alien
 {
 // Compile TrilinosLinearSolver.
 template class ALIEN_TRILINOS_EXPORT LinearSolver<BackEnd::tag::trilinos>;
-
 } // namespace Alien
 
 namespace Alien::Trilinos
 {
-void InternalLinearSolver::checkError(
-const Arccore::String& msg, int ierr, int skipError) const
-{
-/*  if (ierr != 0 and (ierr & ~skipError) != 0) {
-    char hypre_error_msg[256];
-    HYPRE_DescribeError(ierr, hypre_error_msg);
-    alien_fatal([&] {
-      cout() << msg << " failed : " << hypre_error_msg << "[code=" << ierr << "]";
-    });
-  }*/
-}
 
 bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
 {
-  std::cout << "call to solver, with Matrix A : " << &A << ", Vector b : " << b.ptr() << ", Vector x : " << x.ptr() << std::endl;
+  using Teuchos::ParameterList;
+  using Teuchos::RCP;
+  using Teuchos::rcp;
 
+/*
+  // Create Belos iterative linear solver.
+  RCP<solver_type> solver;
+  RCP<ParameterList> solverParams(new ParameterList());
+  {
+    solverParams->set("Maximum Iterations", 400); //m_options.numIterationsMax()
+    solverParams->set("Convergence Tolerance", 1.0e-8); //m_options.stopCriteriaValue()
+    solverParams->set( "Verbosity", Belos::Errors + Belos::Warnings + Belos::TimingDetails + Belos::FinalSummary + Belos::StatusTestDetails );
 
-  auto trilinos_vec = (b.internal())->getDataNonConst();
-  for(size_t i = 0; i < trilinos_vec.size(); i++) {
-    std::cout << "trilinos_vec " << i << " : " << trilinos_vec[i] << std::endl;
-    //std::cout << "values " << i << " : " << values[i] << std::endl;
+    Belos::SolverFactory<SC, MV, OP> belosFactory;
+    solver = belosFactory.create("cg", solverParams);
   }
+  if (solver.is_null()) {
+    return -1;
+  }
+*/
+
+  // Create Ifpack2 preconditioner.
+  Teuchos::RCP<prec_type> M;
+  {
+    M = Ifpack2::Factory::create<row_matrix_type>("RELAXATION", A.internal());
+    if (M.is_null()) {
+      std::cerr << "Failed to create Ifpack2 preconditioner !" << std::endl;
+      return -1;
+    }
+    M->initialize();
+    M->compute();
+  }
+
+  // Create a preconditioned linear problem instance.
+  Belos::LinearProblem<SC,MV,OP> problem( A.internal(), x.internal(), b.internal() );
+  problem.setRightPrec(M);
+  bool set = problem.setProblem();
+  if (set == false) {
+      std::cout << std::endl << "ERROR:  Belos::LinearProblem failed to set up correctly !" << std::endl;
+    return -1;
+  }
+
+  // Create the solver
+  ParameterList belosList;
+  belosList.set( "Maximum Iterations", m_options.numIterationsMax() );
+  belosList.set( "Convergence Tolerance", m_options.stopCriteriaValue() );
+  Belos::BlockCGSolMgr<SC,MV,OP> solver( rcpFromRef(problem), rcpFromRef(belosList) );
+
+  // Run !
+  Belos::ReturnType ret = solver.solve();
+
+  // Check
+  if (ret == Belos::Converged) {
+    std::cout << std::endl << "Belos Solver has converged." << std::endl;
+    const int numIters = solver.getNumIters();
+
+
+    /*std::cout << "Residual norm : " << residual_norm << std::endl;*/
+    std::cout << "Num iters : " << numIters << std::endl;
+  }
+  else if (ret == Belos::Unconverged)
+  {
+    std::cout << "Belos Solver did not converge !" << std::endl;
+  }
+
   return m_status.succeeded;
 }
 

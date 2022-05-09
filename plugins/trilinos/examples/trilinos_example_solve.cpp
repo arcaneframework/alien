@@ -140,7 +140,7 @@ int main(int argc, char** argv)
 
   if (argc < 4) {
     std::cerr << "Usage : ./example_trilinos [solver] [preconditioner] [matrix] [vector] \n"
-              << "  - solver : (CG|*) \n"
+              << "  - solver : (Relaxation|*) \n"
               << "  - preconditioner : (Relaxation|NoPC) \n"
               << "  - MTX matrix file \n"
               << "  - optional MTX vector file \n";

@@ -51,12 +51,8 @@ class SimpleCSR_to_Trilinos_MatrixConverter : public Alien::IMatrixConverter
 
 void SimpleCSR_to_Trilinos_MatrixConverter::convert(const IMatrixImpl* sourceImpl, IMatrixImpl* targetImpl) const
 {
-  //std::cout << " -------------------------- >>> convert !!! " << std:: endl;
   const auto& v = cast<Alien::SimpleCSRMatrix<Arccore::Real>>(sourceImpl, sourceBackend());
   auto& v2 = cast<Alien::Trilinos::Matrix>(targetImpl, targetBackend());
-
-  //std::cout << "Converting Alien::SimpleCSRMatrix: " << &v << " to Trilinos::Matrix " << &v2 << std::endl;
-
 
   if (targetImpl->block())
     _buildBlock(v, v2);
@@ -69,8 +65,6 @@ void SimpleCSR_to_Trilinos_MatrixConverter::convert(const IMatrixImpl* sourceImp
 void SimpleCSR_to_Trilinos_MatrixConverter::_build(const Alien::SimpleCSRMatrix<Arccore::Real>& sourceImpl,
                                                 Alien::Trilinos::Matrix& targetImpl) const
 {
-  //std::cout << " -------------------------- >>> _build !!! " << std::endl;
-
   const auto& dist = sourceImpl.distribution();
   const auto& profile = sourceImpl.getCSRProfile();
   const auto localSize = profile.getNRow();
@@ -85,10 +79,6 @@ void SimpleCSR_to_Trilinos_MatrixConverter::_build(const Alien::SimpleCSRMatrix<
   for (auto row = 0; row < localSize; ++row) {
     sizes[row] = profile.getRowSize(row);
   }
-
-  /*std::cout << "Matrix range : "
-            << "[" << ilower << ":" << iupper << "]" << " - numLocalRows : " << localSize
-            << std::endl;*/
 
   targetImpl.setProfile(ilower, iupper, localSize, globalSize, sizes);
 
