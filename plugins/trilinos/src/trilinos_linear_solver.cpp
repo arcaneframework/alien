@@ -82,7 +82,6 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   //Belos::StatusTestLogResNorm<SC, MV, OP> debugTest = Belos::StatusTestLogResNorm<SC, MV, OP>(m_options.numIterationsMax());
   //solver.setDebugStatusTest( Teuchos::rcp(&debugTest, false) );
 
-
   // Init timer
   std::chrono::nanoseconds time(0);
 
@@ -92,42 +91,39 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   auto toc = std::chrono::steady_clock::now();
   time += std::chrono::duration_cast<std::chrono::nanoseconds>(toc - tic);
 
+  // Check
+  if (ret == Belos::Converged) {
+    std::cout << "Belos Solver has converged." << std::endl;
 
-    // Check
-    if (ret == Belos::Converged) {
-      std::cout << "Belos Solver has converged." << std::endl;
+    // Get solver infos
+    const int numIters = solver.getNumIters();
+    std::cout << "numIters : " << numIters << std::endl;
+    std::cout << "achieved tol : " << solver.achievedTol() << std::endl;
 
-      // Get solver infos
-      const int numIters = solver.getNumIters();
-      std::cout << "numIters : " << numIters << std::endl;
-      std::cout << "achieved tol : " << solver.achievedTol() << std::endl;
+    // Print timing infos
+    double ms = static_cast<double>(time.count()) / 1e6;
+    double sec = static_cast<double>(time.count()) / 1e9;
+    double it_per_sec = numIters / sec;
+    std::cout << "Execution time [ms]: " << ms << std::endl;
+    std::cout << "Execution time [s]: " << sec << std::endl;
+    std::cout << "Iterations per second : " << it_per_sec << std::endl;
 
-      // Print timing infos
-      double ms = static_cast<double>(time.count()) / 1e6;
-      double sec = static_cast<double>(time.count()) / 1e9;
-      double it_per_sec = numIters / sec;
-      std::cout << "Execution time [ms]: " << ms << std::endl;
-      std::cout << "Execution time [s]: " << sec << std::endl;
-      std::cout << "Iterations per second : " << it_per_sec << std::endl;
+    /*std::cout << "Residual norm : " << residual_norm << std::endl;*/
 
+    // update solver status
+    /*m_status.residual = residual_norm;*/
+    m_status.iteration_count = numIters;
+    m_status.succeeded = true;
 
-      /*std::cout << "Residual norm : " << residual_norm << std::endl;*/
-
-
-      // update solver status
-      /*m_status.residual = residual_norm;*/
-      m_status.iteration_count = numIters;
-      m_status.succeeded = true;
-
-      // update solver infos
-      m_total_iter_num += m_status.iteration_count;
-      ++m_solve_num;
-      /*m_total_solve_time += sec;*/
-    }
-    else if (ret == Belos::Unconverged) {
-      m_status.succeeded = false;
-      std::cout << "Belos Solver did not converge !" << std::endl;
-    }
+    // update solver infos
+    m_total_iter_num += m_status.iteration_count;
+    ++m_solve_num;
+    /*m_total_solve_time += sec;*/
+  }
+  else if (ret == Belos::Unconverged) {
+    m_status.succeeded = false;
+    std::cout << "Belos Solver did not converge !" << std::endl;
+  }
 
   return m_status.succeeded;
 }
