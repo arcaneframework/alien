@@ -41,7 +41,7 @@ class SimpleCSR_to_Trilinos_VectorConverter : public Alien::IVectorConverter
 };
 
 void SimpleCSR_to_Trilinos_VectorConverter::convert(const Alien::IVectorImpl* sourceImpl,
-                                                 Alien::IVectorImpl* targetImpl) const
+                                                    Alien::IVectorImpl* targetImpl) const
 {
   const auto& v = cast<Alien::SimpleCSRVector<Arccore::Real>>(sourceImpl, sourceBackend());
   auto& v2 = cast<Alien::Trilinos::Vector>(targetImpl, targetBackend());

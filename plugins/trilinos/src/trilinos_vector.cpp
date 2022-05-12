@@ -18,9 +18,7 @@
 
 #include "trilinos_vector.h"
 
-
 #include <arccore/message_passing_mpi/MpiMessagePassingMng.h>
-
 
 namespace Alien::Trilinos
 {
@@ -30,11 +28,11 @@ Vector::Vector(const MultiVectorImpl* multi_impl)
 {
 
   // communicator
-  using Teuchos::RCP;
   using Teuchos::Comm;
   using Teuchos::MpiComm;
+  using Teuchos::RCP;
   MPI_Comm yourComm = MPI_COMM_WORLD;
-  t_comm = RCP<const Comm<int>>(new MpiComm<int> (yourComm)); // Récupérer le communicateur Arcane ?
+  t_comm = RCP<const Comm<int>>(new MpiComm<int>(yourComm)); // Récupérer le communicateur Arcane ?
 
   // allocate by calling setProfile
   auto block_size = 1;
@@ -55,7 +53,7 @@ Vector::Vector(const MultiVectorImpl* multi_impl)
 
 Vector::~Vector()
 {
-  if(vec)
+  if (vec)
     vec.release();
 }
 
@@ -66,8 +64,8 @@ void Vector::setProfile(int ilower, int iupper, int numGlobalElts, int numLocalE
     vec.release();
 
   // map
-  Teuchos::RCP<const map_type> map = rcp (new map_type (numGlobalElts, numLocalElts,0,t_comm));
-  vec = std::make_unique<Teuchos::RCP<MV>> (new MV (map, 1, true)); /* map, numvec, init 0)*/
+  Teuchos::RCP<const map_type> map = rcp(new map_type(numGlobalElts, numLocalElts, 0, t_comm));
+  vec = rcp(new MV(map, 1, true)); /* map, numvec, init 0)*/
 }
 
 void Vector::setValues(Arccore::ConstArrayView<double> values)
@@ -75,15 +73,15 @@ void Vector::setValues(Arccore::ConstArrayView<double> values)
   auto ncols = values.size();
 
   // Locally, with Tpetra vector methods
-  for(size_t i = 0; i < ncols; i++) {
-    (*vec)->replaceLocalValue(i,0,values[i]); /*lclRow, colIdx, value*/
+  for (size_t i = 0; i < ncols; i++) {
+    vec->replaceLocalValue(i, 0, values[i]); /*lclRow, colIdx, value*/
   }
 }
 
 void Vector::getValues(Arccore::ArrayView<double> values) const
 {
   // get trilinos data
-  auto trilinos_vec = (*vec)->getDataNonConst(0);
+  auto trilinos_vec = vec->getDataNonConst(0);
 
   // check sizes
   auto csr_cols = values.size();
@@ -93,8 +91,8 @@ void Vector::getValues(Arccore::ArrayView<double> values) const
   }
 
   // update alien data with trilinos data
-  for(size_t i = 0; i < csr_cols; i++) {
-    values[i]=trilinos_vec[i];
+  for (size_t i = 0; i < csr_cols; i++) {
+    values[i] = trilinos_vec[i];
   }
 }
 
