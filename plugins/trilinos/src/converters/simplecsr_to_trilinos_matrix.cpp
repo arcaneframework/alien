@@ -63,7 +63,7 @@ void SimpleCSR_to_Trilinos_MatrixConverter::convert(const IMatrixImpl* sourceImp
 }
 
 void SimpleCSR_to_Trilinos_MatrixConverter::_build(const Alien::SimpleCSRMatrix<Arccore::Real>& sourceImpl,
-                                                Alien::Trilinos::Matrix& targetImpl) const
+                                                   Alien::Trilinos::Matrix& targetImpl) const
 {
   const auto& dist = sourceImpl.distribution();
   const auto& profile = sourceImpl.getCSRProfile();
@@ -73,7 +73,7 @@ void SimpleCSR_to_Trilinos_MatrixConverter::_build(const Alien::SimpleCSRMatrix<
   const auto ilower = localOffset;
   const auto iupper = localOffset + localSize - 1;
 
-  int globalSize = dist.rowSpace().size() ;
+  int globalSize = dist.rowSpace().size();
 
   auto sizes = Arccore::UniqueArray<int>(localSize);
   for (auto row = 0; row < localSize; ++row) {
@@ -95,9 +95,9 @@ void SimpleCSR_to_Trilinos_MatrixConverter::_build(const Alien::SimpleCSRMatrix<
 }
 
 void SimpleCSR_to_Trilinos_MatrixConverter::_buildBlock(const Alien::SimpleCSRMatrix<Arccore::Real>& sourceImpl,
-                                                     Alien::Trilinos::Matrix& targetImpl) const
+                                                        Alien::Trilinos::Matrix& targetImpl) const
 {
- /* const auto& dist = sourceImpl.distribution();
+  /* const auto& dist = sourceImpl.distribution();
   const auto& profile = sourceImpl.getCSRProfile();
   const auto localSize = profile.getNRow();
   const auto block_size = targetImpl.block()->size();

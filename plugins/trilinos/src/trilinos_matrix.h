@@ -55,10 +55,11 @@ class Matrix : public IMatrixImpl
 
   void assemble();
 
-  Teuchos::RCP<crs_matrix_type> internal() const { return *mtx; }
+  Teuchos::RCP<crs_matrix_type> const &  internal() const { return mtx; }
+  Teuchos::RCP<crs_matrix_type> & internal() { return mtx; }
 
  private:
-  std::unique_ptr<Teuchos::RCP<crs_matrix_type>> mtx;
+  Teuchos::RCP<crs_matrix_type> mtx;
   Teuchos::RCP<const Teuchos::Comm<int>> t_comm;
 };
 

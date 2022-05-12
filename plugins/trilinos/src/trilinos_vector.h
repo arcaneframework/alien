@@ -32,7 +32,7 @@ class VectorInternal;
 class Vector : public IVectorImpl
 {
   // typedefs
-  typedef Kokkos::Compat::KokkosOpenMPWrapperNode Node;
+  typedef Kokkos::Compat::KokkosOpenMPWrapperNode         Node;
   typedef double                                          SC;
   typedef typename Tpetra::Map<>::local_ordinal_type      LO;
   typedef typename Tpetra::Map<>::global_ordinal_type     GO;
@@ -51,10 +51,11 @@ class Vector : public IVectorImpl
 
   void getValues(Arccore::ArrayView<double> values) const;
 
-  Teuchos::RCP<MV> internal() const { return *vec; }
+  Teuchos::RCP<MV> const & internal() const { return vec; }
+  Teuchos::RCP<MV> & internal() { return vec; }
 
  private:
-  std::unique_ptr<Teuchos::RCP<MV>> vec;
+  Teuchos::RCP<MV> vec;
   Teuchos::RCP<const Teuchos::Comm<int>> t_comm;
 
 };

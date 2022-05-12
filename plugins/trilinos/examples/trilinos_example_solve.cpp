@@ -16,7 +16,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-
 #include <arccore/message_passing_mpi/StandaloneMpiMessagePassingMng.h>
 
 //#include <alien/move/AlienMoveSemantic.h>
@@ -43,7 +42,6 @@ int test(const Alien::Trilinos::OptionTypes::eSolver& solv, const Alien::Trilino
   tm->info() << "Read matrix file : " << mat_filename;
   auto A = Alien::Move::readFromMatrixMarket(pm, mat_filename);
 
-
   /**
 	 *  Vecteur xe (ones)
 	 *********************/
@@ -60,7 +58,8 @@ int test(const Alien::Trilinos::OptionTypes::eSolver& solv, const Alien::Trilino
   /**
 	 *  Vecteur b
 	 *************/
-  Alien::SimpleCSRLinearAlgebra algebra;
+  //Alien::SimpleCSRLinearAlgebra algebra;
+  Alien::Trilinos::LinearAlgebra algebra;
   Alien::Move::VectorData b(A.rowSpace(), A.distribution().rowDistribution());
 
   if (vec_filename != "") {
@@ -120,7 +119,7 @@ int test(const Alien::Trilinos::OptionTypes::eSolver& solv, const Alien::Trilino
      * rerr_max :||Ax-b||_{inf} / ||b|| _{inf}
      */
 
-   /* std::cout << "max(x) : " << vecMax(x) << std::endl;
+    /* std::cout << "max(x) : " << vecMax(x) << std::endl;
     std::cout << "min(x) : " << vecMin(x) << std::endl;
     std::cout << "maxAbs(x) : " << vecMaxAbs(x) << std::endl;
     std::cout << "minAbs(x) : " << vecMinAbs(x) << std::endl;
@@ -146,7 +145,6 @@ int main(int argc, char** argv)
               << "  - optional MTX vector file \n";
     return -1;
   }
-
 
   // Read the solver
   Alien::Trilinos::OptionTypes::eSolver solver;
