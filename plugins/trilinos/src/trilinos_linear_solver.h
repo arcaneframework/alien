@@ -30,8 +30,8 @@
 
 #include <Ifpack2_Factory.hpp>
 #include <BelosBlockCGSolMgr.hpp>
-//#include <BelosSolverFactory.hpp>
-//#include <BelosTpetraAdapter.hpp>
+#include <BelosBlockGmresSolMgr.hpp>
+#include <BelosBiCGStabSolMgr.hpp>
 #include <BelosSolverFactory_Tpetra.hpp>
 
 
