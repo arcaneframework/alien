@@ -19,10 +19,10 @@
 #include <arccore/message_passing_mpi/StandaloneMpiMessagePassingMng.h>
 
 //#include <alien/move/AlienMoveSemantic.h>
-#include </home/mollern/Documents/Dev/cea-ifpen/alien/src/movesemantic/alien/move/AlienMoveSemantic.h>
+#include <alien/move/AlienMoveSemantic.h>
 //#include <alien/move/handlers/scalar/VectorWriter.h>
-#include </home/mollern/Documents/Dev/cea-ifpen/alien/src/movesemantic/alien/move/handlers/scalar/VectorWriter.h>
-#include </home/mollern/Documents/Dev/cea-ifpen/alien/src/movesemantic/alien/move/data/VectorData.h>
+#include <alien/move/handlers/scalar/VectorWriter.h>
+#include <alien/move/data/VectorData.h>
 #include <alien/kernels/simple_csr/algebra/SimpleCSRLinearAlgebra.h>
 
 #include <alien/trilinos/backend.h>
@@ -86,7 +86,7 @@ int test(const Alien::Trilinos::OptionTypes::eSolver& solv, const Alien::Trilino
 	 *  BENCH
 	 ********************************************/
 
-  int nbRuns = 1;
+  int nbRuns = 5;
   for (int i = 0; i < nbRuns; i++) {
     std::cout << "\n************************************************** " << std::endl;
     std::cout << "*                   RUN  # " << i << "                     * " << std::endl;
@@ -94,11 +94,11 @@ int test(const Alien::Trilinos::OptionTypes::eSolver& solv, const Alien::Trilino
               << std::endl;
 
     // init vector x with zeros
-    /*Alien::Move::VectorWriter writer(std::move(x));
+    Alien::Move::LocalVectorWriter writer(std::move(x));
     for (int i = 0; i < writer.size(); i++) {
       writer[i] = 0;
     }
-    x = writer.release();*/
+    x = writer.release();
 
     // solve
     solver.solve(A, b, x);
@@ -151,9 +151,15 @@ int main(int argc, char** argv)
   if (std::string(argv[1]) == "CG") {
     solver = Alien::Trilinos::OptionTypes::CG;
   }
+  else if (std::string(argv[1]) == "GMRES") {
+    solver = Alien::Trilinos::OptionTypes::GMRES;
+  }
+  else if (std::string(argv[1]) == "BICGSTAB") {
+    solver = Alien::Trilinos::OptionTypes::BICGSTAB;
+  }
   else {
     std::cerr << "Unrecognized solver : " << argv[1] << "\n"
-              << "  - solver list : (CG|*toBeCompleted) \n";
+              << "  - solver list : (CG|GMRES|BICGSTAB) \n";
     return -1;
   }
 

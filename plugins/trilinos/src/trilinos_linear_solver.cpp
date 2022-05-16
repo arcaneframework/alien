@@ -33,26 +33,13 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   using Teuchos::RCP;
   using Teuchos::rcp;
 
-  /*
-  // Create Belos iterative linear solver.
-  RCP<solver_type> solver;
-  RCP<ParameterList> solverParams(new ParameterList());
-  {
-    solverParams->set("Maximum Iterations", 400); //m_options.numIterationsMax()
-    solverParams->set("Convergence Tolerance", 1.0e-8); //m_options.stopCriteriaValue()
-    solverParams->set( "Verbosity", Belos::Errors + Belos::Warnings + Belos::TimingDetails + Belos::FinalSummary + Belos::StatusTestDetails );
-
-    Belos::SolverFactory<SC, MV, OP> belosFactory;
-    solver = belosFactory.create("cg", solverParams);
-  }
-  if (solver.is_null()) {
-    return -1;
-  }
-*/
-
-  // Create Ifpack2 preconditioner.
+  // Create the linear problem instance.
+  Belos::LinearProblem<SC, MV, OP> problem(A.internal(), x.internal(), b.internal());
   Teuchos::RCP<prec_type> M;
-  {
+
+  // Ifpack2 preconditioner.
+  switch (m_options.preconditioner()) {
+  case OptionTypes::Relaxation: {
     M = Ifpack2::Factory::create<row_matrix_type>("RELAXATION", A.internal());
     if (M.is_null()) {
       std::cerr << "Failed to create Ifpack2 preconditioner !" << std::endl;
@@ -61,10 +48,16 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
     M->initialize();
     M->compute();
   }
+    problem.setRightPrec(M);
+    break;
+  case OptionTypes::NoPC:
+    break;
+  default:
+    alien_fatal([&] { cout() << "Undefined IFPACK2 preconditioner option"; });
+    break;
+  }
 
-  // Create a preconditioned linear problem instance.
-  Belos::LinearProblem<SC, MV, OP> problem(A.internal(), x.internal(), b.internal());
-  problem.setRightPrec(M);
+  // Set the problem
   bool set = problem.setProblem();
   if (set == false) {
     std::cout << std::endl
@@ -76,18 +69,33 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   ParameterList belosList;
   belosList.set("Maximum Iterations", m_options.numIterationsMax());
   belosList.set("Convergence Tolerance", m_options.stopCriteriaValue());
-  Belos::BlockCGSolMgr<SC, MV, OP> solver(rcpFromRef(problem), rcpFromRef(belosList));
 
-  // Add Logger !
-  //Belos::StatusTestLogResNorm<SC, MV, OP> debugTest = Belos::StatusTestLogResNorm<SC, MV, OP>(m_options.numIterationsMax());
-  //solver.setDebugStatusTest( Teuchos::rcp(&debugTest, false) );
+  Belos::SolverManager<SC, MV, OP>* solver;
+
+  // allocate solver
+  switch (m_options.solver()) {
+  case OptionTypes::CG:
+    solver = new Belos::BlockCGSolMgr<SC, MV, OP>(rcpFromRef(problem), rcpFromRef(belosList));
+    break;
+  case OptionTypes::GMRES:
+    solver = new Belos::BlockGmresSolMgr<SC, MV, OP>(rcpFromRef(problem), rcpFromRef(belosList));
+    break;
+  case OptionTypes::BICGSTAB:
+    solver = new Belos::BiCGStabSolMgr<SC, MV, OP>(rcpFromRef(problem), rcpFromRef(belosList));
+    break;
+  default:
+    alien_fatal([&] {
+      cout() << "Undefined solver option";
+    });
+    break;
+  }
 
   // Init timer
   std::chrono::nanoseconds time(0);
 
   // Run !
   auto tic = std::chrono::steady_clock::now();
-  Belos::ReturnType ret = solver.solve();
+  Belos::ReturnType ret = solver->solve();
   auto toc = std::chrono::steady_clock::now();
   time += std::chrono::duration_cast<std::chrono::nanoseconds>(toc - tic);
 
@@ -96,9 +104,9 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
     std::cout << "Belos Solver has converged." << std::endl;
 
     // Get solver infos
-    const int numIters = solver.getNumIters();
+    const int numIters = solver->getNumIters();
     std::cout << "numIters : " << numIters << std::endl;
-    std::cout << "achieved tol : " << solver.achievedTol() << std::endl;
+    std::cout << "achieved tol : " << solver->achievedTol() << std::endl;
 
     // Print timing infos
     double ms = static_cast<double>(time.count()) / 1e6;
@@ -118,12 +126,15 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
     // update solver infos
     m_total_iter_num += m_status.iteration_count;
     ++m_solve_num;
-    /*m_total_solve_time += sec;*/
+    m_total_solve_time += sec;
   }
   else if (ret == Belos::Unconverged) {
     m_status.succeeded = false;
     std::cout << "Belos Solver did not converge !" << std::endl;
   }
+
+  if (solver)
+    delete solver;
 
   return m_status.succeeded;
 }

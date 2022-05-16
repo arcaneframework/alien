@@ -28,7 +28,9 @@ struct OptionTypes
 {
   enum eSolver
   {
-    CG
+    CG,
+    GMRES,
+    BICGSTAB
   };
 
   enum ePreconditioner
@@ -86,8 +88,12 @@ class OptionsUtils
  public:
   static OptionTypes::eSolver stringToSolverEnum(std::string solver_s)
   {
-    if (solver_s.compare("cg") == 0)
+    if (solver_s.compare("CG") == 0)
       return OptionTypes::CG;
+    else if (solver_s.compare("GMRES") == 0)
+      return OptionTypes::GMRES;
+    else if (solver_s.compare("BICGSTAB") == 0)
+      return OptionTypes::BICGSTAB;
     else
       throw Arccore::FatalErrorException(A_FUNCINFO, Arccore::String::format("solver enum name: {0} is not consistent with axl definition", solver_s));
   }
@@ -96,7 +102,11 @@ class OptionsUtils
   {
     switch (solver) {
     case OptionTypes::CG:
-      return "cg";
+      return "CG";
+    case OptionTypes::GMRES:
+      return "GMRES";
+    case OptionTypes::BICGSTAB:
+      return "BICGSTAB";
     default:
       throw Arccore::FatalErrorException(A_FUNCINFO, Arccore::String::format("Unmanaged TrilinosOptionTypes::eSolver value: {0}", solver));
     }
