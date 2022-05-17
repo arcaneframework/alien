@@ -106,6 +106,7 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
     int rank = A.internal()->getComm()->getRank();
     if (rank == 0) {
       std::cout << "Belos Solver has converged." << std::endl;
+      kokkos_node_verbose();
       std::cout << "numIters : " << numIters << std::endl;
       std::cout << "achieved tol : " << solver->achievedTol() << std::endl;
       std::cout << "Execution time [s]: " << sec << std::endl;
