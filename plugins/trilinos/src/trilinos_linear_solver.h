@@ -42,16 +42,6 @@ class InternalLinearSolver : public IInternalLinearSolver<Matrix, Vector>
 {
  public:
 
-  //typedefs
-  typedef Kokkos::Compat::KokkosOpenMPWrapperNode         Node;
-  typedef double                                          SC;
-  typedef typename Tpetra::Map<>::local_ordinal_type      LO;
-  typedef typename Tpetra::Map<>::global_ordinal_type     GO;
-  typedef Tpetra::RowMatrix<SC,LO,GO,Node>                row_matrix_type;
-  typedef Tpetra::MultiVector<SC,LO,GO,Node>              MV;
-  typedef Tpetra::Operator<SC,LO,GO,Node>                 OP;
-  typedef Ifpack2::Preconditioner<SC,LO,GO,Node>          prec_type;
-
   typedef SolverStatus Status;
 
   InternalLinearSolver() = default;

@@ -18,19 +18,14 @@
 
 #include <arccore/message_passing_mpi/StandaloneMpiMessagePassingMng.h>
 
-//#include <alien/move/AlienMoveSemantic.h>
 #include <alien/move/AlienMoveSemantic.h>
-//#include <alien/move/handlers/scalar/VectorWriter.h>
 #include <alien/move/handlers/scalar/VectorWriter.h>
 #include <alien/move/data/VectorData.h>
-#include <alien/kernels/simple_csr/algebra/SimpleCSRLinearAlgebra.h>
 
 #include <alien/trilinos/backend.h>
 #include <alien/trilinos/options.h>
 
 #include <alien/core/backend/IMatrixConverter.h>
-#include <alien/core/backend/MatrixConverterRegisterer.h>
-#include <alien/kernels/simple_csr/SimpleCSRMatrix.h>
 #include <alien/kernels/simple_csr/SimpleCSRBackEnd.h>
 
 int test(const Alien::Trilinos::OptionTypes::eSolver& solv, const Alien::Trilinos::OptionTypes::ePreconditioner& prec, const std::string& mat_filename, const std::string& vec_filename)
@@ -39,7 +34,8 @@ int test(const Alien::Trilinos::OptionTypes::eSolver& solv, const Alien::Trilino
   auto* tm = Arccore::arccoreCreateDefaultTraceMng();
   Alien::setTraceMng(tm);
 
-  tm->info() << "Read matrix file : " << mat_filename;
+  if (pm->commRank() == 0)
+    tm->info() << "Read matrix file : " << mat_filename;
   auto A = Alien::Move::readFromMatrixMarket(pm, mat_filename);
 
   /**
@@ -63,11 +59,13 @@ int test(const Alien::Trilinos::OptionTypes::eSolver& solv, const Alien::Trilino
   Alien::Move::VectorData b(A.rowSpace(), A.distribution().rowDistribution());
 
   if (vec_filename != "") {
-    tm->info() << "Read vector file : " << vec_filename;
+    if (pm->commRank() == 0)
+      tm->info() << "Read vector file : " << vec_filename;
     b = Alien::Move::readFromMatrixMarket(A.distribution().rowDistribution(), vec_filename);
   }
   else {
-    tm->info() << "Vector b is computed  : b = A * xe";
+    if (pm->commRank() == 0)
+      tm->info() << "Vector b is computed  : b = A * xe";
     algebra.mult(A, xe, b);
   }
 
@@ -88,10 +86,12 @@ int test(const Alien::Trilinos::OptionTypes::eSolver& solv, const Alien::Trilino
 
   int nbRuns = 5;
   for (int i = 0; i < nbRuns; i++) {
-    std::cout << "\n************************************************** " << std::endl;
-    std::cout << "*                   RUN  # " << i << "                     * " << std::endl;
-    std::cout << "************************************************** \n"
-              << std::endl;
+    if (pm->commRank() == 0) {
+      std::cout << "\n************************************************** " << std::endl;
+      std::cout << "*                   RUN  # " << i << "                     * " << std::endl;
+      std::cout << "************************************************** \n"
+                << std::endl;
+    }
 
     // init vector x with zeros
     Alien::Move::LocalVectorWriter writer(std::move(x));
@@ -109,9 +109,12 @@ int test(const Alien::Trilinos::OptionTypes::eSolver& solv, const Alien::Trilino
     algebra.axpy(-1., b, r);
     auto norm_r = algebra.norm2(r);
     auto norm_b = algebra.norm2(b);
-    tm->info() << " => ||Ax-b|| = " << norm_r;
-    tm->info() << " => ||b|| = " << norm_b;
-    tm->info() << " => ||Ax-b||/||b|| = " << norm_r / norm_b;
+
+    if (pm->commRank() == 0) {
+      std::cout << "||Ax-b|| = " << norm_r << std::endl;
+      std::cout << "||b|| = " << norm_b << std::endl;
+      std::cout << "||Ax-b||/||b|| = " << norm_r / norm_b << std::endl;
+    }
 
     /* Check results :
      * min(x), max(x), min|x|, max|x|

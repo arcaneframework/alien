@@ -20,24 +20,17 @@
 
 #include <alien/core/impl/IMatrixImpl.h>
 #include <alien/trilinos/backend.h>
+#include <alien/trilinos/trilinos_config.h>
 #include <Tpetra_CrsMatrix.hpp>
 #include <Tpetra_Core.hpp>
 #include <Teuchos_ParameterXMLFileReader.hpp>
 #include <Teuchos_TimeMonitor.hpp>
-#include <Teuchos_DefaultMpiComm.hpp> // wrapper for MPI_Comm
+#include <Teuchos_DefaultMpiComm.hpp>
 
 namespace Alien::Trilinos
 {
 class Matrix : public IMatrixImpl
 {
-  // typedefs
-  typedef Kokkos::Compat::KokkosOpenMPWrapperNode Node;
-  typedef double                                          SC;
-  typedef typename Tpetra::Map<>::local_ordinal_type      LO;
-  typedef typename Tpetra::Map<>::global_ordinal_type     GO;
-  typedef Tpetra::CrsMatrix<SC,LO,GO,Node>                crs_matrix_type;
-  typedef Tpetra::Map<LO,GO,Node>                         map_type;
-
 
  public:
   explicit Matrix(const MultiMatrixImpl* multi_impl);
@@ -57,6 +50,7 @@ class Matrix : public IMatrixImpl
 
   Teuchos::RCP<crs_matrix_type> const &  internal() const { return mtx; }
   Teuchos::RCP<crs_matrix_type> & internal() { return mtx; }
+  Teuchos::RCP<const Teuchos::Comm<int>> getComm() {return t_comm; };
 
  private:
   Teuchos::RCP<crs_matrix_type> mtx;
