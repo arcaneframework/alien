@@ -18,14 +18,15 @@
 
 #pragma once
 
+#include <alien/ginkgo/TrilinosConfig.h>
 #include <Tpetra_Core.hpp>
 #include <Tpetra_CrsMatrix.hpp>
 #include <Ifpack2_Factory.hpp>
 
 
+
 namespace Alien::Trilinos
 {
-
 #ifdef ALIEN_PLUGIN_TRILINOS_OMP
 typedef Kokkos::Compat::KokkosOpenMPWrapperNode         Node;
 #elif ALIEN_PLUGIN_TRILINOS_CUDA
@@ -52,4 +53,5 @@ typedef Tpetra::CrsMatrix<SC,LO,GO,Node>                crs_matrix_type;
 typedef Tpetra::RowMatrix<SC,LO,GO,Node>                row_matrix_type;
 typedef Ifpack2::Preconditioner<SC,LO,GO,Node>          prec_type;
 
+void kokkos_node_verbose();
 }

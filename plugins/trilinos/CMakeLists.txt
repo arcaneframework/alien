@@ -53,6 +53,7 @@ add_library(trilinos_wrapper
         src/converters/trilinos_to_simplecsr_vector.cpp
         src/converters/simplecsr_to_trilinos_vector.cpp
         src/converters/simplecsr_to_trilinos_matrix.cpp
+        src/trilinos_config.cpp
         )
 
 target_link_libraries(trilinos_wrapper PUBLIC
@@ -85,7 +86,10 @@ else ()
     message(FATAL_ERROR "------ NO HARDWARE EXECUTOR SPECIFIED FOR TRILINOS WRAPPER  ------- ")
 endif ()
 
-
+configure_file(
+        Trilinos.config.in
+        ${CMAKE_CURRENT_BINARY_DIR}/include/alien/ginkgo/TrilinosConfig.h
+)
 
 target_include_directories(trilinos_wrapper PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
