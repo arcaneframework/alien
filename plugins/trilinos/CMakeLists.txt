@@ -42,6 +42,7 @@ set(CMAKE_CXX_FLAGS  "${Trilinos_CXX_COMPILER_FLAGS} ${CMAKE_CXX_FLAGS}")
 add_library(trilinos_wrapper
         include/alien/trilinos/backend.h
         include/alien/trilinos/options.h
+        include/alien/trilinos/trilinos_config.h
         src/trilinos_vector.cpp
         src/trilinos_vector.h
         src/trilinos_matrix.cpp
@@ -52,7 +53,6 @@ add_library(trilinos_wrapper
         src/converters/trilinos_to_simplecsr_vector.cpp
         src/converters/simplecsr_to_trilinos_vector.cpp
         src/converters/simplecsr_to_trilinos_matrix.cpp
-
         )
 
 target_link_libraries(trilinos_wrapper PUBLIC
@@ -68,6 +68,24 @@ target_link_libraries(trilinos_wrapper PRIVATE
         ${Trilinos_LIBRARIES}
         ${Trilinos_TPL_LIBRARIES}
         )
+
+if (ALIEN_PLUGIN_TRILINOS_OMP)
+    message("------ COMPILING TRILINOS WRAPPER WITH *OPENMP* BACKEND  ------- ")
+elseif (ALIEN_PLUGIN_TRILINOS_CUDA)
+    message("------ COMPILING TRILINOS WRAPPER WITH *CUDA* BACKEND  ------- ")
+elseif (ALIEN_PLUGIN_TRILINOS_HIP)
+    message("------ COMPILING TRILINOS WRAPPER WITH *HIP* BACKEND  ------- ")
+elseif (ALIEN_PLUGIN_TRILINOS_SERIAL)
+    message("------ COMPILING TRILINOS WRAPPER WITH *SERIAL* BACKEND  ------- ")
+elseif (ALIEN_PLUGIN_TRILINOS_THREADS)
+    message("------ COMPILING TRILINOS WRAPPER WITH *PTHREAD* BACKEND  ------- ")
+elseif (ALIEN_PLUGIN_TRILINOS_SYCL)
+    message("------ COMPILING TRILINOS WRAPPER WITH *SYCL* BACKEND  ------- ")
+else ()
+    message(FATAL_ERROR "------ NO HARDWARE EXECUTOR SPECIFIED FOR TRILINOS WRAPPER  ------- ")
+endif ()
+
+
 
 target_include_directories(trilinos_wrapper PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

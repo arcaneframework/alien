@@ -19,11 +19,12 @@
 #pragma once
 
 #include <alien/trilinos/backend.h>
+#include <alien/trilinos/trilinos_config.h>
 
 #include <alien/core/impl/IVectorImpl.h>
 #include <Tpetra_Core.hpp>
-#include <Tpetra_CrsMatrix.hpp> // en inclure moins ?
-#include <Teuchos_DefaultMpiComm.hpp> // wrapper for MPI_Comm
+#include <Tpetra_CrsMatrix.hpp>
+#include <Teuchos_DefaultMpiComm.hpp>
 
 namespace Alien::Trilinos
 {
@@ -31,14 +32,6 @@ class VectorInternal;
 
 class Vector : public IVectorImpl
 {
-  // typedefs
-  typedef Kokkos::Compat::KokkosOpenMPWrapperNode         Node;
-  typedef double                                          SC;
-  typedef typename Tpetra::Map<>::local_ordinal_type      LO;
-  typedef typename Tpetra::Map<>::global_ordinal_type     GO;
-  typedef Tpetra::MultiVector<SC, LO, GO, Node>           MV;
-  typedef Tpetra::Map<LO,GO,Node>                         map_type;
-
  public:
   explicit Vector(const MultiVectorImpl* multi_impl);
 
