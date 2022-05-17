@@ -53,8 +53,8 @@ jobs:
             org.opencontainers.image.description=Alien CI base image
             org.opencontainers.image.vendor=CEA
           tags: |
-            type=edge
-            type=edge,branch=main
+            type=raw,value=main
+            type=raw,value={{date 'YYYYMMDD'}}
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
