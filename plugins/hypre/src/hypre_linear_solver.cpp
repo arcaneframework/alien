@@ -77,11 +77,9 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   switch (m_options.preconditioner()) {
   case OptionTypes::NoPC:
     precond_name = "none";
-    // precond_destroy_function = nullptr;
     break;
   case OptionTypes::DiagPC:
     precond_name = "diag";
-    // checkError("Hypre diagonal preconditioner",HYPRE_BoomerAMGCreate(&preconditioner));
     precond_solve_function = HYPRE_ParCSRDiagScale;
     precond_setup_function = HYPRE_ParCSRDiagScaleSetup;
     break;
@@ -91,6 +89,16 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
     precond_solve_function = HYPRE_BoomerAMGSolve;
     precond_setup_function = HYPRE_BoomerAMGSetup;
     precond_destroy_function = HYPRE_BoomerAMGDestroy;
+
+    // GPU only support a subset of paramater values.
+    // see https://hypre.readthedocs.io/en/latest/solvers-boomeramg.html#gpu-supported-options
+    HYPRE_BoomerAMGSetRelaxType(preconditioner, 3); /* 3, 4, 6, 7, 18, 11, 12 */
+    HYPRE_BoomerAMGSetRelaxOrder(preconditioner, false); /* must be false */
+    HYPRE_BoomerAMGSetCoarsenType(preconditioner, 8); /* 8 */
+    HYPRE_BoomerAMGSetInterpType(preconditioner, 3); /* 3, 15, 6, 14, 18 */
+    HYPRE_BoomerAMGSetAggInterpType(preconditioner, 5); /* 5 or 7 */
+    HYPRE_BoomerAMGSetKeepTranspose(preconditioner, true); /* keep transpose to avoid SpMTV */
+    HYPRE_BoomerAMGSetRAP2(preconditioner, false); /* RAP in two multiplications (default: FALSE) */
     break;
   case OptionTypes::ParaSailsPC:
     precond_name = "parasails";
@@ -113,7 +121,6 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   }
 
   // acces aux fonctions du solveur
-  // int (*solver_set_logging_function)(HYPRE_Solver,int) = nullptr;
   int (*solver_set_print_level_function)(HYPRE_Solver, int) = nullptr;
   int (*solver_set_tol_function)(HYPRE_Solver, double) = nullptr;
   int (*solver_set_precond_function)(HYPRE_Solver, HYPRE_PtrToParSolverFcn,
@@ -137,10 +144,8 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
     if (output_level > 0)
       checkError("Hypre AMG SetDebugFlag", HYPRE_BoomerAMGSetDebugFlag(solver, 1));
     checkError("Hypre AMG solver SetMaxIter", HYPRE_BoomerAMGSetMaxIter(solver, max_it));
-    // solver_set_logging_function = HYPRE_BoomerAMGSetLogging;
     solver_set_print_level_function = HYPRE_BoomerAMGSetPrintLevel;
     solver_set_tol_function = HYPRE_BoomerAMGSetTol;
-    // solver_set_precond_function = nullptr;
     solver_setup_function = HYPRE_BoomerAMGSetup;
     solver_solve_function = HYPRE_BoomerAMGSolve;
     solver_get_num_iterations_function = HYPRE_BoomerAMGGetNumIterations;
@@ -153,7 +158,6 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
     checkError("Hypre GMRES solver", HYPRE_ParCSRGMRESCreate(comm, &solver));
     checkError(
     "Hypre GMRES solver SetMaxIter", HYPRE_ParCSRGMRESSetMaxIter(solver, max_it));
-    // solver_set_logging_function = HYPRE_ParCSRGMRESSetLogging;
     solver_set_print_level_function = HYPRE_ParCSRGMRESSetPrintLevel;
     solver_set_tol_function = HYPRE_ParCSRGMRESSetTol;
     solver_set_precond_function = HYPRE_ParCSRGMRESSetPrecond;
@@ -169,7 +173,6 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
     checkError("Hypre CG solver", HYPRE_ParCSRPCGCreate(comm, &solver));
     checkError(
     "Hypre BiCGStab solver SetMaxIter", HYPRE_ParCSRPCGSetMaxIter(solver, max_it));
-    // solver_set_logging_function = HYPRE_ParCSRPCGSetLogging;
     solver_set_print_level_function = HYPRE_ParCSRPCGSetPrintLevel;
     solver_set_tol_function = HYPRE_ParCSRPCGSetTol;
     solver_set_precond_function = HYPRE_ParCSRPCGSetPrecond;
@@ -185,7 +188,6 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
     checkError("Hypre BiCGStab solver", HYPRE_ParCSRBiCGSTABCreate(comm, &solver));
     checkError("Hypre BiCGStab solver SetMaxIter",
                HYPRE_ParCSRBiCGSTABSetMaxIter(solver, max_it));
-    // solver_set_logging_function = HYPRE_ParCSRBiCGSTABSetLogging;
     solver_set_print_level_function = HYPRE_ParCSRBiCGSTABSetPrintLevel;
     solver_set_tol_function = HYPRE_ParCSRBiCGSTABSetTol;
     solver_set_precond_function = HYPRE_ParCSRBiCGSTABSetPrecond;
@@ -209,7 +211,6 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
                HYPRE_ParCSRHybridSetDSCGMaxIter(solver, max_it));
     checkError("Hypre Hybrid solver SetPCMaxIter",
                HYPRE_ParCSRHybridSetPCGMaxIter(solver, max_it));
-    // solver_set_logging_function = HYPRE_ParCSRHybridSetLogging;
     solver_set_print_level_function = HYPRE_ParCSRHybridSetPrintLevel;
     solver_set_tol_function = HYPRE_ParCSRHybridSetTol;
     solver_set_precond_function = nullptr; // HYPRE_ParCSRHybridSetPrecond; // SegFault si
@@ -260,15 +261,6 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
              HYPRE_IJVectorGetObject(bij_vector, (void**)&par_rhs));
   checkError("Hypre Unknown Vector GetObject",
              HYPRE_IJVectorGetObject(xij_vector, (void**)&par_x));
-
-  //#ifdef ALIEN_HYPRE_DEVICE
-  //  /*-----------------------------------------------------------
-  //   * Migrate the system to the wanted memory space
-  //   *-----------------------------------------------------------*/
-  //  hypre_ParCSRMatrixMigrate(par_a, HYPRE_MEMORY_DEVICE);
-  //  hypre_ParVectorMigrate(par_rhs, HYPRE_MEMORY_DEVICE);
-  //  hypre_ParVectorMigrate(par_x, HYPRE_MEMORY_DEVICE);
-  //#endif // ALIEN_HYPRE_DEVICE
 
   checkError("Hypre " + solver_name + " solver Setup",
              (*solver_setup_function)(solver, par_a, par_rhs, par_x));
