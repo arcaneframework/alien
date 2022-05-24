@@ -51,12 +51,6 @@ Vector::Vector(const MultiVectorImpl* multi_impl)
   setProfile(ilower, iupper, globalSize, localSize);
 }
 
-Vector::~Vector()
-{
-  if (vec)
-    vec.release();
-}
-
 void Vector::setProfile(int ilower, int iupper, int numGlobalElts, int numLocalElts)
 {
   //if already exists, dealloc

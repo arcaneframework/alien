@@ -35,12 +35,9 @@ class Matrix : public IMatrixImpl
  public:
   explicit Matrix(const MultiMatrixImpl* multi_impl);
 
-  virtual ~Matrix();
+  ~Matrix() final = default;
 
-  void setProfile(int ilower, int iupper,
-                  int numLocalRows,
-                  int numGlobalRows,
-                  const Arccore::UniqueArray<int> & rowSizes);
+  void setProfile(int numLocalRows, int numGlobalRows, const Arccore::UniqueArray<int> & rowSizes);
 
   void setRowValues(int rows,
                     Arccore::ConstArrayView<int> cols,
@@ -50,7 +47,7 @@ class Matrix : public IMatrixImpl
 
   Teuchos::RCP<crs_matrix_type> const &  internal() const { return mtx; }
   Teuchos::RCP<crs_matrix_type> & internal() { return mtx; }
-  Teuchos::RCP<const Teuchos::Comm<int>> getComm() {return t_comm; };
+  Teuchos::RCP<const Teuchos::Comm<int>> getComm() const {return t_comm; };
 
  private:
   Teuchos::RCP<crs_matrix_type> mtx;

@@ -42,16 +42,7 @@ Matrix::Matrix(const MultiMatrixImpl* multi_impl)
   t_comm = RCP<const Comm<int>>(new MpiComm<int>(yourComm)); // Récupérer le communicateur Arcane ?
 }
 
-Matrix::~Matrix()
-{
-  if (mtx)
-    mtx.release();
-}
-
-void Matrix::setProfile(int ilower, int iupper,
-                        int numLocalRows,
-                        int numGlobalRows,
-                        const Arccore::UniqueArray<int>& rowSizes)
+void Matrix::setProfile(int numLocalRows, int numGlobalRows, const Arccore::UniqueArray<int>& rowSizes)
 {
 
   using Teuchos::RCP;

@@ -28,16 +28,15 @@
 class Trilinos_to_SimpleCSR_VectorConverter : public Alien::IVectorConverter
 {
  public:
-  Trilinos_to_SimpleCSR_VectorConverter() {}
+  Trilinos_to_SimpleCSR_VectorConverter() = default;
 
-  virtual ~Trilinos_to_SimpleCSR_VectorConverter() {}
+  ~Trilinos_to_SimpleCSR_VectorConverter() final = default;
 
- public:
-  Alien::BackEndId sourceBackend() const { return Alien::AlgebraTraits<Alien::BackEnd::tag::trilinos>::name(); }
+  Alien::BackEndId sourceBackend() const final { return Alien::AlgebraTraits<Alien::BackEnd::tag::trilinos>::name(); }
 
-  Alien::BackEndId targetBackend() const { return Alien::AlgebraTraits<Alien::BackEnd::tag::simplecsr>::name(); }
+  Alien::BackEndId targetBackend() const final { return Alien::AlgebraTraits<Alien::BackEnd::tag::simplecsr>::name(); }
 
-  void convert(const Alien::IVectorImpl* sourceImpl, Alien::IVectorImpl* targetImpl) const;
+  void convert(const Alien::IVectorImpl* sourceImpl, Alien::IVectorImpl* targetImpl) const final;
 };
 
 void Trilinos_to_SimpleCSR_VectorConverter::convert(
