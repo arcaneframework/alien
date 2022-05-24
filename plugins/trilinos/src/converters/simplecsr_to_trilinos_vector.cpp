@@ -45,11 +45,7 @@ void SimpleCSR_to_Trilinos_VectorConverter::convert(const Alien::IVectorImpl* so
   const auto& v = cast<Alien::SimpleCSRVector<Arccore::Real>>(sourceImpl, sourceBackend());
   auto& v2 = cast<Alien::Trilinos::Vector>(targetImpl, targetBackend());
 
-  auto block_size = 1;
-  const auto* block = v2.block();
-  if (v2.block())
-    block_size *= block->size();
-  else if (v2.vblock())
+  if (v2.vblock())
     throw Arccore::FatalErrorException(A_FUNCINFO, "Not implemented yet");
 
   // get data from source (Alien)

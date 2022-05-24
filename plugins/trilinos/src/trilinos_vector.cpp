@@ -25,15 +25,8 @@ namespace Alien::Trilinos
 Vector::Vector(const MultiVectorImpl* multi_impl)
 : IVectorImpl(multi_impl, AlgebraTraits<BackEnd::tag::trilinos>::name())
 , vec(nullptr)
+, t_comm(new Teuchos::MpiComm<int>(MPI_COMM_WORLD))
 {
-
-  // communicator
-  using Teuchos::Comm;
-  using Teuchos::MpiComm;
-  using Teuchos::RCP;
-  MPI_Comm yourComm = MPI_COMM_WORLD;
-  t_comm = RCP<const Comm<int>>(new MpiComm<int>(yourComm)); // Récupérer le communicateur Arcane ?
-
   // allocate by calling setProfile
   auto block_size = 1;
   const auto* block = this->block();

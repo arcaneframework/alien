@@ -84,9 +84,6 @@ void Matrix::setRowValues(int row, Arccore::ConstArrayView<int> columns, Arccore
     vals[i] = values[i];
   }
 
-  auto valsView = vals();
-  auto colsView = cols();
-
   mtx->insertGlobalValues(row, ncols, values.data(), cols.data()); // insertLocal possible but needs colmap
 }
 
