@@ -86,7 +86,7 @@ struct Options
 class OptionsUtils
 {
  public:
-  static OptionTypes::eSolver stringToSolverEnum(std::string solver_s)
+  static OptionTypes::eSolver stringToSolverEnum(const std::string& solver_s)
   {
     if (solver_s.compare("CG") == 0)
       return OptionTypes::CG;
@@ -98,7 +98,7 @@ class OptionsUtils
       throw Arccore::FatalErrorException(A_FUNCINFO, Arccore::String::format("solver enum name: {0} is not consistent with axl definition", solver_s));
   }
 
-  static std::string solverEnumToString(OptionTypes::eSolver solver)
+  static std::string solverEnumToString(const OptionTypes::eSolver& solver)
   {
     switch (solver) {
     case OptionTypes::CG:
@@ -112,7 +112,7 @@ class OptionsUtils
     }
   }
 
-  static OptionTypes::ePreconditioner stringToPreconditionerEnum(std::string preconditioner_s)
+  static OptionTypes::ePreconditioner stringToPreconditionerEnum(const std::string& preconditioner_s)
   {
     if (preconditioner_s.compare("none") == 0)
       return OptionTypes::NoPC;
@@ -122,7 +122,7 @@ class OptionsUtils
       throw Arccore::FatalErrorException(A_FUNCINFO, Arccore::String::format("preconditioner enum name: {0} is not consistent with axl definition", preconditioner_s));
   }
 
-  static std::string preconditionerEnumToString(OptionTypes::ePreconditioner preconditioner)
+  static std::string preconditionerEnumToString(const OptionTypes::ePreconditioner& preconditioner)
   {
     switch (preconditioner) {
     case OptionTypes::NoPC:

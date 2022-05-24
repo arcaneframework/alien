@@ -34,7 +34,6 @@
 #include <BelosBiCGStabSolMgr.hpp>
 #include <BelosSolverFactory_Tpetra.hpp>
 
-
 namespace Alien::Trilinos
 {
 class InternalLinearSolver : public IInternalLinearSolver<Matrix, Vector>
@@ -53,7 +52,7 @@ class InternalLinearSolver : public IInternalLinearSolver<Matrix, Vector>
   ~InternalLinearSolver() final = default;
 
   // Nothing to do
-  void updateParallelMng(ALIEN_UNUSED_PARAM Arccore::MessagePassing::IMessagePassingMng const * pm) const {}
+  void updateParallelMng(ALIEN_UNUSED_PARAM Arccore::MessagePassing::IMessagePassingMng const* pm) const {}
 
   bool solve(const Matrix& A, const Vector& b, Vector& x);
 

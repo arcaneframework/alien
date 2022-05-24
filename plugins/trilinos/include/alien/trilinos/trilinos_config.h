@@ -23,35 +23,33 @@
 #include <Tpetra_CrsMatrix.hpp>
 #include <Ifpack2_Factory.hpp>
 
-
-
 namespace Alien::Trilinos
 {
 #ifdef ALIEN_PLUGIN_TRILINOS_OMP
-typedef Kokkos::Compat::KokkosOpenMPWrapperNode         Node;
+typedef Kokkos::Compat::KokkosOpenMPWrapperNode Node;
 #elif ALIEN_PLUGIN_TRILINOS_CUDA
-typedef Kokkos::Compat::KokkosCudaWrapperNode           Node;
+typedef Kokkos::Compat::KokkosCudaWrapperNode Node;
 #elif ALIEN_PLUGIN_TRILINOS_HIP
-typedef Kokkos::Compat::KokkosHIPWrapperNode            Node;
+typedef Kokkos::Compat::KokkosHIPWrapperNode Node;
 #elif ALIEN_PLUGIN_TRILINOS_SERIAL
-typedef Kokkos::Compat::KokkosSerialWrapperNode         Node;
+typedef Kokkos::Compat::KokkosSerialWrapperNode Node;
 #elif ALIEN_PLUGIN_TRILINOS_THREADS
-typedef Kokkos::Compat::KokkosThreadsWrapperNode        Node;
+typedef Kokkos::Compat::KokkosThreadsWrapperNode Node;
 #elif ALIEN_PLUGIN_TRILINOS_SYCL
-typedef Kokkos::Compat::KokkosSYCLWrapperNode           Node;
+typedef Kokkos::Compat::KokkosSYCLWrapperNode Node;
 #else
-typedef Kokkos::Compat::KokkosOpenMPWrapperNode         Node;
+using Node = Kokkos::Compat::KokkosOpenMPWrapperNode;
 #endif
 
-typedef double                                          SC;
-typedef typename Tpetra::Map<>::local_ordinal_type      LO;
-typedef typename Tpetra::Map<>::global_ordinal_type     GO;
-typedef Tpetra::MultiVector<SC, LO, GO, Node>           MV;
-typedef Tpetra::Operator<SC,LO,GO,Node>                 OP;
-typedef Tpetra::Map<LO,GO,Node>                         map_type;
-typedef Tpetra::CrsMatrix<SC,LO,GO,Node>                crs_matrix_type;
-typedef Tpetra::RowMatrix<SC,LO,GO,Node>                row_matrix_type;
-typedef Ifpack2::Preconditioner<SC,LO,GO,Node>          prec_type;
+using SC = double;
+using LO = Tpetra::Map<>::local_ordinal_type;
+using GO = Tpetra::Map<>::global_ordinal_type;
+using MV = Tpetra::MultiVector<SC, LO, GO, Node>;
+using OP = Tpetra::Operator<SC, LO, GO, Node>;
+using map_type = Tpetra::Map<LO, GO, Node>;
+using crs_matrix_type = Tpetra::CrsMatrix<SC, LO, GO, Node>;
+using row_matrix_type = Tpetra::RowMatrix<SC, LO, GO, Node>;
+using prec_type = Ifpack2::Preconditioner<SC, LO, GO, Node>;
 
 void kokkos_node_verbose();
-}
+} // namespace Alien::Trilinos
