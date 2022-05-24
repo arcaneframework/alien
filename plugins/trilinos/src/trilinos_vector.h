@@ -35,9 +35,8 @@ class Vector : public IVectorImpl
  public:
   explicit Vector(const MultiVectorImpl* multi_impl);
 
-  virtual ~Vector();
+  ~Vector() final = default;
 
- public:
   void setProfile(int ilower, int iupper,int numGlobalElts, int numLocalElts);
 
   void setValues(Arccore::ConstArrayView<double> values);

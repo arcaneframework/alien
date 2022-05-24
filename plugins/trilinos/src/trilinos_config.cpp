@@ -22,19 +22,19 @@ namespace Alien::Trilinos
 {
 
 #ifdef ALIEN_PLUGIN_TRILINOS_OMP
-std::string kokkos_node = "OpenMP";
+const std::string kokkos_node = "OpenMP";
 #elif ALIEN_PLUGIN_TRILINOS_CUDA
-std::string kokkos_node = "Cuda";
+const std::string kokkos_node = "Cuda";
 #elif ALIEN_PLUGIN_TRILINOS_HIP
-std::string kokkos_node = "Hip";
+const std::string kokkos_node = "Hip";
 #elif ALIEN_PLUGIN_TRILINOS_SERIAL
-std::string kokkos_node = "Serial";
+const std::string kokkos_node = "Serial";
 #elif ALIEN_PLUGIN_TRILINOS_THREADS
-std::string kokkos_node = "Pthreads";
+const std::string kokkos_node = "Pthreads";
 #elif ALIEN_PLUGIN_TRILINOS_SYCL
-std::string kokkos_node = "Sycl";
+const std::string kokkos_node = "Sycl";
 #else
-std::string kokkos_node = "Default_OpenMP";
+const std::string kokkos_node = "Default_OpenMP";
 #endif
 
 void kokkos_node_verbose()

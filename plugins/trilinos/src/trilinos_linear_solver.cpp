@@ -53,13 +53,12 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   case OptionTypes::NoPC:
     break;
   default:
-    alien_fatal([&] { cout() << "Undefined IFPACK2 preconditioner option"; });
+    alien_fatal([this] { cout() << "Undefined IFPACK2 preconditioner option"; });
     break;
   }
 
   // Set the problem
-  bool set = problem.setProblem();
-  if (set == false) {
+  if (!problem.setProblem()) {
     std::cout << std::endl
               << "ERROR:  Belos::LinearProblem failed to set up correctly !" << std::endl;
     return -1;
@@ -70,21 +69,21 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   belosList.set("Maximum Iterations", m_options.numIterationsMax());
   belosList.set("Convergence Tolerance", m_options.stopCriteriaValue());
 
-  Belos::SolverManager<SC, MV, OP>* solver;
+  std::unique_ptr<Belos::SolverManager<SC, MV, OP>> solver;
 
   // allocate solver
   switch (m_options.solver()) {
   case OptionTypes::CG:
-    solver = new Belos::BlockCGSolMgr<SC, MV, OP>(rcpFromRef(problem), rcpFromRef(belosList));
+    solver = std::make_unique<Belos::BlockCGSolMgr<SC, MV, OP>>(rcpFromRef(problem), rcpFromRef(belosList));
     break;
   case OptionTypes::GMRES:
-    solver = new Belos::BlockGmresSolMgr<SC, MV, OP>(rcpFromRef(problem), rcpFromRef(belosList));
+    solver = std::make_unique<Belos::BlockGmresSolMgr<SC, MV, OP>>(rcpFromRef(problem), rcpFromRef(belosList));
     break;
   case OptionTypes::BICGSTAB:
-    solver = new Belos::BiCGStabSolMgr<SC, MV, OP>(rcpFromRef(problem), rcpFromRef(belosList));
+    solver = std::make_unique<Belos::BiCGStabSolMgr<SC, MV, OP>>(rcpFromRef(problem), rcpFromRef(belosList));
     break;
   default:
-    alien_fatal([&] {
+    alien_fatal([this] {
       cout() << "Undefined solver option";
     });
     break;
@@ -100,19 +99,17 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   if (ret == Belos::Converged) {
     // Get solver and timing infos
     const int numIters = solver->getNumIters();
-    double it_per_sec = numIters / sec;
+    double itPerSec = numIters / sec;
 
     // Print
-    int rank = A.internal()->getComm()->getRank();
-    if (rank == 0) {
+    if (int rank = A.internal()->getComm()->getRank(); rank == 0) {
       std::cout << "Belos Solver has converged." << std::endl;
       kokkos_node_verbose();
       std::cout << "numIters : " << numIters << std::endl;
       std::cout << "achieved tol : " << solver->achievedTol() << std::endl;
       std::cout << "Execution time [s]: " << sec << std::endl;
-      std::cout << "Iterations per second : " << it_per_sec << std::endl;
+      std::cout << "Iterations per second : " << itPerSec << std::endl;
     }
-    /*std::cout << "Residual norm : " << residual_norm << std::endl;*/
 
     // update solver infos
     /*m_status.residual = residual_norm;*/
@@ -126,9 +123,6 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
     m_status.succeeded = false;
     std::cout << "Belos Solver did not converge !" << std::endl;
   }
-
-  if (solver)
-    delete solver;
 
   return m_status.succeeded;
 }

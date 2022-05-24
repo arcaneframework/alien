@@ -39,14 +39,13 @@ class ALIEN_TRILINOS_EXPORT InternalLinearAlgebra
 {
 
   //typedefs
-  typedef double SC;
+  using SC = double;
 
  public:
-  InternalLinearAlgebra() {}
+  InternalLinearAlgebra() = default;
 
-  virtual ~InternalLinearAlgebra() {}
+  ~InternalLinearAlgebra() = default;
 
- public:
   // IInternalLinearAlgebra interface.
   Arccore::Real norm0(const Vector& x) const override;
 
@@ -54,7 +53,7 @@ class ALIEN_TRILINOS_EXPORT InternalLinearAlgebra
 
   Arccore::Real norm2(const Vector& x) const override;
 
-  void mult(const Matrix& a, const Vector& x, Vector& r) const override;
+  void mult(const Matrix& a, const Vector& x, Vector& r) const final;
 
   void axpy(Arccore::Real alpha, const Vector& x, Vector& r) const override;
 

@@ -41,26 +41,19 @@ class InternalLinearSolver : public IInternalLinearSolver<Matrix, Vector>
 , public ObjectWithTrace
 {
  public:
-
-  typedef SolverStatus Status;
+  using Status = SolverStatus;
 
   InternalLinearSolver() = default;
 
   explicit InternalLinearSolver(const Options& options)
   : m_status()
-  , m_init_time(0.0)
-  , m_total_solve_time(0.0)
-  , m_solve_num(0)
-  , m_total_iter_num(0)
-  , m_stat()
   , m_options(options)
   {}
 
-  virtual ~InternalLinearSolver() = default;
+  ~InternalLinearSolver() final = default;
 
- public:
   // Nothing to do
-  void updateParallelMng(ALIEN_UNUSED_PARAM Arccore::MessagePassing::IMessagePassingMng* pm) {}
+  void updateParallelMng(ALIEN_UNUSED_PARAM Arccore::MessagePassing::IMessagePassingMng const * pm) const {}
 
   bool solve(const Matrix& A, const Vector& b, Vector& x);
 
@@ -76,15 +69,14 @@ class InternalLinearSolver : public IInternalLinearSolver<Matrix, Vector>
  private:
   Status m_status;
 
-  Arccore::Real m_init_time;
-  Arccore::Real m_total_solve_time;
-  Arccore::Integer m_solve_num;
-  Arccore::Integer m_total_iter_num;
+  Arccore::Real m_init_time = 0.0;
+  Arccore::Real m_total_solve_time = 0.0;
+  Arccore::Integer m_solve_num = 0;
+  Arccore::Integer m_total_iter_num = 0;
 
   SolverStat m_stat;
   Options m_options;
 
- private:
   void checkError(const Arccore::String& msg, int ierr, int skipError = 0) const;
 };
 } // namespace Alien::Trilinos
