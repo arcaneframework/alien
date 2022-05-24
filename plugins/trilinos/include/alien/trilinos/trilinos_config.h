@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <alien/ginkgo/TrilinosConfig.h>
+#include <alien/trilinos/TrilinosBackend.h>
 #include <Tpetra_Core.hpp>
 #include <Tpetra_CrsMatrix.hpp>
 #include <Ifpack2_Factory.hpp>
@@ -26,17 +26,17 @@
 namespace Alien::Trilinos
 {
 #ifdef ALIEN_PLUGIN_TRILINOS_OMP
-typedef Kokkos::Compat::KokkosOpenMPWrapperNode Node;
+using Node = Kokkos::Compat::KokkosOpenMPWrapperNode;
 #elif ALIEN_PLUGIN_TRILINOS_CUDA
-typedef Kokkos::Compat::KokkosCudaWrapperNode Node;
+using Node = Kokkos::Compat::KokkosCudaWrapperNode;
 #elif ALIEN_PLUGIN_TRILINOS_HIP
-typedef Kokkos::Compat::KokkosHIPWrapperNode Node;
+using Node = Kokkos::Compat::KokkosHIPWrapperNode;
 #elif ALIEN_PLUGIN_TRILINOS_SERIAL
-typedef Kokkos::Compat::KokkosSerialWrapperNode Node;
+using Node = Kokkos::Compat::KokkosSerialWrapperNode;
 #elif ALIEN_PLUGIN_TRILINOS_THREADS
-typedef Kokkos::Compat::KokkosThreadsWrapperNode Node;
+using Node = Kokkos::Compat::KokkosThreadsWrapperNode;
 #elif ALIEN_PLUGIN_TRILINOS_SYCL
-typedef Kokkos::Compat::KokkosSYCLWrapperNode Node;
+using Node = Kokkos::Compat::KokkosSYCLWrapperNode;
 #else
 using Node = Kokkos::Compat::KokkosOpenMPWrapperNode;
 #endif

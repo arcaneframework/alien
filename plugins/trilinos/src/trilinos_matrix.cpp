@@ -48,10 +48,6 @@ void Matrix::setProfile(int numLocalRows, int numGlobalRows, const Arccore::Uniq
   using Teuchos::RCP;
   using Teuchos::rcp;
 
-  //if already exists, dealloc
-  if (mtx)
-    mtx.release();
-
   // map
   RCP<const map_type> rowMap = rcp(new map_type(numGlobalRows, numLocalRows, 0, t_comm));
 

@@ -38,9 +38,6 @@ class ALIEN_TRILINOS_EXPORT InternalLinearAlgebra
 : public IInternalLinearAlgebra<Matrix, Vector>
 {
 
-  //typedefs
-  using SC = double;
-
  public:
   InternalLinearAlgebra() = default;
 

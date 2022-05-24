@@ -5,10 +5,6 @@ find_package(MPI REQUIRED)
 
 
 # ----------------------------------------------------------------------------
-# Disable Kokkos warning about not supporting C++ extensions
-message("---- Trilinos CMAKE starts here ! ----")
-set(CMAKE_CXX_EXTENSIONS OFF)
-
 find_package(Trilinos REQUIRED COMPONENTS Teuchos Kokkos KokkosKernels Belos Tpetra Ifpack2)
 
 # Echo trilinos build info just for fun
@@ -27,14 +23,8 @@ MESSAGE("   Trilinos_BUILD_SHARED_LIBS = ${Trilinos_BUILD_SHARED_LIBS}")
 MESSAGE("End of Trilinos details\n")
 
 # Make sure to use same compilers and flags as Trilinos
-#MESSAGE("   CMAKE_CXX_COMPILER = ${CMAKE_CXX_COMPILER}")
-#MESSAGE("   Trilinos_CXX_COMPILER = ${Trilinos_CXX_COMPILER}")
-#MESSAGE("   CMAKE_CXX_FLAGS = ${CMAKE_CXX_FLAGS}")
-#MESSAGE("   Trilinos_CXX_COMPILER_FLAGS =  ${Trilinos_CXX_COMPILER_FLAGS} ")
-
-#set(CMAKE_CXX_COMPILER ${Trilinos_CXX_COMPILER} )
-set(CMAKE_CXX_FLAGS  "${Trilinos_CXX_COMPILER_FLAGS} ${CMAKE_CXX_FLAGS}")
-
+#MESSAGE("   Trilinos_CXX_COMPILER_FLAGS = ${Trilinos_CXX_COMPILER_FLAGS}")
+string(REPLACE " " ";" Trilinos_CXX_COMPILER_FLAGS ${Trilinos_CXX_COMPILER_FLAGS})
 
 # ----------------------------------------------------------------------------
 # ----------------------------------------------------------------------------
@@ -55,6 +45,12 @@ add_library(trilinos_wrapper
         src/converters/simplecsr_to_trilinos_matrix.cpp
         src/trilinos_config.cpp
         )
+
+set_property(TARGET trilinos_wrapper
+        APPEND_STRING
+        PROPERTY
+        COMPILE_OPTIONS ${Trilinos_CXX_COMPILER_FLAGS}
+)
 
 target_link_libraries(trilinos_wrapper PUBLIC
         Alien::alien_core
@@ -87,8 +83,8 @@ else ()
 endif ()
 
 configure_file(
-        Trilinos.config.in
-        ${CMAKE_CURRENT_BINARY_DIR}/include/alien/ginkgo/TrilinosConfig.h
+        Trilinos.backend.in
+        ${CMAKE_CURRENT_BINARY_DIR}/include/alien/trilinos/TrilinosBackend.h
 )
 
 target_include_directories(trilinos_wrapper PUBLIC
@@ -133,8 +129,11 @@ install(TARGETS trilinos_wrapper EXPORT ${ALIENTRILINOS_EXPORT_TARGET}
         )
 
 install(
-        FILES ${CMAKE_CURRENT_BINARY_DIR}/include/alien/trilinos/export.h
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/alien/trilinos
+        FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/include/alien/trilinos/export.h
+        ${CMAKE_CURRENT_BINARY_DIR}/include/alien/trilinos/TrilinosBackend.h
+        DESTINATION
+        ${CMAKE_INSTALL_INCLUDEDIR}/alien/trilinos
 )
 
 install(EXPORT ${ALIENTRILINOS_EXPORT_TARGET}

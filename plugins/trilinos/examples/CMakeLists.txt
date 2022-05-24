@@ -37,12 +37,6 @@ target_include_directories(trilinos_wrapper PUBLIC
 configure_file(msc00726.mtx msc00726.mtx COPYONLY)
 configure_file(mesh1em6.mtx mesh1em6.mtx COPYONLY)
 
-configure_file(/home/mollern/Documents/Dev/cea-ifpen/data/algebre_test/algebre_first/matrix/matrix_default_name.mtx matrix_first.mtx COPYONLY)
-configure_file(/home/mollern/Documents/Dev/cea-ifpen/data/algebre_test/algebre_first/vector/vector_default_name.mtx vector_first.mtx COPYONLY)
-
-configure_file(/home/mollern/Documents/Dev/cea-ifpen/data/simple.mtx simple.mtx COPYONLY)
-configure_file(/home/mollern/Documents/Dev/cea-ifpen/data/simple_rhs.mtx simple_rhs.mtx COPYONLY)
-
 if (ALIEN_BENCHMARK)
     enable_testing()
     include(LoadAlienTest)
