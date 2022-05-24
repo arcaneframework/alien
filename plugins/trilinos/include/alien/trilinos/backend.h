@@ -35,7 +35,7 @@ extern IInternalLinearSolver<Matrix, Vector>* InternalLinearSolverFactory(const 
 extern IInternalLinearSolver<Matrix, Vector>* InternalLinearSolverFactory();
 
 extern IInternalLinearAlgebra<Matrix, Vector>* InternalLinearAlgebraFactory();
-} // namespace Alien::trilinos
+} // namespace Alien::Trilinos
 
 namespace Alien
 {

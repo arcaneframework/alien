@@ -37,19 +37,18 @@ class Vector : public IVectorImpl
 
   ~Vector() final = default;
 
-  void setProfile(int ilower, int iupper,int numGlobalElts, int numLocalElts);
+  void setProfile(int ilower, int iupper, int numGlobalElts, int numLocalElts);
 
   void setValues(Arccore::ConstArrayView<double> values);
 
   void getValues(Arccore::ArrayView<double> values) const;
 
-  Teuchos::RCP<MV> const & internal() const { return vec; }
-  Teuchos::RCP<MV> & internal() { return vec; }
+  Teuchos::RCP<MV> const& internal() const { return vec; }
+  Teuchos::RCP<MV>& internal() { return vec; }
 
  private:
   Teuchos::RCP<MV> vec;
   Teuchos::RCP<const Teuchos::Comm<int>> t_comm;
-
 };
 
 } // namespace Alien::Trilinos
