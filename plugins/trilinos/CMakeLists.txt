@@ -50,7 +50,7 @@ set_property(TARGET trilinos_wrapper
         APPEND_STRING
         PROPERTY
         COMPILE_OPTIONS ${Trilinos_CXX_COMPILER_FLAGS}
-)
+        )
 
 target_link_libraries(trilinos_wrapper PUBLIC
         Alien::alien_core
@@ -110,7 +110,7 @@ add_subdirectory(examples)
 
 # Tests
 if (ALIEN_TRILINOS_UNIT_TESTS)
-    #add_subdirectory(tests)
+    add_subdirectory(tests)
 endif (ALIEN_TRILINOS_UNIT_TESTS)
 
 # Install
