@@ -41,32 +41,32 @@ class ALIEN_TRILINOS_EXPORT InternalLinearAlgebra
  public:
   InternalLinearAlgebra() = default;
 
-  ~InternalLinearAlgebra() = default;
+  ~InternalLinearAlgebra() final = default;
 
   // IInternalLinearAlgebra interface.
-  Arccore::Real norm0(const Vector& x) const override;
+  Arccore::Real norm0(const Vector& x) const final;
 
-  Arccore::Real norm1(const Vector& x) const override;
+  Arccore::Real norm1(const Vector& x) const final;
 
-  Arccore::Real norm2(const Vector& x) const override;
+  Arccore::Real norm2(const Vector& x) const final;
 
   void mult(const Matrix& a, const Vector& x, Vector& r) const final;
 
-  void axpy(Arccore::Real alpha, const Vector& x, Vector& r) const override;
+  void axpy(Arccore::Real alpha, const Vector& x, Vector& r) const final;
 
-  void aypx(Arccore::Real alpha, Vector& y, const Vector& x) const override;
+  void aypx(Arccore::Real alpha, Vector& y, const Vector& x) const final;
 
-  void copy(const Vector& x, Vector& r) const override;
+  void copy(const Vector& x, Vector& r) const final;
 
-  Arccore::Real dot(const Vector& x, const Vector& y) const override;
+  Arccore::Real dot(const Vector& x, const Vector& y) const final;
 
-  void scal(Arccore::Real alpha, Vector& x) const override;
+  void scal(Arccore::Real alpha, Vector& x) const final;
 
-  void diagonal(const Matrix& a, Vector& x) const override;
+  void diagonal(const Matrix& a, Vector& x) const final;
 
-  void reciprocal(Vector& x) const override;
+  void reciprocal(Vector& x) const final;
 
-  void pointwiseMult(const Vector& x, const Vector& y, Vector& w) const override;
+  void pointwiseMult(const Vector& x, const Vector& y, Vector& w) const final;
 };
 
 Arccore::Real
