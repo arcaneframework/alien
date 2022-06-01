@@ -5,7 +5,7 @@ find_package(MPI REQUIRED)
 
 
 # ----------------------------------------------------------------------------
-find_package(Trilinos REQUIRED COMPONENTS Teuchos Kokkos KokkosKernels Belos Tpetra Ifpack2)
+find_package(Trilinos 13 REQUIRED COMPONENTS Teuchos Kokkos KokkosKernels Belos Tpetra Ifpack2)
 
 # Echo trilinos build info just for fun
 MESSAGE("\nFound Trilinos!  Here are the details: ")
