@@ -86,7 +86,7 @@ TEST_F(SimpleLinearProblemFixtureRef, ParametrizedSolve)
   Alien::Vector x(m_matrix.distribution().rowDistribution());
 
   auto options = Alien::Trilinos::Options()
-                 .numIterationsMax(10)
+                 .numIterationsMax(50)
                  .stopCriteriaValue(1e-10)
                  .preconditioner(Alien::Trilinos::OptionTypes::Relaxation)
                  .solver(Alien::Trilinos::OptionTypes::GMRES);
