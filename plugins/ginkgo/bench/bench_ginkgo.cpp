@@ -108,35 +108,33 @@ int main(int argc, char** argv)
       return -1;
     }
 
-  // Read the preconditioner
-  Alien::Ginkgo::OptionTypes::ePreconditioner prec;
-  if (std::string(argv[2]) == "Jacobi") {
-    prec = Alien::Ginkgo::OptionTypes::Jacobi;
-  }
-  else if (std::string(argv[2]) == "Ilu") {
-    prec = Alien::Ginkgo::OptionTypes::Ilu;
-  }
-  else if (std::string(argv[2]) == "NoPC") {
-    prec = Alien::Ginkgo::OptionTypes::NoPC;
-  }
-  else {
-    std::cerr << "Unrecognized preconditioner : " << argv[2] << "\n"
-              << "  - preconditioner list : (Jacobi|Ilu|NoPC) \n";
-    return -1;
-  }
+    // Read the preconditioner
+    if (std::string(argv[2]) == "Jacobi") {
+      prec = Alien::Ginkgo::OptionTypes::Jacobi;
+    }
+    else if (std::string(argv[2]) == "Ilu") {
+      prec = Alien::Ginkgo::OptionTypes::Ilu;
+    }
+    else if (std::string(argv[2]) == "NoPC") {
+      prec = Alien::Ginkgo::OptionTypes::NoPC;
+    }
+    else {
+      std::cerr << "Unrecognized preconditioner : " << argv[2] << "\n"
+                << "  - preconditioner list : (Jacobi|Ilu|NoPC) \n";
+      return -1;
+    }
 
     matrix_file = std::string(argv[3]);
-    if (argc == 5) {
+    if (argc >= 5) {
       vec_file = std::string(argv[4]);
     }
     else {
       vec_file = "";
     }
-  }
-
-  // Read the optional block size
-  if (argv[5]) {
-    block_size = atoi(argv[5]);
+    // Read the optional block size
+    if (argc >= 6) {
+      block_size = std::atoi(argv[5]);
+    }
   }
 
   auto ret = 0;
