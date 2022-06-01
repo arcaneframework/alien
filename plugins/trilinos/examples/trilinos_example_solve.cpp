@@ -176,7 +176,7 @@ int main(int argc, char** argv)
   }
   else {
     std::cerr << "Unrecognized preconditioner : " << argv[2] << "\n"
-              << "  - preconditioner list : (Jacobi|NoPC) \n";
+              << "  - preconditioner list : (Relaxation|NoPC) \n";
     return -1;
   }
 

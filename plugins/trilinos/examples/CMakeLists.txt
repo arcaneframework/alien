@@ -43,11 +43,19 @@ if (ALIEN_BENCHMARK)
 
     alien_test(
             BENCH trilinos_wrapper
-            NAME trilinos.example
+            NAME trilinos.example.cg
             PROCS 2
             COMMAND example_trilinos
+            OPTIONS CG Relaxation msc00726.mtx
     )
 
+    alien_test(
+            BENCH trilinos_wrapper
+            NAME trilinos.example.gmres
+            PROCS 2
+            COMMAND example_trilinos
+            OPTIONS GMRES Relaxation mesh1em6.mtx
+    )
     #-----------------------------------------------------------
     # Bench recap
     #-----------------------------------------------------------
