@@ -90,16 +90,18 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
     precond_setup_function = HYPRE_BoomerAMGSetup;
     precond_destroy_function = HYPRE_BoomerAMGDestroy;
 
+#ifdef ALIEN_HYPRE_DEVICE
     // GPU only support a subset of paramater values.
     // see https://hypre.readthedocs.io/en/latest/solvers-boomeramg.html#gpu-supported-options
     HYPRE_BoomerAMGSetRelaxType(preconditioner, 3); /* 3, 4, 6, 7, 18, 11, 12 */
     HYPRE_BoomerAMGSetRelaxOrder(preconditioner, false); /* must be false */
     HYPRE_BoomerAMGSetCoarsenType(preconditioner, 8); /* 8 */
-    // FIXME: understand why 3 and 15 do not work with unit tests.
+    // FIXME: understand why 3 and 15 do not work with unit tests on CPUs.
     HYPRE_BoomerAMGSetInterpType(preconditioner, 14); /* 3, 15, 6, 14, 18 */
     HYPRE_BoomerAMGSetAggInterpType(preconditioner, 5); /* 5 or 7 */
     HYPRE_BoomerAMGSetKeepTranspose(preconditioner, true); /* keep transpose to avoid SpMTV */
     HYPRE_BoomerAMGSetRAP2(preconditioner, false); /* RAP in two multiplications (default: FALSE) */
+#endif // ALIEN_HYPRE_DEVICE
     break;
   case OptionTypes::ParaSailsPC:
     precond_name = "parasails";
