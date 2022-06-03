@@ -95,7 +95,7 @@ conda env create -f alien-env.yml
 conda activate alien-env
 ```
 
-Then the CMAKE OPTIONS has to be activated in the Alien configuration step 
+Turn ON the ALIEN_GENERATE_DOCUMENTATION Option in the Alien configuration step.
 
 ```shell script
 cmake -S `pwd`/alien \

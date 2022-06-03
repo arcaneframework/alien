@@ -51,9 +51,11 @@ The Space concept enable to modelize the mathematical algebraic real space :math
 
 To build this concept several tools are provided:
 
-- the `IndexeManager` package provides helper tools to manage `Integer IndexSets`
+- the `IndexManager` package provides helper tools to manage `Integer IndexSets`
 
 - the `Distribution` package provides helper tools to manage the partition of `IndexSets` between MPI processes
+
+The following code illustrates how to build with an `IndexManager` object, families of unique indexes and different `IndexSet` objects.
 
 .. code-block:: bash
 
@@ -110,24 +112,24 @@ To build this concept several tools are provided:
     // Combine all index set and create Linear system index system
     index_manager.prepare();
 
+
+Once some `IndexSet` are built and enregistred in the `IndexManager`, matrix and vector `Distribution` objects
+are built to manage the distribution of indexes between MPI processes.
+
+The following code illustrates how to build theses objects.
+
+.. code-block:: bash
+
     auto global_size = index_manager.globalSize();
     auto local_size = index_manager.localSize();
 
     trace_mng->info() << "GLOBAL SIZE : " << global_size;
     trace_mng->info() << "LOCAL SIZE  : " << local_size;
 
-    /*
-     * DEFINITION of
-     * - Alien Space,
-     * - matrix and vector distributions
-     * to manage the distribution of indexes between all MPI processes
-     */
-
-    auto space = Alien::Space(global_size, "MySpace");
-
-    auto mdist =
-    Alien::MatrixDistribution(global_size, global_size, local_size, parallel_mng);
-    auto vdist = Alien::VectorDistribution(global_size, local_size, parallel_mng);
+    auto mdist = Alien::MatrixDistribution(global_size, global_size, 
+                                           local_size, parallel_mng);
+    auto vdist = Alien::VectorDistribution(global_size, 
+                                           local_size, parallel_mng);
 
     trace_mng->info() << "MATRIX DISTRIBUTION INFO";
     trace_mng->info() << "GLOBAL ROW SIZE : " << mdist.globalRowSize();
@@ -139,6 +141,19 @@ To build this concept several tools are provided:
     trace_mng->info() << "GLOBAL SIZE : " << vdist.globalSize();
     trace_mng->info() << "LOCAL SIZE  : " << vdist.localSize();
 
+
+Then `Space` objects can be built as follows:
+
+.. code-block:: bash
+
+    /*
+     * DEFINITION of
+     * - Alien Space,
+     * - matrix and vector distributions
+     * to manage the distribution of indexes between all MPI processes
+     */
+
+    auto space = Alien::Space(global_size, "MySpace");
 
 Matrix
 ------
