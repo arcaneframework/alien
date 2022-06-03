@@ -95,7 +95,8 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
     HYPRE_BoomerAMGSetRelaxType(preconditioner, 3); /* 3, 4, 6, 7, 18, 11, 12 */
     HYPRE_BoomerAMGSetRelaxOrder(preconditioner, false); /* must be false */
     HYPRE_BoomerAMGSetCoarsenType(preconditioner, 8); /* 8 */
-    HYPRE_BoomerAMGSetInterpType(preconditioner, 3); /* 3, 15, 6, 14, 18 */
+    // FIXME: understand why 3 and 15 do not work with unit tests.
+    HYPRE_BoomerAMGSetInterpType(preconditioner, 14); /* 3, 15, 6, 14, 18 */
     HYPRE_BoomerAMGSetAggInterpType(preconditioner, 5); /* 5 or 7 */
     HYPRE_BoomerAMGSetKeepTranspose(preconditioner, true); /* keep transpose to avoid SpMTV */
     HYPRE_BoomerAMGSetRAP2(preconditioner, false); /* RAP in two multiplications (default: FALSE) */
@@ -264,7 +265,9 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
 
   checkError("Hypre " + solver_name + " solver Setup",
              (*solver_setup_function)(solver, par_a, par_rhs, par_x));
-  m_status.succeeded = ((*solver_solve_function)(solver, par_a, par_rhs, par_x) == 0);
+  HYPRE_Int error;
+  error = (*solver_solve_function)(solver, par_a, par_rhs, par_x);
+  m_status.succeeded = (error == 0);
 
   if (m_status.succeeded) {
     checkError("Hypre " + solver_name + " solver GetNumIterations",
