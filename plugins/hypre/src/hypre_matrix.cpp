@@ -26,10 +26,10 @@
 
 #include <HYPRE.h>
 
-namespace Alien::Hypre
+namespace Alien
 {
 Matrix::Matrix(const MultiMatrixImpl* multi_impl)
-: IMatrixImpl(multi_impl, AlgebraTraits<BackEnd::tag::hypre>::name())
+: IMatrixImpl(multi_impl, "hypre")
 , m_hypre(nullptr)
 {
   const auto& row_space = multi_impl->rowSpace();
@@ -89,4 +89,4 @@ void Matrix::setRowValues(int rows, Arccore::ConstArrayView<int> cols, Arccore::
   }
 }
 
-} // namespace Alien::Hypre
+} // namespace Alien

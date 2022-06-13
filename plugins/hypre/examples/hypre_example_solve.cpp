@@ -16,11 +16,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <alien/hypre/backend.h>
-
 #include <arccore/message_passing_mpi/StandaloneMpiMessagePassingMng.h>
 
 #include <alien/ref/AlienRefSemantic.h>
+
+#include <alien/core/backend/BackEnd.h>
+#include <alien/expression/solver/ILinearSolver.h>
+#include <alien/expression/solver/ILinearAlgebra.h>
 
 int test()
 {
@@ -73,9 +75,10 @@ int test()
 
   Alien::Vector b(size, pm);
 
-  Alien::Hypre::LinearAlgebra algebra;
+  Alien::BackEnd::BackendHandle* backendHandle = Alien::BackEnd::loadBackend("hypre");
+  //Alien::ILinearAlgebra algebra = backendHandle->getLinearAlgebra();
 
-  algebra.mult(A, xe, b);
+  //algebra.mult(A, xe, b);
 
   Alien::Vector x(size, pm);
 
@@ -89,7 +92,8 @@ int test()
   //
   //  auto solver = Alien::Hypre::LinearSolver (options);
 
-  auto solver = Alien::Hypre::LinearSolver();
+  //auto solver = Alien::Hypre::LinearSolver();
+  auto solver = Alien::LinearSolver("hypre");
 
   solver.solve(A, b, x);
 
@@ -97,28 +101,28 @@ int test()
 
   Alien::Vector r(size, pm);
 
-  {
-    Alien::Vector tmp(size, pm);
-    tm->info() << "t = Ax";
-    algebra.mult(A, x, tmp);
-    tm->info() << "r = t";
-    algebra.copy(tmp, r);
-    tm->info() << "r -= b";
-    algebra.axpy(-1., b, r);
-  }
+  //{
+  //  Alien::Vector tmp(size, pm);
+  //  tm->info() << "t = Ax";
+  //  algebra.mult(A, x, tmp);
+  //  tm->info() << "r = t";
+  //  algebra.copy(tmp, r);
+  //  tm->info() << "r -= b";
+  //  algebra.axpy(-1., b, r);
+  //}
 
-  auto norm = algebra.norm2(r);
+  //auto norm = algebra.norm2(r);
 
-  tm->info() << " => ||r|| = " << norm;
+  //tm->info() << " => ||r|| = " << norm;
 
-  tm->info() << "* r = || x - xe ||";
+  //tm->info() << "* r = || x - xe ||";
 
-  {
-    tm->info() << "r = x";
-    algebra.copy(x, r);
-    tm->info() << "r -= xe";
-    algebra.axpy(-1., xe, r);
-  }
+  //{
+  //  tm->info() << "r = x";
+  //  algebra.copy(x, r);
+  //  tm->info() << "r -= xe";
+  //  algebra.axpy(-1., xe, r);
+  //}
 
   tm->info() << " => ||r|| = " << norm;
 

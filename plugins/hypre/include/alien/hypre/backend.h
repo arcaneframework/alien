@@ -20,22 +20,22 @@
 
 #include <alien/core/backend/BackEnd.h>
 #include <alien/core/backend/LinearSolver.h>
-#include <alien/core/backend/LinearAlgebra.h>
 
-namespace Alien::Hypre
-{
+namespace Alien {
+
 class Matrix;
 
 class Vector;
 
 class Options;
 
-extern IInternalLinearSolver<Matrix, Vector>* InternalLinearSolverFactory(const Options& options);
+class ILinearSolver;
 
-extern IInternalLinearSolver<Matrix, Vector>* InternalLinearSolverFactory();
+extern IInternalLinearSolver* LinearSolverFactory(const BackEnd::Options& options);
 
-extern IInternalLinearAlgebra<Matrix, Vector>* InternalLinearAlgebraFactory();
-} // namespace Alien::Hypre
+extern IInternalLinearSolver* LinearSolverFactory();
+} // namespace Alien
+
 
 namespace Alien
 {
@@ -49,42 +49,34 @@ namespace BackEnd
   } // namespace tag
 } // namespace BackEnd
 
-template <>
-struct AlgebraTraits<BackEnd::tag::hypre>
-{
-  // types
-  using matrix_type = Hypre::Matrix;
-  using vector_type = Hypre::Vector;
-  using options_type = Hypre::Options;
-  using algebra_type = IInternalLinearAlgebra<matrix_type, vector_type>;
-  using solver_type = IInternalLinearSolver<matrix_type, vector_type>;
 
-  // factory to build algebra
-  static auto* algebra_factory()
+class Plugin : public BackEnd::IPlugin
+{
+  // factories to default solver
+  IInternalLinearSolver* solver_factory()
   {
-    return Hypre::InternalLinearAlgebraFactory();
+    return LinearSolverFactory();
   }
 
   // factories to build solver
-  static auto* solver_factory(const options_type& options)
+  IInternalLinearSolver* solver_factory(const Alien::BackEnd::Options& options)
   {
-    return Hypre::InternalLinearSolverFactory(options);
+    return LinearSolverFactory(options);
   }
 
-  // factories to build default solver
-  static auto* solver_factory()
-  {
-    return Hypre::InternalLinearSolverFactory();
-  }
-
-  static BackEndId name() { return "hypre"; }
+  BackEndId name() { return "hypre"; }
 };
 
-} // namespace Alien
+extern "C" {
+  inline Plugin* create()
+  {
+    return new Plugin;
+  }
 
-// user interface
-namespace Alien::Hypre
-{
-using LinearSolver = Alien::LinearSolver<BackEnd::tag::hypre>;
-using LinearAlgebra = Alien::LinearAlgebra<BackEnd::tag::hypre>;
-} // namespace Alien::Hypre
+  inline void destroy(Plugin* p)
+  {
+    delete p;
+  }
+}
+
+} // namespace Alien

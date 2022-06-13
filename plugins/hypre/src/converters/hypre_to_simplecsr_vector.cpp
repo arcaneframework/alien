@@ -23,7 +23,7 @@
 #include <alien/kernels/simple_csr/SimpleCSRVector.h>
 #include <alien/kernels/simple_csr/SimpleCSRBackEnd.h>
 
-#include <alien/hypre/backend.h>
+#include "../../include/alien/hypre/backend.h"
 
 class Hypre_to_SimpleCSR_VectorConverter : public Alien::IVectorConverter
 {
@@ -33,7 +33,7 @@ class Hypre_to_SimpleCSR_VectorConverter : public Alien::IVectorConverter
   virtual ~Hypre_to_SimpleCSR_VectorConverter() {}
 
  public:
-  Alien::BackEndId sourceBackend() const { return Alien::AlgebraTraits<Alien::BackEnd::tag::hypre>::name(); }
+  Alien::BackEndId sourceBackend() const { return "hypre"; }
 
   Alien::BackEndId targetBackend() const { return Alien::AlgebraTraits<Alien::BackEnd::tag::simplecsr>::name(); }
 
@@ -43,7 +43,7 @@ class Hypre_to_SimpleCSR_VectorConverter : public Alien::IVectorConverter
 void Hypre_to_SimpleCSR_VectorConverter::convert(
 const Alien::IVectorImpl* sourceImpl, Alien::IVectorImpl* targetImpl) const
 {
-  const auto& v = cast<Alien::Hypre::Vector>(sourceImpl, sourceBackend());
+  const auto& v = cast<Alien::Vector>(sourceImpl, sourceBackend());
   auto& v2 = cast<Alien::SimpleCSRVector<Arccore::Real>>(targetImpl, targetBackend());
 
   alien_debug([&] {

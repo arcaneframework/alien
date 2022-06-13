@@ -181,8 +181,7 @@ class ALIEN_EXPORT MultiMatrixImpl : public TimestampMng
    *
    * \returns The up to date matrix in the requested implementation
    */
-  template <typename tag>
-  const typename AlgebraTraits<tag>::matrix_type& get() const;
+  const IMatrixImpl& get(BackEndId) const;
 
   /*!
    * \brief Get a specific matrix implementation
@@ -193,12 +192,10 @@ class ALIEN_EXPORT MultiMatrixImpl : public TimestampMng
    * \param[in] update_stamp Whether or not the timestamp should be increased or not
    * \returns The up to date matrix in the requested implementation
    */
-  template <typename tag>
-  typename AlgebraTraits<tag>::matrix_type& get(const bool update_stamp);
+  IMatrixImpl& get(BackEndId, const bool update_stamp);
 
   //! Release a matrix implementation
-  template <typename tag>
-  void release() const;
+  void release(BackEndId) const;
 
   /*!
    * \brief Clone this object
@@ -218,7 +215,6 @@ class ALIEN_EXPORT MultiMatrixImpl : public TimestampMng
    * \param[in] backend The id of the specific implementation
    * \returns The matrix in the requested format
    */
-  template <typename matrix_type>
   IMatrixImpl*& getImpl(BackEndId backend) const;
 
   /*!
@@ -233,8 +229,7 @@ class ALIEN_EXPORT MultiMatrixImpl : public TimestampMng
    * \param[in] backend The implementation backend id
    * \param[in] m The matrix to insert
    */
-  template <typename matrix_type>
-  void insert(BackEndId backend, matrix_type* m);
+  void insert(BackEndId backend, IMatrixImpl* m);
 
  private:
   //! The matrix row space
@@ -258,48 +253,45 @@ class ALIEN_EXPORT MultiMatrixImpl : public TimestampMng
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-template <typename tag>
-const typename AlgebraTraits<tag>::matrix_type&
-MultiMatrixImpl::get() const
+const IMatrixImpl&
+MultiMatrixImpl::get(BackEndId backEndId) const
 {
   // TOCHECK : to be removed or not ?
   //  ALIEN_ASSERT(!m_row_space.isNull(), ("Null row space matrix access"));
   //  ALIEN_ASSERT(!m_col_space.isNull(), ("Null col space matrix access"));
-  typedef typename AlgebraTraits<tag>::matrix_type matrix_type;
-  IMatrixImpl*& impl2 = getImpl<matrix_type>(AlgebraTraits<tag>::name());
+  // FIXME: type
+  IMatrixImpl*& impl2 = getImpl(backEndId);
   ALIEN_ASSERT(
-  (impl2->backend() == AlgebraTraits<tag>::name()), ("Inconsistent backend"));
+  (impl2->backend() == backEndId), ("Inconsistent backend"));
   updateImpl(impl2);
-  return *dynamic_cast<matrix_type*>(impl2);
+  return *impl2;
 }
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-template <typename tag>
-typename AlgebraTraits<tag>::matrix_type&
-MultiMatrixImpl::get(const bool update_stamp)
+IMatrixImpl&
+MultiMatrixImpl::get(BackEndId backEndId, const bool update_stamp)
 {
   // TOCHECK : to be removed or not ?
   //  ALIEN_ASSERT(!m_row_space.isNull(), ("Null row space matrix access"));
   //  ALIEN_ASSERT(!m_col_space.isNull(), ("Null col space matrix access"));
-  typedef typename AlgebraTraits<tag>::matrix_type matrix_type;
-  IMatrixImpl*& impl2 = getImpl<matrix_type>(AlgebraTraits<tag>::name());
+  // FIXME: type
+  IMatrixImpl*& impl2 = getImpl(backEndId);
   ALIEN_ASSERT(
-  (impl2->backend() == AlgebraTraits<tag>::name()), ("Inconsistent backend"));
+  (impl2->backend() == backEndId), ("Inconsistent backend"));
   updateImpl(impl2);
   if (update_stamp)
     impl2->updateTimestamp();
-  return *dynamic_cast<matrix_type*>(impl2);
+  return *impl2;
 }
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-template <typename tag>
-void MultiMatrixImpl::release() const
+void MultiMatrixImpl::release(BackEndId backEndId) const
 {
-  auto finder = m_impls2.find(AlgebraTraits<tag>::name());
+  auto finder = m_impls2.find(backEndId);
   if (finder == m_impls2.end())
     return; // already freed
   delete finder->second, finder->second = NULL;
@@ -308,14 +300,13 @@ void MultiMatrixImpl::release() const
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-template <typename matrix_type>
 IMatrixImpl*&
 MultiMatrixImpl::getImpl(BackEndId backend) const
 {
   auto inserter = m_impls2.insert(MultiMatrixImplMap::value_type(backend, NULL));
   IMatrixImpl*& impl2 = inserter.first->second;
   if (impl2 == NULL) {
-    matrix_type* new_impl = new matrix_type(this); // constructeur associé à un multi-impl
+    IMatrixImpl* new_impl = new IMatrixImpl(this); // constructeur associé à un multi-impl
     //    new_impl->init(*m_row_space.get(),
     //                   *m_col_space.get(),
     //                   m_distribution);
@@ -327,8 +318,7 @@ MultiMatrixImpl::getImpl(BackEndId backend) const
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-template <typename matrix_type>
-void MultiMatrixImpl::insert(BackEndId backend, matrix_type* m)
+void MultiMatrixImpl::insert(BackEndId backend, IMatrixImpl* m)
 {
   if (m_impls2.find(backend) != m_impls2.end()) {
     alien_fatal([&] { cout() << "try to insert already inserted value"; });

@@ -30,7 +30,7 @@
 #include <arccore/base/TraceInfo.h>
 
 #include <alien/core/backend/BackEnd.h>
-#include <alien/core/backend/IInternalLinearSolverT.h>
+#include <alien/core/backend/IInternalLinearSolver.h>
 
 #include <alien/expression/solver/ILinearSolver.h>
 
@@ -58,12 +58,11 @@ class IMatrix;
  *
  * \tparam Tag The tag of the type of solvers used
  */
-template <class Tag>
 class LinearSolver : public ILinearSolver
 {
  public:
   //! The type of the solver
-  typedef typename AlgebraTraits<Tag>::solver_type KernelSolver;
+  //typedef typename AlgebraTraits<Tag>::solver_type KernelSolver;
 
  public:
   /*!
@@ -74,10 +73,16 @@ class LinearSolver : public ILinearSolver
    * \tparam T Variadics type of linear solver
    * \param[in] args Linear solvers
    */
-  template <typename... T>
-  LinearSolver(T... args)
-  : m_solver(AlgebraTraits<Tag>::solver_factory(args...))
-  {}
+   // FIXME
+  //LinearSolver(...)
+  //: m_solver(AlgebraTraits<Tag>::solver_factory(...))
+  //{}
+
+  LinearSolver(BackEndId backEndId, Args... args)
+  : m_backEndId(backEndId)
+  {
+    // FIXME: init m_solver here
+  }
 
   //! Free resources
   virtual ~LinearSolver();
@@ -143,7 +148,7 @@ class LinearSolver : public ILinearSolver
    * \brief Get kernel solver implementation
    * \return Linear solver actual implementation
    */
-  KernelSolver* implem();
+  IInternalLinearSolver* implem();
 
   /*!
    * \brief Option to add an extra-equation
@@ -161,7 +166,8 @@ class LinearSolver : public ILinearSolver
 
  private:
   //! The linear solver kernel
-  std::unique_ptr<KernelSolver> m_solver;
+  std::unique_ptr<IInternalLinearSolver> m_solver;
+  BackEndId m_backEndId;
 };
 
 /*---------------------------------------------------------------------------*/

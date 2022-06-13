@@ -14,7 +14,6 @@ add_library(hypre_wrapper
         src/hypre_vector.h
         src/hypre_matrix.cpp
         src/hypre_matrix.h
-        src/hypre_linear_algebra.cpp
         src/hypre_linear_solver.cpp
         src/converters/hypre_to_simplecsr_vector.cpp
         src/converters/simplecsr_to_hypre_vector.cpp

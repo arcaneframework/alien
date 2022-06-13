@@ -22,7 +22,7 @@
 
 #include <HYPRE_IJ_mv.h>
 
-namespace Alien::Hypre
+namespace Alien
 {
 class Matrix : public IMatrixImpl
 {
@@ -49,4 +49,4 @@ class Matrix : public IMatrixImpl
   MPI_Comm m_comm;
 };
 
-} // namespace Alien::Hypre
+} // namespace Alien

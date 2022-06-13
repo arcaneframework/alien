@@ -24,10 +24,10 @@
 
 #include <HYPRE.h>
 
-namespace Alien::Hypre
+namespace Alien
 {
 Vector::Vector(const MultiVectorImpl* multi_impl)
-: IVectorImpl(multi_impl, AlgebraTraits<BackEnd::tag::hypre>::name())
+: IVectorImpl(multi_impl, "hypre")
 , m_hypre(nullptr)
 {
   auto block_size = 1;
@@ -99,4 +99,4 @@ void Vector::assemble()
     throw Arccore::FatalErrorException(A_FUNCINFO, "Hypre assembling failed");
   }
 }
-} // namespace Alien::Hypre
+} // namespace Alien

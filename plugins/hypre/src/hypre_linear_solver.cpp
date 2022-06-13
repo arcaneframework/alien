@@ -23,14 +23,13 @@
 
 namespace Alien
 {
-// Compile HypreLinearSolver.
-template class ALIEN_HYPRE_EXPORT LinearSolver<BackEnd::tag::hypre>;
-
-} // namespace Alien
-
-namespace Alien::Hypre
+Arccore::String
+PluginLinearSolver::getBackEndName() const
 {
-void InternalLinearSolver::checkError(
+  return "hypre";
+}
+
+void PluginLinearSolver::checkError(
 const Arccore::String& msg, int ierr, int skipError) const
 {
   if (ierr != 0 and (ierr & ~skipError) != 0) {
@@ -42,7 +41,14 @@ const Arccore::String& msg, int ierr, int skipError) const
   }
 }
 
-bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
+
+// FIXME: check type and conversion
+bool PluginLinearSolver::solve(const IMatrixImpl& A, const IVectorImpl& b, IVectorImpl& x)
+{
+  return _solve(dynamic_cast<const Matrix&>(A), dynamic_cast<const Vector&>(b), dynamic_cast<Vector&>(x));
+}
+
+bool PluginLinearSolver::_solve(const Matrix& A, const Vector& b, Vector& x)
 {
   auto ij_matrix = A.internal();
   auto bij_vector = b.internal();
@@ -292,29 +298,22 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
 }
 
 const Alien::SolverStatus&
-InternalLinearSolver::getStatus() const
+PluginLinearSolver::getStatus() const
 {
   return m_status;
 }
 
 ALIEN_HYPRE_EXPORT
-std::shared_ptr<ILinearAlgebra>
-InternalLinearSolver::algebra() const
+IInternalLinearSolver*
+LinearSolverFactory(const BackEnd::Options& options)
 {
-  return std::make_shared<LinearAlgebra>();
+  return new PluginLinearSolver(options);
 }
 
 ALIEN_HYPRE_EXPORT
-IInternalLinearSolver<Matrix, Vector>*
-InternalLinearSolverFactory(const Options& options)
+IInternalLinearSolver*
+LinearSolverFactory()
 {
-  return new InternalLinearSolver(options);
+  return new PluginLinearSolver();
 }
-
-ALIEN_HYPRE_EXPORT
-IInternalLinearSolver<Matrix, Vector>*
-InternalLinearSolverFactory()
-{
-  return new InternalLinearSolver();
-}
-} // namespace Alien::Hypre
+} // namespace Alien

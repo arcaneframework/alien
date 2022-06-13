@@ -59,7 +59,7 @@ CompositeMatrix::CompositeMatrix()
 
 CompositeMatrix::CompositeMatrix(Integer nc)
 : m_impl(new CompositeKernel::MultiMatrixImpl())
-, m_composite_matrix(m_impl->get<Alien::BackEnd::tag::composite>(false))
+, m_composite_matrix(m_impl->get("composite", false))
 {
   m_impl->setFeature("composite");
 

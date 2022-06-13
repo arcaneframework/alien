@@ -25,7 +25,7 @@
 #include <alien/kernels/simple_csr/SimpleCSRMatrix.h>
 #include <alien/kernels/simple_csr/SimpleCSRBackEnd.h>
 
-#include <alien/hypre/backend.h>
+#include "../../include/alien/hypre/backend.h"
 
 class SimpleCSR_to_Hypre_MatrixConverter : public Alien::IMatrixConverter
 {
@@ -40,19 +40,19 @@ class SimpleCSR_to_Hypre_MatrixConverter : public Alien::IMatrixConverter
     return Alien::AlgebraTraits<Alien::BackEnd::tag::simplecsr>::name();
   }
 
-  BackEndId targetBackend() const { return Alien::AlgebraTraits<Alien::BackEnd::tag::hypre>::name(); }
+  BackEndId targetBackend() const { return "hypre"; }
 
   void convert(const Alien::IMatrixImpl* sourceImpl, Alien::IMatrixImpl* targetImpl) const;
 
-  void _build(const Alien::SimpleCSRMatrix<Arccore::Real>& sourceImpl, Alien::Hypre::Matrix& targetImpl) const;
+  void _build(const Alien::SimpleCSRMatrix<Arccore::Real>& sourceImpl, Alien::Matrix& targetImpl) const;
 
-  void _buildBlock(const Alien::SimpleCSRMatrix<Arccore::Real>& sourceImpl, Alien::Hypre::Matrix& targetImpl) const;
+  void _buildBlock(const Alien::SimpleCSRMatrix<Arccore::Real>& sourceImpl, Alien::Matrix& targetImpl) const;
 };
 
 void SimpleCSR_to_Hypre_MatrixConverter::convert(const IMatrixImpl* sourceImpl, IMatrixImpl* targetImpl) const
 {
   const auto& v = cast<Alien::SimpleCSRMatrix<Arccore::Real>>(sourceImpl, sourceBackend());
-  auto& v2 = cast<Alien::Hypre::Matrix>(targetImpl, targetBackend());
+  auto& v2 = cast<Alien::Matrix>(targetImpl, targetBackend());
 
   alien_debug([&] {
     cout() << "Converting Alien::SimpleCSRMatrix: " << &v << " to Hypre::Matrix " << &v2;
@@ -67,7 +67,7 @@ void SimpleCSR_to_Hypre_MatrixConverter::convert(const IMatrixImpl* sourceImpl, 
 }
 
 void SimpleCSR_to_Hypre_MatrixConverter::_build(const Alien::SimpleCSRMatrix<Arccore::Real>& sourceImpl,
-                                                Alien::Hypre::Matrix& targetImpl) const
+                                                Alien::Matrix& targetImpl) const
 {
   const auto& dist = sourceImpl.distribution();
   const auto& profile = sourceImpl.getCSRProfile();
@@ -106,7 +106,7 @@ void SimpleCSR_to_Hypre_MatrixConverter::_build(const Alien::SimpleCSRMatrix<Arc
 }
 
 void SimpleCSR_to_Hypre_MatrixConverter::_buildBlock(const Alien::SimpleCSRMatrix<Arccore::Real>& sourceImpl,
-                                                     Alien::Hypre::Matrix& targetImpl) const
+                                                     Alien::Matrix& targetImpl) const
 {
   const auto& dist = sourceImpl.distribution();
   const auto& profile = sourceImpl.getCSRProfile();
@@ -176,5 +176,3 @@ void SimpleCSR_to_Hypre_MatrixConverter::_buildBlock(const Alien::SimpleCSRMatri
 
   targetImpl.assemble();
 }
-
-REGISTER_MATRIX_CONVERTER(SimpleCSR_to_Hypre_MatrixConverter);

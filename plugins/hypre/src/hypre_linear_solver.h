@@ -21,6 +21,9 @@
 #include <alien/core/backend/LinearSolverT.h>
 #include <alien/expression/solver/SolverStater.h>
 
+#include <alien/core/impl/IMatrixImpl.h>
+#include <alien/core/impl/IVectorImpl.h>
+
 #include <alien/hypre/backend.h>
 #include <alien/hypre/export.h>
 #include <alien/hypre/options.h>
@@ -28,17 +31,17 @@
 #include "hypre_matrix.h"
 #include "hypre_vector.h"
 
-namespace Alien::Hypre
+namespace Alien
 {
-class InternalLinearSolver : public IInternalLinearSolver<Matrix, Vector>
+class PluginLinearSolver : public IInternalLinearSolver
 , public ObjectWithTrace
 {
  public:
   typedef SolverStatus Status;
 
-  InternalLinearSolver() = default;
+  PluginLinearSolver() = default;
 
-  explicit InternalLinearSolver(const Options& options)
+  explicit PluginLinearSolver(const BackEnd::Options& options)
   : m_status()
   , m_init_time(0.0)
   , m_total_solve_time(0.0)
@@ -48,13 +51,15 @@ class InternalLinearSolver : public IInternalLinearSolver<Matrix, Vector>
   , m_options(options)
   {}
 
-  virtual ~InternalLinearSolver() = default;
+  virtual ~PluginLinearSolver() = default;
 
  public:
+  Arccore::String getBackEndName() const;
+
   // Nothing to do
   void updateParallelMng(ALIEN_UNUSED_PARAM Arccore::MessagePassing::IMessagePassingMng* pm) {}
 
-  bool solve(const Matrix& A, const Vector& b, Vector& x);
+  bool solve(const IMatrixImpl& A, const IVectorImpl& b, IVectorImpl& x);
 
   bool hasParallelSupport() const { return true; }
 
@@ -63,7 +68,8 @@ class InternalLinearSolver : public IInternalLinearSolver<Matrix, Vector>
 
   const SolverStat& getSolverStat() const { return m_stat; }
 
-  std::shared_ptr<ILinearAlgebra> algebra() const;
+ private:
+  bool _solve(const Matrix& A, const Vector& b, Vector& x);
 
  private:
   Status m_status;
@@ -74,9 +80,9 @@ class InternalLinearSolver : public IInternalLinearSolver<Matrix, Vector>
   Arccore::Integer m_total_iter_num;
 
   SolverStat m_stat;
-  Options m_options;
+  BackEnd::Options m_options;
 
  private:
   void checkError(const Arccore::String& msg, int ierr, int skipError = 0) const;
 };
-} // namespace Alien::Hypre
+} // namespace Alien

@@ -22,7 +22,7 @@
 
 #include <HYPRE_IJ_mv.h>
 
-namespace Alien::Hypre
+namespace Alien
 {
 class VectorInternal;
 

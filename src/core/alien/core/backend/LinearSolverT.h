@@ -39,17 +39,15 @@ namespace Alien
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-template <class Tag>
-LinearSolver<Tag>::~LinearSolver() {}
+LinearSolver::~LinearSolver() {}
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-template <class Tag>
 String
-LinearSolver<Tag>::getBackEndName() const
+LinearSolver::getBackEndName() const
 {
-  return AlgebraTraits<Tag>::name();
+  return m_solver->getBackEndName();
 }
 
 /*---------------------------------------------------------------------------*/
@@ -58,8 +56,7 @@ LinearSolver<Tag>::getBackEndName() const
 /*!
  * \todo Check the comment below and fix if necessary
  */
-template <class Tag>
-bool LinearSolver<Tag>::solve(const IMatrix& A, const IVector& b, IVector& x)
+bool LinearSolver::solve(const IMatrix& A, const IVector& b, IVector& x)
 {
   auto dist = A.impl()->distribution();
   // solve is a global call
@@ -76,9 +73,10 @@ bool LinearSolver<Tag>::solve(const IMatrix& A, const IVector& b, IVector& x)
     m_solver->updateParallelMng(A.impl()->distribution().parallelMng());
   }
   // m_solver->getSolverStat().startPrepareMeasure();
-  const auto& matrix = A.impl()->get<Tag>();
-  const auto& rhs = b.impl()->get<Tag>();
-  auto& sol = x.impl()->get<Tag>(true);
+  // FIXME
+  const auto& matrix = A.impl()->get(m_backEndId);
+  const auto& rhs = b.impl()->get(m_backEndId);
+  auto& sol = x.impl()->get(m_backEndId, true);
   // m_solver->getSolverStat().stopPrepareMeasure();
   return m_solver->solve(matrix, rhs, sol);
 }
@@ -86,8 +84,7 @@ bool LinearSolver<Tag>::solve(const IMatrix& A, const IVector& b, IVector& x)
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-template <class Tag>
-void LinearSolver<Tag>::init()
+void LinearSolver::init()
 {
   m_solver->init();
 }
@@ -95,23 +92,20 @@ void LinearSolver<Tag>::init()
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-template <class Tag>
-void LinearSolver<Tag>::end()
+void LinearSolver::end()
 {
   m_solver->end();
 }
 
-template <class Tag>
-void LinearSolver<Tag>::updateParallelMng(Arccore::MessagePassing::IMessagePassingMng* pm)
+void LinearSolver::updateParallelMng(Arccore::MessagePassing::IMessagePassingMng* pm)
 {
   m_solver->updateParallelMng(pm);
 }
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-template <class Tag>
 const SolverStat&
-LinearSolver<Tag>::getSolverStat() const
+LinearSolver::getSolverStat() const
 {
   return m_solver->getSolverStat();
 }
@@ -119,8 +113,7 @@ LinearSolver<Tag>::getSolverStat() const
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-template <class Tag>
-bool LinearSolver<Tag>::hasParallelSupport() const
+bool LinearSolver::hasParallelSupport() const
 {
   return m_solver->hasParallelSupport();
 }
@@ -128,9 +121,8 @@ bool LinearSolver<Tag>::hasParallelSupport() const
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-template <class Tag>
 const SolverStatus&
-LinearSolver<Tag>::getStatus() const
+LinearSolver::getStatus() const
 {
   return m_solver->getStatus();
 }
@@ -138,9 +130,8 @@ LinearSolver<Tag>::getStatus() const
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-template <class Tag>
-typename LinearSolver<Tag>::KernelSolver*
-LinearSolver<Tag>::implem()
+IInternalLinearSolver*
+LinearSolver::implem()
 {
   return m_solver.get();
 }
@@ -148,9 +139,8 @@ LinearSolver<Tag>::implem()
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-template <class Tag>
 std::shared_ptr<ILinearAlgebra>
-LinearSolver<Tag>::algebra() const
+LinearSolver::algebra() const
 {
   return m_solver->algebra();
 }
