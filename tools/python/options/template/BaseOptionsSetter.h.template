@@ -1,0 +1,364 @@
+<%! import gen_tools %>
+/*
+ * BaseOption.h Generated file
+ */
+
+#pragma once
+
+#include <cxxopts.hpp>
+#include <sstream>
+#include <string>
+
+#ifdef ALIEN_USE_LIBXML2
+#include <alien/utils/XML2Tools.h>
+#endif
+
+#ifdef ALIEN_USE_BOOST_PROPERTY_TREE
+#include <boost/filesystem.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/optional/optional.hpp>
+#endif
+
+namespace Alien {
+
+class ${options.name_}BaseOptionsSetter
+{
+public :
+  % for opt in options.options.complex:
+  class ${gen_tools.toClassName(opt.name_)}BaseOptionSetter
+  {
+  public:
+    ${gen_tools.toClassName(opt.name_)}BaseOptionSetter(${options.name_}BaseOptionsSetter* parent)
+    : m_parent(parent)
+    {}
+
+    ${gen_tools.toClassName(opt.name_)}BaseOptionSetter* operator ->() {
+      return this ;
+    }
+
+    // ACCESSORS
+    // SIMPLE OPTIONS SETTER
+    % for opt2 in opt.simple:
+    //! ${opt2.name_} option setter
+    void set${gen_tools.toClassName(opt2.name_)}(${gen_tools.toCxxType(opt2.type)} value) {
+          m_parent->m_str_argv.push_back("--${opt.name_}-${opt2.name_}") ;
+
+          std::stringstream value_key("") ;
+          value_key<<value;
+          m_parent->m_str_argv.push_back(value_key.str()) ;
+    }
+
+    % endfor
+
+    // ENUM OPTIONS ACCESSOR
+    % for opt2 in opt.enumeration:
+    //! ${opt2.name_} option setter
+    void set${gen_tools.toClassName(opt2.name_)}(${opt2.type} value) const {
+          m_parent->m_str_argv.push_back("--${opt.name_}-${opt2.name_}") ;
+
+          std::stringstream value_key("") ;
+          value_key<<value;
+          m_parent->m_str_argv.push_back(${gen_tools.toClassName(options.name_)}BaseOptionsEnum::${gen_tools.toClassName(opt2.name_)}EnumToString(value)) ;
+    }
+
+
+    void set${gen_tools.toClassName(opt2.name_)}(std::string const& value) const {
+          m_parent->m_str_argv.push_back("--${opt.name_}-${opt2.name_}") ;
+
+          m_parent->m_str_argv.push_back(value) ;
+    }
+
+    % endfor
+
+      private:
+      ${options.name_}BaseOptionsSetter* m_parent = nullptr ;
+  } ;
+  friend class ${gen_tools.toClassName(opt.name_)}BaseOptionSetter ;
+  % endfor
+
+  ${options.name_}BaseOptionsSetter(std::string const& name)
+  : m_name(name)
+  {
+      m_str_argv.push_back(m_name) ;
+  }
+
+  ~${options.name_}BaseOptionsSetter() = default ;
+
+  // SETTER
+  // SIMPLE OPTIONS SETTER
+  % for opt in options.options.simple:
+  //! ${opt.name_} option setter
+  void set${gen_tools.toClassName(opt.name_)}(${gen_tools.toCxxType(opt.type)} value) {
+      m_str_argv.push_back("--${opt.name_}") ;
+
+      std::stringstream value_key("") ;
+      value_key<<value;
+      m_str_argv.push_back(value_key.str()) ;
+  }
+
+  % endfor
+
+  // ENUM OPTIONS SETTER
+  % for opt in options.options.enumeration:
+  //! ${opt.name_} option setter
+  void set${gen_tools.toClassName(opt.name_)}(${opt.type} value) {
+      m_str_argv.push_back("--${opt.name_}") ;
+
+      m_str_argv.push_back(${gen_tools.toClassName(options.name_)}BaseOptionsEnum::${gen_tools.toClassName(opt.name_)}EnumToString(value)) ;
+  }
+
+  void set${gen_tools.toClassName(opt.name_)}(std::string const& value) {
+      m_str_argv.push_back("--${opt.name_}") ;
+
+      m_str_argv.push_back(value) ;
+  }
+
+  % endfor
+
+
+  // COMPLEX OPTIONS ACCESSOR
+  % for opt in options.options.complex:
+  //! ${opt.name_} option accessor
+  ${gen_tools.toClassName(opt.name_)}BaseOptionSetter ${gen_tools.toMethodName(opt.name_)}Setter() {
+      return ${gen_tools.toClassName(opt.name_)}BaseOptionSetter(this) ;
+  }
+
+  % endfor
+
+  std::vector<std::string> const& args() const {
+    return m_str_argv ;
+  }
+protected :
+  std::string              m_name ;
+  std::vector<std::string> m_str_argv ;
+} ;
+
+class ${options.name_}BaseOptionsENVSetter
+: public ${options.name_}BaseOptionsSetter
+{
+public:
+  typedef ${options.name_}BaseOptionsSetter BaseType ;
+  ${options.name_}BaseOptionsENVSetter(std::string const& name)
+  : BaseType(name)
+  {
+    // SIMPLE OPTIONS SETTER
+    % for opt in options.options.simple:
+    //! ${opt.name_} option setter
+    {
+      const char* value_key = std::getenv("ALIEN_${options.name_.upper()}.${gen_tools.toEnvName(opt.name_)}") ;
+      if(value_key)
+      {
+         ${gen_tools.toCxxType(opt.type)} value ;
+          std::istringstream iss(value_key) ;
+          iss >> value ;
+          set${gen_tools.toClassName(opt.name_)}(value) ;
+      }
+    }
+
+    % endfor
+
+    // ENUM OPTIONS ACCESSOR
+    % for opt in options.options.enumeration:
+    //! ${opt.name_} option setter
+    {
+      const char* value_key = std::getenv("ALIEN_${options.name_.upper()}.${gen_tools.toEnvName(opt.name_)}") ;
+      if(value_key)
+      {
+         set${gen_tools.toClassName(opt.name_)}(std::string(value_key)) ;
+      }
+    }
+
+    % endfor
+
+
+    // COMPLEX OPTIONS ACCESSOR
+    % for opt in options.options.complex:
+    //! ${opt.name_} option setter
+    {
+      auto setter = ${gen_tools.toMethodName(opt.name_)}Setter() ;
+
+      % for opt2 in opt.simple:
+      //! ${opt2.name_} option setter
+      {
+        const char* value_key = std::getenv("ALIEN_${options.name_.upper()}.${gen_tools.toEnvName(opt.name_)}.${gen_tools.toEnvName(opt2.name_)}") ;
+        if(value_key)
+        {
+           ${gen_tools.toCxxType(opt2.type)} value ;
+           std::istringstream iss(value_key) ;
+           iss >> value ;
+           setter.set${gen_tools.toClassName(opt2.name_)}(value) ;
+        }
+      }
+
+      % endfor
+      % for opt2 in opt.enumeration:
+      //! ${opt2.name_} option setter
+      {
+        const char* value_key = std::getenv("ALIEN_${options.name_.upper()}.${gen_tools.toEnvName(opt.name_)}.${gen_tools.toEnvName(opt2.name_)}") ;
+        if(value_key)
+        {
+           setter.set${gen_tools.toClassName(opt2.name_)}(std::string(value_key)) ;
+        }
+      }
+
+      % endfor
+    }
+    % endfor
+  }
+};
+
+class ${options.name_}BaseOptionsXMLConfigSetter
+: public ${options.name_}BaseOptionsSetter
+{
+public:
+  typedef ${options.name_}BaseOptionsSetter BaseType ;
+
+  ${options.name_}BaseOptionsXMLConfigSetter(std::string const& name, std::string const& config_file)
+  : BaseType(name)
+  , m_config_file(config_file)
+  {
+#ifdef ALIEN_USE_LIBXML2
+    using namespace XML2Tools ;
+
+    XMLDocument doc = openDocument(m_config_file) ;
+    FileNode root_node = openFileNode(doc,name) ;
+
+    // SIMPLE OPTIONS SETTER
+    % for opt in options.options.simple:
+    //! ${opt.name_} option setter
+    {
+      ${gen_tools.toCxxType(opt.type)} value ;
+      if(read(root_node,"${opt.name_}",value))
+        set${gen_tools.toClassName(opt.name_)}(value) ;
+    }
+
+    % endfor
+
+    // ENUM OPTIONS ACCESSOR
+    % for opt in options.options.enumeration:
+    //! ${opt.name_} option setter
+    {
+      std::string value ;
+      if(read(root_node,"${opt.name_}",value))
+        set${gen_tools.toClassName(opt.name_)}(value) ;
+    }
+
+    % endfor
+    // COMPLEX OPTIONS ACCESSOR
+    % for opt in options.options.complex:
+    //! ${opt.name_} option setter
+    {
+      auto setter = ${gen_tools.toMethodName(opt.name_)}Setter() ;
+
+      FileNode opt_node = openFileNode(root_node,"${opt.name_}") ;
+      % for opt2 in opt.simple:
+      //! ${opt2.name_} option setter
+      {
+         ${gen_tools.toCxxType(opt2.type)} value ;
+         if(read(opt_node,"${opt2.name_}",value))
+           setter.set${gen_tools.toClassName(opt2.name_)}(value) ;
+      }
+
+      % endfor
+      % for opt2 in opt.enumeration:
+      //! ${opt2.name_} option setter
+      {
+         std::string value ;
+         if(read(opt_node,"${opt2.name_}",value))
+           setter.set${gen_tools.toClassName(opt2.name_)}(value) ;
+      }
+
+      % endfor
+    }
+    % endfor
+
+#endif
+  }
+private:
+
+  std::string const& m_config_file ;
+};
+
+class ${options.name_}BaseOptionsJSONConfigSetter
+: public ${options.name_}BaseOptionsSetter
+{
+public:
+  typedef ${options.name_}BaseOptionsSetter BaseType ;
+  ${options.name_}BaseOptionsJSONConfigSetter(std::string const& name, std::string const& config_file)
+  : BaseType(name)
+  , m_config_file(config_file)
+  {
+#ifdef ALIEN_USE_BOOST_PROPERTY_TREE
+    namespace pt = boost::property_tree;
+   // Create a root
+    pt::ptree root;
+
+    // Load the json file in this ptree
+    pt::read_json(m_config_file, root);
+
+    // SIMPLE OPTIONS SETTER
+    % for opt in options.options.simple:
+    //! ${opt.name_} option setter
+    {
+      if( root.count("${opt.name_}") != 0 )
+      {
+         auto value = root.get<${gen_tools.toCxxType(opt.type)}>("${opt.name_}") ;
+         set${gen_tools.toClassName(opt.name_)}(value) ;
+      }
+    }
+
+    % endfor
+
+    // ENUM OPTIONS ACCESSOR
+    % for opt in options.options.enumeration:
+    //! ${opt.name_} option setter
+    {
+      if( root.count("${opt.name_}") != 0 )
+      {
+         auto value = root.get<std::string>("${opt.name_}") ;
+         set${gen_tools.toClassName(opt.name_)}(value) ;
+      }
+    }
+
+    % endfor
+
+
+    // COMPLEX OPTIONS ACCESSOR
+    % for opt in options.options.complex:
+    //! ${opt.name_} option setter
+    {
+      auto setter = ${gen_tools.toMethodName(opt.name_)}Setter() ;
+
+      if( root.count("${opt.name_}") != 0 )
+      {
+        % for opt2 in opt.simple:
+        //! ${opt2.name_} option setter
+        {
+            auto value = root.get<${gen_tools.toCxxType(opt2.type)}>("${opt.name_}.${opt2.name_}") ;
+            setter.set${gen_tools.toClassName(opt2.name_)}(value) ;
+        }
+
+        % endfor
+        % for opt2 in opt.enumeration:
+        //! ${opt2.name_} option setter
+        {
+            auto value = root.get<std::string>("${opt.name_}.${opt2.name_}") ;
+            setter.set${gen_tools.toClassName(opt2.name_)}(value) ;
+        }
+
+        % endfor
+      }
+
+    }
+    % endfor
+#endif
+  }
+
+  ~${options.name_}BaseOptionsJSONConfigSetter() = default ;
+
+private:
+  std::string const& m_config_file ;
+};
+
+} // end namespace Alien

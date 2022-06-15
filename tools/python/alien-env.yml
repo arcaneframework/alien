@@ -5,3 +5,5 @@ channels:
 dependencies:
 - sphinx
 - breathe
+- pyxb
+- mako
