@@ -114,7 +114,7 @@ TEST(TestFamilies, DefaultAbstractFamily)
     ASSERT_EQ(test_owners[i], test_case.owners[i]);
     ASSERT_EQ(test_uids[i], test_case.uid[i]);
     ASSERT_EQ(test_owners[i], test_case.owners[i]);
-    ASSERT_EQ(test_lid[i], test_case.uid[i]);
+    ASSERT_EQ(test_lid[i], test_case.lid[i]);
   }
 }
 
@@ -134,6 +134,6 @@ TEST(TestFamilies, AbstractItemFamily)
     ASSERT_EQ(test_owners[i], test_case.owners[i]);
     ASSERT_EQ(test_uids[i], test_case.uid[i]);
     ASSERT_EQ(test_owners[i], test_case.owners[i]);
-    ASSERT_EQ(test_lid[i], test_case.uid[i]);
+    ASSERT_EQ(test_lid[i], test_case.lid[i]);
   }
 }
