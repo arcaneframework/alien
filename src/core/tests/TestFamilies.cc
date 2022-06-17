@@ -29,20 +29,38 @@
 
 namespace
 {
+std::vector<size_t> generate_permutation(size_t length, int seed)
+{
+  std::vector<size_t> perm(length);
+  auto i = 0;
+  for (auto& p : perm) {
+    p = i++;
+  }
+
+  std::shuffle(perm.begin(), perm.end(), std::default_random_engine(seed));
+  return perm;
+}
+
+template <typename T>
+void apply_permutation(Arccore::ArrayView<T> array, const std::vector<size_t>& permutation)
+{
+  auto tmp_array = Arccore::UniqueArray<T>(array.constView());
+  std::transform(permutation.begin(), permutation.end(), array.begin(), [&tmp_array](int id) { return tmp_array[id]; });
+};
+
 template <typename Family>
 struct FamilyChecker
 {
  public:
-  Arccore::MessagePassing::IMessagePassingMng* pm;
-  Alien::UniqueArray<Arccore::Int64> uid;
-  Alien::UniqueArray<Arccore::Int32> lid;
-  Alien::UniqueArray<Arccore::Integer> owners;
   Arccore::Int64 problem_size = 100;
   std::unique_ptr<Family> family = nullptr;
 
   explicit FamilyChecker(Arccore::MessagePassing::IMessagePassingMng* pm, bool shuffle = false)
-  : pm(pm)
   {
+    Alien::UniqueArray<Arccore::Int64> uid;
+    Alien::UniqueArray<Arccore::Int32> lid;
+    Alien::UniqueArray<Arccore::Integer> owners;
+
     auto rank = pm->commRank();
     auto procs = pm->commSize();
 
@@ -77,25 +95,50 @@ struct FamilyChecker
       owners.add(rank);
     }
 
+    assert(uid.size() == lid.size());
+    assert(owners.size() == lid.size());
+
     if (shuffle) {
-      std::vector<size_t> perm(local_problem);
-      auto i = 0;
-      for (auto& p : perm) {
-        p = i++;
-      }
+      auto perm = generate_permutation(lid.size(), 42);
 
-      auto seed = 42;
-      std::shuffle(perm.begin(), perm.end(), std::default_random_engine(seed));
-      auto rand_func = [&perm](int id) { return perm[id]; };
-
-      std::random_shuffle(uid.begin(), uid.end(), rand_func);
-      std::random_shuffle(lid.begin(), lid.end(), rand_func);
-      std::random_shuffle(owners.begin(), owners.end(), rand_func);
+      apply_permutation(uid.view(), perm);
+      apply_permutation(lid.view(), perm);
+      apply_permutation(owners.view(), perm);
     }
+
     family = std::make_unique<Family>(uid, owners, pm);
   }
-};
 
+  void simple_check()
+  {
+    auto sub_lid = family->allLocalIds();
+    check(sub_lid.view());
+  }
+
+  void permuted_check(int seed)
+  {
+    auto sub_lid = Arccore::UniqueArray<Arccore::Int32>(family->allLocalIds().view());
+    auto permutation = generate_permutation(sub_lid.size(), seed);
+    apply_permutation(sub_lid.view(), permutation);
+    check(sub_lid.view());
+  }
+
+  void check(Arccore::ConstArrayView<Arccore::Int32> lids)
+  {
+    // LIDs that we want to use
+    auto local_size = lids.size();
+
+    // UIDs of given LIDs
+    auto test_uids = family->uids(lids);
+
+    // Inverse lookup: from UIDs to LIDs
+    Arccore::UniqueArray<Arccore::Int32> test_lid(local_size, 0);
+    family->uniqueIdToLocalId(test_lid, test_uids.view());
+    for (auto i = 0; i < lids.size(); i++) {
+      ASSERT_EQ(test_lid[i], lids[i]);
+    }
+  }
+};
 } // namespace
 
 TEST(TestFamilies, DefaultAbstractFamily)
@@ -103,19 +146,17 @@ TEST(TestFamilies, DefaultAbstractFamily)
   auto* pm = AlienTest::Environment::parallelMng();
   auto test_case = FamilyChecker<Alien::DefaultAbstractFamily>(pm);
 
-  auto local_size = test_case.lid.size();
-  auto sub_lid = test_case.lid.subView(0, local_size);
-  auto test_owners = test_case.family->owners(sub_lid);
-  auto test_uids = test_case.family->uids(sub_lid);
-  Arccore::UniqueArray<Arccore::Int32> test_lid(local_size, 0);
-  test_case.family->uniqueIdToLocalId(test_lid, test_case.uid.subView(0, local_size));
+  test_case.simple_check();
+  test_case.permuted_check(37);
+}
 
-  for (auto i = 0; i < sub_lid.size(); i++) {
-    ASSERT_EQ(test_owners[i], test_case.owners[i]);
-    ASSERT_EQ(test_uids[i], test_case.uid[i]);
-    ASSERT_EQ(test_owners[i], test_case.owners[i]);
-    ASSERT_EQ(test_lid[i], test_case.lid[i]);
-  }
+TEST(TestFamilies, DefaultAbstractFamilyShuffle)
+{
+  auto* pm = AlienTest::Environment::parallelMng();
+  auto test_case = FamilyChecker<Alien::DefaultAbstractFamily>(pm, true);
+
+  test_case.simple_check();
+  test_case.permuted_check(37);
 }
 
 TEST(TestFamilies, AbstractItemFamily)
@@ -123,17 +164,6 @@ TEST(TestFamilies, AbstractItemFamily)
   auto* pm = AlienTest::Environment::parallelMng();
   auto test_case = FamilyChecker<Alien::AbstractItemFamily>(pm);
 
-  auto local_size = test_case.lid.size();
-  auto sub_lid = test_case.lid.subView(0, local_size);
-  auto test_owners = test_case.family->owners(sub_lid);
-  auto test_uids = test_case.family->uids(sub_lid);
-  Arccore::UniqueArray<Arccore::Int32> test_lid(local_size, 0);
-  test_case.family->uniqueIdToLocalId(test_lid, test_case.uid.subView(0, local_size));
-
-  for (auto i = 0; i < sub_lid.size(); i++) {
-    ASSERT_EQ(test_owners[i], test_case.owners[i]);
-    ASSERT_EQ(test_uids[i], test_case.uid[i]);
-    ASSERT_EQ(test_owners[i], test_case.owners[i]);
-    ASSERT_EQ(test_lid[i], test_case.lid[i]);
-  }
+  test_case.simple_check();
+  test_case.permuted_check(37);
 }
