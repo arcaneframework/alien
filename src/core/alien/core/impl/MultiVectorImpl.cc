@@ -263,6 +263,60 @@ void MultiVectorImpl::updateImpl(IVectorImpl* target) const
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
+const IVectorImpl&
+MultiVectorImpl::get(BackEndId backEndId) const
+{
+  IVectorImpl*& impl2 = getImpl(backEndId);
+  ALIEN_ASSERT(
+  (impl2->backend() == backEndId), ("Inconsistent backend"));
+  updateImpl(impl2);
+  return *impl2;
+}
+
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+
+IVectorImpl&
+MultiVectorImpl::get(BackEndId backEndId, const bool update_stamp)
+{
+  IVectorImpl*& impl2 = getImpl(backEndId);
+  ALIEN_ASSERT(
+  (impl2->backend() == backEndId), ("Inconsistent backend"));
+  updateImpl(impl2);
+  if (update_stamp) {
+    impl2->updateTimestamp();
+  }
+  return *impl2;
+}
+
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+
+
+void MultiVectorImpl::release(BackEndId backEndId) const
+{
+  auto finder = m_impls2.find(backEndId);
+  if (finder == m_impls2.end())
+    return; // already freed
+  delete finder->second, finder->second = NULL;
+}
+
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+
+IVectorImpl*&
+MultiVectorImpl::getImpl(BackEndId backend) const
+{
+  auto inserter = m_impls2.insert(MultiVectorImplMap::value_type(backend, NULL));
+  IVectorImpl*& impl2 = inserter.first->second;
+  if (impl2 == NULL) {
+    auto new_impl = new IVectorImpl(this); // constructeur associ� � un multi-impl
+    new_impl->init(*m_distribution.get(), true);
+    impl2 = new_impl;
+  }
+  return impl2;
+}
+
 } // namespace Alien
 
 /*---------------------------------------------------------------------------*/
