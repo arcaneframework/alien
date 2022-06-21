@@ -66,7 +66,6 @@
 
 #include "kernels/simple_csr/SimpleCSRMatrix.h"
 #include "kernels/simple_csr/SimpleCSRVector.h"
-#include "kernels/simple_csr/algebra/SimpleCSRLinearAlgebra.h"
 
 #include "kernels/composite/CompositeMultiVectorImpl.h"
 #include "kernels/composite/CompositeSpace.h"
