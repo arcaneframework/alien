@@ -52,7 +52,7 @@ namespace Common
   {
     using namespace Alien;
     SimpleCSRVector<ValueT>& v =
-    m_vector.impl()->template get<BackEnd::tag::simplecsr>(false);
+    dynamic_cast<SimpleCSRVector<ValueT>&>(m_vector.impl()->get("simplecsr", false));
     m_values = v.fullValues();
     m_vector_impl = &v;
   }

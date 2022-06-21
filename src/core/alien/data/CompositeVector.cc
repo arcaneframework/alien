@@ -59,7 +59,7 @@ CompositeVector::CompositeVector()
 
 CompositeVector::CompositeVector(Integer nc)
 : m_impl(new CompositeKernel::MultiVectorImpl())
-, m_composite_vector(m_impl->get<Alien::BackEnd::tag::composite>(false))
+, m_composite_vector(dynamic_cast<CompositeKernel::Vector&>(m_impl->get("composite", false)))
 {
   m_impl->setFeature("composite");
 

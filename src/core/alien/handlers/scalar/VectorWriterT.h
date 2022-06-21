@@ -45,7 +45,7 @@ namespace Common
   , m_local_offset(0)
   , m_finalized(false)
   {
-    auto& v = vector.impl()->get<BackEnd::tag::simplecsr>(update);
+    auto& v = dynamic_cast<SimpleCSRVector<ValueT>&>(vector.impl()->get("simplecsr", update));
     m_local_offset = v.distribution().offset();
     m_values = v.fullValues();
     m_time_stamp = &v;

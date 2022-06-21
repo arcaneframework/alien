@@ -47,7 +47,7 @@ namespace Common
   , m_local_offset(0)
   {
     using namespace Alien;
-    const SimpleCSRVector<ValueT>& v = vector.impl()->get<BackEnd::tag::simplecsr>();
+    const SimpleCSRVector<ValueT>& v = dynamic_cast<const SimpleCSRVector<ValueT>&>(vector.impl()->get("simplecsr"));
     m_values = v.fullValues();
     m_vector_impl = &v;
     m_local_offset = v.distribution().offset();

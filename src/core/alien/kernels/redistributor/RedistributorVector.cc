@@ -85,15 +85,15 @@ RedistributorVector::updateTargetPM(const RedistributorCommPlan* commPlan)
 std::shared_ptr<MultiVectorImpl>
 RedistributorVector::redistribute()
 {
-  auto& vec_src = m_multi_impl->get<BackEnd::tag::simplecsr>();
-  auto& vec_tgt = m_tgt_impl->get<BackEnd::tag::simplecsr>(true);
+  auto& vec_src = dynamic_cast<const SimpleCSRVector<Real>&>(m_multi_impl->get("simplecsr"));
+  auto& vec_tgt = dynamic_cast<SimpleCSRVector<Real>&>(m_tgt_impl->get("simplecsr", true));
   m_distributor->distribute(vec_src, vec_tgt);
   return m_tgt_impl;
 }
 
 void RedistributorVector::redistributeBack(SimpleCSRVector<Real>& vec_tgt) const
 {
-  auto& vec_src = m_tgt_impl->get<BackEnd::tag::simplecsr>();
+  auto& vec_src = dynamic_cast<const SimpleCSRVector<Real>&>(m_tgt_impl->get("simplecsr"));
   m_distributor->distributeBack(vec_src, vec_tgt);
 }
 

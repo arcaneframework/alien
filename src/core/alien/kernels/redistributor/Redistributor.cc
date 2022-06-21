@@ -59,7 +59,7 @@ Redistributor::redistribute(MultiMatrixImpl* mat)
 std::shared_ptr<MultiVectorImpl>
 Redistributor::redistribute(MultiVectorImpl* vect)
 {
-  auto& red_vect = vect->get<BackEnd::tag::redistributor>(false);
+  auto& red_vect = dynamic_cast<RedistributorVector&>(vect->get("redistributor", false));
   return red_vect.updateTargetPM(m_distributor.get());
 }
 

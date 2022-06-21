@@ -198,7 +198,7 @@ MultiMatrixImpl::clone() const
 
   typedef BackEnd::tag::simplecsr tag;
   // We get the last up to date implementation
-  const SimpleCSRMatrix<Real>& matrixToClone = this->get<tag>();
+  const SimpleCSRMatrix<Real>& matrixToClone = dynamic_cast<const SimpleCSRMatrix<Real>&>(this->get("simplecsr"));
   // And clone it
   SimpleCSRMatrix<Real>* matrixCloned = matrixToClone.cloneTo(impl);
   matrixCloned->setTimestamp(impl, matrixToClone.timestamp());
@@ -278,7 +278,7 @@ void MultiMatrixImpl::updateImpl(IMatrixImpl* target) const
   };
 
   // Request simplecsr implementation
-  auto* simplecsr = getImpl<SimpleCSRMatrix<Real>>("simplecsr");
+  auto* simplecsr = getImpl("simplecsr");
 
   // Checking that we have a converter from simplecsr to the requested implementation
   auto* simplecsr_target =

@@ -1,17 +1,17 @@
 # Copyright 2020 IFPEN-CEA
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 # http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# 
+#
 # SPDX-License-Identifier: Apache-2.0
 
 add_subdirectory(alien/utils)
@@ -40,10 +40,6 @@ add_library(alien_core
         alien/core/backend/IMatrixConverter.h
         alien/core/backend/IVectorConverter.h
         alien/core/backend/ISolverFabric.h
-        alien/core/backend/LinearAlgebra.h
-        alien/core/backend/LinearAlgebraT.h
-        alien/core/backend/LinearAlgebraExpr.h
-        alien/core/backend/LinearAlgebraExprT.h
         alien/core/backend/LinearSolver.h
         alien/core/backend/LinearSolverT.h
         alien/core/backend/MatrixConverterRegisterer.cc
@@ -82,7 +78,6 @@ add_library(alien_core
         alien/expression/normalization/NormalizeOpt.cc
         alien/expression/normalization/NormalizeOpt.h
         alien/expression/solver/IEigenSolver.h
-        alien/expression/solver/ILinearAlgebra.h
         alien/expression/solver/ILinearSolver.h
         alien/expression/solver/SolverStat.cc
         alien/expression/solver/SolverStater.cc

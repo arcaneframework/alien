@@ -48,7 +48,7 @@ namespace Common
   , m_finalized(false)
   {
     m_matrix.impl()->lock();
-    m_matrix_impl = &m_matrix.impl()->get<BackEnd::tag::simplecsr>(true);
+    m_matrix_impl = &(dynamic_cast<SimpleCSRMatrix<Real>&>(m_matrix.impl()->get("simplecsr", true)));
 
     const ISpace& space = m_matrix.rowSpace();
     // if (space != m_matrix.colSpace())

@@ -150,14 +150,13 @@ MultiVectorImpl::clone() const
   auto impl = new MultiVectorImpl(*this);
 
   // We get the last up to date implementation
-  typedef BackEnd::tag::simplecsr tag;
-  const SimpleCSRVector<Real>& vectorToClone = this->get<tag>();
+  const SimpleCSRVector<Real>& vectorToClone = dynamic_cast<const SimpleCSRVector<Real>&>(this->get("simplecsr"));
   // And clone it
   SimpleCSRVector<Real>* vectorCloned = vectorToClone.cloneTo(impl);
   vectorCloned->setTimestamp(impl, vectorToClone.timestamp());
   vectorCloned->updateTimestamp();
   impl->m_impls2.insert(
-  MultiVectorImplMap::value_type(AlgebraTraits<tag>::name(), vectorCloned));
+  MultiVectorImplMap::value_type("simplecsr", vectorCloned));
 
   // TOCHECK: to be removed or not ?
   /* WARNING: this implementation is temporary. Later it should be implemented through a
@@ -231,7 +230,7 @@ void MultiVectorImpl::updateImpl(IVectorImpl* target) const
   };
 
   // Request simplecsr implementation
-  auto* simplecsr = getImpl<SimpleCSRVector<Real>>("simplecsr");
+  auto* simplecsr = dynamic_cast<SimpleCSRVector<Real>*>(getImpl("simplecsr"));
 
   // Checking that we have a converter from simplecsr to the requested implementation
   auto* simplecsr_target =

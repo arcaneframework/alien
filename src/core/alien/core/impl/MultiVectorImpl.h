@@ -158,8 +158,7 @@ class ALIEN_EXPORT MultiVectorImpl : public TimestampMng
    *
    * \returns The up to date vector in the requested implementation
    */
-  template <typename tag>
-  const typename AlgebraTraits<tag>::vector_type& get() const;
+  const IVectorImpl& get(BackEndId backEndId) const;
 
   /*!
    * \brief Get a specific vector implementation
@@ -170,12 +169,10 @@ class ALIEN_EXPORT MultiVectorImpl : public TimestampMng
    * \param[in] update_stamp Whether or not the timestamp should be increased or not
    * \returns The up to date vector in the requested implementation
    */
-  template <typename tag>
-  typename AlgebraTraits<tag>::vector_type& get(bool update_stamp);
+  IVectorImpl& get(BackEndId backEndId, bool update_stamp);
 
   //! Release a vector implementation
-  template <typename tag>
-  void release() const;
+  void release(BackEndId backEndId) const;
 
  private:
   /*!
@@ -183,7 +180,6 @@ class ALIEN_EXPORT MultiVectorImpl : public TimestampMng
    * \param[in] backend The id of the specific implementation
    * \returns The vector in the requested format
    */
-  template <typename vector_type>
   IVectorImpl*& getImpl(BackEndId backend) const;
 
   /*!
@@ -216,46 +212,39 @@ class ALIEN_EXPORT MultiVectorImpl : public TimestampMng
   std::shared_ptr<VBlock> m_variable_block;
 };
 
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-template <typename tag>
-const typename AlgebraTraits<tag>::vector_type&
-MultiVectorImpl::get() const
+const IVectorImpl&
+MultiVectorImpl::get(BackEndId backEndId) const
 {
-  typedef typename AlgebraTraits<tag>::vector_type vector_type;
-  IVectorImpl*& impl2 = getImpl<vector_type>(AlgebraTraits<tag>::name());
+  IVectorImpl*& impl2 = getImpl(backEndId);
   ALIEN_ASSERT(
-  (impl2->backend() == AlgebraTraits<tag>::name()), ("Inconsistent backend"));
+  (impl2->backend() == backEndId), ("Inconsistent backend"));
   updateImpl(impl2);
-  return *dynamic_cast<vector_type*>(impl2);
+  return *impl2;
 }
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-template <typename tag>
-typename AlgebraTraits<tag>::vector_type&
-MultiVectorImpl::get(const bool update_stamp)
+IVectorImpl&
+MultiVectorImpl::get(BackEndId backEndId, const bool update_stamp)
 {
-  typedef typename AlgebraTraits<tag>::vector_type vector_type;
-  IVectorImpl*& impl2 = getImpl<vector_type>(AlgebraTraits<tag>::name());
+  IVectorImpl*& impl2 = getImpl(backEndId);
   ALIEN_ASSERT(
-  (impl2->backend() == AlgebraTraits<tag>::name()), ("Inconsistent backend"));
+  (impl2->backend() == backEndId), ("Inconsistent backend"));
   updateImpl(impl2);
   if (update_stamp) {
     impl2->updateTimestamp();
   }
-  return *dynamic_cast<vector_type*>(impl2);
+  return *impl2;
 }
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-template <typename tag>
-void MultiVectorImpl::release() const
+
+void MultiVectorImpl::release(BackEndId backEndId) const
 {
-  auto finder = m_impls2.find(AlgebraTraits<tag>::name());
+  auto finder = m_impls2.find(backEndId);
   if (finder == m_impls2.end())
     return; // already freed
   delete finder->second, finder->second = NULL;
@@ -264,14 +253,13 @@ void MultiVectorImpl::release() const
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-template <typename vector_type>
 IVectorImpl*&
 MultiVectorImpl::getImpl(BackEndId backend) const
 {
   auto inserter = m_impls2.insert(MultiVectorImplMap::value_type(backend, NULL));
   IVectorImpl*& impl2 = inserter.first->second;
   if (impl2 == NULL) {
-    auto new_impl = new vector_type(this); // constructeur associ� � un multi-impl
+    auto new_impl = new IVectorImpl(this); // constructeur associ� � un multi-impl
     new_impl->init(*m_distribution.get(), true);
     impl2 = new_impl;
   }

@@ -79,8 +79,8 @@ void NormalizeOpt::setOpt(eOptType opt, bool flag)
 NormalizeOpt::eErrorType
 NormalizeOpt::normalize(IMatrix& m, IVector& x) const
 {
-  MatrixImpl& A = m.impl()->get<Alien::BackEnd::tag::simplecsr>(true);
-  VectorImpl& b = x.impl()->get<Alien::BackEnd::tag::simplecsr>(true);
+  MatrixImpl& A = dynamic_cast<SimpleCSRMatrix<Real>&>(m.impl()->get("simplecsr", true));
+  VectorImpl& b = dynamic_cast<SimpleCSRVector<Real>&>(x.impl()->get("simplecsr", true));
   return _normalize(A, b);
 }
 
@@ -92,12 +92,12 @@ NormalizeOpt::normalize(
 CompositeMatrix& m, CompositeVector& x, ConstArrayView<Integer> eq_ids) const
 {
   // need to update timestamp of all submatrices
-  MatrixImpl& A00 = m(0, 0).impl()->get<Alien::BackEnd::tag::simplecsr>(true);
-  MatrixImpl& A01 = m(0, 1).impl()->get<Alien::BackEnd::tag::simplecsr>(true);
-  MatrixImpl& A10 = m(1, 0).impl()->get<Alien::BackEnd::tag::simplecsr>(true);
-  MatrixImpl& A11 = m(1, 1).impl()->get<Alien::BackEnd::tag::simplecsr>(true);
-  VectorImpl& b0 = x[0].impl()->get<Alien::BackEnd::tag::simplecsr>(true);
-  VectorImpl& b1 = x[1].impl()->get<Alien::BackEnd::tag::simplecsr>(true);
+  MatrixImpl& A00 = dynamic_cast<SimpleCSRMatrix<Real>&>(m(0, 0).impl()->get("simplecsr", true));
+  MatrixImpl& A01 = dynamic_cast<SimpleCSRMatrix<Real>&>(m(0, 1).impl()->get("simplecsr", true));
+  MatrixImpl& A10 = dynamic_cast<SimpleCSRMatrix<Real>&>(m(1, 0).impl()->get("simplecsr", true));
+  MatrixImpl& A11 = dynamic_cast<SimpleCSRMatrix<Real>&>(m(1, 1).impl()->get("simplecsr", true));
+  VectorImpl& b0 = dynamic_cast<SimpleCSRVector<Real>&>(x[0].impl()->get("simplecsr", true));
+  VectorImpl& b1 = dynamic_cast<SimpleCSRVector<Real>&>(x[1].impl()->get("simplecsr", true));
   {
     eErrorType error =
     _normalize(A00, A01, m(0, 1).impl()->hasFeature("transposed"), eq_ids, b0);

@@ -50,7 +50,7 @@ namespace Common
   MatrixProfilerT<ValueT>::MatrixProfilerT(IMatrix& matrix)
   : m_matrix(matrix)
   {
-    m_matrix_impl = &m_matrix.impl()->template get<BackEnd::tag::simplecsr>(false);
+    m_matrix_impl = &(dynamic_cast<SimpleCSRMatrix<ValueT>&>(m_matrix.impl()->get("simplecsr", false)));
 
     const ISpace& space = m_matrix_impl->rowSpace();
 
