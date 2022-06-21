@@ -31,7 +31,7 @@ Common::BaseDoKDirectMatrixBuilder::BaseDoKDirectMatrixBuilder(Alien::IMatrix& s
 : m_matrix(self)
 {
   m_matrix.impl()->lock();
-  m_impl = &m_matrix.impl()->get<BackEnd::tag::DoK>(true);
+  m_impl = dynamic_cast<Alien::DoKMatrix*>(&m_matrix.impl()->get("DoK", true));
 }
 
 Common::BaseDoKDirectMatrixBuilder::~BaseDoKDirectMatrixBuilder()

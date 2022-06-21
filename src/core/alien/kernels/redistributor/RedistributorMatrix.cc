@@ -81,8 +81,8 @@ RedistributorMatrix::updateTargetPM(const RedistributorCommPlan* commPlan)
 std::shared_ptr<MultiMatrixImpl>
 RedistributorMatrix::redistribute()
 {
-  auto& mat_src = m_multi_impl->get<BackEnd::tag::DoK>();
-  auto& mat_tgt = m_tgt_impl->get<BackEnd::tag::DoK>(true);
+  auto& mat_src = dynamic_cast<const Alien::DoKMatrix&>(m_multi_impl->get("DoK"));
+  auto& mat_tgt = dynamic_cast<Alien::DoKMatrix&>(m_tgt_impl->get("DoK", true));
   m_distributor->distribute(mat_src, mat_tgt);
   return m_tgt_impl;
 }

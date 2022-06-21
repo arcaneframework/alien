@@ -52,7 +52,7 @@ int globalSize, Arccore::MessagePassing::IMessagePassingMng* super, Arccore::Mes
 std::shared_ptr<MultiMatrixImpl>
 Redistributor::redistribute(MultiMatrixImpl* mat)
 {
-  auto& red_mat = mat->get<BackEnd::tag::redistributor>(true);
+  auto& red_mat = dynamic_cast<Alien::RedistributorMatrix&>(mat->get("redistributor", true));
   return red_mat.updateTargetPM(m_distributor.get());
 }
 
