@@ -23,7 +23,7 @@
 #include <alien/kernels/simple_csr/SimpleCSRVector.h>
 #include <alien/kernels/simple_csr/SimpleCSRBackEnd.h>
 
-#include "../../include/alien/hypre/backend.h"
+#include <alien/hypre/backend.h>
 
 class Hypre_to_SimpleCSR_VectorConverter : public Alien::IVectorConverter
 {

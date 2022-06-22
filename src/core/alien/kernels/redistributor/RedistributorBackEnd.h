@@ -38,12 +38,13 @@ class RedistributorVector;
 class Space;
 template <class Matrix, class Vector>
 class IInternalLinearAlgebra;
+template <class Matrix, class Vector>
 class IInternalLinearSolver;
 
 extern IInternalLinearAlgebra<RedistributorMatrix, RedistributorVector>*
 redistributorLinearAlgebraFactory();
 
-extern IInternalLinearSolver*
+extern IInternalLinearSolver<RedistributorMatrix, RedistributorVector>*
 redistributorLinearSolverFactory(IMessagePassingMng* p_mng);
 
 /*---------------------------------------------------------------------------*/
@@ -63,7 +64,7 @@ struct AlgebraTraits<BackEnd::tag::redistributor>
   typedef RedistributorMatrix matrix_type;
   typedef RedistributorVector vector_type;
   typedef IInternalLinearAlgebra<matrix_type, vector_type> algebra_type;
-  typedef IInternalLinearSolver solver_type;
+  typedef IInternalLinearSolver<matrix_type, vector_type> solver_type;
   static algebra_type* algebra_factory() { return redistributorLinearAlgebraFactory(); }
   static solver_type* solver_factory(IMessagePassingMng* p_mng)
   {

@@ -21,8 +21,8 @@
 #include <alien/ref/AlienRefSemantic.h>
 
 #include <alien/core/backend/BackEnd.h>
-#include <alien/expression/solver/ILinearSolver.h>
-#include <alien/expression/solver/ILinearAlgebra.h>
+#include <alien/core/backend/LinearSolver.h>
+//#include <alien/expression/solver/ILinearAlgebra.h>
 
 int test()
 {
@@ -75,9 +75,6 @@ int test()
 
   Alien::Vector b(size, pm);
 
-  Alien::BackEnd::BackendHandle* backendHandle = Alien::BackEnd::loadBackend("hypre");
-  //Alien::ILinearAlgebra algebra = backendHandle->getLinearAlgebra();
-
   //algebra.mult(A, xe, b);
 
   Alien::Vector x(size, pm);
@@ -124,7 +121,7 @@ int test()
   //  algebra.axpy(-1., xe, r);
   //}
 
-  tm->info() << " => ||r|| = " << norm;
+  tm->info() << " => ||r|| = "; // << norm;
 
   tm->info() << " ";
   tm->info() << "... example finished !!!";

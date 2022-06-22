@@ -67,6 +67,6 @@ TEST(TestDoKMatrix, MultiImplConverter)
   A = builder.release();
 
   Alien::MultiMatrixImpl* multiA = A.impl();
-  const Alien::DoKMatrix& dok_a = multiA->get<Alien::BackEnd::tag::DoK>();
+  const Alien::DoKMatrix& dok_a = dynamic_cast<const Alien::DoKMatrix&>(multiA->get("DoK"));
   dok_a.backend();
 }

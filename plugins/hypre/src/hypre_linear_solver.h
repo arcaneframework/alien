@@ -18,7 +18,7 @@
 
 #include <arccore/message_passing_mpi/MpiMessagePassingMng.h>
 
-#include <alien/core/backend/LinearSolverT.h>
+#include <alien/core/backend/LinearSolver.h>
 #include <alien/expression/solver/SolverStater.h>
 
 #include <alien/core/impl/IMatrixImpl.h>
@@ -33,7 +33,7 @@
 
 namespace Alien
 {
-class PluginLinearSolver : public IInternalLinearSolver
+class PluginLinearSolver : public IInternalLinearSolver<Matrix, Vector>
 , public ObjectWithTrace
 {
  public:
@@ -67,6 +67,8 @@ class PluginLinearSolver : public IInternalLinearSolver
   const Status& getStatus() const;
 
   const SolverStat& getSolverStat() const { return m_stat; }
+
+  const BackEndId backEndName() const { return "hypre"; }
 
  private:
   bool _solve(const Matrix& A, const Vector& b, Vector& x);

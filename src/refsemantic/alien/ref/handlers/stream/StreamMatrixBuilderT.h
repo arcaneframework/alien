@@ -189,7 +189,7 @@ void StreamMatrixBuilderT<ValueT>::init()
 
   m_matrix.impl()->lock();
 
-  m_matrix_impl = &m_matrix.impl()->template get<BackEnd::tag::simplecsr>(true);
+  m_matrix_impl = &dynamic_cast<SimpleCSRMatrix<ValueT>&>(m_matrix.impl()->get("simplecsr", true));
 
   // const ISpace& space = m_matrix_impl->rowSpace();
   //  if (space != m_matrix_impl->colSpace())

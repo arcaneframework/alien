@@ -46,6 +46,9 @@ class ILinearAlgebra;
 class SolverStat;
 class SolverStatus;
 
+class IMatrixImpl;
+class IVectorImpl;
+
 /*!
  * \ingroup core
  * \brief Internal linear solver interface
@@ -85,7 +88,7 @@ class IInternalLinearSolver
    * \param[in,out] x The solution
    * \returns Solver success or failure
    */
-  virtual bool solve(const Matrix& A, const Vector& b, Vector& x) = 0;
+  virtual bool solve(const IMatrixImpl& A, const IVectorImpl& b, IVectorImpl& x) = 0;
 
   /*!
    * \brief Get statistics on the solve phase
@@ -117,6 +120,8 @@ class IInternalLinearSolver
   {
     return std::shared_ptr<ILinearAlgebra>();
   }
+
+  virtual const BackEndId backEndName() const = 0;
 };
 
 /*---------------------------------------------------------------------------*/

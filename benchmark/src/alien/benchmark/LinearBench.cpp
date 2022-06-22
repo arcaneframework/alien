@@ -25,7 +25,7 @@
 #include <alien/move/handlers/scalar/VectorWriter.h>
 #include <alien/move/data/Redistribution.h>
 
-#include <alien/kernels/simple_csr/algebra/SimpleCSRLinearAlgebra.h>
+//#include <alien/kernels/simple_csr/algebra/SimpleCSRLinearAlgebra.h>
 #include <chrono>
 
 namespace Alien::Benchmark
@@ -89,7 +89,7 @@ Alien::Move::VectorData LinearBench::_solve(Alien::Move::MatrixData&& linop, Ali
 
 LinearBenchResults::LinearBenchResults(const LinearBench& bench, Alien::Move::VectorData&& solution)
 {
-  SimpleCSRLinearAlgebra algebra;
+  //SimpleCSRLinearAlgebra algebra;
 
   auto linop = bench.m_lp->matrix();
 
@@ -97,8 +97,8 @@ LinearBenchResults::LinearBenchResults(const LinearBench& bench, Alien::Move::Ve
 
   auto rhs = bench.m_lp->vector();
 
-  algebra.mult(linop, solution, residual);
-  algebra.axpy(-1., rhs, residual);
+  //algebra.mult(linop, solution, residual);
+  //algebra.axpy(-1., rhs, residual);
 
   m_solution = computeAnalytics(solution);
   m_rhs = computeAnalytics(rhs);

@@ -47,7 +47,7 @@ LinearSolver::~LinearSolver() {}
 String
 LinearSolver::getBackEndName() const
 {
-  return m_solver->getBackEndName();
+  return m_solver->backEndName();
 }
 
 /*---------------------------------------------------------------------------*/
@@ -130,7 +130,7 @@ LinearSolver::getStatus() const
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-IInternalLinearSolver*
+IInternalLinearSolver<class Tag, class TagV>*
 LinearSolver::implem()
 {
   return m_solver.get();

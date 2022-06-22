@@ -176,7 +176,7 @@ void StreamVBlockMatrixBuilderT<ValueT>::init()
   m_parallel_mng = dist.parallelMng();
 
   m_matrix.impl()->lock();
-  m_matrix_impl = &m_matrix.impl()->template get<BackEnd::tag::simplecsr>(true);
+  m_matrix_impl = &dynamic_cast<SimpleCSRMatrix<ValueT>&>(m_matrix.impl()->get("simplecsr", true));
   m_matrix_impl->free();
 
   m_local_size = dist.localRowSize();

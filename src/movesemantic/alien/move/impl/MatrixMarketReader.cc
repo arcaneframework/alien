@@ -215,7 +215,7 @@ VectorData ALIEN_MOVESEMANTIC_EXPORT
 readFromMatrixMarket(const VectorDistribution& distribution, const std::string& filename)
 {
   VectorData out(distribution);
-  auto& v = out.impl()->template get<BackEnd::tag::DoK>(true);
+  auto& v = dynamic_cast<DoKVector&>(out.impl()->get("DoK", true));
 
   if (distribution.parallelMng()->commRank() == 0) { // Only rank 0 read the file
     std::ifstream stream;

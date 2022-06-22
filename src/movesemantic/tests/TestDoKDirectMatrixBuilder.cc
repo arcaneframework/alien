@@ -29,7 +29,6 @@
 #include <alien/move/handlers/scalar/VectorReader.h>
 
 #include <Environment.h>
-#include <alien/core/backend/LinearAlgebra.h>
 
 TEST(TestDoKDirectMatrixBuilder, Fill)
 {

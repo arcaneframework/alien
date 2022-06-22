@@ -30,7 +30,7 @@
 #include <arccore/base/TraceInfo.h>
 
 #include <alien/core/backend/BackEnd.h>
-#include <alien/core/backend/IInternalLinearSolver.h>
+#include <alien/core/backend/IInternalLinearSolverT.h>
 
 #include <alien/expression/solver/ILinearSolver.h>
 
@@ -78,7 +78,7 @@ class LinearSolver : public ILinearSolver
   //: m_solver(AlgebraTraits<Tag>::solver_factory(...))
   //{}
 
-  LinearSolver(BackEndId backEndId, Args... args)
+  LinearSolver(BackEndId backEndId)
   : m_backEndId(backEndId)
   {
     // FIXME: init m_solver here
@@ -148,7 +148,7 @@ class LinearSolver : public ILinearSolver
    * \brief Get kernel solver implementation
    * \return Linear solver actual implementation
    */
-  IInternalLinearSolver* implem();
+  IInternalLinearSolver<class Tag, class TagV>* implem();
 
   /*!
    * \brief Option to add an extra-equation
@@ -166,7 +166,7 @@ class LinearSolver : public ILinearSolver
 
  private:
   //! The linear solver kernel
-  std::unique_ptr<IInternalLinearSolver> m_solver;
+  std::unique_ptr<IInternalLinearSolver<class Tag, class TagV>> m_solver;
   BackEndId m_backEndId;
 };
 

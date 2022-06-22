@@ -154,8 +154,8 @@ TEST(TestDoKMatrix, ConvertFromCSR)
   std::unique_ptr<Alien::MultiMatrixImpl> multimat(
   new Alien::MultiMatrixImpl(row_space.clone(), col_space.clone(), mdist.clone()));
 
-  auto& csr_mat(multimat->get<Alien::BackEnd::tag::simplecsr>());
-  auto& dok_mat(multimat->get<Alien::BackEnd::tag::DoK>(true));
+  auto& csr_mat(dynamic_cast<const SimpleCSRMatrix<Real>&>(multimat->get("simplecsr")));
+  auto& dok_mat(dynamic_cast<DoKMatrix&>(multimat->get("DoK", true)));
 
   Alien::SimpleCSRtoDoKMatrixConverter converter;
   converter.convert(&csr_mat, &dok_mat);

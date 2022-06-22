@@ -59,7 +59,7 @@ MatrixMarketSystemWriter::~MatrixMarketSystemWriter() {}
 
 void MatrixMarketSystemWriter::dump(Matrix const& A)
 {
-  const SimpleCSRMatrix<Real>& csr = A.impl()->get<BackEnd::tag::simplecsr>();
+  const SimpleCSRMatrix<Real>& csr = dynamic_cast<const SimpleCSRMatrix<Real>&>(A.impl()->get("simplecsr"));
   const SimpleCSRMatrix<Real>::ProfileType& profile = csr.getProfile();
   int nrows = profile.getNRows();
   int nnz = profile.getNnz();
@@ -138,7 +138,7 @@ void MatrixMarketSystemWriter::dump(Matrix const& A)
 
 void MatrixMarketSystemWriter::dump(Vector const& rhs)
 {
-  const SimpleCSRVector<Real>& v = rhs.impl()->get<BackEnd::tag::simplecsr>();
+  const SimpleCSRVector<Real>& v = dynamic_cast<const SimpleCSRVector<Real>&>(rhs.impl()->get("simplecsr"));
   auto local_size = v.distribution().localSize();
   const double* values = v.getAddressData();
   if (m_nproc == 1) {

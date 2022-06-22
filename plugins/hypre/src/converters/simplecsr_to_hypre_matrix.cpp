@@ -25,7 +25,7 @@
 #include <alien/kernels/simple_csr/SimpleCSRMatrix.h>
 #include <alien/kernels/simple_csr/SimpleCSRBackEnd.h>
 
-#include "../../include/alien/hypre/backend.h"
+#include <alien/hypre/backend.h>
 
 class SimpleCSR_to_Hypre_MatrixConverter : public Alien::IMatrixConverter
 {

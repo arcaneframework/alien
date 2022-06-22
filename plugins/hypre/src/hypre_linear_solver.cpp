@@ -41,7 +41,6 @@ const Arccore::String& msg, int ierr, int skipError) const
   }
 }
 
-
 // FIXME: check type and conversion
 bool PluginLinearSolver::solve(const IMatrixImpl& A, const IVectorImpl& b, IVectorImpl& x)
 {
@@ -304,16 +303,16 @@ PluginLinearSolver::getStatus() const
 }
 
 ALIEN_HYPRE_EXPORT
-IInternalLinearSolver*
+std::shared_ptr<IInternalLinearSolver<Matrix, Vector>>
 LinearSolverFactory(const BackEnd::Options& options)
 {
-  return new PluginLinearSolver(options);
+  return std::make_shared<PluginLinearSolver>(options);
 }
 
 ALIEN_HYPRE_EXPORT
-IInternalLinearSolver*
+std::shared_ptr<IInternalLinearSolver<Matrix, Vector>>
 LinearSolverFactory()
 {
-  return new PluginLinearSolver();
+  return std::make_shared<PluginLinearSolver>();
 }
 } // namespace Alien

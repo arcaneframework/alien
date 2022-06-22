@@ -41,7 +41,7 @@ add_library(alien_core
         alien/core/backend/IVectorConverter.h
         alien/core/backend/ISolverFabric.h
         alien/core/backend/LinearSolver.h
-        alien/core/backend/LinearSolverT.h
+        alien/core/backend/LinearSolver.cc
         alien/core/backend/MatrixConverterRegisterer.cc
         alien/core/backend/MatrixConverterRegisterer.h
         alien/core/backend/VectorConverterRegisterer.cc

@@ -214,8 +214,8 @@ TEST(TestCompositeMatrix, TimeStampTest)
   auto* impl0 = c0.impl();
   ASSERT_EQ(0, impl0->timestamp());
   std::cout << "sub0 ts = " << impl0->timestamp() << std::endl;
-  impl0->get<Alien::BackEnd::tag::simplecsr>(true);
-  impl0->get<Alien::BackEnd::tag::simplecsr>(true);
+  impl0->get("simple_csr", true);
+  impl0->get("simple_csr", true);
   ASSERT_EQ(2, impl0->timestamp());
   std::cout << "sub0 ts = " << impl0->timestamp() << std::endl;
   ASSERT_EQ(2, impl->timestamp());

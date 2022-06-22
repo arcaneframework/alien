@@ -34,7 +34,7 @@
 
 #include <Environment.h>
 
-#include <alien/kernels/simple_csr/algebra/SimpleCSRLinearAlgebra.h>
+//#include <alien/kernels/simple_csr/algebra/SimpleCSRLinearAlgebra.h>
 
 using namespace Arccore;
 
@@ -87,7 +87,7 @@ TEST(TestRedistributorRef, Redistributor)
   Alien::RedistributedVector bb(b, redist);
   Alien::RedistributedVector xx(x, redist);
 
-  Alien::SimpleCSRLinearAlgebra algebra;
-  algebra.axpy(2., bb, xx);
-  algebra.mult(Aa, xx, bb);
+  //Alien::SimpleCSRLinearAlgebra algebra;
+  //algebra.axpy(2., bb, xx);
+  //algebra.mult(Aa, xx, bb);
 }

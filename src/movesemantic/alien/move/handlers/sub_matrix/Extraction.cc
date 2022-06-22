@@ -51,7 +51,7 @@ SubMatrix::extractRange(const IMatrix& matrix, const ExtractionIndices& indices)
 {
 
   const SimpleCSRMatrix<Real>* matrix_impl =
-  &matrix.impl()->get<BackEnd::tag::simplecsr>();
+  &dynamic_cast<const SimpleCSRMatrix<Real>&>(matrix.impl()->get("simple_csr"));
 
   const auto& dist = matrix_impl->distribution();
 

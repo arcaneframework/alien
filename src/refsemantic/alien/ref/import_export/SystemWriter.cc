@@ -214,7 +214,7 @@ void SystemWriter::_endDump(Exporter* exporter, FileNodeT& base_node)
 
 void SystemWriter::dump(Matrix const& A)
 {
-  const SimpleCSRMatrix<Real>& csr = A.impl()->get<BackEnd::tag::simplecsr>();
+  const SimpleCSRMatrix<Real>& csr = dynamic_cast<const SimpleCSRMatrix<Real>&>(A.impl()->get("simplecsr"));
   const SimpleCSRMatrix<Real>::ProfileType& profile = csr.getProfile();
   int nrows = profile.getNRows();
   int blk_size = 1;
@@ -245,7 +245,7 @@ void SystemWriter::dump(Matrix const& A, Vector const& rhs)
 {
   // A is supposed to be square
 
-  const SimpleCSRMatrix<Real>& csr = A.impl()->get<BackEnd::tag::simplecsr>();
+  const SimpleCSRMatrix<Real>& csr = dynamic_cast<const SimpleCSRMatrix<Real>&>(A.impl()->get("simplecsr"));
   const SimpleCSRMatrix<Real>::ProfileType& profile = csr.getProfile();
   int nrows = profile.getNRows();
   int blk_size = 1;
@@ -271,7 +271,7 @@ void SystemWriter::dump(Matrix const& A, Vector const& rhs)
 
   FileNode vector_node = exporter->createFileNode(root_node, "rhs-0");
   {
-    const SimpleCSRVector<Real>& v = rhs.impl()->get<BackEnd::tag::simplecsr>();
+    const SimpleCSRVector<Real>& v = dynamic_cast<const SimpleCSRVector<Real>&>(rhs.impl()->get("simplecsr"));
     const double* values = v.getAddressData();
     _writeVector(*exporter, vector_node, nrows, blk_size, values);
   }
@@ -283,7 +283,7 @@ void SystemWriter::dump(Matrix const& A, Vector const& rhs)
 void SystemWriter::dump(
 Matrix const& A, Vector const& rhs, Vector const& sol, SolutionInfo const& sol_info)
 {
-  const SimpleCSRMatrix<Real>& csr = A.impl()->get<BackEnd::tag::simplecsr>();
+  const SimpleCSRMatrix<Real>& csr = dynamic_cast<const SimpleCSRMatrix<Real>&>(A.impl()->get("simplecsr"));
   const SimpleCSRMatrix<Real>::ProfileType& profile = csr.getProfile();
   int nrows = profile.getNRows();
   int blk_size = 1;
@@ -309,7 +309,7 @@ Matrix const& A, Vector const& rhs, Vector const& sol, SolutionInfo const& sol_i
 
   FileNode rhs_node = exporter->createFileNode(root_node, "rhs-0");
   {
-    const SimpleCSRVector<Real>& v = rhs.impl()->get<BackEnd::tag::simplecsr>();
+    const SimpleCSRVector<Real>& v = dynamic_cast<const SimpleCSRVector<Real>&>(rhs.impl()->get("simplecsr"));
     const double* values = v.getAddressData();
     _writeVector(*exporter, rhs_node, nrows, blk_size, values);
   }
@@ -324,7 +324,7 @@ Matrix const& A, Vector const& rhs, Vector const& sol, SolutionInfo const& sol_i
 
     FileNode solution_vector_node =
     exporter->createFileNode(solution_node, "solution-vector");
-    const SimpleCSRVector<Real>& v = sol.impl()->get<BackEnd::tag::simplecsr>();
+    const SimpleCSRVector<Real>& v = dynamic_cast<const SimpleCSRVector<Real>&>(sol.impl()->get("simplecsr"));
     const double* values = v.getAddressData();
     _writeVector(*exporter, solution_vector_node, nrows, blk_size, values);
     exporter->closeFileNode(solution_vector_node);
@@ -336,7 +336,7 @@ Matrix const& A, Vector const& rhs, Vector const& sol, SolutionInfo const& sol_i
 
 void SystemWriter::dump(BlockMatrix const& A, BlockVector const& rhs)
 {
-  const SimpleCSRMatrix<Real>& csr = A.impl()->get<BackEnd::tag::simplecsr>();
+  const SimpleCSRMatrix<Real>& csr = dynamic_cast<const SimpleCSRMatrix<Real>&>(A.impl()->get("simplecsr"));
   const SimpleCSRMatrix<Real>::ProfileType& profile = csr.getProfile();
   int nrows = profile.getNRows();
   int blk_size = A.block().size();
@@ -362,7 +362,7 @@ void SystemWriter::dump(BlockMatrix const& A, BlockVector const& rhs)
 
   FileNode vector_node = exporter->createFileNode(root_node, "rhs-0");
   {
-    const SimpleCSRVector<Real>& v = rhs.impl()->get<BackEnd::tag::simplecsr>();
+    const SimpleCSRVector<Real>& v = dynamic_cast<const SimpleCSRVector<Real>&>(rhs.impl()->get("simplecsr"));
     const double* values = v.getAddressData();
     _writeVector(*exporter, vector_node, nrows, blk_size, values);
   }
@@ -373,7 +373,7 @@ void SystemWriter::dump(BlockMatrix const& A, BlockVector const& rhs)
 void SystemWriter::dump(BlockMatrix const& A, BlockVector const& rhs, BlockVector const& sol,
                         SolutionInfo const& sol_info)
 {
-  const SimpleCSRMatrix<Real>& csr = A.impl()->get<BackEnd::tag::simplecsr>();
+  const SimpleCSRMatrix<Real>& csr = dynamic_cast<const SimpleCSRMatrix<Real>&>(A.impl()->get("simplecsr"));
   const SimpleCSRMatrix<Real>::ProfileType& profile = csr.getProfile();
   int nrows = profile.getNRows();
   int blk_size = A.block().size();
@@ -399,7 +399,7 @@ void SystemWriter::dump(BlockMatrix const& A, BlockVector const& rhs, BlockVecto
 
   FileNode rhs_node = exporter->createFileNode(root_node, "rhs-0");
   {
-    const SimpleCSRVector<Real>& v = rhs.impl()->get<BackEnd::tag::simplecsr>();
+    const SimpleCSRVector<Real>& v = dynamic_cast<const SimpleCSRVector<Real>&>(rhs.impl()->get("simplecsr"));
     const double* values = v.getAddressData();
     _writeVector(*exporter, rhs_node, nrows, blk_size, values);
   }
@@ -408,7 +408,7 @@ void SystemWriter::dump(BlockMatrix const& A, BlockVector const& rhs, BlockVecto
 
   FileNode sol_node = exporter->createFileNode(root_node, "sol");
   {
-    const SimpleCSRVector<Real>& v = sol.impl()->get<BackEnd::tag::simplecsr>();
+    const SimpleCSRVector<Real>& v = dynamic_cast<const SimpleCSRVector<Real>&>(sol.impl()->get("simplecsr"));
     const double* values = v.getAddressData();
     _writeVector(*exporter, sol_node, nrows, blk_size, values);
   }
