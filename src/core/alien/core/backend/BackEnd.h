@@ -39,7 +39,6 @@ struct AlgebraTraits;
 template <typename Tag>
 class LUSendRecvTraits;
 
-template <typename Tag, typename TagV = Tag>
 class IInternalLinearSolver;
 
 class ILinearSolver;
@@ -114,8 +113,9 @@ namespace BackEnd
 
   class IPlugin
   {
-    IInternalLinearSolver<class Matrix, class Vector>* solver_factory();
-    IInternalLinearSolver<class Matrix, class Vector>* solver_factory(const Alien::BackEnd::Options& options);
+  public:
+    virtual std::unique_ptr<IInternalLinearSolver> solver_factory() = 0;
+    virtual std::unique_ptr<IInternalLinearSolver> solver_factory(const Alien::BackEnd::Options& options) = 0;
     BackEndId name();
   };
 } // namespace BackEnd

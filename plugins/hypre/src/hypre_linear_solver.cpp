@@ -303,16 +303,16 @@ PluginLinearSolver::getStatus() const
 }
 
 ALIEN_HYPRE_EXPORT
-std::shared_ptr<IInternalLinearSolver<Matrix, Vector>>
+std::unique_ptr<IInternalLinearSolver>
 LinearSolverFactory(const BackEnd::Options& options)
 {
-  return std::make_shared<PluginLinearSolver>(options);
+  return std::make_unique<PluginLinearSolver>(options);
 }
 
 ALIEN_HYPRE_EXPORT
-std::shared_ptr<IInternalLinearSolver<Matrix, Vector>>
+std::unique_ptr<IInternalLinearSolver>
 LinearSolverFactory()
 {
-  return std::make_shared<PluginLinearSolver>();
+  return std::make_unique<PluginLinearSolver>();
 }
 } // namespace Alien

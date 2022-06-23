@@ -39,7 +39,30 @@ namespace Alien
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-LinearSolver::~LinearSolver() {}
+LinearSolver::LinearSolver(BackEndId backEndId)
+{
+  // FIXME: add error checking
+
+  m_handle = dlopen(backEndId.localstr(), RTLD_NOW | RTLD_LOCAL);
+  m_plugin_create = (BackEnd::IPlugin*(*)()) dlsym(m_handle, "create");
+  m_plugin_destroy = (void (*)(BackEnd::IPlugin*)) dlsym(m_handle, "destroy");
+
+  m_plugin.reset(m_plugin_create());
+  m_solver = m_plugin->solver_factory();
+
+  m_backEndId = m_solver->backEndName();
+
+  std::cout << "BACKENDNAMEIS " << m_backEndId << std::endl;
+}
+
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+
+LinearSolver::~LinearSolver()
+{
+  // FIXME: m_handle + plugin.destroy()?
+  m_plugin_destroy(m_plugin.release());
+}
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
@@ -130,7 +153,7 @@ LinearSolver::getStatus() const
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-IInternalLinearSolver<class Tag, class TagV>*
+IInternalLinearSolver*
 LinearSolver::implem()
 {
   return m_solver.get();

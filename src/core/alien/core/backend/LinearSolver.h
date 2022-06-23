@@ -22,6 +22,11 @@
  */
 #pragma once
 
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+#include <dlfcn.h>
+
 #include <alien/utils/Precomp.h>
 
 #include <memory>
@@ -30,7 +35,7 @@
 #include <arccore/base/TraceInfo.h>
 
 #include <alien/core/backend/BackEnd.h>
-#include <alien/core/backend/IInternalLinearSolverT.h>
+#include <alien/core/backend/IInternalLinearSolver.h>
 
 #include <alien/expression/solver/ILinearSolver.h>
 
@@ -58,7 +63,9 @@ class IMatrix;
  *
  * \tparam Tag The tag of the type of solvers used
  */
-class LinearSolver : public ILinearSolver
+
+// FIXME: force access through factory?
+class ALIEN_EXPORT LinearSolver : public ILinearSolver
 {
  public:
   //! The type of the solver
@@ -78,11 +85,7 @@ class LinearSolver : public ILinearSolver
   //: m_solver(AlgebraTraits<Tag>::solver_factory(...))
   //{}
 
-  LinearSolver(BackEndId backEndId)
-  : m_backEndId(backEndId)
-  {
-    // FIXME: init m_solver here
-  }
+  LinearSolver(BackEndId backEndId);
 
   //! Free resources
   virtual ~LinearSolver();
@@ -148,7 +151,7 @@ class LinearSolver : public ILinearSolver
    * \brief Get kernel solver implementation
    * \return Linear solver actual implementation
    */
-  IInternalLinearSolver<class Tag, class TagV>* implem();
+  IInternalLinearSolver* implem();
 
   /*!
    * \brief Option to add an extra-equation
@@ -166,8 +169,13 @@ class LinearSolver : public ILinearSolver
 
  private:
   //! The linear solver kernel
-  std::unique_ptr<IInternalLinearSolver<class Tag, class TagV>> m_solver;
+  std::unique_ptr<IInternalLinearSolver> m_solver;
+  void* m_handle;
   BackEndId m_backEndId;
+
+  std::unique_ptr<BackEnd::IPlugin> m_plugin;
+  BackEnd::IPlugin* (*m_plugin_create)();
+  void (*m_plugin_destroy)(BackEnd::IPlugin*);
 };
 
 /*---------------------------------------------------------------------------*/

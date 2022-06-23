@@ -17,8 +17,8 @@
  */
 
 /*!
- * \file IInternalLinearSolverT.h
- * \brief IInternalLinearSolverT.h
+ * \file IInternalLinearSolver.h
+ * \brief IInternalLinearSolver.h
  */
 #pragma once
 
@@ -58,7 +58,6 @@ class IVectorImpl;
  * \tparam Matrix The type of matrix used
  * \tparam Vector The type of vector used
  */
-template <class Matrix, class Vector>
 class IInternalLinearSolver
 {
  public:

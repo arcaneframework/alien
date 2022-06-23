@@ -21,8 +21,8 @@
 #include <alien/move/AlienMoveSemantic.h>
 #include <alien/move/handlers/scalar/VectorWriter.h>
 
-#include <alien/hypre/backend.h>
-#include <alien/hypre/options.h>
+#include <alien/core/backend/BackEnd.h>
+#include <alien/core/backend/LinearSolver.h>
 
 int test()
 {

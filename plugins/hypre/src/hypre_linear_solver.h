@@ -33,7 +33,7 @@
 
 namespace Alien
 {
-class PluginLinearSolver : public IInternalLinearSolver<Matrix, Vector>
+class PluginLinearSolver : public IInternalLinearSolver
 , public ObjectWithTrace
 {
  public:

@@ -36,7 +36,7 @@ add_library(alien_core
         alien/core/backend/IInternalEigenSolverT.h
         alien/core/backend/IInternalLinearAlgebraT.h
         alien/core/backend/IInternalLinearAlgebraExprT.h
-        alien/core/backend/IInternalLinearSolverT.h
+        alien/core/backend/IInternalLinearSolver.h
         alien/core/backend/IMatrixConverter.h
         alien/core/backend/IVectorConverter.h
         alien/core/backend/ISolverFabric.h

@@ -31,9 +31,9 @@ class Options;
 
 class ILinearSolver;
 
-extern std::shared_ptr<IInternalLinearSolver<Matrix, Vector>> LinearSolverFactory(const BackEnd::Options& options);
+extern std::unique_ptr<IInternalLinearSolver> LinearSolverFactory(const BackEnd::Options& options);
 
-extern std::shared_ptr<IInternalLinearSolver<Matrix, Vector>> LinearSolverFactory();
+extern std::unique_ptr<IInternalLinearSolver> LinearSolverFactory();
 } // namespace Alien
 
 
@@ -52,14 +52,15 @@ namespace BackEnd
 
 class Plugin : public BackEnd::IPlugin
 {
+public:
   // factories to default solver
-  std::shared_ptr<IInternalLinearSolver<Matrix, Vector>> solver_factory()
+  std::unique_ptr<IInternalLinearSolver> solver_factory()
   {
     return LinearSolverFactory();
   }
 
   // factories to build solver
-  std::shared_ptr<IInternalLinearSolver<Matrix, Vector>> solver_factory(const Alien::BackEnd::Options& options)
+  std::unique_ptr<IInternalLinearSolver> solver_factory(const Alien::BackEnd::Options& options)
   {
     return LinearSolverFactory(options);
   }
