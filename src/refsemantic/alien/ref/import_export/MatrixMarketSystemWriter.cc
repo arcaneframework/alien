@@ -71,7 +71,7 @@ void MatrixMarketSystemWriter::dump(Matrix const& A, std::string const& descript
     std::ofstream fout(m_filename);
     fout << "%%MatrixMarket matrix coordinate real general" << std::endl;
     fout << "%" << std::endl;
-    fout << "% " << description<<std::endl;
+    fout << "% " << description << std::endl;
     fout << "%" << std::endl;
     fout << "% #rows #cols #nonzeros" << std::endl;
     fout << "% #vertices #hyperedges #pins" << std::endl;
@@ -94,7 +94,7 @@ void MatrixMarketSystemWriter::dump(Matrix const& A, std::string const& descript
       std::ofstream fout(m_filename);
       fout << "%%MatrixMarket matrix coordinate real general" << std::endl;
       fout << "%" << std::endl;
-      fout << "% " << description<<std::endl;
+      fout << "% " << description << std::endl;
       fout << "%" << std::endl;
       fout << "% #rows #cols #nonzeros" << std::endl;
       fout << "% #vertices #hyperedges #pins" << std::endl;
@@ -125,8 +125,8 @@ void MatrixMarketSystemWriter::dump(Matrix const& A, std::string const& descript
       Integer domain_offset = csr.distribution().rowOffset();
       for (int irow = 0; irow < nrows; ++irow) {
         for (int k = kcol[irow]; k < kcol[irow + 1]; ++k) {
-          indexes[2 * k] = domain_offset + irow + 1 ;
-          indexes[2 * k + 1] = cols[k] + 1 ;
+          indexes[2 * k] = domain_offset + irow + 1;
+          indexes[2 * k + 1] = cols[k] + 1;
           local_values[k] = values[k];
         }
       }
@@ -145,7 +145,7 @@ void MatrixMarketSystemWriter::dump(Vector const& rhs, std::string const& descri
     std::ofstream fout(m_filename);
     fout << "%%MatrixMarket matrix array real general" << std::endl;
     fout << "%" << std::endl;
-    fout << "% " << description<<std::endl;
+    fout << "% " << description << std::endl;
     fout << "%" << std::endl;
     fout << local_size << " 1" << std::endl;
     for (int irow = 0; irow < local_size; ++irow) {
@@ -160,7 +160,7 @@ void MatrixMarketSystemWriter::dump(Vector const& rhs, std::string const& descri
       std::ofstream fout(m_filename);
       fout << "%%MatrixMarket matrix array real general" << std::endl;
       fout << "%" << std::endl;
-      fout << "% " << description<<std::endl;
+      fout << "% " << description << std::endl;
       fout << "%" << std::endl;
       fout << global_size << " 1" << std::endl;
       for (int irow = 0; irow < local_size; ++irow) {
