@@ -85,7 +85,7 @@ class ALIEN_EXPORT LinearSolver : public ILinearSolver
   //: m_solver(AlgebraTraits<Tag>::solver_factory(...))
   //{}
 
-  LinearSolver(BackEndId backEndId);
+  LinearSolver(std::string soFile);
 
   //! Free resources
   virtual ~LinearSolver();

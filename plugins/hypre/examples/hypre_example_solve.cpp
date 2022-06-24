@@ -90,7 +90,7 @@ int test()
   //  auto solver = Alien::Hypre::LinearSolver (options);
 
   //auto solver = Alien::Hypre::LinearSolver();
-  auto solver = Alien::LinearSolver("hypre");
+  auto solver = Alien::LinearSolver("../libhypre_wrapper.so");
 
   solver.solve(A, b, x);
 

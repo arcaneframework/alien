@@ -24,13 +24,13 @@
 #include <alien/benchmark/ILinearProblem.h>
 #include <alien/benchmark/LinearBench.h>
 
-#include <alien/hypre/backend.h>
-#include <alien/hypre/options.h>
+#include <alien/core/backend/BackEnd.h>
+#include <alien/core/backend/LinearSolver.h>
 #include "alien/expression/solver/SolverStat.h"
 
 constexpr int NB_RUNS = 5;
 
-int test(const Alien::Hypre::OptionTypes::eSolver& solv, const Alien::Hypre::OptionTypes::ePreconditioner& prec, const std::string& mat_filename, const std::string& vec_filename)
+int test(const Alien::BackEnd::OptionTypes::eSolver& solv, const Alien::BackEnd::OptionTypes::ePreconditioner& prec, const std::string& mat_filename, const std::string& vec_filename)
 {
   auto* pm = Arccore::MessagePassing::Mpi::StandaloneMpiMessagePassingMng::create(MPI_COMM_WORLD);
   auto* tm = Arccore::arccoreCreateDefaultTraceMng();
@@ -41,12 +41,12 @@ int test(const Alien::Hypre::OptionTypes::eSolver& solv, const Alien::Hypre::Opt
   auto bench = Alien::Benchmark::LinearBench(std::move(problem));
 
   for (int i = 0; i < NB_RUNS; i++) {
-    Alien::Hypre::Options options;
+    Alien::BackEnd::Options options;
     options.numIterationsMax(500);
     options.stopCriteriaValue(1e-8);
     options.preconditioner(prec); // Jacobi, NoPC
     options.solver(solv); //CG, GMRES, BICG, BICGSTAB
-    auto solver = Alien::Hypre::LinearSolver(options);
+    auto solver = Alien::LinearSolver("hypre");
 
     tm->info() << "Running Hypre";
     auto solution = bench.solve(&solver);
@@ -81,8 +81,8 @@ int main(int argc, char** argv)
   }
 
   // Default options, to run as test
-  auto solver = Alien::Hypre::OptionTypes::GMRES;
-  auto prec = Alien::Hypre::OptionTypes::DiagPC;
+  auto solver = Alien::BackEnd::OptionTypes::GMRES;
+  auto prec = Alien::BackEnd::OptionTypes::DiagPC;
   std::string matrix_file = "matrix.mtx";
   std::string vec_file = "rhs.mtx";
 
@@ -92,10 +92,10 @@ int main(int argc, char** argv)
   else {
     // Read the solver
     if (std::string(argv[1]) == "CG") {
-      solver = Alien::Hypre::OptionTypes::CG;
+      solver = Alien::BackEnd::OptionTypes::CG;
     }
     else if (std::string(argv[1]) == "GMRES") {
-      solver = Alien::Hypre::OptionTypes::GMRES;
+      solver = Alien::BackEnd::OptionTypes::GMRES;
     }
     else {
       std::cerr << "Unrecognized solver : " << argv[1] << "\n"
@@ -104,13 +104,13 @@ int main(int argc, char** argv)
     }
 
     if (std::string(argv[2]) == "Jacobi") {
-      prec = Alien::Hypre::OptionTypes::DiagPC;
+      prec = Alien::BackEnd::OptionTypes::DiagPC;
     }
     else if (std::string(argv[2]) == "NoPC") {
-      prec = Alien::Hypre::OptionTypes::NoPC;
+      prec = Alien::BackEnd::OptionTypes::NoPC;
     }
     else if (std::string(argv[2]) == "AMG") {
-      prec = Alien::Hypre::OptionTypes::AMGPC;
+      prec = Alien::BackEnd::OptionTypes::AMGPC;
     }
     else {
       std::cerr << "Unrecognized preconditioner : " << argv[2] << "\n"

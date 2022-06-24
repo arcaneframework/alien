@@ -22,6 +22,8 @@
 #include <arccore/base/String.h>
 #include <arccore/base/ArccoreGlobal.h>
 
+#include <map>
+
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
@@ -43,6 +45,11 @@ class IInternalLinearSolver;
 
 class ILinearSolver;
 class ILinearAlgebra;
+
+class IMatrixConverter;
+class IVectorConverter;
+class IMatrixImpl;
+class IVectorImpl;
 
 
 namespace BackEnd
@@ -113,10 +120,19 @@ namespace BackEnd
 
   class IPlugin
   {
+    typedef IMatrixImpl* (*MatrixFactory) (void);
+    typedef IVectorImpl* (*VectorFactory) (void);
+
   public:
     virtual std::unique_ptr<IInternalLinearSolver> solver_factory() = 0;
     virtual std::unique_ptr<IInternalLinearSolver> solver_factory(const Alien::BackEnd::Options& options) = 0;
-    BackEndId name();
+
+    virtual void registerMatrixConverters(std::map<std::map<BackEndId, BackEndId>, IMatrixConverter>& converters) = 0;
+    virtual void registerVectorConverters(std::map<std::map<BackEndId, BackEndId>, IVectorConverter>& converters) = 0;
+    virtual void registerMatrixFactory(std::map<BackEndId, MatrixFactory>& matrixFactories) = 0;
+    virtual void registerVectorFactory(std::map<BackEndId, VectorFactory>& vectorFactories) = 0;
+
+    virtual BackEndId name() = 0;
   };
 } // namespace BackEnd
 

@@ -23,8 +23,8 @@
 #include <alien/ref/AlienRefSemantic.h>
 #include <alien/ref/handlers/scalar/VectorWriter.h>
 
-#include <alien/hypre/backend.h>
-#include <alien/hypre/options.h>
+#include <alien/core/backend/BackEnd.h>
+#include <alien/core/backend/LinearSolver.h>
 
 class SimpleLinearProblemFixtureRef : public ::testing::Test
 {
@@ -76,7 +76,7 @@ TEST_F(SimpleLinearProblemFixtureRef, SimpleSolve)
 {
   Alien::Vector x(m_matrix.distribution().rowDistribution());
 
-  auto solver = Alien::Hypre::LinearSolver();
+  auto solver = Alien::LinearSolver("hypre");
 
   ASSERT_TRUE(solver.solve(m_matrix, m_rhs, x));
 }
@@ -85,13 +85,13 @@ TEST_F(SimpleLinearProblemFixtureRef, ParametrizedSolve)
 {
   Alien::Vector x(m_matrix.distribution().rowDistribution());
 
-  auto options = Alien::Hypre::Options()
-                 .numIterationsMax(10)
-                 .stopCriteriaValue(1e-10)
-                 .preconditioner(Alien::Hypre::OptionTypes::AMGPC)
-                 .solver(Alien::Hypre::OptionTypes::GMRES);
+  //auto options = Alien::Hypre::Options()
+  //               .numIterationsMax(10)
+  //               .stopCriteriaValue(1e-10)
+  //               .preconditioner(Alien::Hypre::OptionTypes::AMGPC)
+  //               .solver(Alien::Hypre::OptionTypes::GMRES);
 
-  auto solver = Alien::Hypre::LinearSolver(options);
+  auto solver = Alien::LinearSolver("hypre");
 
   ASSERT_TRUE(solver.solve(m_matrix, m_rhs, x));
 }
@@ -108,13 +108,13 @@ TEST_F(SimpleLinearProblemFixtureRef, MultipleSolve)
   }
   {
     // First call, should fail
-    auto options = Alien::Hypre::Options()
-                   .numIterationsMax(1)
-                   .stopCriteriaValue(1e-20)
-                   .preconditioner(Alien::Hypre::OptionTypes::NoPC)
-                   .solver(Alien::Hypre::OptionTypes::CG);
+    //auto options = Alien::Hypre::Options()
+    //               .numIterationsMax(1)
+    //               .stopCriteriaValue(1e-20)
+    //               .preconditioner(Alien::Hypre::OptionTypes::NoPC)
+    //               .solver(Alien::Hypre::OptionTypes::CG);
 
-    auto solver = Alien::Hypre::LinearSolver(options);
+    auto solver = Alien::LinearSolver("hypre");
     EXPECT_FALSE(solver.solve(m_matrix, m_rhs, x));
   }
 
@@ -128,7 +128,7 @@ TEST_F(SimpleLinearProblemFixtureRef, MultipleSolve)
 
   {
     // Second call, should succeed
-    auto solver = Alien::Hypre::LinearSolver();
+    auto solver = Alien::LinearSolver("hypre");
     ASSERT_TRUE(solver.solve(m_matrix, m_rhs, x));
   }
 }

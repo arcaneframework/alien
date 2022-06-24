@@ -85,21 +85,21 @@ int test()
 
   Alien::Move::VectorData b(distribution.rowDistribution());
 
-  Alien::Hypre::LinearAlgebra algebra;
+  //Alien::Hypre::LinearAlgebra algebra;
 
-  algebra.mult(A, xe, b);
+  //algebra.mult(A, xe, b);
 
   Alien::Move::VectorData x(distribution.colDistribution());
 
   tm->info() << "* x = A^-1 b";
 
-  auto options = Alien::Hypre::Options()
-                 .numIterationsMax(100)
-                 .stopCriteriaValue(1e-10)
-                 .preconditioner(Alien::Hypre::OptionTypes::AMGPC)
-                 .solver(Alien::Hypre::OptionTypes::GMRES);
+  //auto options = Alien::Hypre::Options()
+  //               .numIterationsMax(100)
+  //               .stopCriteriaValue(1e-10)
+  //               .preconditioner(Alien::Hypre::OptionTypes::AMGPC)
+  //               .solver(Alien::Hypre::OptionTypes::GMRES);
 
-  auto solver = Alien::Hypre::LinearSolver(options);
+  auto solver = Alien::LinearSolver("hypre");
 
   solver.solve(A, b, x);
 
@@ -107,30 +107,30 @@ int test()
 
   Alien::Move::VectorData r(distribution.colDistribution());
 
-  {
-    Alien::Move::VectorData tmp(distribution.colDistribution());
-    tm->info() << "t = Ax";
-    algebra.mult(A, x, tmp);
-    tm->info() << "r = t";
-    algebra.copy(tmp, r);
-    tm->info() << "r -= b";
-    algebra.axpy(-1., b, r);
-  }
+  //{
+  //  Alien::Move::VectorData tmp(distribution.colDistribution());
+  //  tm->info() << "t = Ax";
+  //  algebra.mult(A, x, tmp);
+  //  tm->info() << "r = t";
+  //  algebra.copy(tmp, r);
+  //  tm->info() << "r -= b";
+  //  algebra.axpy(-1., b, r);
+  //}
 
-  auto norm = algebra.norm2(r);
+  //auto norm = algebra.norm2(r);
 
-  tm->info() << " => ||r|| = " << norm;
+  //tm->info() << " => ||r|| = " << norm;
 
   tm->info() << "* r = || x - xe ||";
 
-  {
-    tm->info() << "r = x";
-    algebra.copy(x, r);
-    tm->info() << "r -= xe";
-    algebra.axpy(-1., xe, r);
-  }
+  //{
+  //  tm->info() << "r = x";
+  //  algebra.copy(x, r);
+  //  tm->info() << "r -= xe";
+  //  algebra.axpy(-1., xe, r);
+  //}
 
-  tm->info() << " => ||r|| = " << norm;
+  //tm->info() << " => ||r|| = " << norm;
 
   tm->info() << " ";
   tm->info() << "... example finished !!!";
