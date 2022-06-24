@@ -72,7 +72,7 @@ option(ALIEN_PLUGIN_GINKGO_DPCPP "Whether or not to compile DPCPP Ginkgo backend
 
 get_filename_component(_fp_framework "framework/CMake" REALPATH)
 if (EXISTS ${_fp_framework})
-    option(ALIENDEV_EMBEDDED "[dev] forbid to compile Arcon and Arccore" ${ALIEN_DEFAULT_OPTIONS})
+    option(ALIENDEV_EMBEDDED "[dev] forbid to compile Arcon and Arccore" OFF)
 else ()
     set(ALIENDEV_EMBEDDED OFF)
 endif ()
