@@ -51,6 +51,9 @@ class IVectorConverter;
 class IMatrixImpl;
 class IVectorImpl;
 
+class MultiMatrixImpl;
+class MultiVectorImpl;
+
 
 namespace BackEnd
 {
@@ -120,15 +123,15 @@ namespace BackEnd
 
   class IPlugin
   {
-    typedef IMatrixImpl* (*MatrixFactory) (void);
-    typedef IVectorImpl* (*VectorFactory) (void);
-
   public:
+    typedef IMatrixImpl* (*MatrixFactory) (const MultiMatrixImpl*);
+    typedef IVectorImpl* (*VectorFactory) (const MultiVectorImpl*);
+
     virtual std::unique_ptr<IInternalLinearSolver> solver_factory() = 0;
     virtual std::unique_ptr<IInternalLinearSolver> solver_factory(const Alien::BackEnd::Options& options) = 0;
 
-    virtual void registerMatrixConverters(std::map<std::map<BackEndId, BackEndId>, IMatrixConverter>& converters) = 0;
-    virtual void registerVectorConverters(std::map<std::map<BackEndId, BackEndId>, IVectorConverter>& converters) = 0;
+    virtual void registerMatrixConverters(std::map<std::pair<BackEndId, BackEndId>, IMatrixConverter*>& converters) = 0;
+    virtual void registerVectorConverters(std::map<std::pair<BackEndId, BackEndId>, IVectorConverter*>& converters) = 0;
     virtual void registerMatrixFactory(std::map<BackEndId, MatrixFactory>& matrixFactories) = 0;
     virtual void registerVectorFactory(std::map<BackEndId, VectorFactory>& vectorFactories) = 0;
 
@@ -136,9 +139,18 @@ namespace BackEnd
   };
 } // namespace BackEnd
 
+#define REGISTER_PLUGIN_MATRIX_CONVERTER(a, b, converter) \
+  converters.insert(std::map<std::pair<BackEndId, BackEndId>, IMatrixConverter*>::value_type(std::pair<BackEndId, BackEndId>{a, b}, new converter()));
+
+#define REGISTER_PLUGIN_VECTOR_CONVERTER(a, b, converter) \
+  converters.insert(std::map<std::pair<BackEndId, BackEndId>, IVectorConverter*>::value_type(std::pair<BackEndId, BackEndId>{a, b}, new converter()));
 
 
+#define REGISTER_PLUGIN_MATRIX_FACTORY(a, factories, factory) \
+  factories.insert(std::map<BackEndId, MatrixFactory>::value_type(a, factory));
 
+#define REGISTER_PLUGIN_VECTOR_FACTORY(a, factories, factory) \
+  factories.insert(std::map<BackEndId, VectorFactory>::value_type(a, factory));
 
 
 /*---------------------------------------------------------------------------*/

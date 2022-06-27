@@ -248,6 +248,11 @@ class ALIEN_EXPORT MultiMatrixImpl : public TimestampMng
   std::shared_ptr<VBlock> m_rows_block;
   //! The variable col block datas
   std::shared_ptr<VBlock> m_cols_block;
+
+// FIXME: private, access through functions
+ public:
+  static std::map<std::pair<BackEndId, BackEndId>, IMatrixConverter*> m_matrixConverters;
+  static std::map<BackEndId, BackEnd::IPlugin::MatrixFactory> m_matrixFactory;
 };
 
 /*---------------------------------------------------------------------------*/

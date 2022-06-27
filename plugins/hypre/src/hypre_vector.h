@@ -53,4 +53,6 @@ class Vector : public IVectorImpl
   Arccore::UniqueArray<Arccore::Integer> m_rows;
 };
 
+inline IVectorImpl* vector_factory(const MultiVectorImpl* multiImpl) { return new Vector(multiImpl); };
+
 } // namespace Alien::Hypre

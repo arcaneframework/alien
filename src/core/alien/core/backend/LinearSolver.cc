@@ -52,7 +52,10 @@ LinearSolver::LinearSolver(std::string soFile)
 
   m_backEndId = m_solver->backEndName();
 
-  std::cout << "BACKENDNAMEIS " << m_backEndId << std::endl;
+  m_plugin->registerMatrixConverters(MultiMatrixImpl::m_matrixConverters);
+  m_plugin->registerVectorConverters(MultiVectorImpl::m_vectorConverters);
+  m_plugin->registerMatrixFactory(MultiMatrixImpl::m_matrixFactory);
+  m_plugin->registerVectorFactory(MultiVectorImpl::m_vectorFactory);
 }
 
 /*---------------------------------------------------------------------------*/

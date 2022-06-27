@@ -65,6 +65,12 @@ public:
     return LinearSolverFactory(options);
   }
 
+  void registerMatrixConverters(std::map<std::pair<BackEndId, BackEndId>, IMatrixConverter*>& converters);
+  void registerVectorConverters(std::map<std::pair<BackEndId, BackEndId>, IVectorConverter*>& converters);
+  void registerMatrixFactory(std::map<BackEndId, MatrixFactory>& matrixFactories);
+  void registerVectorFactory(std::map<BackEndId, VectorFactory>& vectorFactories);
+
+
   BackEndId name() { return "hypre"; }
 };
 

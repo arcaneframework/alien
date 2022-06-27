@@ -49,4 +49,6 @@ class Matrix : public IMatrixImpl
   MPI_Comm m_comm;
 };
 
+inline IMatrixImpl* matrix_factory(const MultiMatrixImpl* multiImpl) { return new Matrix(multiImpl); };
+
 } // namespace Alien

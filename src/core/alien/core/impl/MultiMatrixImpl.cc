@@ -36,6 +36,9 @@ namespace Alien
 
 using namespace Arccore;
 
+std::map<std::pair<BackEndId, BackEndId>, IMatrixConverter*> MultiMatrixImpl::m_matrixConverters;
+std::map<BackEndId, BackEnd::IPlugin::MatrixFactory> MultiMatrixImpl::m_matrixFactory;
+
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
@@ -365,7 +368,7 @@ MultiMatrixImpl::getImpl(BackEndId backend) const
   auto inserter = m_impls2.insert(MultiMatrixImplMap::value_type(backend, NULL));
   IMatrixImpl*& impl2 = inserter.first->second;
   if (impl2 == NULL) {
-    IMatrixImpl* new_impl = new IMatrixImpl(this); // constructeur associé à un multi-impl
+    IMatrixImpl* new_impl = m_matrixFactory[backend](this); // constructeur associé à un multi-impl
     //    new_impl->init(*m_row_space.get(),
     //                   *m_col_space.get(),
     //                   m_distribution);

@@ -16,55 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "../hypre_matrix.h"
-
-#include <arccore/collections/Array2.h>
-
-#include <alien/core/backend/IMatrixConverter.h>
-#include <alien/core/backend/MatrixConverterRegisterer.h>
-#include <alien/kernels/simple_csr/SimpleCSRMatrix.h>
-#include <alien/kernels/simple_csr/SimpleCSRBackEnd.h>
-
-#include <alien/hypre/backend.h>
-
-class SimpleCSR_to_Hypre_MatrixConverter : public Alien::IMatrixConverter
-{
- public:
-  SimpleCSR_to_Hypre_MatrixConverter() {}
-
-  virtual ~SimpleCSR_to_Hypre_MatrixConverter() {}
-
- public:
-  BackEndId sourceBackend() const
-  {
-    return Alien::AlgebraTraits<Alien::BackEnd::tag::simplecsr>::name();
-  }
-
-  BackEndId targetBackend() const { return "hypre"; }
-
-  void convert(const Alien::IMatrixImpl* sourceImpl, Alien::IMatrixImpl* targetImpl) const;
-
-  void _build(const Alien::SimpleCSRMatrix<Arccore::Real>& sourceImpl, Alien::Matrix& targetImpl) const;
-
-  void _buildBlock(const Alien::SimpleCSRMatrix<Arccore::Real>& sourceImpl, Alien::Matrix& targetImpl) const;
-};
-
-void SimpleCSR_to_Hypre_MatrixConverter::convert(const IMatrixImpl* sourceImpl, IMatrixImpl* targetImpl) const
-{
-  const auto& v = cast<Alien::SimpleCSRMatrix<Arccore::Real>>(sourceImpl, sourceBackend());
-  auto& v2 = cast<Alien::Matrix>(targetImpl, targetBackend());
-
-  alien_debug([&] {
-    cout() << "Converting Alien::SimpleCSRMatrix: " << &v << " to Hypre::Matrix " << &v2;
-  });
-
-  if (targetImpl->block())
-    _buildBlock(v, v2);
-  else if (targetImpl->vblock())
-    throw Arccore::FatalErrorException(A_FUNCINFO, "Block sizes are variable - builds not yet implemented");
-  else
-    _build(v, v2);
-}
+#include "simplecsr_to_hypre_matrix.h"
 
 void SimpleCSR_to_Hypre_MatrixConverter::_build(const Alien::SimpleCSRMatrix<Arccore::Real>& sourceImpl,
                                                 Alien::Matrix& targetImpl) const
@@ -175,4 +127,21 @@ void SimpleCSR_to_Hypre_MatrixConverter::_buildBlock(const Alien::SimpleCSRMatri
   }
 
   targetImpl.assemble();
+}
+
+void SimpleCSR_to_Hypre_MatrixConverter::convert(const IMatrixImpl* sourceImpl, IMatrixImpl* targetImpl) const
+{
+  const auto& v = cast<Alien::SimpleCSRMatrix<Arccore::Real>>(sourceImpl, sourceBackend());
+  auto& v2 = cast<Alien::Matrix>(targetImpl, targetBackend());
+
+  alien_debug([&] {
+    cout() << "Converting Alien::SimpleCSRMatrix: " << &v << " to Hypre::Matrix " << &v2;
+  });
+
+  if (targetImpl->block())
+    _buildBlock(v, v2);
+  else if (targetImpl->vblock())
+    throw Arccore::FatalErrorException(A_FUNCINFO, "Block sizes are variable - builds not yet implemented");
+  else
+    _build(v, v2);
 }

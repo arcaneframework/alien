@@ -210,6 +210,11 @@ class ALIEN_EXPORT MultiVectorImpl : public TimestampMng
   std::shared_ptr<Block> m_block;
   //! The variable block datas
   std::shared_ptr<VBlock> m_variable_block;
+
+// FIXME: private, access throuh functions
+ public:
+  static std::map<std::pair<BackEndId, BackEndId>, IVectorConverter*> m_vectorConverters;
+  static std::map<BackEndId, BackEnd::IPlugin::VectorFactory> m_vectorFactory;
 };
 
 
