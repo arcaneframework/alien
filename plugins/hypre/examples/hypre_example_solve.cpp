@@ -50,6 +50,8 @@ int test()
   int lsize = dist.localRowSize();
   int gsize = dist.globalRowSize();
 
+  auto solver = Alien::LinearSolver("../libhypre_wrapper.so");
+
   tm->info() << "build matrix with direct matrix builder";
   {
     Alien::DirectMatrixBuilder builder(A, Alien::DirectMatrixOptions::eResetValues);
@@ -90,7 +92,6 @@ int test()
   //  auto solver = Alien::Hypre::LinearSolver (options);
 
   //auto solver = Alien::Hypre::LinearSolver();
-  auto solver = Alien::LinearSolver("../libhypre_wrapper.so");
 
   solver.solve(A, b, x);
 

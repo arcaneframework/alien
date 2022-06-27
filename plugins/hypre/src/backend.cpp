@@ -31,4 +31,14 @@ void Plugin::registerVectorFactory(std::map<BackEndId, VectorFactory>& vectorFac
   REGISTER_PLUGIN_VECTOR_FACTORY("hypre", vectorFactories, &vector_factory);
 }
 
+Plugin* create()
+{
+  return new Plugin;
+}
+
+void destroy(Plugin* p)
+{
+  delete p;
+}
+
 }

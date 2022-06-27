@@ -75,15 +75,8 @@ public:
 };
 
 extern "C" {
-  inline Plugin* create()
-  {
-    return new Plugin;
-  }
-
-  inline void destroy(Plugin* p)
-  {
-    delete p;
-  }
+  ALIEN_EXPORT Plugin* create();
+  ALIEN_EXPORT void destroy(Plugin* p);
 }
 
 } // namespace Alien

@@ -368,7 +368,11 @@ MultiMatrixImpl::getImpl(BackEndId backend) const
   auto inserter = m_impls2.insert(MultiMatrixImplMap::value_type(backend, NULL));
   IMatrixImpl*& impl2 = inserter.first->second;
   if (impl2 == NULL) {
-    IMatrixImpl* new_impl = m_matrixFactory[backend](this); // constructeur associé à un multi-impl
+    auto factory = m_matrixFactory[backend];
+    if (!factory)
+      throw FatalErrorException("MultiMatrixImpl::getImpl(): Can't find matrix factory for backend: " + backend);
+
+    auto new_impl = factory(this); // constructeur associé à un multi-impl
     //    new_impl->init(*m_row_space.get(),
     //                   *m_col_space.get(),
     //                   m_distribution);

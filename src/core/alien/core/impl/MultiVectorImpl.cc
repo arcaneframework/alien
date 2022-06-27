@@ -313,7 +313,11 @@ MultiVectorImpl::getImpl(BackEndId backend) const
   auto inserter = m_impls2.insert(MultiVectorImplMap::value_type(backend, NULL));
   IVectorImpl*& impl2 = inserter.first->second;
   if (impl2 == NULL) {
-    auto new_impl = m_vectorFactory[backend](this); // constructeur associ� � un multi-impl
+    auto factory = m_vectorFactory[backend];
+    if (!factory)
+      throw FatalErrorException("MultiVectorImpl::getImpl(): Can't find vector factory for backend: " + backend);
+
+    auto new_impl = factory(this); // constructeur associ� � un multi-impl
     new_impl->init(*m_distribution.get(), true);
     impl2 = new_impl;
   }
