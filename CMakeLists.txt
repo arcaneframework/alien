@@ -70,7 +70,7 @@ option(ALIEN_PLUGIN_GINKGO_CUDA "Whether or not to compile Ginkgo CUDA backend" 
 option(ALIEN_PLUGIN_GINKGO_HIP "Whether or not to compile Ginkgo HIP backend" OFF)
 option(ALIEN_PLUGIN_GINKGO_DPCPP "Whether or not to compile DPCPP Ginkgo backend" OFF)
 
-get_filename_component(_fp_framework "framework/CMake" REALPATH)
+get_filename_component(_fp_framework "CMake/fake-framework" REALPATH)
 if (EXISTS ${_fp_framework})
     option(ALIENDEV_EMBEDDED "[dev] forbid to compile Arcon and Arccore" OFF)
 else ()
@@ -107,7 +107,7 @@ if (ALIENDEV_EMBEDDED)
     )
     set(FRAMEWORK_EXPORT_NAME AlienFrameworkTargets)
 
-    get_filename_component(_fp_framework "framework/CMake" REALPATH)
+    get_filename_component(_fp_framework "CMake/fake-framework" REALPATH)
     if (EXISTS ${_fp_framework})
         list(APPEND CMAKE_MODULE_PATH ${_fp_framework})
     endif ()
