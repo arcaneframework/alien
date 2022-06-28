@@ -36,6 +36,7 @@
 #include <alien/utils/Precomp.h>
 #include <alien/utils/UserFeatureMng.h>
 #include <alien/utils/time_stamp/TimestampMng.h>
+#include <alien/kernels/simple_csr/SimpleCSRMatrix.h>
 #include <cstdlib>
 #include <iostream>
 
@@ -249,10 +250,25 @@ class ALIEN_EXPORT MultiMatrixImpl : public TimestampMng
   //! The variable col block datas
   std::shared_ptr<VBlock> m_cols_block;
 
+
+
+
+  class MatrixConverters : public std::map<std::pair<BackEndId, BackEndId>, IMatrixConverter*>
+  {
+    public:
+      MatrixConverters();
+  };
+
+  class MatrixFactories : public std::map<BackEndId, BackEnd::MatrixFactory>
+  {
+    public:
+      MatrixFactories();
+  };
+
 // FIXME: private, access through functions
  public:
-  static std::map<std::pair<BackEndId, BackEndId>, IMatrixConverter*> m_matrixConverters;
-  static std::map<BackEndId, BackEnd::MatrixFactory> m_matrixFactory;
+  static MatrixConverters m_matrixConverters;
+  static MatrixFactories m_matrixFactories;
 };
 
 /*---------------------------------------------------------------------------*/

@@ -30,9 +30,6 @@
 #include <alien/data/IMatrix.h>
 #include <alien/data/IVector.h>
 
-#include <alien/kernels/simple_csr/SimpleCSRMatrix.h>
-#include <alien/kernels/simple_csr/SimpleCSRVector.h>
-
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
@@ -45,16 +42,6 @@ namespace Alien
 LinearSolver::LinearSolver(std::string soFile)
 {
   // FIXME: add error checking
-
-  if (!m_initialized)
-  {
-    // FIXME: add others kernels
-    REGISTER_PLUGIN_MATRIX_FACTORY("simplecsr", MultiMatrixImpl::m_matrixFactory, &SimpleCSRInternal::matrix_factory);
-    REGISTER_PLUGIN_VECTOR_FACTORY("simplecsr", MultiVectorImpl::m_vectorFactory, &SimpleCSRInternal::vector_factory);
-
-    m_initialized = true;
-  }
-
   m_handle = dlopen(soFile.c_str(), RTLD_NOW | RTLD_LOCAL);
   m_plugin_create = (BackEnd::IPlugin*(*)()) dlsym(m_handle, "create");
   m_plugin_destroy = (void (*)(BackEnd::IPlugin*)) dlsym(m_handle, "destroy");
@@ -66,8 +53,8 @@ LinearSolver::LinearSolver(std::string soFile)
 
   m_plugin->registerMatrixConverters(MultiMatrixImpl::m_matrixConverters);
   m_plugin->registerVectorConverters(MultiVectorImpl::m_vectorConverters);
-  m_plugin->registerMatrixFactory(MultiMatrixImpl::m_matrixFactory);
-  m_plugin->registerVectorFactory(MultiVectorImpl::m_vectorFactory);
+  m_plugin->registerMatrixFactory(MultiMatrixImpl::m_matrixFactories);
+  m_plugin->registerVectorFactory(MultiVectorImpl::m_vectorFactories);
 }
 
 /*---------------------------------------------------------------------------*/

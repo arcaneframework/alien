@@ -36,8 +36,19 @@ namespace Alien
 
 using namespace Arccore;
 
-std::map<std::pair<BackEndId, BackEndId>, IMatrixConverter*> MultiMatrixImpl::m_matrixConverters;
-std::map<BackEndId, BackEnd::MatrixFactory> MultiMatrixImpl::m_matrixFactory;
+MultiMatrixImpl::MatrixConverters::MatrixConverters()
+  : std::map<std::pair<BackEndId, BackEndId>, IMatrixConverter*>()
+{
+}
+
+MultiMatrixImpl::MatrixFactories::MatrixFactories()
+  : std::map<BackEndId, BackEnd::MatrixFactory>()
+{
+  REGISTER_PLUGIN_MATRIX_FACTORY("simplecsr", MultiMatrixImpl::m_matrixFactories, &Alien::SimpleCSRInternal::matrix_factory);
+}
+
+MultiMatrixImpl::MatrixConverters MultiMatrixImpl::m_matrixConverters;
+MultiMatrixImpl::MatrixFactories MultiMatrixImpl::m_matrixFactories;
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
@@ -370,7 +381,7 @@ MultiMatrixImpl::getImpl(BackEndId backend) const
   auto inserter = m_impls2.insert(MultiMatrixImplMap::value_type(backend, NULL));
   IMatrixImpl*& impl2 = inserter.first->second;
   if (impl2 == NULL) {
-    auto factory = m_matrixFactory[backend];
+    auto factory = m_matrixFactories[backend];
     if (!factory)
       throw FatalErrorException("MultiMatrixImpl::getImpl(): Can't find matrix factory for backend: " + backend);
 

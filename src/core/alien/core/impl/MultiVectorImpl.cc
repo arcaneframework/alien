@@ -33,8 +33,19 @@ namespace Alien
 
 using namespace Arccore;
 
-std::map<std::pair<BackEndId, BackEndId>, IVectorConverter*> MultiVectorImpl::m_vectorConverters;
-std::map<BackEndId, BackEnd::VectorFactory> MultiVectorImpl::m_vectorFactory;
+MultiVectorImpl::VectorConverters::VectorConverters()
+  : std::map<std::pair<BackEndId, BackEndId>, IVectorConverter*>()
+{
+}
+
+MultiVectorImpl::VectorFactories::VectorFactories()
+  : std::map<BackEndId, BackEnd::VectorFactory>()
+{
+  REGISTER_PLUGIN_VECTOR_FACTORY("simplecsr", MultiVectorImpl::m_vectorFactories, &Alien::SimpleCSRInternal::vector_factory);
+}
+
+MultiVectorImpl::VectorConverters MultiVectorImpl::m_vectorConverters;
+MultiVectorImpl::VectorFactories MultiVectorImpl::m_vectorFactories;
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
@@ -313,7 +324,7 @@ MultiVectorImpl::getImpl(BackEndId backend) const
   auto inserter = m_impls2.insert(MultiVectorImplMap::value_type(backend, NULL));
   IVectorImpl*& impl2 = inserter.first->second;
   if (impl2 == NULL) {
-    auto factory = m_vectorFactory[backend];
+    auto factory = m_vectorFactories[backend];
     if (!factory)
       throw FatalErrorException("MultiVectorImpl::getImpl(): Can't find vector factory for backend: " + backend);
 

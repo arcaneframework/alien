@@ -36,6 +36,7 @@
 #include <alien/utils/Precomp.h>
 #include <alien/utils/UserFeatureMng.h>
 #include <alien/utils/time_stamp/TimestampMng.h>
+#include <alien/kernels/simple_csr/SimpleCSRVector.h>
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
@@ -45,6 +46,7 @@ namespace Alien
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
+
 
 class ALIEN_EXPORT MultiVectorImpl : public TimestampMng
 , public UserFeatureMng
@@ -211,10 +213,24 @@ class ALIEN_EXPORT MultiVectorImpl : public TimestampMng
   //! The variable block datas
   std::shared_ptr<VBlock> m_variable_block;
 
+
+
+  class VectorConverters : public std::map<std::pair<BackEndId, BackEndId>, IVectorConverter*>
+  {
+    public:
+      VectorConverters();
+  };
+
+  class VectorFactories : public std::map<BackEndId, BackEnd::VectorFactory>
+  {
+    public:
+      VectorFactories();
+  };
+
 // FIXME: private, access throuh functions
  public:
-  static std::map<std::pair<BackEndId, BackEndId>, IVectorConverter*> m_vectorConverters;
-  static std::map<BackEndId, BackEnd::VectorFactory> m_vectorFactory;
+  static VectorConverters m_vectorConverters;
+  static VectorFactories m_vectorFactories;
 };
 
 

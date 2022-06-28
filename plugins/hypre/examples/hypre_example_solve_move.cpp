@@ -52,8 +52,6 @@ int test()
   int lsize = dist.localRowSize();
   int gsize = dist.globalRowSize();
 
-  auto solver = Alien::LinearSolver("../libhypre_wrapper.so");
-
   tm->info() << "build matrix with direct matrix builder";
   {
     Alien::Move::DirectMatrixBuilder builder(std::move(A), Alien::DirectMatrixOptions::eResetValues);
@@ -100,6 +98,8 @@ int test()
   //               .stopCriteriaValue(1e-10)
   //               .preconditioner(Alien::Hypre::OptionTypes::AMGPC)
   //               .solver(Alien::Hypre::OptionTypes::GMRES);
+
+  auto solver = Alien::LinearSolver("../libhypre_wrapper.so");
 
   solver.solve(A, b, x);
 
