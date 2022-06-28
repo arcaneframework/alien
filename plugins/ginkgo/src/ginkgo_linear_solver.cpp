@@ -150,8 +150,9 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
 
   // Get nb iterations + final residual
   auto num_iters = conv_logger->get_num_iterations();
-  auto vec_res_norm = reinterpret_cast<const gko::matrix::Dense<double>*>(conv_logger->get_residual_norm());
-  auto residual_norm = vec_res_norm->get_const_values()[0];
+  auto vec_res_norm = gko::as<gko::matrix::Dense<double>>(conv_logger->get_residual_norm());
+  auto vec_res_norm_host = gko::clone(exec->get_master(), vec_res_norm);
+  auto residual_norm = vec_res_norm_host->get_const_values()[0];
 
   // Print results infos
   std::cout << "===== SOLVER  RUN INFORMATION ===== " << std::endl;
