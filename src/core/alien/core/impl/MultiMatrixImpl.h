@@ -252,7 +252,7 @@ class ALIEN_EXPORT MultiMatrixImpl : public TimestampMng
 // FIXME: private, access through functions
  public:
   static std::map<std::pair<BackEndId, BackEndId>, IMatrixConverter*> m_matrixConverters;
-  static std::map<BackEndId, BackEnd::IPlugin::MatrixFactory> m_matrixFactory;
+  static std::map<BackEndId, BackEnd::MatrixFactory> m_matrixFactory;
 };
 
 /*---------------------------------------------------------------------------*/

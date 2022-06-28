@@ -37,7 +37,7 @@ namespace Alien
 using namespace Arccore;
 
 std::map<std::pair<BackEndId, BackEndId>, IMatrixConverter*> MultiMatrixImpl::m_matrixConverters;
-std::map<BackEndId, BackEnd::IPlugin::MatrixFactory> MultiMatrixImpl::m_matrixFactory;
+std::map<BackEndId, BackEnd::MatrixFactory> MultiMatrixImpl::m_matrixFactory;
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
@@ -240,7 +240,8 @@ void MultiMatrixImpl::updateImpl(IMatrixImpl* target) const
     if (candidate->timestamp() != timestamp())
       continue;
     auto* converter =
-    MatrixConverterRegisterer::getConverter(candidate->backend(), target->backend());
+    //MatrixConverterRegisterer::getConverter(candidate->backend(), target->backend());
+    MultiMatrixImpl::m_matrixConverters[std::make_pair<BackEndId, BackEndId>(candidate->backend(), target->backend())];
     // If no converter is found, we continue
     if (converter == nullptr)
       continue;
@@ -285,7 +286,8 @@ void MultiMatrixImpl::updateImpl(IMatrixImpl* target) const
 
   // Checking that we have a converter from simplecsr to the requested implementation
   auto* simplecsr_target =
-  MatrixConverterRegisterer::getConverter(simplecsr->backend(), target->backend());
+  //MatrixConverterRegisterer::getConverter(simplecsr->backend(), target->backend());
+  MultiMatrixImpl::m_matrixConverters[std::pair<BackEndId, BackEndId>(simplecsr->backend(), target->backend())];
 
   // If not, throw error
   if (simplecsr_target == nullptr)

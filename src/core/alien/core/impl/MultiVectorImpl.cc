@@ -34,7 +34,7 @@ namespace Alien
 using namespace Arccore;
 
 std::map<std::pair<BackEndId, BackEndId>, IVectorConverter*> MultiVectorImpl::m_vectorConverters;
-std::map<BackEndId, BackEnd::IPlugin::VectorFactory> MultiVectorImpl::m_vectorFactory;
+std::map<BackEndId, BackEnd::VectorFactory> MultiVectorImpl::m_vectorFactory;
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/

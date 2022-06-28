@@ -214,7 +214,7 @@ class ALIEN_EXPORT MultiVectorImpl : public TimestampMng
 // FIXME: private, access throuh functions
  public:
   static std::map<std::pair<BackEndId, BackEndId>, IVectorConverter*> m_vectorConverters;
-  static std::map<BackEndId, BackEnd::IPlugin::VectorFactory> m_vectorFactory;
+  static std::map<BackEndId, BackEnd::VectorFactory> m_vectorFactory;
 };
 
 

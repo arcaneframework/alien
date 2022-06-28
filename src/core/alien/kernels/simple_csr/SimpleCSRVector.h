@@ -189,6 +189,11 @@ class SimpleCSRVector : public IVectorImpl
   VectorDistribution m_own_distribution;
 };
 
+namespace SimpleCSRInternal
+{
+  inline IVectorImpl* vector_factory(const MultiVectorImpl* multiImpl) { return new SimpleCSRVector<Real>(multiImpl); };
+}
+
 /*---------------------------------------------------------------------------*/
 
 } // namespace Alien

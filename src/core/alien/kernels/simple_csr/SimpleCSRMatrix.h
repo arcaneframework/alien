@@ -339,6 +339,11 @@ class SimpleCSRMatrix : public IMatrixImpl
   }
 };
 
+namespace SimpleCSRInternal
+{
+  inline IMatrixImpl* matrix_factory(const MultiMatrixImpl* multiImpl) { return new SimpleCSRMatrix<Real>(multiImpl); };
+}
+
 /*---------------------------------------------------------------------------*/
 
 } // namespace Alien

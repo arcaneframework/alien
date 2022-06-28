@@ -42,7 +42,7 @@ namespace Common
   template <typename ValueT, typename Parameters>
   VectorReaderT<ValueT, Parameters>::VectorReaderT(const IVector& vector)
   {
-    const auto& v = dynamic_cast<const SimpleCSRVector<ValueT>&>(vector.impl()->get("simple_csr"));
+    const auto& v = dynamic_cast<const SimpleCSRVector<ValueT>&>(vector.impl()->get("simplecsr"));
     m_values = v.fullValues();
     m_local_offset = v.distribution().offset();
   }

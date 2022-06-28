@@ -176,6 +176,9 @@ class ALIEN_EXPORT LinearSolver : public ILinearSolver
   std::unique_ptr<BackEnd::IPlugin> m_plugin;
   BackEnd::IPlugin* (*m_plugin_create)();
   void (*m_plugin_destroy)(BackEnd::IPlugin*);
+
+  //FIXME: do it differently
+  bool m_initialized{false};
 };
 
 /*---------------------------------------------------------------------------*/

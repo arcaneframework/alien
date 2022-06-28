@@ -121,12 +121,12 @@ namespace BackEnd
     }
   };
 
+  typedef IMatrixImpl* (*MatrixFactory) (const MultiMatrixImpl*);
+  typedef IVectorImpl* (*VectorFactory) (const MultiVectorImpl*);
+
   class IPlugin
   {
   public:
-    typedef IMatrixImpl* (*MatrixFactory) (const MultiMatrixImpl*);
-    typedef IVectorImpl* (*VectorFactory) (const MultiVectorImpl*);
-
     virtual std::unique_ptr<IInternalLinearSolver> solver_factory() = 0;
     virtual std::unique_ptr<IInternalLinearSolver> solver_factory(const Alien::BackEnd::Options& options) = 0;
 
@@ -147,10 +147,10 @@ namespace BackEnd
 
 
 #define REGISTER_PLUGIN_MATRIX_FACTORY(a, factories, factory) \
-  factories.insert(std::map<BackEndId, MatrixFactory>::value_type(a, factory));
+  factories.insert(std::map<BackEndId, Alien::BackEnd::MatrixFactory>::value_type(a, factory));
 
 #define REGISTER_PLUGIN_VECTOR_FACTORY(a, factories, factory) \
-  factories.insert(std::map<BackEndId, VectorFactory>::value_type(a, factory));
+  factories.insert(std::map<BackEndId, Alien::BackEnd::VectorFactory>::value_type(a, factory));
 
 
 /*---------------------------------------------------------------------------*/
