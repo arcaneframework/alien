@@ -1,0 +1,542 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Building with move semantic &#8212; Alien 1.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Building with ref semantic" href="ref.html" />
+    <link rel="prev" title="Alien’s high level design" href="concepts.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="building-with-move-semantic">
+<span id="user-move-build"></span><h1>Building with move semantic<a class="headerlink" href="#building-with-move-semantic" title="Permalink to this headline">¶</a></h1>
+<section id="directmatrixbuilder">
+<h2>DirectMatrixBuilder<a class="headerlink" href="#directmatrixbuilder" title="Permalink to this headline">¶</a></h2>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien4Move19DirectMatrixBuilderE">
+<span id="_CPPv3N5Alien4Move19DirectMatrixBuilderE"></span><span id="_CPPv2N5Alien4Move19DirectMatrixBuilderE"></span><span id="Alien::Move::DirectMatrixBuilder"></span><span class="target" id="classAlien_1_1Move_1_1DirectMatrixBuilder"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-prename descclassname"><span class="n"><span class="pre">Alien</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Move</span></span><span class="p"><span class="pre">::</span></span></span><span class="sig-name descname"><span class="n"><span class="pre">DirectMatrixBuilder</span></span></span><span class="w"> </span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="k"><span class="pre">protected</span></span><span class="w"> </span><span class="n"><span class="pre">MoveObject</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N5Alien4Move10MatrixDataE" title="Alien::Move::MatrixData"><span class="n"><span class="pre">MatrixData</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="k"><span class="pre">public</span></span><span class="w"> </span><span class="n"><span class="pre">Common</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">DirectMatrixBuilder</span></span><a class="headerlink" href="#_CPPv4N5Alien4Move19DirectMatrixBuilderE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien4Move19DirectMatrixBuilder19DirectMatrixBuilderERR10MatrixDataK9ResetFlagK13SymmetricFlag">
+<span id="_CPPv3N5Alien4Move19DirectMatrixBuilder19DirectMatrixBuilderERR10MatrixDataK9ResetFlagK13SymmetricFlag"></span><span id="_CPPv2N5Alien4Move19DirectMatrixBuilder19DirectMatrixBuilderERR10MatrixDataK9ResetFlagK13SymmetricFlag"></span><span id="Alien::Move::DirectMatrixBuilder::DirectMatrixBuilder__MatrixDataRR.ResetFlagC.SymmetricFlagC"></span><span class="target" id="classAlien_1_1Move_1_1DirectMatrixBuilder_1a718142655f607432cea0cdb4c4ed345c"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">DirectMatrixBuilder</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4N5Alien4Move10MatrixDataE" title="Alien::Move::MatrixData"><span class="n"><span class="pre">MatrixData</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">matrix</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">ResetFlag</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">reset_flag</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">SymmetricFlag</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">symmetric_flag</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="n"><span class="pre">SymmetricFlag</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">eSymmetric</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5Alien4Move19DirectMatrixBuilder19DirectMatrixBuilderERR10MatrixDataK9ResetFlagK13SymmetricFlag" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien4Move19DirectMatrixBuilderD0Ev">
+<span id="_CPPv3N5Alien4Move19DirectMatrixBuilderD0Ev"></span><span id="_CPPv2N5Alien4Move19DirectMatrixBuilderD0Ev"></span><span id="Alien::Move::DirectMatrixBuilder::~DirectMatrixBuilder"></span><span class="target" id="classAlien_1_1Move_1_1DirectMatrixBuilder_1a0c14246c351a7ba089518d8beb9b8f9d"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">~DirectMatrixBuilder</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">default</span></span><a class="headerlink" href="#_CPPv4N5Alien4Move19DirectMatrixBuilderD0Ev" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien4Move19DirectMatrixBuilder7releaseEv">
+<span id="_CPPv3N5Alien4Move19DirectMatrixBuilder7releaseEv"></span><span id="_CPPv2N5Alien4Move19DirectMatrixBuilder7releaseEv"></span><span id="Alien::Move::DirectMatrixBuilder::release"></span><span class="target" id="classAlien_1_1Move_1_1DirectMatrixBuilder_1abde6ac9d6317bfabad078bf9b8c44d97"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N5Alien4Move10MatrixDataE" title="Alien::Move::MatrixData"><span class="n"><span class="pre">MatrixData</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">release</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5Alien4Move19DirectMatrixBuilder7releaseEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+</section>
+<section id="profiledmatrixbuilder">
+<h2>ProfiledMatrixBuilder<a class="headerlink" href="#profiledmatrixbuilder" title="Permalink to this headline">¶</a></h2>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien4Move21ProfiledMatrixBuilderE">
+<span id="_CPPv3N5Alien4Move21ProfiledMatrixBuilderE"></span><span id="_CPPv2N5Alien4Move21ProfiledMatrixBuilderE"></span><span id="Alien::Move::ProfiledMatrixBuilder"></span><span class="target" id="classAlien_1_1Move_1_1ProfiledMatrixBuilder"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ProfiledMatrixBuilder</span></span></span><span class="w"> </span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="k"><span class="pre">protected</span></span><span class="w"> </span><span class="n"><span class="pre">MoveObject</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N5Alien4Move10MatrixDataE" title="Alien::Move::MatrixData"><span class="n"><span class="pre">MatrixData</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="k"><span class="pre">public</span></span><span class="w"> </span><span class="n"><span class="pre">Common</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">ProfiledMatrixBuilder</span></span><a class="headerlink" href="#_CPPv4N5Alien4Move21ProfiledMatrixBuilderE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</section>
+<section id="matrixdata">
+<h2>MatrixData<a class="headerlink" href="#matrixdata" title="Permalink to this headline">¶</a></h2>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien4Move10MatrixDataE">
+<span id="_CPPv3N5Alien4Move10MatrixDataE"></span><span id="_CPPv2N5Alien4Move10MatrixDataE"></span><span id="Alien::Move::MatrixData"></span><span class="target" id="classAlien_1_1Move_1_1MatrixData"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-prename descclassname"><span class="n"><span class="pre">Alien</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Move</span></span><span class="p"><span class="pre">::</span></span></span><span class="sig-name descname"><span class="n"><span class="pre">MatrixData</span></span></span><span class="w"> </span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="k"><span class="pre">public</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N5Alien7IMatrixE" title="Alien::IMatrix"><span class="n"><span class="pre">IMatrix</span></span></a><a class="headerlink" href="#_CPPv4N5Alien4Move10MatrixDataE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Algebraic Matrix with internal multi-representation object. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-types">Public Types</p>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien4Move10MatrixData9ValueTypeE">
+<span id="_CPPv3N5Alien4Move10MatrixData9ValueTypeE"></span><span id="_CPPv2N5Alien4Move10MatrixData9ValueTypeE"></span><span id="Alien::Move::MatrixData::ValueType"></span><span class="target" id="classAlien_1_1Move_1_1MatrixData_1ab398e1a883c90c74172cb4d3b5d462d9"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="n"><span class="pre">Real</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ValueType</span></span></span><a class="headerlink" href="#_CPPv4N5Alien4Move10MatrixData9ValueTypeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien4Move10MatrixData10MatrixDataEv">
+<span id="_CPPv3N5Alien4Move10MatrixData10MatrixDataEv"></span><span id="_CPPv2N5Alien4Move10MatrixData10MatrixDataEv"></span><span id="Alien::Move::MatrixData::MatrixData"></span><span class="target" id="group__constructor_1ga810c42fd0404026a07dccdb48840b28c"></span><span class="sig-name descname"><span class="n"><span class="pre">MatrixData</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5Alien4Move10MatrixData10MatrixDataEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Empty constructor</p>
+<p>This matrix must be associated with a \r Space before use. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien4Move10MatrixData10MatrixDataERK5SpaceRK18MatrixDistribution">
+<span id="_CPPv3N5Alien4Move10MatrixData10MatrixDataERK5SpaceRK18MatrixDistribution"></span><span id="_CPPv2N5Alien4Move10MatrixData10MatrixDataERK5SpaceRK18MatrixDistribution"></span><span id="Alien::Move::MatrixData::MatrixData__SpaceCR.MatrixDistributionCR"></span><span class="target" id="group__constructor_1ga628663857159603843633790a0a3880b"></span><span class="sig-name descname"><span class="n"><span class="pre">MatrixData</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Space</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">space</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">MatrixDistribution</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">dist</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5Alien4Move10MatrixData10MatrixDataERK5SpaceRK18MatrixDistribution" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Build a new matrix from a Space</p>
+<p>
+This matrix is directly ready to use. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>space</strong> – Domain (and Codomain) Space of the matrix. </p></li>
+<li><p><strong>dist</strong> – Parallel distribution.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien4Move10MatrixData10MatrixDataERK5SpaceRK5SpaceRK18MatrixDistribution">
+<span id="_CPPv3N5Alien4Move10MatrixData10MatrixDataERK5SpaceRK5SpaceRK18MatrixDistribution"></span><span id="_CPPv2N5Alien4Move10MatrixData10MatrixDataERK5SpaceRK5SpaceRK18MatrixDistribution"></span><span id="Alien::Move::MatrixData::MatrixData__SpaceCR.SpaceCR.MatrixDistributionCR"></span><span class="target" id="group__constructor_1ga362d59bb5dedf22ec5f3fbcd453b233e"></span><span class="sig-name descname"><span class="n"><span class="pre">MatrixData</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Space</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">row_space</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Space</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">col_space</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">MatrixDistribution</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">dist</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5Alien4Move10MatrixData10MatrixDataERK5SpaceRK5SpaceRK18MatrixDistribution" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Build a new matrix from two Spaces</p>
+<p>
+This matrix is directly ready to use. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>row_space</strong> – Domain Space of the matrix. </p></li>
+<li><p><strong>col_space</strong> – Codomain Space of the matrix. </p></li>
+<li><p><strong>dist</strong> – Parallel distribution.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien4Move10MatrixData10MatrixDataE7IntegerRK18MatrixDistribution">
+<span id="_CPPv3N5Alien4Move10MatrixData10MatrixDataE7IntegerRK18MatrixDistribution"></span><span id="_CPPv2N5Alien4Move10MatrixData10MatrixDataE7IntegerRK18MatrixDistribution"></span><span id="Alien::Move::MatrixData::MatrixData__Integer.MatrixDistributionCR"></span><span class="target" id="group__constructor_1ga74fef69ea17d659ea3378b430c62338e"></span><span class="sig-name descname"><span class="n"><span class="pre">MatrixData</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">Integer</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">MatrixDistribution</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">dist</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5Alien4Move10MatrixData10MatrixDataE7IntegerRK18MatrixDistribution" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Build a new matrix from a size.</p>
+<p><p>Matlab-like interface, matrix is defined as a [0, n-1]x[0, n-1] array.</p>
+<p>This matrix is ready to use on an anonymous Space.</p>
+</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>size</strong> – Number of rows and columns of the matrix. </p></li>
+<li><p><strong>dist</strong> – Parallel distribution.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien4Move10MatrixData10MatrixDataE7Integer7IntegerRK18MatrixDistribution">
+<span id="_CPPv3N5Alien4Move10MatrixData10MatrixDataE7Integer7IntegerRK18MatrixDistribution"></span><span id="_CPPv2N5Alien4Move10MatrixData10MatrixDataE7Integer7IntegerRK18MatrixDistribution"></span><span id="Alien::Move::MatrixData::MatrixData__Integer.Integer.MatrixDistributionCR"></span><span class="target" id="group__constructor_1ga099f5c7456a3203c15820ea1235c12bf"></span><span class="sig-name descname"><span class="n"><span class="pre">MatrixData</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">Integer</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">row_size</span></span>, <span class="n"><span class="pre">Integer</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">col_size</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">MatrixDistribution</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">dist</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5Alien4Move10MatrixData10MatrixDataE7Integer7IntegerRK18MatrixDistribution" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Build a new matrix from two sizes.</p>
+<p><p>Matlab-like interface, matrix is defined as a [0, n-1]x[0, m-1] array.</p>
+<p>This matrix is ready to use on an anonymous Space.</p>
+</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>row_size</strong> – Number of rows of the matrix. </p></li>
+<li><p><strong>col_size</strong> – Number of rows of the matrix. </p></li>
+<li><p><strong>dist</strong> – Parallel distribution.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien4Move10MatrixData10MatrixDataERK18MatrixDistribution">
+<span id="_CPPv3N5Alien4Move10MatrixData10MatrixDataERK18MatrixDistribution"></span><span id="_CPPv2N5Alien4Move10MatrixData10MatrixDataERK18MatrixDistribution"></span><span id="Alien::Move::MatrixData::MatrixData__MatrixDistributionCR"></span><span class="target" id="group__constructor_1gaef405cca2d7dd087a92d12f29cefd7c9"></span><span class="k"><span class="pre">explicit</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">MatrixData</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">MatrixDistribution</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">dist</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5Alien4Move10MatrixData10MatrixDataERK18MatrixDistribution" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Build a new matrix on <code class="docutils literal notranslate"><span class="pre">MatrixDistribution</span></code></p>
+<p>
+This matrix is directly ready to use. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dist</strong> – Parallel distribution.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien4Move10MatrixData10MatrixDataERR10MatrixData">
+<span id="_CPPv3N5Alien4Move10MatrixData10MatrixDataERR10MatrixData"></span><span id="_CPPv2N5Alien4Move10MatrixData10MatrixDataERR10MatrixData"></span><span id="Alien::Move::MatrixData::MatrixData__MatrixDataRR"></span><span class="target" id="group__constructor_1gacdcb8aa78283adafe72207ca841226f9"></span><span class="sig-name descname"><span class="n"><span class="pre">MatrixData</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4N5Alien4Move10MatrixData10MatrixDataERR10MatrixData" title="Alien::Move::MatrixData::MatrixData"><span class="n"><span class="pre">MatrixData</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">matrix</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5Alien4Move10MatrixData10MatrixDataERR10MatrixData" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Move constructor for Matrix</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>matrix</strong> – Matrix to move from. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien4Move10MatrixDataD0Ev">
+<span id="_CPPv3N5Alien4Move10MatrixDataD0Ev"></span><span id="_CPPv2N5Alien4Move10MatrixDataD0Ev"></span><span id="Alien::Move::MatrixData::~MatrixData"></span><span class="target" id="group__constructor_1ga4ec10c564425f8917485ce265096366e"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">~MatrixData</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">default</span></span><a class="headerlink" href="#_CPPv4N5Alien4Move10MatrixDataD0Ev" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>}&#64; </p>
+<p>Destructor All internal data structures will be deleted. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien4Move10MatrixDataaSERR10MatrixData">
+<span id="_CPPv3N5Alien4Move10MatrixDataaSERR10MatrixData"></span><span id="_CPPv2N5Alien4Move10MatrixDataaSERR10MatrixData"></span><span id="Alien::Move::MatrixData::assign-operator__MatrixDataRR"></span><span class="target" id="group__constructor_1ga64439fc50494a89c40ca24eacdeb5883"></span><a class="reference internal" href="#_CPPv4N5Alien4Move10MatrixDataE" title="Alien::Move::MatrixData"><span class="n"><span class="pre">MatrixData</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="k"><span class="pre">operator</span></span><span class="o"><span class="pre">=</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4N5Alien4Move10MatrixDataE" title="Alien::Move::MatrixData"><span class="n"><span class="pre">MatrixData</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">matrix</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5Alien4Move10MatrixDataaSERR10MatrixData" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Move from Matrix. </p>
+<p>Move assignment</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>matrix</strong> – Matrix to move from. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien4Move10MatrixData4initERK5SpaceRK18MatrixDistribution">
+<span id="_CPPv3N5Alien4Move10MatrixData4initERK5SpaceRK18MatrixDistribution"></span><span id="_CPPv2N5Alien4Move10MatrixData4initERK5SpaceRK18MatrixDistribution"></span><span id="Alien::Move::MatrixData::init__SpaceCR.MatrixDistributionCR"></span><span class="target" id="group__constructor_1ga2ae758b01f9f6f74c052494c50c7376b"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">init</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Space</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">space</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">MatrixDistribution</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">dist</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5Alien4Move10MatrixData4initERK5SpaceRK18MatrixDistribution" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Initialize a Matrix with a Space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>space</strong> – Domain and Codomain Space for the Matrix. </p></li>
+<li><p><strong>dist</strong> – Parallel Distribution. </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien4Move10MatrixData10MatrixDataERK10MatrixData">
+<span id="_CPPv3N5Alien4Move10MatrixData10MatrixDataERK10MatrixData"></span><span id="_CPPv2N5Alien4Move10MatrixData10MatrixDataERK10MatrixData"></span><span id="Alien::Move::MatrixData::MatrixData__MatrixDataCR"></span><span class="target" id="group__constructor_1ga2003c43a6c6fcad3507312375808e338"></span><span class="sig-name descname"><span class="n"><span class="pre">MatrixData</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N5Alien4Move10MatrixData10MatrixDataERK10MatrixData" title="Alien::Move::MatrixData::MatrixData"><span class="n"><span class="pre">MatrixData</span></span></a><span class="p"><span class="pre">&amp;</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">delete</span></span><a class="headerlink" href="#_CPPv4N5Alien4Move10MatrixData10MatrixDataERK10MatrixData" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Only support move semantic </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien4Move10MatrixDataaSERK10MatrixData">
+<span id="_CPPv3N5Alien4Move10MatrixDataaSERK10MatrixData"></span><span id="_CPPv2N5Alien4Move10MatrixDataaSERK10MatrixData"></span><span id="Alien::Move::MatrixData::assign-operator__MatrixDataCR"></span><span class="target" id="group__constructor_1gac8c0c775c915696a7bcb7943ab642958"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="k"><span class="pre">operator</span></span><span class="o"><span class="pre">=</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N5Alien4Move10MatrixDataE" title="Alien::Move::MatrixData"><span class="n"><span class="pre">MatrixData</span></span></a><span class="p"><span class="pre">&amp;</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">delete</span></span><a class="headerlink" href="#_CPPv4N5Alien4Move10MatrixDataaSERK10MatrixData" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Only support move semantic </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5Alien4Move10MatrixData5cloneEv">
+<span id="_CPPv3NK5Alien4Move10MatrixData5cloneEv"></span><span id="_CPPv2NK5Alien4Move10MatrixData5cloneEv"></span><span id="Alien::Move::MatrixData::cloneC"></span><span class="target" id="group__constructor_1gadf9f2b11a84df072b71bb694b13ff3cb"></span><a class="reference internal" href="#_CPPv4N5Alien4Move10MatrixDataE" title="Alien::Move::MatrixData"><span class="n"><span class="pre">MatrixData</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">clone</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK5Alien4Move10MatrixData5cloneEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien4Move10MatrixData13setBlockInfosEK7Integer">
+<span id="_CPPv3N5Alien4Move10MatrixData13setBlockInfosEK7Integer"></span><span id="_CPPv2N5Alien4Move10MatrixData13setBlockInfosEK7Integer"></span><span id="Alien::Move::MatrixData::setBlockInfos__IntegerC"></span><span class="target" id="group__block_1gafe5dd37cc99512d20e6b1705df213d25"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setBlockInfos</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Integer</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">block_size</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5Alien4Move10MatrixData13setBlockInfosEK7Integer" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien4Move10MatrixData13setBlockInfosEPK5Block">
+<span id="_CPPv3N5Alien4Move10MatrixData13setBlockInfosEPK5Block"></span><span id="_CPPv2N5Alien4Move10MatrixData13setBlockInfosEPK5Block"></span><span id="Alien::Move::MatrixData::setBlockInfos__BlockCP"></span><span class="target" id="group__block_1ga9d5bdd003358ab9c857485f4452bbbfc"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setBlockInfos</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Block</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">block</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5Alien4Move10MatrixData13setBlockInfosEPK5Block" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien4Move10MatrixData13setBlockInfosEPK6VBlock">
+<span id="_CPPv3N5Alien4Move10MatrixData13setBlockInfosEPK6VBlock"></span><span id="_CPPv2N5Alien4Move10MatrixData13setBlockInfosEPK6VBlock"></span><span id="Alien::Move::MatrixData::setBlockInfos__VBlockCP"></span><span class="target" id="group__block_1ga41e384228011633231a121164c256e0d"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setBlockInfos</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">VBlock</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">block</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5Alien4Move10MatrixData13setBlockInfosEPK6VBlock" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5Alien4Move10MatrixData5blockEv">
+<span id="_CPPv3NK5Alien4Move10MatrixData5blockEv"></span><span id="_CPPv2NK5Alien4Move10MatrixData5blockEv"></span><span id="Alien::Move::MatrixData::blockC"></span><span class="target" id="group__block_1ga3b362cefe9f7193cc186c1d28d9340ee"></span><span class="n"><span class="pre">Block</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">block</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK5Alien4Move10MatrixData5blockEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5Alien4Move10MatrixData6vblockEv">
+<span id="_CPPv3NK5Alien4Move10MatrixData6vblockEv"></span><span id="_CPPv2NK5Alien4Move10MatrixData6vblockEv"></span><span id="Alien::Move::MatrixData::vblockC"></span><span class="target" id="group__block_1ga9ce64b05cb03bff9de7bee64c83b2136"></span><span class="n"><span class="pre">VBlock</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">vblock</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK5Alien4Move10MatrixData6vblockEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien4Move10MatrixData4freeEv">
+<span id="_CPPv3N5Alien4Move10MatrixData4freeEv"></span><span id="_CPPv2N5Alien4Move10MatrixData4freeEv"></span><span id="Alien::Move::MatrixData::free"></span><span class="target" id="group__block_1ga33e3ec027937747d3ceb10b3f94ea8b9"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">free</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5Alien4Move10MatrixData4freeEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>}&#64;</p>
+<p>Delete all internal data structures </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien4Move10MatrixData5clearEv">
+<span id="_CPPv3N5Alien4Move10MatrixData5clearEv"></span><span id="_CPPv2N5Alien4Move10MatrixData5clearEv"></span><span id="Alien::Move::MatrixData::clear"></span><span class="target" id="group__block_1ga31567c3903bda0bc4cd6faa26174bf88"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">clear</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5Alien4Move10MatrixData5clearEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Clean all internal data structures.</p>
+<p>Internal data are cleared, not deleted. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5Alien4Move10MatrixData5visitER18ICopyOnWriteMatrix">
+<span id="_CPPv3NK5Alien4Move10MatrixData5visitER18ICopyOnWriteMatrix"></span><span id="_CPPv2NK5Alien4Move10MatrixData5visitER18ICopyOnWriteMatrix"></span><span id="Alien::Move::MatrixData::visit__ICopyOnWriteMatrixRC"></span><span class="target" id="group__block_1gab7b831c265e135f7c5c3abebf2304be9"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">visit</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ICopyOnWriteMatrix</span></span><span class="p"><span class="pre">&amp;</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK5Alien4Move10MatrixData5visitER18ICopyOnWriteMatrix" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Handle for visitor pattern </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5Alien4Move10MatrixData8rowSpaceEv">
+<span id="_CPPv3NK5Alien4Move10MatrixData8rowSpaceEv"></span><span id="_CPPv2NK5Alien4Move10MatrixData8rowSpaceEv"></span><span id="Alien::Move::MatrixData::rowSpaceC"></span><span class="target" id="group__space_1gabb451f9f188ed3a4da71e1e50a75cf98"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">ISpace</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">rowSpace</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK5Alien4Move10MatrixData8rowSpaceEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Domain Space of the current matrix </p>
+<dl class="field-list simple">
+<dt class="field-odd">Throws</dt>
+<dd class="field-odd"><p><span><span class="cpp-expr sig sig-inline cpp"><span class="n">FatalException</span></span></span> – if uninitialized. Call isNull before to avoid any problem. </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Domain Space. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5Alien4Move10MatrixData8colSpaceEv">
+<span id="_CPPv3NK5Alien4Move10MatrixData8colSpaceEv"></span><span id="_CPPv2NK5Alien4Move10MatrixData8colSpaceEv"></span><span id="Alien::Move::MatrixData::colSpaceC"></span><span class="target" id="group__space_1ga75a41cce9e70dce043abbaf54640a2e1"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">ISpace</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">colSpace</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK5Alien4Move10MatrixData8colSpaceEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>CoDomain Space of the current matrix </p>
+<dl class="field-list simple">
+<dt class="field-odd">Throws</dt>
+<dd class="field-odd"><p><span><span class="cpp-expr sig sig-inline cpp"><span class="n">FatalException</span></span></span> – if uninitialized. Call isNull before to avoid any problem. </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>CoDomain Space. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5Alien4Move10MatrixData12distributionEv">
+<span id="_CPPv3NK5Alien4Move10MatrixData12distributionEv"></span><span id="_CPPv2NK5Alien4Move10MatrixData12distributionEv"></span><span id="Alien::Move::MatrixData::distributionC"></span><span class="target" id="group__space_1ga405826f366ff68f4ebf88e2d1da1ba33"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">MatrixDistribution</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">distribution</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK5Alien4Move10MatrixData12distributionEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>}&#64;</p>
+<p>Parallel distribution of the Matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Parallel distribution of the Matrix. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien4Move10MatrixData4lockEv">
+<span id="_CPPv3N5Alien4Move10MatrixData4lockEv"></span><span id="_CPPv2N5Alien4Move10MatrixData4lockEv"></span><span id="Alien::Move::MatrixData::lock"></span><span class="target" id="group__lock_1gafafdfb9d5e7a2370195c252c516d2ceb"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">lock</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5Alien4Move10MatrixData4lockEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Lock Matrix with the caller. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien4Move10MatrixData6unlockEv">
+<span id="_CPPv3N5Alien4Move10MatrixData6unlockEv"></span><span id="_CPPv2N5Alien4Move10MatrixData6unlockEv"></span><span id="Alien::Move::MatrixData::unlock"></span><span class="target" id="group__lock_1ga04ab04af9185b72e7356c0ddf059ddd2"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">unlock</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5Alien4Move10MatrixData6unlockEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Unlock Matrix, making it available for others. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5Alien4Move10MatrixData8isLockedEv">
+<span id="_CPPv3NK5Alien4Move10MatrixData8isLockedEv"></span><span id="_CPPv2NK5Alien4Move10MatrixData8isLockedEv"></span><span id="Alien::Move::MatrixData::isLockedC"></span><span class="target" id="group__lock_1ga326edfe27fa7a90fe4f1d4df3998f11a"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">isLocked</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK5Alien4Move10MatrixData8isLockedEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Test if a Matrix is locked.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>whether of not a matrix is already locked by someone. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien4Move10MatrixData14setUserFeatureE6String">
+<span id="_CPPv3N5Alien4Move10MatrixData14setUserFeatureE6String"></span><span id="_CPPv2N5Alien4Move10MatrixData14setUserFeatureE6String"></span><span id="Alien::Move::MatrixData::setUserFeature__String"></span><span class="target" id="group__properties_1ga1a3e14040a96412cfe878fef8a9dc114"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setUserFeature</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">String</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">feature</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5Alien4Move10MatrixData14setUserFeatureE6String" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Add a new property on this matrix </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5Alien4Move10MatrixData14hasUserFeatureE6String">
+<span id="_CPPv3NK5Alien4Move10MatrixData14hasUserFeatureE6String"></span><span id="_CPPv2NK5Alien4Move10MatrixData14hasUserFeatureE6String"></span><span id="Alien::Move::MatrixData::hasUserFeature__StringC"></span><span class="target" id="group__properties_1ga92c09d40dfbc2ee568bc7dc9f57cfb7a"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">hasUserFeature</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">String</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">feature</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK5Alien4Move10MatrixData14hasUserFeatureE6String" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Check if a property is set. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5Alien4Move10MatrixData12isTransposedEv">
+<span id="_CPPv3NK5Alien4Move10MatrixData12isTransposedEv"></span><span id="_CPPv2NK5Alien4Move10MatrixData12isTransposedEv"></span><span id="Alien::Move::MatrixData::isTransposedC"></span><span class="target" id="group__properties_1gaac271f5e58b14535e7037308325ae036"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">isTransposed</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK5Alien4Move10MatrixData12isTransposedEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Alias on property “transposed” </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5Alien4Move10MatrixData11isCompositeEv">
+<span id="_CPPv3NK5Alien4Move10MatrixData11isCompositeEv"></span><span id="_CPPv2NK5Alien4Move10MatrixData11isCompositeEv"></span><span id="Alien::Move::MatrixData::isCompositeC"></span><span class="target" id="group__properties_1ga20a22e36df10f8ccd01c1f2a1707644d"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">isComposite</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK5Alien4Move10MatrixData11isCompositeEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Is this matrix composite ? </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien4Move10MatrixData4implEv">
+<span id="_CPPv3N5Alien4Move10MatrixData4implEv"></span><span id="_CPPv2N5Alien4Move10MatrixData4implEv"></span><span id="Alien::Move::MatrixData::impl"></span><span class="target" id="group__impl_1ga5b305af883267f42b7bc6b1a4b13ff1f"></span><span class="n"><span class="pre">MultiMatrixImpl</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">impl</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5Alien4Move10MatrixData4implEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5Alien4Move10MatrixData4implEv">
+<span id="_CPPv3NK5Alien4Move10MatrixData4implEv"></span><span id="_CPPv2NK5Alien4Move10MatrixData4implEv"></span><span id="Alien::Move::MatrixData::implC"></span><span class="target" id="group__impl_1gaa3dee260787361df3fa2c70a0ae12eac"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">MultiMatrixImpl</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">impl</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK5Alien4Move10MatrixData4implEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-friends">Friends</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien4Move10MatrixData16createMatrixDataENSt10shared_ptrI15MultiMatrixImplEE">
+<span id="_CPPv3N5Alien4Move10MatrixData16createMatrixDataENSt10shared_ptrI15MultiMatrixImplEE"></span><span id="_CPPv2N5Alien4Move10MatrixData16createMatrixDataENSt10shared_ptrI15MultiMatrixImplEE"></span><span id="Alien::Move::MatrixData::createMatrixData__std::shared_ptr:MultiMatrixImpl:"></span><span class="target" id="group__impl_1gad7e887143ea338f37e54ac9aafd9c451"></span><span class="k"><span class="pre">friend</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N5Alien4Move10MatrixDataE" title="Alien::Move::MatrixData"><span class="n"><span class="pre">MatrixData</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">createMatrixData</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">shared_ptr</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">MultiMatrixImpl</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">multi</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5Alien4Move10MatrixData16createMatrixDataENSt10shared_ptrI15MultiMatrixImplEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>} &#64; </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</section>
+<section id="imatrix">
+<h2>IMatrix<a class="headerlink" href="#imatrix" title="Permalink to this headline">¶</a></h2>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien7IMatrixE">
+<span id="_CPPv3N5Alien7IMatrixE"></span><span id="_CPPv2N5Alien7IMatrixE"></span><span id="Alien::IMatrix"></span><span class="target" id="classAlien_1_1IMatrix"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-prename descclassname"><span class="n"><span class="pre">Alien</span></span><span class="p"><span class="pre">::</span></span></span><span class="sig-name descname"><span class="n"><span class="pre">IMatrix</span></span></span><a class="headerlink" href="#_CPPv4N5Alien7IMatrixE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Interface for all matrices. </p>
+<p>Subclassed by Alien::CompositeMatrix</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien7IMatrixD0Ev">
+<span id="_CPPv3N5Alien7IMatrixD0Ev"></span><span id="_CPPv2N5Alien7IMatrixD0Ev"></span><span id="Alien::IMatrix::~IMatrix"></span><span class="target" id="classAlien_1_1IMatrix_1af72034aaec01eb655264dc6582a6a235"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">~IMatrix</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5Alien7IMatrixD0Ev" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5Alien7IMatrix5visitER18ICopyOnWriteMatrix">
+<span id="_CPPv3NK5Alien7IMatrix5visitER18ICopyOnWriteMatrix"></span><span id="_CPPv2NK5Alien7IMatrix5visitER18ICopyOnWriteMatrix"></span><span id="Alien::IMatrix::visit__ICopyOnWriteMatrixRC"></span><span class="target" id="classAlien_1_1IMatrix_1a8761b809cf3dd538934b70347f3e99d6"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">visit</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ICopyOnWriteMatrix</span></span><span class="p"><span class="pre">&amp;</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><a class="headerlink" href="#_CPPv4NK5Alien7IMatrix5visitER18ICopyOnWriteMatrix" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Visit method. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5Alien7IMatrix8rowSpaceEv">
+<span id="_CPPv3NK5Alien7IMatrix8rowSpaceEv"></span><span id="_CPPv2NK5Alien7IMatrix8rowSpaceEv"></span><span id="Alien::IMatrix::rowSpaceC"></span><span class="target" id="classAlien_1_1IMatrix_1a0f6c871cfe14a8f4eb2a55977efb42c2"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">ISpace</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">rowSpace</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><a class="headerlink" href="#_CPPv4NK5Alien7IMatrix8rowSpaceEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Get row space associated to the matrix. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The row space </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5Alien7IMatrix8colSpaceEv">
+<span id="_CPPv3NK5Alien7IMatrix8colSpaceEv"></span><span id="_CPPv2NK5Alien7IMatrix8colSpaceEv"></span><span id="Alien::IMatrix::colSpaceC"></span><span class="target" id="classAlien_1_1IMatrix_1a92c86a5e2df621c90324bf2951c2fb69"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">ISpace</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">colSpace</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><a class="headerlink" href="#_CPPv4NK5Alien7IMatrix8colSpaceEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Get col space associated to the matrix. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The col space </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5Alien7IMatrix4implEv">
+<span id="_CPPv3N5Alien7IMatrix4implEv"></span><span id="_CPPv2N5Alien7IMatrix4implEv"></span><span id="Alien::IMatrix::impl"></span><span class="target" id="classAlien_1_1IMatrix_1aa8e562bb9ddd6b92e1d2b8abb275aa35"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="n"><span class="pre">MultiMatrixImpl</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">impl</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><a class="headerlink" href="#_CPPv4N5Alien7IMatrix4implEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Get the multimatrix implementation. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The multimatrix implementation </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5Alien7IMatrix4implEv">
+<span id="_CPPv3NK5Alien7IMatrix4implEv"></span><span id="_CPPv2NK5Alien7IMatrix4implEv"></span><span id="Alien::IMatrix::implC"></span><span class="target" id="classAlien_1_1IMatrix_1a62d08b1315c1a65878426fedd32a898f"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">MultiMatrixImpl</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">impl</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><a class="headerlink" href="#_CPPv4NK5Alien7IMatrix4implEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Get the multimatrix implementation. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The multimatrix implementation </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Alien</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Alien user documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="build.html">Building and Using Alien</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concepts.html">Alien’s high level design</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Building with move semantic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ref.html">Building with ref semantic</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer/index.html">Alien developer documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sycl/index.html">Alien SYCL documentation</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Alien user documentation</a><ul>
+      <li>Previous: <a href="concepts.html" title="previous chapter">Alien’s high level design</a></li>
+      <li>Next: <a href="ref.html" title="next chapter">Building with ref semantic</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, CEA, IFPEN.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/user/move.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

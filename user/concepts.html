@@ -1,0 +1,192 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Alien’s high level design &#8212; Alien 1.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Building with move semantic" href="move.html" />
+    <link rel="prev" title="Building and Using Alien" href="build.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="alien-s-high-level-design">
+<span id="user-concepts"></span><h1>Alien’s high level design<a class="headerlink" href="#alien-s-high-level-design" title="Permalink to this headline">¶</a></h1>
+<p>Alien’s design key objective is to provide a robust interface for linear algebra users in the context of distributed
+memory computations.</p>
+<p>Robustness is achieved relying on well defined concepts to ensure a mathematically correct code, as well as a valid
+parallel code.</p>
+<section id="mathematical-choices">
+<h2>Mathematical Choices<a class="headerlink" href="#mathematical-choices" title="Permalink to this headline">¶</a></h2>
+<p>We will present quickly important mathematical aspects of Alien. First we will introduce the scope of Alien, and then we will
+describe more precisely how Alien uses mathematical objects such as matrices.</p>
+<section id="linear-algebra">
+<h3>Linear Algebra<a class="headerlink" href="#linear-algebra" title="Permalink to this headline">¶</a></h3>
+<p>Alien focuses on linear algebra, dealing with matrices and vectors. We do not support nonlinear solvers,
+such as non-linear Newton algorithms.</p>
+<p>Alien provides access to solvers for linear equations: for given matrix <span class="math notranslate nohighlight">\(A\)</span> and right hand side vector <span class="math notranslate nohighlight">\(b\)</span>,
+find vector <span class="math notranslate nohighlight">\(x\)</span> which satisfies <a class="reference internal" href="#equation-linear-eq">(1)</a>.</p>
+<div class="math notranslate nohighlight" id="equation-linear-eq">
+<span class="eqno">(1)<a class="headerlink" href="#equation-linear-eq" title="Permalink to this equation">¶</a></span>\[A x = b\]</div>
+<p>Alien also provides access to linear algebra basic computations such as matrix-vector products, linear combinations, …</p>
+</section>
+<section id="spaces">
+<h3>Spaces<a class="headerlink" href="#spaces" title="Permalink to this headline">¶</a></h3>
+<p>In Alien, we chose to view linear algebra objects as defined on generic indexed <em>spaces</em>.</p>
+<p>Indeed, there are several ways to define a matrix, and we retain the following:
+given three sets <span class="math notranslate nohighlight">\((I,J,K)\)</span>, a matrix <span class="math notranslate nohighlight">\(M\)</span> is a family of elements of <span class="math notranslate nohighlight">\(K\)</span>,
+indexed by the cartesian product <span class="math notranslate nohighlight">\(I \times J\)</span>; i.e. an application <span class="math notranslate nohighlight">\(M : I \times J \mapsto K\)</span>, see
+<a class="reference internal" href="#bourbaki-matrix" id="id1"><span>[bourbaki_matrix]</span></a> for more details.</p>
+<p>Most common indexed space are <span class="math notranslate nohighlight">\(\{0,..,n-1\}\)</span> or <span class="math notranslate nohighlight">\(\{1,..,n\}\)</span>.</p>
+<p>Using named spaces allow us to ensure strict compatibility checks when computing.
+For example, if <span class="math notranslate nohighlight">\(u_I\)</span> and <span class="math notranslate nohighlight">\(u_J\)</span> are two vectors defined on <span class="math notranslate nohighlight">\(I\)</span> and <span class="math notranslate nohighlight">\(J\)</span>,
+we can detect that computing matrix-vector product <span class="math notranslate nohighlight">\(M . u_I\)</span> is invalid while <span class="math notranslate nohighlight">\(M . u_J\)</span> is valid.</p>
+<p>If <span class="math notranslate nohighlight">\(I\)</span> and <span class="math notranslate nohighlight">\(J\)</span> have the same size, as it is the case for square matrices, it is impossible to distinguish
+mathematically valid operations from invalid without using set’s names.</p>
+<p>Another advantage of using these named spaces is that we can unambiguously define sub-matrices.</p>
+<p>Trilinos <a class="reference internal" href="#trilinos" id="id2"><span>[trilinos]</span></a> uses something similar but less formalized with its <a class="reference external" href="https://docs.trilinos.org/dev/packages/epetra/doc/html/classEpetra__Map.html">maps</a>.</p>
+</section>
+</section>
+<section id="software-design">
+<h2>Software design<a class="headerlink" href="#software-design" title="Permalink to this headline">¶</a></h2>
+<section id="multiple-representations">
+<h3>Multiple representations<a class="headerlink" href="#multiple-representations" title="Permalink to this headline">¶</a></h3>
+<p>Alien is mainly a wrapper over external linear algebra libraries. The idea is to not reimplement linear solvers.
+However, we focus on interoperability between libraries and functionalities.</p>
+<p>Alien’s main idea is to allow dynamic (runtime) change of linear solver implementation. For example, one can try to solve
+a linear system using a fast but not numerically robust algorithm, but yet be able to switch to a slow and robust one
+if the former has failed.</p>
+<p>Alien will convert data structures between libraries and deal with the distributed memory aspects.</p>
+</section>
+<section id="stateless-objects">
+<h3>Stateless objects<a class="headerlink" href="#stateless-objects" title="Permalink to this headline">¶</a></h3>
+<p>To ensure easier of Alien, as well as more robust code, we have chosen to not rely on state for our objects.
+That means that we do not want the user to deal with notions liked, is my matrix correctly finalized before computing with it ?</p>
+<p>To enable that idea, we heavily rely on a converter pattern. That means we will have a lot of specific objects, that can only
+perform one task, such as filling in or compute linear expression. To perform different operations, user has to
+<em>explicitly</em> convert between types.</p>
+</section>
+<section id="coherent-apis">
+<h3>Coherent APIs<a class="headerlink" href="#coherent-apis" title="Permalink to this headline">¶</a></h3>
+</section>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<dl class="citation">
+<dt class="label" id="bourbaki-matrix"><span class="brackets"><a class="fn-backref" href="#id1">bourbaki_matrix</a></span></dt>
+<dd><ol class="upperalpha simple" start="14">
+<li><p>Bourbaki, Algèbre, Chapitres 1 à 3, Springer, 2006, 2e éd.</p></li>
+</ol>
+</dd>
+<dt class="label" id="trilinos"><span class="brackets"><a class="fn-backref" href="#id2">trilinos</a></span></dt>
+<dd><p>The Trilinos Project Website, <a class="reference external" href="https://trilinos.github.io">https://trilinos.github.io</a></p>
+</dd>
+</dl>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Alien</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Alien user documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="build.html">Building and Using Alien</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Alien’s high level design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="move.html">Building with move semantic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ref.html">Building with ref semantic</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer/index.html">Alien developer documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sycl/index.html">Alien SYCL documentation</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Alien user documentation</a><ul>
+      <li>Previous: <a href="build.html" title="previous chapter">Building and Using Alien</a></li>
+      <li>Next: <a href="move.html" title="next chapter">Building with move semantic</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, CEA, IFPEN.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/user/concepts.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,145 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Building and using Alien SYCL backend &#8212; Alien 1.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Exemple : how to use Alien SYCL backend" href="example.html" />
+    <link rel="prev" title="How to install SYCL" href="install.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="building-and-using-alien-sycl-backend">
+<span id="sycl-build"></span><h1>Building and using Alien SYCL backend<a class="headerlink" href="#building-and-using-alien-sycl-backend" title="Permalink to this headline">¶</a></h1>
+<section id="building-alien-sycl-backend">
+<h2>Building Alien SYCL backend<a class="headerlink" href="#building-alien-sycl-backend" title="Permalink to this headline">¶</a></h2>
+<p>Alien’s build system is based on CMake.</p>
+<section id="configuring">
+<h3>Configuring<a class="headerlink" href="#configuring" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">GCCCORE</span><span class="o">=</span><span class="s1">&#39;path_to_gccroot_compiler&#39;</span>
+cmake -S <span class="sb">`</span><span class="nb">pwd</span><span class="sb">`</span>/alien <span class="se">\</span>
+      -B <span class="sb">`</span><span class="nb">pwd</span><span class="sb">`</span>/build-alien <span class="se">\</span>
+      -DCMAKE_BUILD_TYPE<span class="o">=</span>Release <span class="se">\</span>
+      -DALIEN_WANT_AVX2<span class="o">=</span>ON <span class="se">\</span>
+      -DALIEN_USE_LIBXML2<span class="o">=</span>ON <span class="se">\</span>
+      -DALIEN_UNIT_TESTS<span class="o">=</span>ON <span class="se">\</span>
+      -DALIEN_USE_HDF5<span class="o">=</span>ON -DHIPSYCL_TARGETS<span class="o">=</span>cuda:sm_50 <span class="se">\</span>
+      -DALIEN_USE_SYCL<span class="o">=</span>ON <span class="se">\</span>
+      -DGCCCORE_ROOT:PATH<span class="o">=</span><span class="si">${</span><span class="nv">GCCXORE_ROOT</span><span class="si">}</span> <span class="se">\</span>
+      ../alien
+cmake --build &lt;build_dir&gt;
+cmake --install &lt;build_dir&gt;
+</pre></div>
+</div>
+</section>
+<section id="concepts">
+<h3>Concepts<a class="headerlink" href="#concepts" title="Permalink to this headline">¶</a></h3>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Alien</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../user/index.html">Alien user documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer/index.html">Alien developer documentation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Alien SYCL documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="SYCL.html">SYCL backend in ALIEN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html">How to install SYCL</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Building and using Alien SYCL backend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example.html">Exemple : how to use Alien SYCL backend</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Alien SYCL documentation</a><ul>
+      <li>Previous: <a href="install.html" title="previous chapter">How to install SYCL</a></li>
+      <li>Next: <a href="example.html" title="next chapter">Exemple : how to use Alien SYCL backend</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, CEA, IFPEN.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/sycl/build.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

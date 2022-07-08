@@ -1,0 +1,162 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Alien API &#8212; Alien 1.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Alien’s Coding Style" href="coding-style.html" />
+    <link rel="prev" title="Alien developer documentation" href="index.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="alien-api">
+<span id="developer-api"></span><h1>Alien API<a class="headerlink" href="#alien-api" title="Permalink to this headline">¶</a></h1>
+<section id="alien-user-api-concepts">
+<h2>Alien User API, concepts<a class="headerlink" href="#alien-user-api-concepts" title="Permalink to this headline">¶</a></h2>
+<dl class="simple">
+<dt>Alien User API aims at:</dt><dd><ul class="simple">
+<li><p>accessing data structure,</p></li>
+<li><p>performing <em>algebraic</em> operations,</p></li>
+<li><p>performing <em>computer related</em> operations.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Alien’s design allows to create new APIs to give access to previously listed functionalities.</p>
+</section>
+<section id="alien-layout-for-header-files">
+<h2>Alien layout for header files<a class="headerlink" href="#alien-layout-for-header-files" title="Permalink to this headline">¶</a></h2>
+<section id="core">
+<h3>Core<a class="headerlink" href="#core" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>alien                          <span class="c1"># No or few .h at this level (AlienConfig.h)</span>
+├── advanced                   <span class="c1"># Utilities for end-user API</span>
+│   ├── handlers               <span class="c1"># IO</span>
+│   ├── kernels                <span class="c1"># Access to internal kernels</span>
+│   └── utils                  <span class="c1"># Utilities</span>
+│       └── test_framework     <span class="c1"># Set up test environment for APIs</span>
+├── backend                    <span class="c1"># Plug-in API</span>
+└── core                       <span class="c1"># Keys objects: Mng, Space, Distribution</span>
+</pre></div>
+</div>
+</section>
+<section id="user-api">
+<h3>User API<a class="headerlink" href="#user-api" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>alien
+└── api_name                   <span class="c1"># Most files at this level</span>
+    └── handlers               <span class="c1"># Most Builders/Accessors at this level</span>
+        └── fs                 <span class="c1"># Disk IO</span>
+</pre></div>
+</div>
+</section>
+<section id="backend-layout">
+<h3>Backend layout<a class="headerlink" href="#backend-layout" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>alien
+└── backend_name
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Alien</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../user/index.html">Alien user documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Alien developer documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Alien API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="coding-style.html">Alien’s Coding Style</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../sycl/index.html">Alien SYCL documentation</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Alien developer documentation</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Alien developer documentation</a></li>
+      <li>Next: <a href="coding-style.html" title="next chapter">Alien’s Coding Style</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, CEA, IFPEN.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/developer/API.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

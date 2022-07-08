@@ -1,0 +1,218 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Exemple : how to use Alien SYCL backend &#8212; Alien 1.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Building and using Alien SYCL backend" href="build.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="exemple-how-to-use-alien-sycl-backend">
+<span id="sycl-example"></span><h1>Exemple : how to use Alien SYCL backend<a class="headerlink" href="#exemple-how-to-use-alien-sycl-backend" title="Permalink to this headline">¶</a></h1>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>This tutorial illustrates how to build vectors and matrices, to apply linear algebra operations
+and to solve linear systems with solver supporting the Alien SYCL BackEnd.</p>
+</section>
+<section id="using-sycl-linear-algebra">
+<h2>Using SYCL Linear Algebra<a class="headerlink" href="#using-sycl-linear-algebra" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>/*
+ * LINEAR SYSTEM CONSTRUCTION
+ */
+
+auto <span class="nv">A</span> <span class="o">=</span> Alien::Matrix<span class="o">(</span>mdist<span class="o">)</span><span class="p">;</span>
+auto <span class="nv">B</span> <span class="o">=</span> Alien::Vector<span class="o">(</span>vdist<span class="o">)</span><span class="p">;</span>
+auto <span class="nv">X</span> <span class="o">=</span> Alien::Vector<span class="o">(</span>vdist<span class="o">)</span><span class="p">;</span>
+auto <span class="nv">Y</span> <span class="o">=</span> Alien::Vector<span class="o">(</span>vdist<span class="o">)</span><span class="p">;</span>
+auto <span class="nv">R</span> <span class="o">=</span> Alien::Vector<span class="o">(</span>vdist<span class="o">)</span><span class="p">;</span>
+
+/*
+ * Create a SYCL LinearAlgebra object
+ */
+Alien::SYCLLinearAlgebra sycl_alg<span class="p">;</span>
+
+/*
+ * Apply Blas operation to compute <span class="nv">R</span> <span class="o">=</span> B - A*X
+ */
+sycl_alg.mult<span class="o">(</span>A,X,Y<span class="o">)</span> <span class="p">;</span>
+sycl_alg.copy<span class="o">(</span>B,R<span class="o">)</span>
+sycl_alg.axpy<span class="o">(</span>-1,Y,R<span class="o">)</span>
+auto <span class="nv">residual</span> <span class="o">=</span> sycl_alg.dot<span class="o">(</span>R,R<span class="o">)</span> <span class="p">;</span>
+</pre></div>
+</div>
+</section>
+<section id="linear-systems-resolution">
+<h2>Linear Systems resolution<a class="headerlink" href="#linear-systems-resolution" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>/*
+ * LINEAR SYSTEM CONSTRUCTION
+ */
+auto <span class="nv">trace_mng</span> <span class="o">=</span> Alien::Universe.traceMng<span class="o">()</span> <span class="p">;</span>
+
+auto <span class="nv">A</span> <span class="o">=</span> Alien::Matrix<span class="o">(</span>mdist<span class="o">)</span><span class="p">;</span>
+auto <span class="nv">B</span> <span class="o">=</span> Alien::Vector<span class="o">(</span>vdist<span class="o">)</span><span class="p">;</span>
+auto <span class="nv">X</span> <span class="o">=</span> Alien::Vector<span class="o">(</span>vdist<span class="o">)</span><span class="p">;</span>
+
+/*
+ * Create a SYCLInternalLinearAlgebra instance
+ * and get <span class="nb">true</span> SYCL Matrix and vectors implementations
+ */
+typedef Alien::SYCLInternalLinearAlgebra         AlgebraType <span class="p">;</span>
+typedef typename AlgebraType::BackEndType        BackEndType <span class="p">;</span>
+typedef Alien::Iteration&lt;AlgebraType&gt;            StopCriteriaType <span class="p">;</span>
+
+AlgebraType sycl_alg<span class="p">;</span>
+
+auto const<span class="p">&amp;</span> <span class="nv">true_A</span> <span class="o">=</span> A.impl<span class="o">()</span>-&gt;get&lt;BackEndType&gt;<span class="o">()</span> <span class="p">;</span>
+auto const<span class="p">&amp;</span> <span class="nv">true_b</span> <span class="o">=</span> b.impl<span class="o">()</span>-&gt;get&lt;BackEndType&gt;<span class="o">()</span> <span class="p">;</span>
+auto<span class="p">&amp;</span>       <span class="nv">true_x</span> <span class="o">=</span> x.impl<span class="o">()</span>-&gt;get&lt;BackEndType&gt;<span class="o">(</span><span class="nb">true</span><span class="o">)</span> <span class="p">;</span>
+
+/*
+ * Create a CG solver and stop criteria
+ */
+StopCriteriaType stop_criteria<span class="o">{</span>alg,true_b,tol,max_iteration,output_level&gt;0?trace_mng:nullptr<span class="o">}</span> <span class="p">;</span>
+
+typedef Alien::CG&lt;AlgebraType&gt; SolverType <span class="p">;</span>
+
+SolverType solver<span class="o">{</span>alg,trace_mng<span class="o">}</span> <span class="p">;</span>
+solver.setOutputLevel<span class="o">(</span>output_level<span class="o">)</span> <span class="p">;</span>
+
+/*
+ *Create a Chebyshev polynomial preconditioner
+ */
+trace_mng-&gt;info<span class="o">()</span>&lt;&lt;<span class="s2">&quot;CHEBYSHEV PRECONDITIONER&quot;</span><span class="p">;</span>
+double <span class="nv">polynom_factor</span>          <span class="o">=</span> <span class="m">0</span>.5 <span class="p">;</span>
+int    <span class="nv">polynom_order</span>           <span class="o">=</span> <span class="m">3</span> <span class="p">;</span>
+int    <span class="nv">polynom_factor_max_iter</span> <span class="o">=</span> <span class="m">10</span> <span class="p">;</span>
+
+typedef Alien::ChebyshevPreconditioner&lt;AlgebraType&gt; PrecondType <span class="p">;</span>
+PrecondType      precond<span class="o">{</span>alg,true_A,polynom_factor,polynom_order,polynom_factor_max_iter,trace_mng<span class="o">}</span> <span class="p">;</span>
+precond.init<span class="o">()</span> <span class="p">;</span>
+
+/*
+ * Solve the Linear System A*x<span class="o">=</span>B
+ */
+solver.solve<span class="o">(</span>precond,stop_criteria,true_A,true_b,true_x<span class="o">)</span> <span class="p">;</span>
+
+/*
+ * Analyze the solution
+ */
+<span class="k">if</span><span class="o">(</span>stop_criteria.getStatus<span class="o">())</span>
+<span class="o">{</span>
+  trace_mng-&gt;info<span class="o">()</span>&lt;&lt;<span class="s2">&quot;Solver has converged&quot;</span><span class="p">;</span>
+  trace_mng-&gt;info<span class="o">()</span>&lt;&lt;<span class="s2">&quot;Nb iterations  : &quot;</span><span class="s">&lt;&lt;stop_criteria();</span>
+<span class="s">  trace_mng-&gt;info()&lt;&lt;&quot;Criteria value : &quot;&lt;&lt;stop_criteria</span>.getValue<span class="o">()</span><span class="p">;</span>
+<span class="o">}</span>
+<span class="k">else</span>
+<span class="o">{</span>
+  trace_mng-&gt;info<span class="o">()</span>&lt;&lt;<span class="s2">&quot;Solver convergence failed&quot;</span><span class="p">;</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Alien</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../user/index.html">Alien user documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer/index.html">Alien developer documentation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Alien SYCL documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="SYCL.html">SYCL backend in ALIEN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html">How to install SYCL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build.html">Building and using Alien SYCL backend</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Exemple : how to use Alien SYCL backend</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Alien SYCL documentation</a><ul>
+      <li>Previous: <a href="build.html" title="previous chapter">Building and using Alien SYCL backend</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, CEA, IFPEN.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/sycl/example.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

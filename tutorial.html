@@ -1,0 +1,395 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Tutorial &#8212; Alien 1.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Alien developer documentation" href="developer/index.html" />
+    <link rel="prev" title="Building with ref semantic" href="user/ref.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="tutorial">
+<h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
+<section id="intro">
+<h2>Intro<a class="headerlink" href="#intro" title="Permalink to this headline">¶</a></h2>
+<p>This tutorial illustrates how to build a linear system and solve it with various linear solver algorithm.</p>
+<p>We consider the Laplacian problem on a 2D square mesh of size <span class="math notranslate nohighlight">\(N_X \times N_Y\)</span>. Unknowns are related to the mesh nodes
+indexed by <span class="math notranslate nohighlight">\((i,j)\)</span>. We use a 5-Points stencil to discretize the problem.</p>
+<p>First of all Alien provides tools to initialize the library, the MPI parallel environment to parametrize IO.
+The following code illustrates how to initialize :</p>
+<ul class="simple">
+<li><p>the ParallelMng object</p></li>
+<li><p>the TraceMng object</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>// INITIALIZE PARALLEL ENVIRONMENT
+Environment::initialize<span class="o">(</span>argc, argv<span class="o">)</span><span class="p">;</span>
+
+auto <span class="nv">parallel_mng</span> <span class="o">=</span> Environment::parallelMng<span class="o">()</span><span class="p">;</span>
+auto <span class="nv">trace_mng</span> <span class="o">=</span> Environment::traceMng<span class="o">()</span><span class="p">;</span>
+
+auto <span class="nv">comm_size</span> <span class="o">=</span> Environment::parallelMng<span class="o">()</span>-&gt;commSize<span class="o">()</span><span class="p">;</span>
+auto <span class="nv">comm_rank</span> <span class="o">=</span> Environment::parallelMng<span class="o">()</span>-&gt;commRank<span class="o">()</span><span class="p">;</span>
+
+trace_mng-&gt;info<span class="o">()</span> &lt;&lt; <span class="s2">&quot;NB PROC = &quot;</span> <span class="s">&lt;&lt; comm_size;</span>
+<span class="s">trace_mng-&gt;info() &lt;&lt; &quot;RANK    = &quot; &lt;&lt; comm_rank;</span>
+
+<span class="s">Arccore::StringBuilder filename(&quot;tutorial.log&quot;);</span>
+<span class="s">Arccore::ReferenceCounter&lt;Arccore::ITraceStream&gt; ofile;</span>
+<span class="s">if (comm_size</span> &gt; <span class="m">1</span><span class="o">)</span> <span class="o">{</span>
+  <span class="nv">filename</span> <span class="o">+=</span> comm_rank<span class="p">;</span>
+  <span class="nv">ofile</span> <span class="o">=</span> Arccore::ITraceStream::createFileStream<span class="o">(</span>filename.toString<span class="o">())</span><span class="p">;</span>
+  trace_mng-&gt;setRedirectStream<span class="o">(</span>ofile.get<span class="o">())</span><span class="p">;</span>
+<span class="o">}</span>
+trace_mng-&gt;finishInitialize<span class="o">()</span><span class="p">;</span>
+
+Alien::setTraceMng<span class="o">(</span>trace_mng<span class="o">)</span><span class="p">;</span>
+Alien::setVerbosityLevel<span class="o">(</span>Alien::Verbosity::Debug<span class="o">)</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+<section id="space">
+<h2>Space<a class="headerlink" href="#space" title="Permalink to this headline">¶</a></h2>
+<p>The Space concept enable to modelize the mathematical algebraic real space <span class="math notranslate nohighlight">\(R^N\)</span> of dimension <span class="math notranslate nohighlight">\(N\)</span></p>
+<p>To build this concept several tools are provided:</p>
+<ul class="simple">
+<li><p>the <cite>IndexeManager</cite> package provides helper tools to manage <cite>Integer IndexSets</cite></p></li>
+<li><p>the <cite>Distribution</cite> package provides helper tools to manage the partition of <cite>IndexSets</cite> between MPI processes</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>int <span class="nv">Nx</span> <span class="o">=</span> <span class="m">10</span><span class="p">;</span>
+int <span class="nv">Ny</span> <span class="o">=</span> <span class="m">10</span><span class="p">;</span>
+
+/*
+ * MESH PARTITION ALONG Y AXIS
+ *
+ */
+int <span class="nv">local_ny</span> <span class="o">=</span> Ny / comm_size<span class="p">;</span>
+int <span class="nv">r</span> <span class="o">=</span> Ny % comm_size<span class="p">;</span>
+
+std::vector&lt;int&gt; y_offset<span class="o">(</span>comm_size + <span class="m">1</span><span class="o">)</span><span class="p">;</span>
+y_offset<span class="o">[</span><span class="m">0</span><span class="o">]</span> <span class="o">=</span> <span class="m">0</span><span class="p">;</span>
+<span class="k">for</span> <span class="o">(</span>int <span class="nv">ip</span> <span class="o">=</span> <span class="m">0</span><span class="p">;</span> ip &lt; r<span class="p">;</span> ++ip<span class="o">)</span>
+  y_offset<span class="o">[</span>ip + <span class="m">1</span><span class="o">]</span> <span class="o">=</span> y_offset<span class="o">[</span>ip<span class="o">]</span> + local_ny + <span class="m">1</span><span class="p">;</span>
+
+<span class="k">for</span> <span class="o">(</span>int <span class="nv">ip</span> <span class="o">=</span> r<span class="p">;</span> ip &lt; comm_size<span class="p">;</span> ++ip<span class="o">)</span>
+  y_offset<span class="o">[</span>ip + <span class="m">1</span><span class="o">]</span> <span class="o">=</span> y_offset<span class="o">[</span>ip<span class="o">]</span> + local_ny<span class="p">;</span>
+
+// Define a lambda <span class="k">function</span> to compute node unique ids from the 2D <span class="o">(</span>i,j<span class="o">)</span> coordinates
+// <span class="o">(</span>i,j<span class="o">)</span> -&gt; <span class="nv">uid</span> <span class="o">=</span> node_uid<span class="o">(</span>i,j<span class="o">)</span>
+auto <span class="nv">node_uid</span> <span class="o">=</span> <span class="o">[</span><span class="p">&amp;</span><span class="o">](</span>int i, int j<span class="o">)</span> <span class="o">{</span> <span class="k">return</span> j * Nx + i<span class="p">;</span> <span class="o">}</span><span class="p">;</span>
+
+/*
+ * DEFINITION of Unknowns Unique Ids and  Local Ids
+ */
+Alien::UniqueArray&lt;UID&gt; uid<span class="p">;</span>
+Alien::UniqueArray&lt;LID&gt; lid<span class="p">;</span>
+int <span class="nv">first_j</span> <span class="o">=</span> y_offset<span class="o">[</span>comm_rank<span class="o">]</span><span class="p">;</span>
+int <span class="nv">last_j</span> <span class="o">=</span> y_offset<span class="o">[</span>comm_rank + <span class="m">1</span><span class="o">]</span><span class="p">;</span>
+
+int <span class="nv">index</span> <span class="o">=</span> <span class="m">0</span><span class="p">;</span>
+<span class="k">for</span> <span class="o">(</span>int <span class="nv">j</span> <span class="o">=</span> first_j<span class="p">;</span> j &lt; last_j<span class="p">;</span> ++j<span class="o">)</span> <span class="o">{</span>
+  <span class="k">for</span> <span class="o">(</span>int <span class="nv">i</span> <span class="o">=</span> <span class="m">0</span><span class="p">;</span> i &lt; Nx<span class="p">;</span> ++i<span class="o">)</span> <span class="o">{</span>
+    uid.add<span class="o">(</span>node_uid<span class="o">(</span>i, j<span class="o">))</span><span class="p">;</span>
+    lid.add<span class="o">(</span>index<span class="o">)</span><span class="p">;</span>
+    ++index<span class="p">;</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+/*
+ * DEFINITION of an abstract family of unknowns
+ */
+Alien::DefaultAbstractFamily family<span class="o">(</span>uid, parallel_mng<span class="o">)</span><span class="p">;</span>
+Alien::IndexManager index_manager<span class="o">(</span>parallel_mng<span class="o">)</span><span class="p">;</span>
+
+/*
+ * Creation of a <span class="nb">set</span> of indexes
+ */
+auto <span class="nv">indexSetU</span> <span class="o">=</span> index_manager.buildScalarIndexSet<span class="o">(</span><span class="s2">&quot;U&quot;</span>, lid, family, <span class="m">0</span><span class="o">)</span><span class="p">;</span>
+
+// Combine all index <span class="nb">set</span> and create Linear system index system
+index_manager.prepare<span class="o">()</span><span class="p">;</span>
+
+auto <span class="nv">global_size</span> <span class="o">=</span> index_manager.globalSize<span class="o">()</span><span class="p">;</span>
+auto <span class="nv">local_size</span> <span class="o">=</span> index_manager.localSize<span class="o">()</span><span class="p">;</span>
+
+trace_mng-&gt;info<span class="o">()</span> &lt;&lt; <span class="s2">&quot;GLOBAL SIZE : &quot;</span> <span class="s">&lt;&lt; global_size;</span>
+<span class="s">trace_mng-&gt;info() &lt;&lt; &quot;LOCAL SIZE  : &quot; &lt;&lt; local_size;</span>
+
+<span class="s">/*</span>
+<span class="s"> * DEFINITION of</span>
+<span class="s"> * - Alien Space,</span>
+<span class="s"> * - matrix and vector distributions</span>
+<span class="s"> * to manage the distribution of indexes between all MPI processes</span>
+<span class="s"> */</span>
+
+<span class="s">auto space = Alien::Space(global_size</span>, <span class="s2">&quot;MySpace&quot;</span><span class="o">)</span><span class="p">;</span>
+
+auto <span class="nv">mdist</span> <span class="o">=</span>
+Alien::MatrixDistribution<span class="o">(</span>global_size, global_size, local_size, parallel_mng<span class="o">)</span><span class="p">;</span>
+auto <span class="nv">vdist</span> <span class="o">=</span> Alien::VectorDistribution<span class="o">(</span>global_size, local_size, parallel_mng<span class="o">)</span><span class="p">;</span>
+
+trace_mng-&gt;info<span class="o">()</span> &lt;&lt; <span class="s2">&quot;MATRIX DISTRIBUTION INFO&quot;</span><span class="p">;</span>
+trace_mng-&gt;info<span class="o">()</span> &lt;&lt; <span class="s2">&quot;GLOBAL ROW SIZE : &quot;</span> <span class="s">&lt;&lt; mdist.globalRowSize();</span>
+<span class="s">trace_mng-&gt;info() &lt;&lt; &quot;LOCAL ROW SIZE  : &quot; &lt;&lt; mdist</span>.localRowSize<span class="o">()</span><span class="p">;</span>
+trace_mng-&gt;info<span class="o">()</span> &lt;&lt; <span class="s2">&quot;GLOBAL COL SIZE : &quot;</span> <span class="s">&lt;&lt; mdist.globalColSize();</span>
+<span class="s">trace_mng-&gt;info() &lt;&lt; &quot;LOCAL COL SIZE  : &quot; &lt;&lt; mdist</span>.localColSize<span class="o">()</span><span class="p">;</span>
+
+trace_mng-&gt;info<span class="o">()</span> &lt;&lt; <span class="s2">&quot;VECTOR DISTRIBUTION INFO&quot;</span><span class="p">;</span>
+trace_mng-&gt;info<span class="o">()</span> &lt;&lt; <span class="s2">&quot;GLOBAL SIZE : &quot;</span> <span class="s">&lt;&lt; vdist.globalSize();</span>
+<span class="s">trace_mng-&gt;info() &lt;&lt; &quot;LOCAL SIZE  : &quot; &lt;&lt; vdist</span>.localSize<span class="o">()</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+<section id="matrix">
+<h2>Matrix<a class="headerlink" href="#matrix" title="Permalink to this headline">¶</a></h2>
+<p>The Matrix concept represents a set of <span class="math notranslate nohighlight">\(N_i\)</span> linear equations (rows) <span class="math notranslate nohighlight">\((y_i)\)</span> of <span class="math notranslate nohighlight">\(N_j\)</span> unknowns <span class="math notranslate nohighlight">\((x_j)\)</span> (columns).
+This represents a linear application <span class="math notranslate nohighlight">\(S_X \mapsto S_Y\)</span> with <span class="math notranslate nohighlight">\(x \in S_X\)</span>, <span class="math notranslate nohighlight">\(y \in S_Y\)</span> and <span class="math notranslate nohighlight">\(x \mapsto y=A*x\)</span>.
+Usually the dimension of <span class="math notranslate nohighlight">\(S_X\)</span> and <span class="math notranslate nohighlight">\(S_Y\)</span> are equal, <span class="math notranslate nohighlight">\(N_i=N_j\)</span>. In that case the matrix is square.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>/*
+ * MATRIX CONSTRUCTION STEP
+ */
+auto <span class="nv">A</span> <span class="o">=</span> Alien::Matrix<span class="o">(</span>mdist<span class="o">)</span><span class="p">;</span>
+
+/* FILLING STEP */
+
+alien_info<span class="o">([</span><span class="p">&amp;</span><span class="o">]</span> <span class="o">{</span> cout<span class="o">()</span> &lt;&lt; <span class="s2">&quot;DIRECT ONE STEP FILLING PHASE&quot;</span><span class="p">;</span><span class="o">})</span> <span class="p">;</span>
+
+auto <span class="nv">tag</span> <span class="o">=</span> Alien::DirectMatrixOptions::eResetValues<span class="p">;</span>
+<span class="o">{</span>
+  auto <span class="nv">builder</span> <span class="o">=</span> Alien::DirectMatrixBuilder<span class="o">(</span>A, tag, Alien::DirectMatrixOptions::SymmetricFlag::eUnSymmetric<span class="o">)</span><span class="p">;</span>
+
+  // RESERVE <span class="m">5</span> non zero entries per row
+  builder.reserve<span class="o">(</span><span class="m">5</span><span class="o">)</span><span class="p">;</span>
+  builder.allocate<span class="o">()</span><span class="p">;</span>
+
+  // LOOP FOLLOWING Y AXE
+  <span class="k">for</span> <span class="o">(</span>int <span class="nv">j</span> <span class="o">=</span> first_j<span class="p">;</span> j &lt; last_j<span class="p">;</span> ++j<span class="o">)</span> <span class="o">{</span>
+    // LOOP FOLLOWING X AXE
+    <span class="k">for</span> <span class="o">(</span>int <span class="nv">i</span> <span class="o">=</span> <span class="m">0</span><span class="p">;</span> i &lt; Nx<span class="p">;</span> ++i<span class="o">)</span> <span class="o">{</span>
+      auto <span class="nv">n_uid</span> <span class="o">=</span> node_uid<span class="o">(</span>i, j<span class="o">)</span><span class="p">;</span>
+      auto <span class="nv">n_lid</span> <span class="o">=</span> uid2lid<span class="o">[</span>n_uid<span class="o">]</span><span class="p">;</span>
+      auto <span class="nv">irow</span> <span class="o">=</span> allUIndex<span class="o">[</span>n_lid<span class="o">]</span><span class="p">;</span>
+
+      // DIAGONAL FILLING
+      builder<span class="o">(</span>irow, irow<span class="o">)</span> <span class="o">=</span> <span class="m">4</span><span class="p">;</span>
+
+      // OFF DIAG FILLING
+      // On bottom
+      <span class="k">if</span> <span class="o">(</span>j &gt; <span class="m">0</span><span class="o">)</span> <span class="o">{</span>
+        auto <span class="nv">off_uid</span> <span class="o">=</span> node_uid<span class="o">(</span>i, j - <span class="m">1</span><span class="o">)</span><span class="p">;</span>
+        auto <span class="nv">off_lid</span> <span class="o">=</span> uid2lid<span class="o">[</span>off_uid<span class="o">]</span><span class="p">;</span>
+        auto <span class="nv">jcol</span> <span class="o">=</span> allUIndex<span class="o">[</span>off_lid<span class="o">]</span><span class="p">;</span>
+        <span class="k">if</span> <span class="o">(</span>jcol !<span class="o">=</span> -1<span class="o">)</span>
+          builder<span class="o">(</span>irow, jcol<span class="o">)</span> <span class="o">=</span> -1<span class="p">;</span>
+      <span class="o">}</span>
+      // On the left size
+      <span class="k">if</span> <span class="o">(</span>i &gt; <span class="m">0</span><span class="o">)</span> <span class="o">{</span>
+        auto <span class="nv">off_uid</span> <span class="o">=</span> node_uid<span class="o">(</span>i - <span class="m">1</span>, j<span class="o">)</span><span class="p">;</span>
+        auto <span class="nv">off_lid</span> <span class="o">=</span> uid2lid<span class="o">[</span>off_uid<span class="o">]</span><span class="p">;</span>
+        auto <span class="nv">jcol</span> <span class="o">=</span> allUIndex<span class="o">[</span>off_lid<span class="o">]</span><span class="p">;</span>
+        <span class="k">if</span> <span class="o">(</span>jcol !<span class="o">=</span> -1<span class="o">)</span>
+          builder<span class="o">(</span>irow, jcol<span class="o">)</span> <span class="o">=</span> -1<span class="p">;</span>
+      <span class="o">}</span>
+      // on the right side
+      <span class="k">if</span> <span class="o">(</span>i &lt; Nx - <span class="m">1</span><span class="o">)</span> <span class="o">{</span>
+        auto <span class="nv">off_uid</span> <span class="o">=</span> node_uid<span class="o">(</span>i + <span class="m">1</span>, j<span class="o">)</span><span class="p">;</span>
+        auto <span class="nv">off_lid</span> <span class="o">=</span> uid2lid<span class="o">[</span>off_uid<span class="o">]</span><span class="p">;</span>
+        auto <span class="nv">jcol</span> <span class="o">=</span> allUIndex<span class="o">[</span>off_lid<span class="o">]</span><span class="p">;</span>
+        <span class="k">if</span> <span class="o">(</span>jcol !<span class="o">=</span> -1<span class="o">)</span>
+          builder<span class="o">(</span>irow, jcol<span class="o">)</span> <span class="o">=</span> -1<span class="p">;</span>
+      <span class="o">}</span>
+      // On the top
+      <span class="k">if</span> <span class="o">(</span>j &lt; Ny - <span class="m">1</span><span class="o">)</span> <span class="o">{</span>
+        auto <span class="nv">off_uid</span> <span class="o">=</span> node_uid<span class="o">(</span>i, j + <span class="m">1</span><span class="o">)</span><span class="p">;</span>
+        auto <span class="nv">off_lid</span> <span class="o">=</span> uid2lid<span class="o">[</span>off_uid<span class="o">]</span><span class="p">;</span>
+        auto <span class="nv">jcol</span> <span class="o">=</span> allUIndex<span class="o">[</span>off_lid<span class="o">]</span><span class="p">;</span>
+        <span class="k">if</span> <span class="o">(</span>jcol !<span class="o">=</span> -1<span class="o">)</span>
+          builder<span class="o">(</span>irow, jcol<span class="o">)</span> <span class="o">=</span> -1<span class="p">;</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+</section>
+<section id="vector">
+<h2>Vector<a class="headerlink" href="#vector" title="Permalink to this headline">¶</a></h2>
+<p>The Vector concept represents the set of unknowns <span class="math notranslate nohighlight">\(x=(x_i)\)</span> element of a linear space <span class="math notranslate nohighlight">\(S_X\)</span>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>/*
+ * VECTOR CONSTRUCTION
+ */
+auto <span class="nv">B</span> <span class="o">=</span> Alien::Vector<span class="o">(</span>vdist<span class="o">)</span><span class="p">;</span>
+
+// VECTOR FILLING STEP
+<span class="o">{</span>
+  Alien::VectorWriter writer<span class="o">(</span>B<span class="o">)</span><span class="p">;</span>
+
+  // LOOP ALONG Y AXE
+  <span class="k">for</span> <span class="o">(</span>int <span class="nv">j</span> <span class="o">=</span> first_j<span class="p">;</span> j &lt; last_j<span class="p">;</span> ++j<span class="o">)</span> <span class="o">{</span>
+    // LOOP ALONG X AXE
+    <span class="k">for</span> <span class="o">(</span>int <span class="nv">i</span> <span class="o">=</span> <span class="m">0</span><span class="p">;</span> i &lt; Nx<span class="p">;</span> ++i<span class="o">)</span> <span class="o">{</span>
+      auto <span class="nv">n_uid</span> <span class="o">=</span> node_uid<span class="o">(</span>i, j<span class="o">)</span><span class="p">;</span>
+      auto <span class="nv">n_lid</span> <span class="o">=</span> uid2lid<span class="o">[</span>n_uid<span class="o">]</span><span class="p">;</span>
+      auto <span class="nv">irow</span> <span class="o">=</span> allUIndex<span class="o">[</span>n_lid<span class="o">]</span><span class="p">;</span>
+
+      writer<span class="o">[</span>irow<span class="o">]</span> <span class="o">=</span> <span class="m">1</span>. / <span class="o">(</span><span class="m">1</span>. + i + j<span class="o">)</span><span class="p">;</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+// VECTOR ACCESSOR
+<span class="o">{</span>
+  Alien::LocalVectorReader reader<span class="o">(</span>B<span class="o">)</span><span class="p">;</span>
+  <span class="k">for</span> <span class="o">(</span>int <span class="nv">i</span> <span class="o">=</span> <span class="m">0</span><span class="p">;</span> i &lt; reader.size<span class="o">()</span><span class="p">;</span> ++i<span class="o">)</span> <span class="o">{</span>
+    trace_mng-&gt;info<span class="o">()</span> &lt;&lt; <span class="s2">&quot;B[&quot;</span> <span class="s">&lt;&lt; i &lt;&lt; &quot;]=&quot; &lt;&lt; reader[i</span><span class="o">]</span><span class="p">;</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+</section>
+<section id="linear-systems-resolution">
+<h2>Linear Systems resolution<a class="headerlink" href="#linear-systems-resolution" title="Permalink to this headline">¶</a></h2>
+<p>A linear system is reprensented by a matrix <span class="math notranslate nohighlight">\(A\)</span>, and two vectors <span class="math notranslate nohighlight">\(B\)</span> and <span class="math notranslate nohighlight">\(X\)</span> where <span class="math notranslate nohighlight">\(B\)</span> is the system right hand side and <span class="math notranslate nohighlight">\(X\)</span> the solution.</p>
+<p>Solving the linear system consists in finding the solution X such that <span class="math notranslate nohighlight">\(A*X=B\)</span> applying a linear solver algorithm.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>/*
+ * LINEAR SYSTEM CONSTRUCTION
+ */
+
+auto <span class="nv">A</span> <span class="o">=</span> Alien::Matrix<span class="o">(</span>mdist<span class="o">)</span><span class="p">;</span>
+auto <span class="nv">B</span> <span class="o">=</span> Alien::Vector<span class="o">(</span>vdist<span class="o">)</span><span class="p">;</span>
+auto <span class="nv">X</span> <span class="o">=</span> Alien::Vector<span class="o">(</span>vdist<span class="o">)</span><span class="p">;</span>
+
+auto <span class="nv">solver</span> <span class="o">=</span> createSolver<span class="o">(</span>/*  ... */<span class="o">)</span> <span class="p">;</span>
+
+solver-&gt;init<span class="o">()</span> <span class="p">;</span>
+
+solver-&gt;solve<span class="o">(</span>matrixA, vectorB, vectorX<span class="o">)</span><span class="p">;</span>
+
+Alien::SolverStatus <span class="nv">status</span> <span class="o">=</span> solver-&gt;getStatus<span class="o">()</span><span class="p">;</span>
+<span class="k">if</span> <span class="o">(</span>status.succeeded<span class="o">)</span>
+<span class="o">{</span>
+    alien_info<span class="o">()([</span><span class="p">&amp;</span><span class="o">]{</span> cout<span class="o">()</span>&lt;&lt;<span class="s2">&quot;SOLVER HAS  SUCCEEDED&quot;</span><span class="p">;</span><span class="o">})</span> <span class="p">;</span>
+
+    SimpleCSRLinearAlgebra alg<span class="p">;</span>
+    Alien::Vector vectorR<span class="o">(</span>m_vdist<span class="o">)</span><span class="p">;</span>
+    alg.mult<span class="o">(</span>matrixA, vectorX, vectorR<span class="o">)</span><span class="p">;</span>
+    alg.axpy<span class="o">(</span>-1., vectorB, vectorR<span class="o">)</span><span class="p">;</span>
+    Real <span class="nv">res</span> <span class="o">=</span> alg.norm2<span class="o">(</span>vectorR<span class="o">)</span><span class="p">;</span>
+    alien_info<span class="o">([</span><span class="p">&amp;</span><span class="o">]</span> cout<span class="o">()</span> &lt;&lt; <span class="s2">&quot;RES : &quot;</span> <span class="s">&lt;&lt; res;}) ;</span>
+<span class="s">  }</span>
+<span class="s">  else</span>
+<span class="s">    alien_info()([&amp;]{ cout()&lt;&lt;&quot;SOLVER FAILED&quot;;}) ;</span>
+<span class="s">  solver</span>-&gt;getSolverStat<span class="o">()</span>.print<span class="o">(</span>Universe<span class="o">()</span>.traceMng<span class="o">()</span>, status, <span class="s2">&quot;Linear Solver : &quot;</span><span class="o">)</span><span class="p">;</span>
+<span class="o">}</span>
+
+solver-&gt;end<span class="o">()</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Alien</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="user/index.html">Alien user documentation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#intro">Intro</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#space">Space</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#matrix">Matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#vector">Vector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#linear-systems-resolution">Linear Systems resolution</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="developer/index.html">Alien developer documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sycl/index.html">Alien SYCL documentation</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="user/ref.html" title="previous chapter">Building with ref semantic</a></li>
+      <li>Next: <a href="developer/index.html" title="next chapter">Alien developer documentation</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, CEA, IFPEN.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/tutorial.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
