@@ -70,6 +70,7 @@ public:
   void registerMatrixFactory(std::map<BackEndId, BackEnd::MatrixFactory>& matrixFactories);
   void registerVectorFactory(std::map<BackEndId, BackEnd::VectorFactory>& vectorFactories);
 
+  void init();
 
   BackEndId name() { return "hypre"; }
 };

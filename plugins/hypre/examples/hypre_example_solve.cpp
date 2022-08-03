@@ -92,6 +92,11 @@ int test()
   //auto solver = Alien::Hypre::LinearSolver();
 
   auto solver = Alien::LinearSolver("../libhypre_wrapper.so");
+  //auto solver2 = Alien::LinearSolver("../libhypre_wrapper.so");
+
+  std::cout << "foufou1" << std::endl;
+  MPI_Barrier(MPI_COMM_WORLD);
+  std::cout << "foufou2" << std::endl;
 
   solver.solve(A, b, x);
 

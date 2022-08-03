@@ -22,6 +22,8 @@
 #include <arccore/base/String.h>
 #include <arccore/base/ArccoreGlobal.h>
 
+extern "C" int MPI_Init(int *argc, char ***argv);
+
 #include <map>
 
 /*---------------------------------------------------------------------------*/
@@ -129,6 +131,8 @@ namespace BackEnd
   public:
     virtual std::unique_ptr<IInternalLinearSolver> solver_factory() = 0;
     virtual std::unique_ptr<IInternalLinearSolver> solver_factory(const Alien::BackEnd::Options& options) = 0;
+
+    virtual void init() = 0;
 
     virtual void registerMatrixConverters(std::map<std::pair<BackEndId, BackEndId>, IMatrixConverter*>& converters) = 0;
     virtual void registerVectorConverters(std::map<std::pair<BackEndId, BackEndId>, IVectorConverter*>& converters) = 0;

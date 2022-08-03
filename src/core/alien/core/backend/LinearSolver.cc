@@ -39,10 +39,34 @@ namespace Alien
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
+#define MANAGE_DL_ERROR(name) \
+    error = dlerror(); \
+    if (error != NULL) { \
+        fprintf(stderr, "%s\n", error); \
+        printf("%s failed\n", name); \
+    }
+
 LinearSolver::LinearSolver(std::string soFile)
 {
   // FIXME: add error checking
-  m_handle = dlopen(soFile.c_str(), RTLD_NOW | RTLD_LOCAL);
+  printf("LM_ID_NEWLM is: %d\n", LM_ID_NEWLM);
+  printf("LM_ID_BASE is: %d\n", LM_ID_BASE);
+  char* error;
+  void* fooHandle = dlmopen(LM_ID_NEWLM, "libc.so.6", RTLD_NOW);
+  if (fooHandle == NULL){
+    MANAGE_DL_ERROR("first dlopen");
+  }
+  Lmid_t givenNs;
+  dlinfo(fooHandle, RTLD_DI_LMID, &givenNs);
+
+  void* mpiHandle = dlmopen(givenNs, "libmpi.so.40", RTLD_NOW);
+  if (fooHandle == NULL){
+    MANAGE_DL_ERROR("mpi dlopen");
+  }
+  m_handle = dlmopen(givenNs, soFile.c_str(), RTLD_NOW);
+  if (m_handle == NULL){
+    MANAGE_DL_ERROR("plugin dlopen");
+  }
   m_plugin_create = (BackEnd::IPlugin*(*)()) dlsym(m_handle, "create");
   m_plugin_destroy = (void (*)(BackEnd::IPlugin*)) dlsym(m_handle, "destroy");
 
@@ -55,6 +79,8 @@ LinearSolver::LinearSolver(std::string soFile)
   m_plugin->registerVectorConverters(MultiVectorImpl::m_vectorConverters);
   m_plugin->registerMatrixFactory(MultiMatrixImpl::m_matrixFactories);
   m_plugin->registerVectorFactory(MultiVectorImpl::m_vectorFactories);
+
+  m_plugin->init();
 }
 
 /*---------------------------------------------------------------------------*/

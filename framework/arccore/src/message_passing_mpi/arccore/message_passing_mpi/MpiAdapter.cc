@@ -954,14 +954,7 @@ directSendPack(const void* send_buffer,Int64 send_buffer_size,
 MpiMessagePassingMng* MpiAdapter::
 commSplit(bool keep)
 {
-  MPI_Comm new_comm;
-
-  MPI_Comm_split(m_communicator, (keep) ? 1 : MPI_UNDEFINED, commRank(), &new_comm);
-  if (keep) {
-    // Failed if new_comm is MPI_COMM_NULL
-    return StandaloneMpiMessagePassingMng::create(new_comm, true);
-  }
-  return nullptr;
+  return StandaloneMpiMessagePassingMng::create(m_communicator, true);
 }
 
 /*---------------------------------------------------------------------------*/

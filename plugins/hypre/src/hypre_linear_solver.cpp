@@ -53,6 +53,12 @@ bool PluginLinearSolver::_solve(const Matrix& A, const Vector& b, Vector& x)
   auto bij_vector = b.internal();
   auto xij_vector = x.internal();
 
+  std::cout << "boubou1" << std::endl;
+  int foo = 0;
+  MPI_Comm_size(MPI_COMM_WORLD, &foo);
+  MPI_Barrier(MPI_COMM_WORLD);
+  std::cout << "boubou2" << std::endl;
+
   // Clear all Hypre error for this session
   HYPRE_ClearAllErrors();
 
@@ -70,6 +76,7 @@ bool PluginLinearSolver::_solve(const Matrix& A, const Vector& b, Vector& x)
   int (*precond_destroy_function)(HYPRE_Solver) = nullptr;
 
   MPI_Comm comm = MPI_COMM_WORLD;
+  printf("Foofoo\n");
   auto* mpi_comm_mng = dynamic_cast<Arccore::MessagePassing::Mpi::MpiMessagePassingMng*>(
   A.distribution().parallelMng());
   if (mpi_comm_mng)
@@ -255,6 +262,7 @@ bool PluginLinearSolver::_solve(const Matrix& A, const Vector& b, Vector& x)
 
   HYPRE_ParCSRMatrix par_a;
   HYPRE_ParVector par_rhs, par_x;
+  printf("Barbar\n");
   checkError(
   "Hypre Matrix GetObject", HYPRE_IJMatrixGetObject(ij_matrix, (void**)&par_a));
   checkError("Hypre RHS Vector GetObject",
@@ -265,6 +273,7 @@ bool PluginLinearSolver::_solve(const Matrix& A, const Vector& b, Vector& x)
   checkError("Hypre " + solver_name + " solver Setup",
              (*solver_setup_function)(solver, par_a, par_rhs, par_x));
   m_status.succeeded = ((*solver_solve_function)(solver, par_a, par_rhs, par_x) == 0);
+  printf("Farfar\n");
 
   if (m_status.succeeded) {
     checkError("Hypre " + solver_name + " solver GetNumIterations",

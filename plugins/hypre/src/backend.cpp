@@ -31,6 +31,18 @@ void Plugin::registerVectorFactory(std::map<BackEndId, BackEnd::VectorFactory>& 
   REGISTER_PLUGIN_VECTOR_FACTORY("hypre", vectorFactories, &vector_factory);
 }
 
+void Plugin::init()
+{
+  int argc = 0;
+  char** argv = nullptr;
+  std::cout << "coucou" << std::endl;
+  MPI_Init(&argc, &argv);
+  MPI_Barrier(MPI_COMM_WORLD);
+  int foo = 0;
+  MPI_Comm_size(MPI_COMM_WORLD, &foo);
+  std::cout << "foufou" << std::endl;
+};
+
 Plugin* create()
 {
   return new Plugin;
