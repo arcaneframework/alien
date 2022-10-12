@@ -82,6 +82,12 @@ RedistributorCommPlan::tgtDist() const
   return m_tgt_dist.view();
 }
 
+Int32
+RedistributorCommPlan::procNum(Int32 proc) const
+{
+  return m_proc_num[proc];
+}
+
 void RedistributorCommPlan::_buildTgtDist()
 {
   Int32 super_comm_size = m_super_pm->commSize();

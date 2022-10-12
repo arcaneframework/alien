@@ -218,7 +218,6 @@ class ALIEN_EXPORT VectorDistribution
    */
   std::shared_ptr<VectorDistribution> clone() const;
 
- private:
   /*!
    * \brief Get the local id of an elements with its global id
    * \param[in] i The global id of the element
@@ -226,6 +225,7 @@ class ALIEN_EXPORT VectorDistribution
    */
   Arccore::Integer globalToLocal(Arccore::Integer i) const;
 
+ private:
   /*!
    * \brief Get the local id of a non local element with its global id
    * \param[in] i The global id of the non local element
