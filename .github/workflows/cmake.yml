@@ -26,7 +26,9 @@ jobs:
     # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
     name: ${{matrix.config.name}}
     runs-on: ubuntu-latest
-    container: ${{matrix.config.container}}
+    container:
+      image: ${{matrix.config.container}}
+      options: --user root  # Avoid to match github UID in container.
     strategy:
       fail-fast: false
       matrix:
