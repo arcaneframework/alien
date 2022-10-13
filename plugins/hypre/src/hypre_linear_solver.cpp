@@ -94,7 +94,9 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
     HYPRE_BoomerAMGSetMaxIter(preconditioner, 1);
     HYPRE_BoomerAMGSetTol(preconditioner, 0.0);
 
-    //HYPRE_BoomerAMGSetPrintLevel(preconditioner, 1); /* print amg solution info */
+    HYPRE_BoomerAMGSetStrongThreshold(preconditioner, 0.5); // Better for 3d ?
+
+    HYPRE_BoomerAMGSetPrintLevel(preconditioner, 1); /* print amg solution info */
 
     //#ifdef ALIEN_HYPRE_DEVICE
     // GPU only support a subset of paramater values.
@@ -102,7 +104,7 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
     HYPRE_BoomerAMGSetRelaxType(preconditioner, 6); /* 3, 4, 6, 7, 18, 11, 12 */
     HYPRE_BoomerAMGSetRelaxOrder(preconditioner, false); /* must be false */
     HYPRE_BoomerAMGSetCoarsenType(preconditioner, 8); /* 8 */
-    HYPRE_BoomerAMGSetInterpType(preconditioner, 6); /* 3, 15, 6, 14, 18 */
+    HYPRE_BoomerAMGSetInterpType(preconditioner, 18); /* 3, 15, 6, 14, 18 */
     HYPRE_BoomerAMGSetAggInterpType(preconditioner, 5); /* 5 or 7 */
     HYPRE_BoomerAMGSetAggNumLevels(preconditioner, 4);
     HYPRE_BoomerAMGSetKeepTranspose(preconditioner, true); /* keep transpose to avoid SpMTV */
