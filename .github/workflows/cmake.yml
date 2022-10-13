@@ -105,7 +105,7 @@ jobs:
           }
     steps:
       # Checkout v2 does not include files listed in .gitattributes
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
 
       # Setting up ccache from github cached files
       - name: Prepare ccache timestamp
@@ -115,7 +115,7 @@ jobs:
         run: echo "::set-output name=timestamp::$(date +'%Y-%m-%d-%H;%M;%S')"
 
       - name: ccache files
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         # Disabled for `act`
         if: ${{ !env.ACT }}
         with:

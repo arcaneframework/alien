@@ -54,7 +54,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: arcaneframework/framework
           path: ${{ env.ARCCON_SOURCE_DIR }}
@@ -90,7 +90,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: arcaneframework/framework
           path: ${{ env.ARCCORE_SOURCE_DIR }}
@@ -107,7 +107,7 @@ jobs:
         shell: bash
         run: echo "::set-output name=date::$(/bin/date -u '+%Y%m%d%H%M%S')"
       - name: Get cache for ccache tool
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{env.CCACHE_DIR}}
           key: ${{ env.CC_KEY_PREFIX }}-arccore-${{ env.CM_BUILD_TYPE }}-${{ steps.get-date.outputs.date }}-${{ github.run_number }}
@@ -152,7 +152,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: arcaneframework/dependencies
           path: ${{ env.DEPENDENCIES_SOURCE_DIR }}
@@ -196,7 +196,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: arcaneframework/framework
           path: ${{ env.AXLSTAR_SOURCE_DIR }}
@@ -247,7 +247,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: ${{ env.ALIEN_SOURCE_DIR }}
       - name: Download arccon install artifact
@@ -269,7 +269,7 @@ jobs:
         shell: bash
         run: echo "::set-output name=date::$(/bin/date -u '+%Y%m%d%H%M%S')"
       - name: Get cache for ccache tool
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{env.CCACHE_DIR}}
           key: ${{ env.CC_KEY_PREFIX }}-alien-${{ env.CM_BUILD_TYPE }}-${{ steps.get-date.outputs.date }}-${{ github.run_number }}
@@ -317,7 +317,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: arcaneframework/alien_legacy_plugins
           path: ${{ env.ALIENLEGACY_SOURCE_DIR }}
@@ -356,7 +356,7 @@ jobs:
         shell: bash
         run: echo "::set-output name=date::$(/bin/date -u '+%Y%m%d%H%M%S')"
       - name: Get cache for ccache tool
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{env.CCACHE_DIR}}
           key: ${{ env.CC_KEY_PREFIX }}-alienlegacy-${{ env.CM_BUILD_TYPE }}-${{ steps.get-date.outputs.date }}-${{ github.run_number }}
@@ -422,7 +422,7 @@ jobs:
   #    fail-fast: false
   #  steps:
   #    - name: Checkout
-  #      uses: actions/checkout@v2
+  #      uses: actions/checkout@v3
   #      with:
   #        path: ${{ env.ALIEN_SOURCE_DIR }}
   #    - name: Download alien build artifact
@@ -464,7 +464,7 @@ jobs:
   #    fail-fast: false
   #  steps:
   #    - name: Checkout
-  #      uses: actions/checkout@v2
+  #      uses: actions/checkout@v3
   #      with:
   #        repository: arcaneframework/alien_legacy_plugins
   #        path: ${{ env.ALIENLEGACY_SOURCE_DIR }}
