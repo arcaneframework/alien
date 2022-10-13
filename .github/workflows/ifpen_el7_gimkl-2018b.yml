@@ -72,7 +72,7 @@ jobs:
         shell: bash
         run: tar cf arccon-install-artifact.tar ${{ env.ARCCON_INSTALL_DIR }}
       - name: Upload install artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: arccon-install-artifact
           path: arccon-install-artifact.tar
@@ -96,7 +96,7 @@ jobs:
           path: ${{ env.ARCCORE_SOURCE_DIR }}
           ref: main
       - name: Download arccon install artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: arccon-install-artifact
       - name: Untar arccon install artifact
@@ -125,7 +125,7 @@ jobs:
         shell: bash
         run: tar cf arccore-build-artifact.tar ${{ env.ARCCORE_BUILD_DIR }}
       - name: Upload build artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: arccore-build-artifact
           path: arccore-build-artifact.tar
@@ -134,7 +134,7 @@ jobs:
         shell: bash
         run: tar cf arccore-install-artifact.tar ${{ env.ARCCORE_INSTALL_DIR }}
       - name: Upload install artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: arccore-install-artifact
           path: arccore-install-artifact.tar
@@ -158,7 +158,7 @@ jobs:
           path: ${{ env.DEPENDENCIES_SOURCE_DIR }}
           ref: main
       - name: Download arccon install artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: arccon-install-artifact
       - name: Untar arccon install artifact
@@ -177,7 +177,7 @@ jobs:
         shell: bash
         run: tar cf dependencies-install-artifact.tar ${{ env.DEPENDENCIES_INSTALL_DIR }}
       - name: Upload install artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: dependencies-install-artifact
           path: dependencies-install-artifact.tar
@@ -202,14 +202,14 @@ jobs:
           path: ${{ env.AXLSTAR_SOURCE_DIR }}
           ref: main
       - name: Download arccon install artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: arccon-install-artifact
       - name: Untar arccon install artifact
         shell: bash
         run: tar xf arccon-install-artifact.tar -C /
       - name: Download dependencies install artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: dependencies-install-artifact
       - name: Untar dependencies install artifact
@@ -228,7 +228,7 @@ jobs:
         shell: bash
         run: tar cf axlstar-install-artifact.tar ${{ env.AXLSTAR_INSTALL_DIR }}
       - name: Upload install artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: axlstar-install-artifact
           path: axlstar-install-artifact.tar
@@ -251,14 +251,14 @@ jobs:
         with:
           path: ${{ env.ALIEN_SOURCE_DIR }}
       - name: Download arccon install artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: arccon-install-artifact
       - name: Untar arccon install artifact
         shell: bash
         run: tar xf arccon-install-artifact.tar -C /
       - name: Download arccore install artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: arccore-install-artifact
       - name: Untar arccore install artifact
@@ -287,7 +287,7 @@ jobs:
         shell: bash
         run: tar cf alien-build-artifact.tar ${{ env.ALIEN_BUILD_DIR }}
       - name: Upload build artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: alien-build-artifact
           path: alien-build-artifact.tar
@@ -296,7 +296,7 @@ jobs:
         shell: bash
         run: tar cf alien-install-artifact.tar ${{ env.ALIEN_INSTALL_DIR }}
       - name: Upload install artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: alien-install-artifact
           path: alien-install-artifact.tar
@@ -324,28 +324,28 @@ jobs:
           ref: main
           submodules: true
       - name: Download arccon install artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: arccon-install-artifact
       - name: Untar arccon install artifact
         shell: bash
         run: tar xf arccon-install-artifact.tar -C /
       - name: Download arccore install artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: arccore-install-artifact
       - name: Untar arccore install artifact
         shell: bash
         run: tar xf arccore-install-artifact.tar -C /
       - name: Download alien install artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: alien-install-artifact
       - name: Untar alien install artifact
         shell: bash
         run: tar xf alien-install-artifact.tar -C /
       - name: Download axlstar install artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: axlstar-install-artifact
       - name: Untar axlstar install artifact
@@ -374,7 +374,7 @@ jobs:
         shell: bash
         run: tar cf alienlegacy-build-artifact.tar ${{ env.ALIENLEGACY_BUILD_DIR }}
       - name: Upload build artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: alienlegacy-build-artifact
           path: alienlegacy-build-artifact.tar
@@ -392,7 +392,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Download arccore build artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: arccore-build-artifact
       - name: Untar arccore build artifact
@@ -402,7 +402,7 @@ jobs:
         shell: bash
         run: ctest --test-dir ${{ env.ARCCORE_BUILD_DIR }} ${{ env.CT_OPTS }}
       - name: Upload test artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: arccore-test-artifact
@@ -426,14 +426,14 @@ jobs:
         with:
           path: ${{ env.ALIEN_SOURCE_DIR }}
       - name: Download alien build artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: alien-build-artifact
       - name: Untar alien build artifact
         shell: bash
         run: tar xf alien-build-artifact.tar -C /
       - name: Download arccore install artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: arccore-install-artifact
       - name: Untar arccore install artifact
@@ -443,7 +443,7 @@ jobs:
         shell: bash
         run: ctest --test-dir ${{ env.ALIEN_BUILD_DIR }} ${{ env.CT_OPTS }}
       - name: Upload test artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: alien-test-artifact
@@ -471,21 +471,21 @@ jobs:
           ref: main
           submodules: true
       - name: Download alienlegacy build artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: alienlegacy-build-artifact
       - name: Untar alienlegacy build artifact
         shell: bash
         run: tar xf alienlegacy-build-artifact.tar -C /
       - name: Download alien install artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: alien-install-artifact
       - name: Untar alien install artifact
         shell: bash
         run: tar xf alien-install-artifact.tar -C /
       - name: Download arccore install artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: arccore-install-artifact
       - name: Untar arccore install artifact
@@ -495,7 +495,7 @@ jobs:
         shell: bash
         run: ctest --test-dir ${{ env.ALIENLEGACY_BUILD_DIR }} ${{ env.CT_OPTS }} -E '^(alien.interface.c.seq.mpi-1|alien.interface.fortran.seq.mpi-1)$'
       - name: Upload test artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: alienlegacy-test-artifact
