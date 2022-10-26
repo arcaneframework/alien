@@ -17,11 +17,8 @@
  */
 
 #include <fstream>
-#include <limits>
 #include <algorithm>
 #include <cctype>
-
-#include <mpi.h>
 
 #include <arccore/base/FatalErrorException.h>
 #include <arccore/message_passing/IMessagePassingMng.h>
@@ -41,6 +38,19 @@ namespace Alien::Move
 
 namespace
 {
+  std::pair<size_t, size_t> partition(size_t full_size, const Arccore::MessagePassing::IMessagePassingMng* pm)
+  {
+    auto my_rank = pm->commRank();
+    auto comm_size = pm->commSize();
+    size_t line_slice = full_size / comm_size;
+    auto start = line_slice * my_rank;
+    auto stop = line_slice * (my_rank + 1);
+    if (my_rank == comm_size - 1) {
+      stop = full_size;
+    }
+    return std::make_pair(start, stop);
+  }
+
   void tolower(std::string& str)
   {
     std::transform(str.begin(), str.end(), str.begin(), ::tolower);
@@ -178,20 +188,8 @@ readFromMatrixMarket(Arccore::MessagePassing::IMessagePassingMng* pm, const std:
   }
   DoKDirectMatrixBuilder builder(createMatrixData(desc.value(), pm));
 
-  size_t nnz_slice = desc.value().n_nnz / pm->commSize();
-
-  auto my_rank = pm->commRank();
-  auto nnz_start = nnz_slice * my_rank;
-  auto nnz_stop = nnz_slice * (my_rank + 1);
-  if (my_rank == pm->commSize() - 1) {
-    nnz_stop = desc.value().n_nnz;
-  }
-
-  std::cerr << "> " << pm->commRank() << " reading from " << nnz_start << " to " << nnz_stop << std::endl;
-  auto start = MPI_Wtime();
+  auto [nnz_start, nnz_stop] = partition(desc.value().n_nnz, pm);
   readValues(stream, builder, desc->symmetric, nnz_start, nnz_stop);
-  auto stop = MPI_Wtime() - start;
-  std::cerr << "File reading took" << stop << std::endl;
   return builder.release();
 }
 
@@ -256,14 +254,7 @@ readFromMatrixMarket(const VectorDistribution& distribution, const std::string& 
     break;
   }
 
-  auto my_rank = distribution.parallelMng()->commRank();
-  auto comm_size = distribution.parallelMng()->commSize();
-  size_t line_slice = rows / comm_size;
-  auto row_start = line_slice * my_rank;
-  auto row_stop = line_slice * (my_rank + 1);
-  if (my_rank == comm_size - 1) {
-    row_stop = rows;
-  }
+  auto [row_start, row_stop] = partition(rows, distribution.parallelMng());
 
   Arccore::Int32 row = 0;
   for (row = 0; row < row_start; ++row) {
