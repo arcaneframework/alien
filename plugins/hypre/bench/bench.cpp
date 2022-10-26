@@ -42,7 +42,7 @@ int test(const Alien::Hypre::OptionTypes::eSolver& solv, const Alien::Hypre::Opt
 
   for (int i = 0; i < NB_RUNS; i++) {
     Alien::Hypre::Options options;
-    options.numIterationsMax(500);
+    options.numIterationsMax(10000);
     options.stopCriteriaValue(1e-8);
     options.preconditioner(prec); // Jacobi, NoPC
     options.solver(solv); //CG, GMRES, BICG, BICGSTAB

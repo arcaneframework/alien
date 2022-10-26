@@ -90,18 +90,26 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
     precond_setup_function = HYPRE_BoomerAMGSetup;
     precond_destroy_function = HYPRE_BoomerAMGDestroy;
 
-#ifdef ALIEN_HYPRE_DEVICE
+    // Important, set these parameters for running BoomerAMG as a preconditioner
+    HYPRE_BoomerAMGSetMaxIter(preconditioner, 1);
+    HYPRE_BoomerAMGSetTol(preconditioner, 0.0);
+
+    HYPRE_BoomerAMGSetStrongThreshold(preconditioner, 0.5); // Better for 3d ?
+
+    // HYPRE_BoomerAMGSetPrintLevel(preconditioner, 1); /* print amg solution info */
+
+    //#ifdef ALIEN_HYPRE_DEVICE
     // GPU only support a subset of paramater values.
     // see https://hypre.readthedocs.io/en/latest/solvers-boomeramg.html#gpu-supported-options
-    HYPRE_BoomerAMGSetRelaxType(preconditioner, 3); /* 3, 4, 6, 7, 18, 11, 12 */
+    HYPRE_BoomerAMGSetRelaxType(preconditioner, 18); /* 3, 4, 6, 7, 18, 11, 12 */
     HYPRE_BoomerAMGSetRelaxOrder(preconditioner, false); /* must be false */
     HYPRE_BoomerAMGSetCoarsenType(preconditioner, 8); /* 8 */
-    // FIXME: understand why 3 and 15 do not work with unit tests on CPUs.
-    HYPRE_BoomerAMGSetInterpType(preconditioner, 14); /* 3, 15, 6, 14, 18 */
-    HYPRE_BoomerAMGSetAggInterpType(preconditioner, 5); /* 5 or 7 */
+    HYPRE_BoomerAMGSetInterpType(preconditioner, 18); /* 3, 15, 6, 14, 18 */
+    HYPRE_BoomerAMGSetAggInterpType(preconditioner, 7); /* 5 or 7 */
+    HYPRE_BoomerAMGSetAggNumLevels(preconditioner, 5);
     HYPRE_BoomerAMGSetKeepTranspose(preconditioner, true); /* keep transpose to avoid SpMTV */
     HYPRE_BoomerAMGSetRAP2(preconditioner, false); /* RAP in two multiplications (default: FALSE) */
-#endif // ALIEN_HYPRE_DEVICE
+    //#endif // ALIEN_HYPRE_DEVICE
     break;
   case OptionTypes::ParaSailsPC:
     precond_name = "parasails";
@@ -271,18 +279,18 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   error = (*solver_solve_function)(solver, par_a, par_rhs, par_x);
   m_status.succeeded = (error == 0);
 
-  if (m_status.succeeded) {
-    checkError("Hypre " + solver_name + " solver GetNumIterations",
-               (*solver_get_num_iterations_function)(solver, &m_status.iteration_count));
-    checkError("Hypre " + solver_name + " solver GetFinalResidual",
-               (*solver_get_final_relative_residual_function)(solver, &m_status.residual));
+  //if (m_status.succeeded) {
+  checkError("Hypre " + solver_name + " solver GetNumIterations",
+             (*solver_get_num_iterations_function)(solver, &m_status.iteration_count));
+  checkError("Hypre " + solver_name + " solver GetFinalResidual",
+             (*solver_get_final_relative_residual_function)(solver, &m_status.residual));
 
-    m_status.succeeded = (m_status.iteration_count < max_it) || (m_status.succeeded == max_it && m_status.residual <= rtol);
-  }
-  else {
-    // Solver is not converged. Clear Hypre errors for subsequent calls.
-    HYPRE_ClearAllErrors();
-  }
+  m_status.succeeded = (m_status.iteration_count < max_it) || (m_status.succeeded == max_it && m_status.residual <= rtol);
+  //  }
+  //  else {
+  //    // Solver is not converged. Clear Hypre errors for subsequent calls.
+  //    HYPRE_ClearAllErrors();
+  //  }
 
   checkError(
   "Hypre " + solver_name + " solver Destroy", (*solver_destroy_function)(solver));
