@@ -28,6 +28,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <vector>
+#include <execution>
 
 #include "DoKReverseIndexer.h"
 
@@ -75,8 +76,8 @@ namespace
   class KeyCompare
   {
    public:
-    typedef typename Map::iterator Iterator;
-    typedef typename Map::key_type Key;
+    using Iterator = typename Map::iterator;
+    using Key = typename Map::key_type;
 
    public:
     bool operator()(const Iterator& a, const Iterator& b)
@@ -99,7 +100,7 @@ DoKLocalMatrixIndexer::sort(Arccore::Array<DoKLocalMatrixIndexer::Renumbering>& 
   }
 
   KeyCompare<HashTable> compare;
-  std::sort(src.begin(), src.end(), compare);
+  std::sort(std::execution::par_unseq, src.begin(), src.end(), compare);
 
   auto* indexer = new DoKReverseIndexer();
   auto size = static_cast<Arccore::Integer>(m_data.size());

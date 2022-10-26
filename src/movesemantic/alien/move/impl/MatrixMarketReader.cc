@@ -191,7 +191,7 @@ readFromMatrixMarket(Arccore::MessagePassing::IMessagePassingMng* pm, const std:
   auto start = MPI_Wtime();
   readValues(stream, builder, desc->symmetric, nnz_start, nnz_stop);
   auto stop = MPI_Wtime() - start;
-  std::cerr << "File reading took" << stop << std::endl;
+  std::cerr << "File reading took " << stop << std::endl;
   return builder.release();
 }
 

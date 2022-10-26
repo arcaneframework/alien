@@ -19,6 +19,7 @@
 #include "DoKDistributor.h"
 
 #include <vector>
+#include <execution>
 
 #include "DoKBackEnd.h"
 #include "DoKMatrixT.h"
@@ -30,7 +31,7 @@ namespace Alien
 {
 
 DoKDistributor::DoKDistributor(const RedistributorCommPlan* commPlan)
-: m_distributor(new DoKDistributorComm(commPlan))
+: m_distributor(std::make_unique<DoKDistributorComm>(commPlan))
 {}
 
 void DoKDistributor::distribute(const DoKMatrix& src, DoKMatrix& dst)
@@ -41,7 +42,7 @@ void DoKDistributor::distribute(const DoKMatrix& src, DoKMatrix& dst)
 void DoKDistributor::distribute(const DoKVector& src, DoKVector& dst)
 {
   std::vector<std::pair<Arccore::Int32, DoKVector::ValueType>> pair_values(src.m_data.begin(), src.m_data.end());
-  std::sort(pair_values.begin(), pair_values.end());
+  std::sort(std::execution::par_unseq, pair_values.begin(), pair_values.end());
 
   Arccore::UniqueArray<Int32> snd_keys(src.m_data.size());
   Arccore::UniqueArray<DoKVector::ValueType> snd_values(src.m_data.size());
