@@ -183,7 +183,9 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
     solver_name = "cg";
     checkError("Hypre CG solver", HYPRE_ParCSRPCGCreate(comm, &solver));
     checkError(
-    "Hypre BiCGStab solver SetMaxIter", HYPRE_ParCSRPCGSetMaxIter(solver, max_it));
+    "Hypre CG solver SetMaxIter", HYPRE_ParCSRPCGSetMaxIter(solver, max_it));
+    checkError("Hypre CG explicit residual test", HYPRE_PCGSetRecomputeResidual(solver, true));
+    checkError("Hypre CG use two norm stopping criteria", HYPRE_PCGSetTwoNorm(solver, true));
     solver_set_print_level_function = HYPRE_ParCSRPCGSetPrintLevel;
     solver_set_tol_function = HYPRE_ParCSRPCGSetTol;
     solver_set_precond_function = HYPRE_ParCSRPCGSetPrecond;
