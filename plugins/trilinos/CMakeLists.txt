@@ -4,6 +4,29 @@ option(ALIEN_TRILINOS_UNIT_TESTS "Enable Trilinos wrapper tests" ${ALIEN_UNIT_TE
 find_package(MPI REQUIRED)
 
 # ----------------------------------------------------------------------------
+
+add_library(trilinos_wrapper
+        include/alien/trilinos/backend.h
+        include/alien/trilinos/options.h
+        include/alien/trilinos/trilinos_config.h
+        src/trilinos_vector.cpp
+        src/trilinos_vector.h
+        src/trilinos_matrix.cpp
+        src/trilinos_matrix.h
+        src/trilinos_linear_algebra.cpp
+        src/trilinos_linear_solver.cpp
+        src/trilinos_linear_solver.h
+        src/converters/trilinos_to_simplecsr_vector.cpp
+        src/converters/simplecsr_to_trilinos_vector.cpp
+        src/converters/simplecsr_to_trilinos_matrix.cpp
+        src/trilinos_config.cpp
+        )
+
+target_link_libraries(trilinos_wrapper PUBLIC
+        Alien::alien_core
+        )
+
+# ----------------------------------------------------------------------------
 find_package(Trilinos 13 REQUIRED COMPONENTS Teuchos Kokkos KokkosKernels Belos Tpetra Ifpack2 MueLu)
 
 if (NOT TARGET Trilinos::all_selected_libs)
@@ -31,31 +54,26 @@ if (NOT TARGET Trilinos::all_selected_libs)
     target_compile_options(Trilinos::all_selected_libs INTERFACE ${Trilinos_CXX_COMPILER_FLAGS})
     target_include_directories(Trilinos::all_selected_libs INTERFACE ${Trilinos_INCLUDE_DIRS} ${TRILINOS_TPL_INCLUDE_DIRS})
     target_link_libraries(Trilinos::all_selected_libs INTERFACE ${Trilinos_LIBRARIES} ${Trilinos_TPL_LIBRARIES})
+
+    if (NOT TARGET Kokkos::kokkos)
+        add_library(Kokkos::kokkos INTERFACE IMPORTED)
+    else ()
+        # Debian and Ubuntu packaging is bugged, INTERFACE_INCLUDE_DIRECTORIES referencing a /usr/lib/include directory
+        get_target_property(KOKKOS_INC_DIRS Kokkos::kokkos INTERFACE_INCLUDE_DIRECTORIES)
+        set(NEW_KOKKOS_INC_DIRS)
+        foreach (INC_DIR ${KOKKOS_INC_DIRS})
+            MESSAGE(STATUS "INC_DIR = ${INC_DIR}")
+            if (EXISTS ${INC_DIR})
+                LIST(APPEND NEW_KOKKOS_INC_DIRS ${INC_DIR})
+            endif ()
+        endforeach ()
+        set_target_properties(Kokkos::kokkos PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${NEW_KOKKOS_INC_DIRS}")
+    endif ()
+else ()
+    kokkos_compilation(TARGET trilinos_wrapper)
 endif ()
 
 # ----------------------------------------------------------------------------
-# ----------------------------------------------------------------------------
-
-add_library(trilinos_wrapper
-        include/alien/trilinos/backend.h
-        include/alien/trilinos/options.h
-        include/alien/trilinos/trilinos_config.h
-        src/trilinos_vector.cpp
-        src/trilinos_vector.h
-        src/trilinos_matrix.cpp
-        src/trilinos_matrix.h
-        src/trilinos_linear_algebra.cpp
-        src/trilinos_linear_solver.cpp
-        src/trilinos_linear_solver.h
-        src/converters/trilinos_to_simplecsr_vector.cpp
-        src/converters/simplecsr_to_trilinos_vector.cpp
-        src/converters/simplecsr_to_trilinos_matrix.cpp
-        src/trilinos_config.cpp
-        )
-
-target_link_libraries(trilinos_wrapper PUBLIC
-        Alien::alien_core
-        )
 
 target_link_libraries(trilinos_wrapper PRIVATE
         MPI::MPI_CXX
@@ -63,7 +81,7 @@ target_link_libraries(trilinos_wrapper PRIVATE
         Arccore::arccore_collections
         Arccore::arccore_base
         Arccore::arccore_message_passing_mpi
-        Trilinos::all_selected_libs
+        Trilinos::all_selected_libs Kokkos::kokkos
         )
 
 
