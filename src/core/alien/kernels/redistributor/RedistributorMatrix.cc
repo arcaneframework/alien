@@ -62,6 +62,11 @@ void RedistributorMatrix::setSuperPM(IMessagePassingMng* pm)
   m_super_pm = pm;
 }
 
+void RedistributorMatrix::useCSRRedistributor()
+{
+  m_use_dok = false;
+}
+
 std::shared_ptr<MultiMatrixImpl>
 RedistributorMatrix::updateTargetPM(const RedistributorCommPlan* commPlan)
 {
@@ -79,7 +84,8 @@ RedistributorMatrix::updateTargetPM(const RedistributorCommPlan* commPlan)
     m_distributor.reset(new DoKDistributor(commPlan));
   else {
     const VectorDistribution& row_src_dist = distribution().rowDistribution();
-    m_simple_csr_distibutor.reset(new SimpleCSRDistributor(commPlan, row_src_dist));
+    const auto& mat_src = m_multi_impl->get<BackEnd::tag::simplecsr>();
+    m_simple_csr_distibutor = std::make_unique<SimpleCSRDistributor>(commPlan, row_src_dist,&mat_src.getProfile());
   }
   return redistribute();
 }

@@ -43,6 +43,7 @@ class ALIEN_EXPORT RedistributorMatrix : public IMatrixImpl
   //! Demande la lib�ration des donn�es
   void clear() override;
 
+  void useCSRRedistributor();
   std::shared_ptr<MultiMatrixImpl> updateTargetPM(const RedistributorCommPlan* commPlan);
   void setSuperPM(IMessagePassingMng* pm);
 

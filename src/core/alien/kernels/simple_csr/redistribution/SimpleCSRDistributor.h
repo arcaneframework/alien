@@ -32,7 +32,9 @@ namespace Alien
 class ALIEN_EXPORT SimpleCSRDistributor
 {
  public:
-  SimpleCSRDistributor(const RedistributorCommPlan* commPlan,const VectorDistribution& source_distribution);
+  SimpleCSRDistributor(const RedistributorCommPlan* commPlan,const VectorDistribution& source_distribution,
+                       const Alien::SimpleCSRInternal::CSRStructInfo* src_profile);
+
   virtual ~SimpleCSRDistributor() = default;
 
   template<typename NumT>
@@ -48,7 +50,12 @@ class ALIEN_EXPORT SimpleCSRDistributor
 
  private:
    template<typename T>
+   T _owner(const std::vector<T>& offset,T global_row_id);
+   template<typename T>
    void _distribute(const int bb,const T* src,T* dst);
+   template<typename T>
+   void _resizeBuffers(const int bb);
+   void _finishExchange();
 
   struct CommInfo
   {
