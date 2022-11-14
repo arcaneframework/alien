@@ -136,7 +136,7 @@ m_src_profile(src_profile)
 
   for(auto& [send_id,comm_info] : m_send_comm_info)
   {
-    Arccore::MessagePassing::PointToPointMessageInfo message_info(MessageRank(send_id),MessageRank(me),
+    Arccore::MessagePassing::PointToPointMessageInfo message_info(MessageRank(me),MessageRank(send_id),
                                                                   Arccore::MessagePassing::NonBlocking);
     comm_info.m_message_info = message_info;
   }
@@ -172,7 +172,8 @@ m_src_profile(src_profile)
 
   // create destination profile
   if(dst_me >= 0) {
-    m_dst_profile = std::make_shared<Alien::SimpleCSRInternal::CSRStructInfo>(ext_dst_n_rows + m_src2dst_row_list.size(), dst_n_elems);
+    m_dst_profile = std::make_shared<Alien::SimpleCSRInternal::CSRStructInfo>();
+    m_dst_profile->init(ext_dst_n_rows + m_src2dst_row_list.size(),dst_n_elems);
   }
 
   // build destination kcol
@@ -305,12 +306,13 @@ void SimpleCSRDistributor::distribute(const SimpleCSRMatrix<NumT>& src, SimpleCS
   const auto me = m_comm_plan->superParallelMng()->commRank();
   const auto dst_me = m_comm_plan->procNum(me);
 
-  // may be wee need to allocate dst
-
   if(dst_me >= 0) {
     // I am in the target parallel manager
     // fill dst profile with a copy of m_dst_profile
-    auto profile = dst.internal().getCSRProfile();
+    auto& profile = dst.internal().getCSRProfile();
+    profile.init(src.getCSRProfile().getNRows(),src.getCSRProfile().getNElems());
+    dst.allocate();
+
     for (int i = 0; i < profile.getNRows() + 1; ++i) {
       profile.kcol()[i] = m_src_profile->kcol()[i];
     }
@@ -322,9 +324,11 @@ void SimpleCSRDistributor::distribute(const SimpleCSRMatrix<NumT>& src, SimpleCS
   if(src.block()) {
     _distribute(src.block()->sizeX()*src.block()->sizeY(), src.data(), dst.data());
   }
-  else
-  {
+  else if(src.vblock()) {
      throw Arccore::NotImplementedException(Arccore::TraceInfo(__FILE__,__PRETTY_FUNCTION__,__LINE__));
+  }
+  else {
+    _distribute(1, src.data(), dst.data());
   }
 }
 
