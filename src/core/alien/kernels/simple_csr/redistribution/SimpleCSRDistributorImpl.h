@@ -40,7 +40,7 @@ m_src_profile(src_profile)
 
   if(dst_me == 0)
   {
-    // TODO: broadcast target_offset form more than on proc
+    // TODO: broadcast target_offset from more than on proc
 
     const auto& target_distribution = m_comm_plan->distribution();
     const auto target_np = m_comm_plan->distribution().parallelMng()->commSize();
@@ -310,14 +310,14 @@ void SimpleCSRDistributor::distribute(const SimpleCSRMatrix<NumT>& src, SimpleCS
     // I am in the target parallel manager
     // fill dst profile with a copy of m_dst_profile
     auto& profile = dst.internal().getCSRProfile();
-    profile.init(src.getCSRProfile().getNRows(),src.getCSRProfile().getNElems());
+    profile.init(m_dst_profile->getNRows(),m_dst_profile->getNElems());
     dst.allocate();
 
     for (int i = 0; i < profile.getNRows() + 1; ++i) {
-      profile.kcol()[i] = m_src_profile->kcol()[i];
+      profile.kcol()[i] = m_dst_profile->kcol()[i];
     }
     for (int k = 0; k < profile.getNElems(); ++k) {
-      profile.cols()[k] = m_src_profile->cols()[k];
+      profile.cols()[k] = m_dst_profile->cols()[k];
     }
   }
 
@@ -330,6 +330,22 @@ void SimpleCSRDistributor::distribute(const SimpleCSRMatrix<NumT>& src, SimpleCS
   else {
     _distribute(1, src.data(), dst.data());
   }
+
+#if 0
+  if(dst_me == 0)
+  {
+    const auto& profile = dst.internal().getCSRProfile();
+    for (int i = 0; i < profile.getNRows(); ++i)
+    {
+      std::cout << i ;
+      for (int k = profile.kcol()[i]; k < profile.kcol()[i+1]; ++k)
+      {
+        std::cout << " [" << profile.cols()[k] << " " << dst.data()[k] << "]";
+      }
+      std::cout << std::endl;
+    }
+  }
+#endif
 }
 
 template <typename NumT>
