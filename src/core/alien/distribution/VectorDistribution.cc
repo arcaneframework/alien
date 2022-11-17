@@ -600,6 +600,15 @@ VectorDistribution::offset(Integer p) const
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
+ConstArrayView<Integer>
+VectorDistribution::offsets() const
+{
+  return m_internal->m_offsets.constView();
+}
+
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+
 std::shared_ptr<VectorDistribution>
 VectorDistribution::clone() const
 {

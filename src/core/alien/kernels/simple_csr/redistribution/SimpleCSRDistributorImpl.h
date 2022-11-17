@@ -31,62 +31,31 @@ m_comm_plan(commPlan),
 m_src_profile(src_profile)
 {
   const auto me = m_comm_plan->superParallelMng()->commRank();
-  const auto dst_me = m_comm_plan->procNum(me);
+  const auto dst_me = _dstMe(me);
 
-  // send target distribution to
-  // all processors that are not in source comm
-  std::vector<int> target_offset;
-  const auto src_comm_size = m_comm_plan->superParallelMng()->commSize();
 
-  if(dst_me == 0)
+  // build target_offset from comm_plan tgtdist
+  const auto tgt_dist = m_comm_plan->tgtDist();
+  int n_offset = 0;
+  for(int i=1;i<tgt_dist.size();++i)
   {
-    // TODO: broadcast target_offset from more than on proc
-
-    const auto& target_distribution = m_comm_plan->distribution();
-    const auto target_np = m_comm_plan->distribution().parallelMng()->commSize();
-    target_offset.resize(target_np+1);
-    for(int i=0;i<target_np+1;++i)
-    {
-      target_offset[i] = target_distribution.offset(i);
-    }
-
-    auto size = target_offset.size();
-
-    for(int i=0;i<src_comm_size;++i)
-    {
-      if(m_comm_plan->procNum(i) < 0)
-      {
-
-        // proc i in superParallelMng is not in target so it must have offsets
-        Arccore::MessagePassing::PointToPointMessageInfo
-          message_info(MessageRank(me),MessageRank(i),Arccore::MessagePassing::MessageTag(444),
-                       Arccore::MessagePassing::Blocking);
-
-        Arccore::MessagePassing::mpSend(m_comm_plan->superParallelMng(),
-                                        Arccore::Span<size_t>(&size,1),
-                                        message_info);
-        Arccore::MessagePassing::mpSend(m_comm_plan->superParallelMng(),
-                                        Arccore::Span<int>(target_offset.data(),target_offset.size()),
-                                        message_info);
-      }
-    }
+    if(tgt_dist[i]!=tgt_dist[i-1])
+      n_offset++;
   }
-  else if(dst_me < 0)
+  if(dst_me>=0)
   {
-    // I'am not in target distribution so get target_offset
-    Arccore::MessagePassing::PointToPointMessageInfo
-      message_info(MessageRank(me),MessageRank(),Arccore::MessagePassing::MessageTag(444),
-                   Arccore::MessagePassing::Blocking);
+    assert(n_offset==m_comm_plan->tgtParallelMng()->commSize());
+  }
+  std::vector<int> target_offset(n_offset+1);
 
-    size_t size = 0;
-    Arccore::MessagePassing::mpReceive(m_comm_plan->superParallelMng(),
-                                       Arccore::Span<size_t>(&size,1),
-                                       message_info);
-    target_offset.resize(size);
-    Arccore::MessagePassing::mpReceive(m_comm_plan->superParallelMng(),
-                                       Arccore::Span<int>(target_offset.data(),target_offset.size()),
-                                       message_info);
-
+  target_offset[0] = 0;
+  int tgt_i = 1;
+  for(int i=1;i<tgt_dist.size();++i)
+  {
+    if(tgt_dist[i]!=tgt_dist[i-1]) {
+      target_offset[tgt_i] = tgt_dist[i];
+      tgt_i++;
+    }
   }
 
   typeof(m_src_profile->getNElems()) dst_n_elems = 0;
@@ -106,7 +75,7 @@ m_src_profile(src_profile)
     }
     else
     {
-      auto& comm_info = m_send_comm_info[target];
+      auto& comm_info = m_send_comm_info[m_comm_plan->procNum(target)];
       comm_info.m_row_list.push_back(src_local_row);
       comm_info.m_n_item += m_src_profile->getRowSize(src_local_row);
     }
@@ -134,16 +103,16 @@ m_src_profile(src_profile)
     }
   }
 
-  for(auto& [send_id,comm_info] : m_send_comm_info)
+  for(auto& [send_to_id,comm_info] : m_send_comm_info)
   {
-    Arccore::MessagePassing::PointToPointMessageInfo message_info(MessageRank(me),MessageRank(send_id),
+    Arccore::MessagePassing::PointToPointMessageInfo message_info(MessageRank(me),MessageRank(send_to_id),
                                                                   Arccore::MessagePassing::NonBlocking);
     comm_info.m_message_info = message_info;
   }
 
-  for(auto& [recv_id,comm_info] : m_recv_comm_info)
+  for(auto& [recv_from_id,comm_info] : m_recv_comm_info)
   {
-    Arccore::MessagePassing::PointToPointMessageInfo message_info(MessageRank(me),MessageRank(recv_id),
+    Arccore::MessagePassing::PointToPointMessageInfo message_info(MessageRank(me),MessageRank(recv_from_id),
                                                                   Arccore::MessagePassing::NonBlocking);
 
     comm_info.m_message_info = message_info;
@@ -152,17 +121,17 @@ m_src_profile(src_profile)
   auto *pm = m_comm_plan->superParallelMng();
 
   // perform an exchange of sizes
-  for(auto& [recv_id,comm_info] : m_recv_comm_info)
+  for(auto& [recv_from_id,comm_info] : m_recv_comm_info)
   {
     comm_info.m_request = Arccore::MessagePassing::mpReceive(pm,Arccore::Span<size_t>(&comm_info.m_n_item,1),comm_info.m_message_info);
   }
 
-  for(auto& [send_id,comm_info] : m_send_comm_info)
+  for(auto& [send_to_id,comm_info] : m_send_comm_info)
   {
     comm_info.m_request = Arccore::MessagePassing::mpSend(pm,Arccore::Span<size_t>(&comm_info.m_n_item,1),comm_info.m_message_info);
   }
 
-  for(const auto& [recv_id,comm_info] : m_recv_comm_info)
+  for(const auto& [recv_from_id,comm_info] : m_recv_comm_info)
   {
      Arccore::MessagePassing::mpWait(pm,comm_info.m_request);
      dst_n_elems += comm_info.m_n_item;
@@ -304,7 +273,7 @@ template <typename NumT>
 void SimpleCSRDistributor::distribute(const SimpleCSRMatrix<NumT>& src, SimpleCSRMatrix<NumT>& dst)
 {
   const auto me = m_comm_plan->superParallelMng()->commRank();
-  const auto dst_me = m_comm_plan->procNum(me);
+  const auto dst_me = _dstMe(me);
 
   if(dst_me >= 0) {
     // I am in the target parallel manager
@@ -329,6 +298,15 @@ void SimpleCSRDistributor::distribute(const SimpleCSRMatrix<NumT>& src, SimpleCS
   }
   else {
     _distribute(1, src.data(), dst.data());
+  }
+
+  if(dst_me >= 0) {
+    if(m_comm_plan->tgtParallelMng()->commSize() == 1) {
+      dst.sequentialStart();
+    }
+    else {
+      dst.parallelStart(dst.distribution().rowDistribution().offsets(),m_comm_plan->tgtParallelMng().get(),true);
+    }
   }
 
 #if 0
@@ -372,7 +350,7 @@ void SimpleCSRDistributor::_finishExchange()
 {
   auto* pm = m_comm_plan->superParallelMng();
   // finish properly
-  for(auto const& [send_id,comm_info] : m_send_comm_info)
+  for(auto const& [send_to_id,comm_info] : m_send_comm_info)
   {
     Arccore::MessagePassing::mpWait(pm,comm_info.m_request);
   }
@@ -399,6 +377,15 @@ T SimpleCSRDistributor::_owner(const std::vector<T>& offset, T global_id)
   }
 
   return min;
+}
+int SimpleCSRDistributor::_dstMe(int) const
+{
+  if(m_comm_plan->tgtParallelMng())
+  {
+    return m_comm_plan->tgtParallelMng()->commRank();
+  }
+
+  return -1;
 }
 
 } // namespace Alien

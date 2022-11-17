@@ -32,7 +32,7 @@ RedistributorCommPlan::RedistributorCommPlan(
 int globalSize, IMessagePassingMng* super_pm, IMessagePassingMng* target_pm)
 : m_super_pm(super_pm)
 , m_tgt_pm(target_pm)
-, m_proc_num(super_pm->commSize() + 1, -1)
+, m_proc_num(super_pm->commSize() + 1, -1) // Why + 1 ?
 , m_tgt_dist(super_pm->commSize() + 1, -1)
 {
   m_tgt_distribution.reset(new VectorDistribution(globalSize, m_tgt_pm));

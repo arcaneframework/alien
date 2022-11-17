@@ -56,6 +56,7 @@ class ALIEN_EXPORT SimpleCSRDistributor
    template<typename T>
    void _resizeBuffers(const int bb);
    void _finishExchange();
+   int _dstMe(int) const;
 
   struct CommInfo
   {
