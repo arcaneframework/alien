@@ -41,7 +41,9 @@ class MultiVectorImpl;
 class ALIEN_EXPORT Redistributor
 {
  public:
-  Redistributor(int globalSize, IMessagePassingMng* super, IMessagePassingMng* target);
+  using Method = enum {dok,csr};
+
+  Redistributor(int globalSize, IMessagePassingMng* super, IMessagePassingMng* target, Method method = dok);
   virtual ~Redistributor() = default;
 
   /**
@@ -70,6 +72,7 @@ class ALIEN_EXPORT Redistributor
  private:
   IMessagePassingMng* m_super_pm;
   std::unique_ptr<RedistributorCommPlan> m_distributor;
+  Method m_method = dok;
 };
 
 } // namespace Alien
