@@ -18,7 +18,6 @@
 
 #pragma once
 
-
 #include <alien/utils/Precomp.h>
 #include <alien/distribution/MatrixDistribution.h>
 #include <alien/kernels/simple_csr/SimpleCSRMatrix.h>
@@ -32,31 +31,31 @@ namespace Alien
 class ALIEN_EXPORT SimpleCSRDistributor
 {
  public:
-  SimpleCSRDistributor(const RedistributorCommPlan* commPlan,const VectorDistribution& source_distribution,
+  SimpleCSRDistributor(const RedistributorCommPlan* commPlan, const VectorDistribution& source_distribution,
                        const Alien::SimpleCSRInternal::CSRStructInfo* src_profile);
 
   virtual ~SimpleCSRDistributor() = default;
 
-  template<typename NumT>
+  template <typename NumT>
   void distribute(const SimpleCSRMatrix<NumT>& src, SimpleCSRMatrix<NumT>& dst);
 
-  template<typename NumT>
+  template <typename NumT>
   void distribute(const SimpleCSRVector<NumT>& src, SimpleCSRVector<NumT>& dst);
 
-  [[nodiscard]] std::shared_ptr<const Alien::SimpleCSRInternal::CSRStructInfo>  getDstProfile() const
+  [[nodiscard]] std::shared_ptr<const Alien::SimpleCSRInternal::CSRStructInfo> getDstProfile() const
   {
     return m_dst_profile;
   }
 
  private:
-   template<typename T>
-   T _owner(const std::vector<T>& offset,T global_row_id);
-   template<typename T>
-   void _distribute(const int bb,const T* src,T* dst);
-   template<typename T>
-   void _resizeBuffers(const int bb);
-   void _finishExchange();
-   int _dstMe(int) const;
+  template <typename T>
+  T _owner(const std::vector<T>& offset, T global_row_id);
+  template <typename T>
+  void _distribute(const int bb, const T* src, T* dst);
+  template <typename T>
+  void _resizeBuffers(const int bb);
+  void _finishExchange();
+  int _dstMe(int) const;
 
   struct CommInfo
   {
@@ -70,15 +69,15 @@ class ALIEN_EXPORT SimpleCSRDistributor
 
   const RedistributorCommPlan* m_comm_plan = nullptr;
 
-  const Alien::SimpleCSRInternal::CSRStructInfo *m_src_profile = nullptr;
+  const Alien::SimpleCSRInternal::CSRStructInfo* m_src_profile = nullptr;
   std::shared_ptr<Alien::SimpleCSRInternal::CSRStructInfo> m_dst_profile;
 
   // map<processor id,<num item,row list>>
-  std::map<int,CommInfo> m_send_comm_info;
-  std::map<int,CommInfo> m_recv_comm_info;
+  std::map<int, CommInfo> m_send_comm_info;
+  std::map<int, CommInfo> m_recv_comm_info;
 
   // list of rows that can directly transferred from source matrix to destination matrix
-  std::vector<std::pair<int,int>> m_src2dst_row_list;
+  std::vector<std::pair<int, int>> m_src2dst_row_list;
 };
 
 } // namespace Alien

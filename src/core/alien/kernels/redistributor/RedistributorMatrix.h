@@ -32,7 +32,7 @@ class RedistributorCommPlan;
 class ALIEN_EXPORT RedistributorMatrix : public IMatrixImpl
 {
  public:
-  explicit RedistributorMatrix(const MultiMatrixImpl* src_impl,bool use_dok=true);
+  explicit RedistributorMatrix(const MultiMatrixImpl* src_impl, bool use_dok = true);
   ~RedistributorMatrix() = default;
 
   RedistributorMatrix(const RedistributorMatrix& src) = delete;

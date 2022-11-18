@@ -50,7 +50,7 @@ class ALIEN_EXPORT RedistributorCommPlan
   std::unique_ptr<VectorDistribution> m_tgt_distribution; //! Distribution in the target pm
   UniqueArray<Int32> m_proc_num; //! Array for converting ranks from super to dst
   UniqueArray<Int32> m_tgt_dist; //! This array will contain the target distribution, relative to the
-                                 //! super communication manager.
+  //! super communication manager.
 };
 
 } // namespace Alien

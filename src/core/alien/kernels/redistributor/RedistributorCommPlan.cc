@@ -82,8 +82,7 @@ RedistributorCommPlan::tgtDist() const
   return m_tgt_dist.view();
 }
 
-Int32
-RedistributorCommPlan::procNum(Int32 proc) const
+Int32 RedistributorCommPlan::procNum(Int32 proc) const
 {
   return m_proc_num[proc];
 }

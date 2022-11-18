@@ -74,7 +74,7 @@ TEST(TestRedistributor, NoDokRedistributorMatrix)
   std::unique_ptr<Alien::MultiMatrixImpl> multimat(
   new Alien::MultiMatrixImpl(row_space.clone(), col_space.clone(), mdist.clone()));
 
-  Alien::RedistributorMatrix mat(multimat.get(),false);
+  Alien::RedistributorMatrix mat(multimat.get(), false);
   // mat.updateTargetPM(Environment::parallelMng());
 }
 

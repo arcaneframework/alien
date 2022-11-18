@@ -205,7 +205,7 @@ class ALIEN_EXPORT VectorDistribution
    */
   Arccore::Integer offset(Arccore::Integer p) const;
 
-   /*!
+  /*!
    * \brief Get all the offsets
    * \returns Offsets array
    */

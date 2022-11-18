@@ -41,7 +41,7 @@ namespace Alien
 using namespace Arccore;
 using namespace Arccore::MessagePassing;
 
-RedistributorMatrix::RedistributorMatrix(const MultiMatrixImpl* src_impl,bool use_dok)
+RedistributorMatrix::RedistributorMatrix(const MultiMatrixImpl* src_impl, bool use_dok)
 : IMatrixImpl(src_impl, AlgebraTraits<BackEnd::tag::redistributor>::name())
 , m_super_pm(nullptr)
 , m_tgt_impl(nullptr)
@@ -80,12 +80,12 @@ RedistributorMatrix::updateTargetPM(const RedistributorCommPlan* commPlan)
   new MultiMatrixImpl(rowSpace().clone(), colSpace().clone(), m_tgt_dist));
 
   // Now, we have to exchange data, using DoK representation.
-  if(m_use_dok)
+  if (m_use_dok)
     m_distributor.reset(new DoKDistributor(commPlan));
   else {
     const VectorDistribution& row_src_dist = distribution().rowDistribution();
     const auto& mat_src = m_multi_impl->get<BackEnd::tag::simplecsr>();
-    m_simple_csr_distibutor = std::make_unique<SimpleCSRDistributor>(commPlan, row_src_dist,&mat_src.getProfile());
+    m_simple_csr_distibutor = std::make_unique<SimpleCSRDistributor>(commPlan, row_src_dist, &mat_src.getProfile());
   }
   return redistribute();
 }
@@ -93,7 +93,7 @@ RedistributorMatrix::updateTargetPM(const RedistributorCommPlan* commPlan)
 std::shared_ptr<MultiMatrixImpl>
 RedistributorMatrix::redistribute()
 {
-  if(m_use_dok) {
+  if (m_use_dok) {
     auto& mat_src = m_multi_impl->get<BackEnd::tag::DoK>();
     auto& mat_tgt = m_tgt_impl->get<BackEnd::tag::DoK>(true);
     m_distributor->distribute(mat_src, mat_tgt);

@@ -41,7 +41,8 @@ class MultiVectorImpl;
 class ALIEN_EXPORT Redistributor
 {
  public:
-  using Method = enum {dok,csr};
+  using Method = enum { dok,
+                        csr };
 
   Redistributor(int globalSize, IMessagePassingMng* super, IMessagePassingMng* target, Method method = dok);
   virtual ~Redistributor() = default;
