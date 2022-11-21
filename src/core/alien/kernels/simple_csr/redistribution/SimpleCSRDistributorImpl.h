@@ -159,6 +159,7 @@ SimpleCSRDistributor::SimpleCSRDistributor(const RedistributorCommPlan* commPlan
     row_size[dst_row] = m_src_profile->getRowSize(src_row);
   }
   // wait for recv messages
+  // mpWaitSome ?
   for (auto const& [recv_id, comm_info] : m_recv_comm_info) {
     Arccore::MessagePassing::mpWait(pm, comm_info.m_request);
 
@@ -225,6 +226,7 @@ void SimpleCSRDistributor::_distribute(const int bb, const T* src, T* dst)
   }
 
   // wait for recv messages
+  // Use mpWaitAny or mpWaitSome
   for (auto const& [recv_id, comm_info] : m_recv_comm_info) {
     Arccore::MessagePassing::mpWait(pm, comm_info.m_request);
 
@@ -307,6 +309,7 @@ void SimpleCSRDistributor::distribute(const SimpleCSRVector<NumT>& src, SimpleCS
 template <typename T>
 void SimpleCSRDistributor::_resizeBuffers(const int bb)
 {
+  // comm_info should be templated by the type to avoid cast and explicit size computations
   for (auto& [send_id, comm_info] : m_send_comm_info) {
     comm_info.m_buffer.resize((comm_info.m_n_item * sizeof(T) * bb + sizeof(uint64_t) - 1) / sizeof(uint64_t));
   }
@@ -320,6 +323,8 @@ void SimpleCSRDistributor::_finishExchange()
 {
   auto* pm = m_comm_plan->superParallelMng();
   // finish properly
+
+  // CC: should be a mpWaitAll and not a loop
   for (auto const& [send_to_id, comm_info] : m_send_comm_info) {
     Arccore::MessagePassing::mpWait(pm, comm_info.m_request);
   }
