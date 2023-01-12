@@ -56,11 +56,11 @@ class SimpleLinearProblemFixtureMove : public ::testing::Test
       builder.allocate(); // Allocation de l'espace mémoire réservé
 
       for (int irow = offset; irow < offset + lsize; ++irow) {
-        builder(irow, irow) = 2.;
+        builder.contribute(irow, irow, 2.);
         if (irow - 1 >= 0)
-          builder(irow, irow - 1) = -1.;
+          builder.contribute(irow, irow - 1, -1.);
         if (irow + 1 < gsize)
-          builder(irow, irow + 1) = -1.;
+          builder.contribute(irow, irow + 1, -1.);
       }
 
       m_matrix = builder.release();
