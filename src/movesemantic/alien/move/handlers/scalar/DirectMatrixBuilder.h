@@ -68,12 +68,18 @@ class DirectMatrixBuilder
     m_builder.allocate();
   }
 
-  MatrixElement operator()(const Integer iIndex, const Integer jIndex)
+  [[deprecated("Use contribute() instead.")]] MatrixElement operator()(const Integer iIndex, const Integer jIndex)
   {
     return MatrixElement(iIndex, jIndex, *this);
   }
 
-  void addData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value)
+  std::optional<Arccore::Real> contribute(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value)
+  {
+    m_builder.addData(iIndex, jIndex, value);
+    return { value };
+  }
+
+  [[deprecated("Use contribute() instead.")]] void addData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value)
   {
     m_builder.addData(iIndex, jIndex, value);
   }
