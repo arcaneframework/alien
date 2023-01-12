@@ -37,14 +37,14 @@ using namespace Arccore;
 /*---------------------------------------------------------------------------*/
 
 MatrixData::MatrixData()
-: m_impl(new MultiMatrixImpl(std::make_shared<Space>(0), std::make_shared<Space>(0),
-                             std::make_shared<MatrixDistribution>(MatrixDistribution())))
+: m_impl(std::make_shared<MultiMatrixImpl>(std::make_shared<Space>(0), std::make_shared<Space>(0),
+                                           std::make_shared<MatrixDistribution>(MatrixDistribution())))
 {}
 
 /*---------------------------------------------------------------------------*/
 
 MatrixData::MatrixData(const Space& space, const MatrixDistribution& dist)
-: m_impl(new MultiMatrixImpl(
+: m_impl(std::make_shared<MultiMatrixImpl>(
   std::make_shared<Space>(space), std::make_shared<Space>(space), dist.clone()))
 {}
 
@@ -52,29 +52,29 @@ MatrixData::MatrixData(const Space& space, const MatrixDistribution& dist)
 
 MatrixData::MatrixData(
 const Space& row_space, const Space& col_space, const MatrixDistribution& dist)
-: m_impl(new MultiMatrixImpl(
+: m_impl(std::make_shared<MultiMatrixImpl>(
   std::make_shared<Space>(row_space), std::make_shared<Space>(col_space), dist.clone()))
 {}
 
 /*---------------------------------------------------------------------------*/
 
 MatrixData::MatrixData(Integer size, const MatrixDistribution& dist)
-: m_impl(new MultiMatrixImpl(
+: m_impl(std::make_shared<MultiMatrixImpl>(
   std::make_shared<Space>(size), std::make_shared<Space>(size), dist.clone()))
 {}
 
 /*---------------------------------------------------------------------------*/
 
 MatrixData::MatrixData(Integer row_size, Integer col_size, const MatrixDistribution& dist)
-: m_impl(new MultiMatrixImpl(
+: m_impl(std::make_shared<MultiMatrixImpl>(
   std::make_shared<Space>(row_size), std::make_shared<Space>(col_size), dist.clone()))
 {}
 
 /*---------------------------------------------------------------------------*/
 
 MatrixData::MatrixData(const MatrixDistribution& dist)
-: m_impl(new MultiMatrixImpl(dist.rowDistribution().space().clone(),
-                             dist.colDistribution().space().clone(), dist.clone()))
+: m_impl(std::make_shared<MultiMatrixImpl>(dist.rowDistribution().space().clone(),
+                                           dist.colDistribution().space().clone(), dist.clone()))
 {}
 
 /*---------------------------------------------------------------------------*/
