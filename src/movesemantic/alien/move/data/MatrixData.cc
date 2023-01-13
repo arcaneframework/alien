@@ -79,13 +79,13 @@ MatrixData::MatrixData(const MatrixDistribution& dist)
 
 /*---------------------------------------------------------------------------*/
 
-MatrixData::MatrixData(MatrixData&& matrix)
+MatrixData::MatrixData(MatrixData&& matrix) noexcept
 : m_impl(std::move(matrix.m_impl))
 {}
 
-/*---------------------------------------------------------------------------*/
+/*--------------------move-------------------------------------------------------*/
 
-MatrixData& MatrixData::operator=(MatrixData&& matrix)
+MatrixData& MatrixData::operator=(MatrixData&& matrix) noexcept
 {
   m_impl = std::move(matrix.m_impl);
   return *this;

@@ -55,7 +55,7 @@ int test(const std::string& filename)
 
   algebra.mult(A, xe, b);
 
-  Alien::Move::VectorData x(A.distribution().rowDistribution());
+  Alien::Move::VectorData x(A.colSpace(), A.distribution().rowDistribution());
 
   tm->info() << "* x = A^-1 b";
 

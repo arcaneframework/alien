@@ -55,7 +55,7 @@ namespace Move
   class ALIEN_MOVESEMANTIC_EXPORT MatrixData : public IMatrix
   {
    public:
-    typedef Real ValueType;
+    using ValueType = Real;
 
     /*! @defgroup constructor Matrix Constructor
          * @{
@@ -116,20 +116,20 @@ namespace Move
          *
          * @param matrix Matrix to move from.
          */
-    MatrixData(MatrixData&& matrix);
+    MatrixData(MatrixData&& matrix) noexcept;
     //! }@
 
     /*! Destructor
          * All internal data structures will be deleted.
          */
-    virtual ~MatrixData() = default;
+    ~MatrixData() final = default;
 
     /*! Move assignment
          * \brief Move from Matrix
          *
          * @param matrix Matrix to move from.
          */
-    MatrixData& operator=(MatrixData&& matrix);
+    MatrixData& operator=(MatrixData&& matrix) noexcept;
 
     /*! Initialize a Matrix with a Space.
          *
@@ -143,7 +143,7 @@ namespace Move
     /*! Only support move semantic */
     void operator=(const MatrixData&) = delete;
 
-    MatrixData clone() const;
+    [[nodiscard]] MatrixData clone() const;
 
     /*! @defgroup block Block related API
          * @{ */
@@ -169,7 +169,7 @@ namespace Move
     void clear();
 
     /*! Handle for visitor pattern */
-    void visit(ICopyOnWriteMatrix&) const;
+    void visit(ICopyOnWriteMatrix&) const final;
 
     /*! @defgroup space Space related functions.
          * @{
@@ -179,14 +179,14 @@ namespace Move
          * @throw FatalException if uninitialized.
          * Call isNull before to avoid any problem.
          */
-    const ISpace& rowSpace() const;
+    const ISpace& rowSpace() const final;
 
     /*! CoDomain Space of the current matrix
          * @return CoDomain Space.
          * @throw FatalException if uninitialized.
          * Call isNull before to avoid any problem.
          */
-    const ISpace& colSpace() const;
+    const ISpace& colSpace() const final;
     /*! }@ */
 
     /*! Parallel distribution of the Matrix.
@@ -235,9 +235,9 @@ namespace Move
          * Access multi-representation object.
          * @{
          */
-    MultiMatrixImpl* impl();
+    MultiMatrixImpl* impl() final;
 
-    const MultiMatrixImpl* impl() const;
+    const MultiMatrixImpl* impl() const final;
     /*! } @ */
 
     friend MatrixData createMatrixData(std::shared_ptr<MultiMatrixImpl> multi);

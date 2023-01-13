@@ -47,8 +47,6 @@ namespace Move
   class ALIEN_MOVESEMANTIC_EXPORT VectorData : public IVector
   {
    public:
-    typedef Real ValueType;
-
     /*! @defgroup constructor Vector Constructor
          * @{
          */
@@ -67,7 +65,7 @@ namespace Move
          *
          * \see VectorData::VectorData(const VectorDistribution&).
          * */
-    [[deprecated]] VectorData(const ISpace& space, const VectorDistribution& dist);
+    [[deprecated("Use VectorData(const VectorDistribution&) instead")]] VectorData(const ISpace& space, const VectorDistribution& dist);
 
     /*! Build a new Vector from a size.
          *
@@ -79,7 +77,7 @@ namespace Move
          *
          * \see VectorData::VectorData(const VectorDistribution&).
          */
-    [[deprecated]] VectorData(Integer size, const VectorDistribution& dist);
+    [[deprecated("Use VectorData(const VectorDistribution&) instead")]] VectorData(Integer size, const VectorDistribution& dist);
 
     /*! Build a new Vector from a Space
            *
@@ -93,20 +91,20 @@ namespace Move
          *
          * @param vector Vector to move from.
          */
-    VectorData(VectorData&& vector);
+    VectorData(VectorData&& vector) noexcept;
     /*! }@ */
 
     /*! Destructor
          * All internal data structures will be deleted.
          */
-    virtual ~VectorData() = default;
+    ~VectorData() final = default;
 
     /*! Move assignment
          * \brief Move from Vector
          *
          * @param matrix Vector to move from.
          */
-    VectorData& operator=(VectorData&& vector);
+    VectorData& operator=(VectorData&& vector) noexcept;
 
     /*! Initialize a Vector with a Space.
          *
@@ -145,7 +143,7 @@ namespace Move
     void clear();
 
     /*! Handle for visitor pattern */
-    void visit(ICopyOnWriteVector&) const;
+    void visit(ICopyOnWriteVector&) const final;
 
     /*! @defgroup space Space related functions.
          * @{
@@ -155,7 +153,7 @@ namespace Move
          * @throw FatalException if uninitialized.
          * Call isNull before to avoid any problem.
          */
-    const ISpace& space() const;
+    const ISpace& space() const final;
 
     /*! Parallel distribution of the Vector.
          *
@@ -181,9 +179,9 @@ namespace Move
          * Access multi-representation object.
          * @{
          */
-    MultiVectorImpl* impl();
+    MultiVectorImpl* impl() final;
 
-    const MultiVectorImpl* impl() const;
+    const MultiVectorImpl* impl() const final;
     /*! }@ */
 
     friend VectorData createVectorData(std::shared_ptr<MultiVectorImpl> multi);
