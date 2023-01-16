@@ -72,7 +72,7 @@ namespace Move
          * \param dist Parallel distribution.
          *
          * This matrix is directly ready to use. */
-    [[deprecated]] MatrixData(const Space& space, const MatrixDistribution& dist);
+    MatrixData(const Space& space, const MatrixDistribution& dist);
 
     /*!  Build a new matrix from two Spaces
          *
@@ -81,7 +81,7 @@ namespace Move
          * \param dist Parallel distribution.
          *
          * This matrix is directly ready to use. */
-    [[deprecated]] MatrixData(
+    MatrixData(
     const Space& row_space, const Space& col_space, const MatrixDistribution& dist);
 
     /*! Build a new matrix from a size.
@@ -92,7 +92,7 @@ namespace Move
          *
          * This matrix is ready to use on an anonymous Space.
          */
-    [[deprecated]] MatrixData(Integer size, const MatrixDistribution& dist);
+    [[deprecated("Use MatrixData(const MatrixDistribution&) instead.")]] MatrixData(Integer size, const MatrixDistribution& dist);
 
     /*! Build a new matrix from two sizes.
          *
