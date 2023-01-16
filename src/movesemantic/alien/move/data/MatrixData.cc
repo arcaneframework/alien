@@ -101,47 +101,6 @@ void MatrixData::init(const Space& space, const MatrixDistribution& dist)
 
 /*---------------------------------------------------------------------------*/
 
-const Block*
-MatrixData::block() const
-{
-  return m_impl->block();
-}
-
-/*---------------------------------------------------------------------------*/
-
-const VBlock*
-MatrixData::vblock() const
-{
-  return m_impl->vblock();
-}
-
-/*---------------------------------------------------------------------------*/
-
-void MatrixData::setBlockInfos(const Integer block_size)
-{
-  m_impl->setBlockInfos(block_size);
-}
-
-/*---------------------------------------------------------------------------*/
-
-void MatrixData::setBlockInfos(const Block* block)
-{
-  if (block) {
-    m_impl->setBlockInfos(block);
-  }
-}
-
-/*---------------------------------------------------------------------------*/
-
-void MatrixData::setBlockInfos(const VBlock* block)
-{
-  if (block) {
-    m_impl->setBlockInfos(block);
-  }
-}
-
-/*---------------------------------------------------------------------------*/
-
 void MatrixData::free()
 {
   m_impl->free();
@@ -183,27 +142,6 @@ const MatrixDistribution&
 MatrixData::distribution() const
 {
   return m_impl->distribution();
-}
-
-/*---------------------------------------------------------------------------*/
-
-void MatrixData::setUserFeature(String feature)
-{
-  m_impl->setFeature(feature);
-}
-
-/*---------------------------------------------------------------------------*/
-
-bool MatrixData::hasUserFeature(String feature) const
-{
-  return m_impl->hasFeature(feature);
-}
-
-/*---------------------------------------------------------------------------*/
-
-bool MatrixData::isComposite() const
-{
-  return m_impl->hasFeature("composite");
 }
 
 /*---------------------------------------------------------------------------*/

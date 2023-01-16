@@ -120,19 +120,6 @@ namespace Move
 
     VectorData clone() const;
 
-    /*! @defgroup block Block related API
-         * @{ */
-    void setBlockInfos(const Integer block_size);
-
-    void setBlockInfos(const Block* block);
-
-    void setBlockInfos(const VBlock* block);
-
-    const Block* block() const;
-
-    const VBlock* vblock() const;
-    /*! }@ */
-
     /*! Delete all internal data structures */
     void free();
 
@@ -160,19 +147,6 @@ namespace Move
          * @return Parallel distribution of the Vector.
          */
     const VectorDistribution& distribution() const;
-
-    /*! @defgroup properties Algebraic properties management.
-         *
-         * Algebraic properties are designed to propagate high level information of matrix
-         * object. These properties can be passed to external solvers but are not designed to
-         * overload Alien's solver parameters.
-         * @{ */
-    /*! Add a new property on this vector */
-    void setUserFeature(String feature);
-
-    /*! Check if a property is set. */
-    bool hasUserFeature(String feature) const;
-    /*! }@ */
 
     /*! @defgroup impl Internal data structure access.
          *

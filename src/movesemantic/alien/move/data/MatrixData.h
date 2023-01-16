@@ -144,21 +144,7 @@ namespace Move
     void operator=(const MatrixData&) = delete;
 
     [[nodiscard]] MatrixData clone() const;
-
-    /*! @defgroup block Block related API
-         * @{ */
-
-    void setBlockInfos(const Integer block_size);
-
-    void setBlockInfos(const Block* block);
-
-    void setBlockInfos(const VBlock* block);
-
-    Block const* block() const;
-
-    VBlock const* vblock() const;
-    /*! }@ */
-
+    
     /*! Delete all internal data structures */
     void free();
 
@@ -194,41 +180,6 @@ namespace Move
          * @return Parallel distribution of the Matrix.
          */
     const MatrixDistribution& distribution() const;
-
-    /*! @defgroup lock Protection functions.
-         * @{
-         */
-    /*! Lock Matrix with the caller. */
-    void lock() {}
-
-    /*! Unlock Matrix, making it available for others. */
-    void unlock() {}
-
-    /*! Test if a Matrix is locked.
-         *
-         * @return whether of not a matrix is already locked by someone.
-         */
-    bool isLocked() const { return false; }
-    /*! }@ */
-
-    /*! @defgroup properties Algebraic properties management.
-         *
-         * Algebraic properties are designed to propagate high level information of matrix
-         * object. These properties can be passed to external solvers but are not designed to
-         * overload Alien's solver parameters.
-         * @{ */
-    /*! Add a new property on this matrix */
-    void setUserFeature(String feature);
-
-    /*! Check if a property is set. */
-    bool hasUserFeature(String feature) const;
-
-    /*! Alias on property "transposed" */
-    bool isTransposed() const { return hasUserFeature("transposed"); }
-
-    /*! Is this matrix composite ? */
-    bool isComposite() const;
-    /* }@ */
 
     /*! @defgroup impl Internal data structure access.
          *

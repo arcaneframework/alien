@@ -80,31 +80,6 @@ void VectorData::init(const ISpace& space, const VectorDistribution& dist)
 
 /*---------------------------------------------------------------------------*/
 
-void VectorData::setBlockInfos(const Integer block_size)
-{
-  impl()->setBlockInfos(block_size);
-}
-
-/*---------------------------------------------------------------------------*/
-
-void VectorData::setBlockInfos(const Block* block)
-{
-  if (block) {
-    impl()->setBlockInfos(block);
-  }
-}
-
-/*---------------------------------------------------------------------------*/
-
-void VectorData::setBlockInfos(const VBlock* block)
-{
-  if (block) {
-    impl()->setBlockInfos(block);
-  }
-}
-
-/*---------------------------------------------------------------------------*/
-
 void VectorData::free()
 {
   impl()->free();
@@ -138,36 +113,6 @@ const VectorDistribution&
 VectorData::distribution() const
 {
   return m_impl->distribution();
-}
-
-/*---------------------------------------------------------------------------*/
-
-const Block*
-VectorData::block() const
-{
-  return m_impl->block();
-}
-
-/*---------------------------------------------------------------------------*/
-
-const VBlock*
-VectorData::vblock() const
-{
-  return m_impl->vblock();
-}
-
-/*---------------------------------------------------------------------------*/
-
-void VectorData::setUserFeature(String feature)
-{
-  impl()->setFeature(feature);
-}
-
-/*---------------------------------------------------------------------------*/
-
-bool VectorData::hasUserFeature(String feature) const
-{
-  return impl()->hasFeature(feature);
 }
 
 /*---------------------------------------------------------------------------*/
