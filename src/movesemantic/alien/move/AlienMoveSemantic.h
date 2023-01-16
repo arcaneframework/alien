@@ -17,6 +17,7 @@
  */
 
 #pragma once
+#warning "This header file should not be used. Use separate header files instead."
 
 #include <alien/move/data/MatrixData.h>
 #include <alien/move/data/VectorData.h>

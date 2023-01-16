@@ -20,7 +20,8 @@
 
 #include <arccore/message_passing_mpi/StandaloneMpiMessagePassingMng.h>
 
-#include <alien/move/AlienMoveSemantic.h>
+#include <alien/move/data/MatrixData.h>
+#include <alien/move/handlers/scalar/DirectMatrixBuilder.h>
 #include <alien/move/handlers/scalar/VectorWriter.h>
 
 #include <alien/hypre/backend.h>
