@@ -144,7 +144,7 @@ namespace Move
     void operator=(const MatrixData&) = delete;
 
     [[nodiscard]] MatrixData clone() const;
-    
+
     /*! Delete all internal data structures */
     void free();
 
