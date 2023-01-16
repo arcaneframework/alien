@@ -65,7 +65,7 @@ namespace Move
          *
          * \see VectorData::VectorData(const VectorDistribution&).
          * */
-    [[deprecated("Use VectorData(const VectorDistribution&) instead")]] VectorData(const ISpace& space, const VectorDistribution& dist);
+    VectorData(const ISpace& space, const VectorDistribution& dist);
 
     /*! Build a new Vector from a size.
          *
