@@ -30,7 +30,8 @@ namespace Alien
 template class ALIEN_REFSEMANTIC_EXPORT StreamVBlockMatrixBuilderT<double>;
 
 #ifdef WIN32
-template class ALIEN_IFPEN_EXPORT StreamVBlockMatrixBuilderT<double>::BaseInserter;
+#ifdef BUGGY_EXPORT
+template class ALIEN_IFPEN_EXPORT StreamVBlockMatrixBuilderT < double> ::BaseInserter;
 template class ALIEN_IFPEN_EXPORT StreamVBlockMatrixBuilderT<double>::Profiler;
 template class ALIEN_IFPEN_EXPORT StreamVBlockMatrixBuilderT<double>::Filler;
 template class ALIEN_IFPEN_EXPORT StreamVBlockMatrixBuilderT<double>::Inserter;
@@ -43,6 +44,7 @@ template ALIEN_IFPEN_EXPORT void StreamVBlockMatrixBuilderT<double>::Filler::sta
 template ALIEN_IFPEN_EXPORT void
 StreamVBlockMatrixBuilderT<double>::Profiler::addMatrixEntry(
 Integer row_index, Integer col_index);
+#endif
 
 #endif
 

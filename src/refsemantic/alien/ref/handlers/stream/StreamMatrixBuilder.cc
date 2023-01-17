@@ -32,6 +32,7 @@ namespace Alien
 template class ALIEN_REFSEMANTIC_EXPORT StreamMatrixBuilderT<double>;
 
 #ifdef WIN32
+#ifdef BUGGY_EXPORT
 template class ALIEN_IFPEN_EXPORT StreamMatrixBuilderT<double>::BaseInserter;
 template class ALIEN_IFPEN_EXPORT StreamMatrixBuilderT<double>::Profiler;
 template class ALIEN_IFPEN_EXPORT StreamMatrixBuilderT<double>::Filler;
@@ -53,6 +54,7 @@ template ALIEN_IFPEN_EXPORT void StreamMatrixBuilderT<double>::Profiler::addMatr
 const Integer row_index, ConstArrayView<Integer> col_index);
 template ALIEN_IFPEN_EXPORT Integer
 StreamMatrixBuilderT<double>::BaseInserter::getId() const;
+#endif
 #endif
 
 /*---------------------------------------------------------------------------*/
