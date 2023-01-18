@@ -22,6 +22,13 @@ add_executable(ref.gtest.mpi
         TestIndexManager.cc
         )
 
+if (WIN32)
+  add_custom_command(TARGET ref.gtest.mpi POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:ref.gtest.mpi> $<TARGET_FILE_DIR:ref.gtest.mpi>
+    COMMAND_EXPAND_LISTS
+    )
+endif()
+
 if (ALIEN_USE_LIBXML2)
     target_sources(ref.gtest.mpi PRIVATE TestImportExport.cc)
 endif ()

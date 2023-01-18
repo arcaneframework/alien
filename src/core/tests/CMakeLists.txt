@@ -35,6 +35,13 @@ add_executable(core.gtest.mpi main.cpp
         TestRedistributor.cc
         )
 
+if (WIN32)
+  add_custom_command(TARGET core.gtest.mpi POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:core.gtest.mpi> $<TARGET_FILE_DIR:core.gtest.mpi>
+    COMMAND_EXPAND_LISTS
+    )
+endif()
+
 target_link_libraries(core.gtest.seq
         PUBLIC GTest::GTest
         PUBLIC Alien::alien_core
