@@ -23,6 +23,7 @@
 
 #ifdef WIN32
 #include <windows.h>
+#include <time.h>
 #define ARCANE_TIMER_USE_CLOCK
 #else
 #include <errno.h>
