@@ -23,6 +23,7 @@ find_package(GTest REQUIRED)
 
 add_executable(core.gtest.seq main.cpp TestFamilies.cc
         TestSpace.cc TestAlienInclude.cc TestSpacePartition.cc)
+alien_copy_dlls_command(core.gtest.seq)
 
 add_executable(core.gtest.mpi main.cpp
         TestFamilies.cc
@@ -34,13 +35,7 @@ add_executable(core.gtest.mpi main.cpp
         TestDoK.cc
         TestRedistributor.cc
         )
-
-if (WIN32)
-  add_custom_command(TARGET core.gtest.mpi POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:core.gtest.mpi> $<TARGET_FILE_DIR:core.gtest.mpi>
-    COMMAND_EXPAND_LISTS
-    )
-endif()
+alien_copy_dlls_command(core.gtest.mpi)
 
 target_link_libraries(core.gtest.seq
         PUBLIC GTest::GTest

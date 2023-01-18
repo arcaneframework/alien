@@ -34,6 +34,7 @@ message(STATUS "Using AVX2 Simd instructions ? -> ${ALIEN_WANT_AVX2}")
 message(STATUS "Using AVX512 Simd instructions ? -> ${ALIEN_WANT_AVX512}")
 
 add_executable(krylov_example.exe test_krylov.cpp)
+alien_copy_dlls_command(krylov_example.exe)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR (CMAKE_CXX_COMPILER_ID STREQUAL Clang))
   if(ALIEN_WANT_AVX)

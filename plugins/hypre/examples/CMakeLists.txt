@@ -23,18 +23,21 @@ project(AlienHypreExample VERSION 1.0 LANGUAGES CXX)
 find_package(Alien REQUIRED)
 
 add_executable(example_hypre hypre_example_solve.cpp)
+alien_copy_dlls_command(example_hypre)
 
 target_link_libraries(example_hypre PUBLIC
         Alien::hypre_wrapper
         Alien::alien_semantic_ref)
 
 add_executable(example_hypre_move hypre_example_solve_move.cpp)
+alien_copy_dlls_command(example_hypre_move)
 
 target_link_libraries(example_hypre_move PUBLIC
         Alien::hypre_wrapper
         Alien::alien_semantic_move)
 
 add_executable(mm_driver_hypre driver_mm_hypre.cc)
+alien_copy_dlls_command(mm_driver_hypre)
 
 target_link_libraries(mm_driver_hypre PUBLIC
         Alien::hypre_wrapper

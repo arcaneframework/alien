@@ -23,6 +23,7 @@ find_package(Alien REQUIRED)
 
 
 add_executable(bench_hypre bench.cpp)
+alien_copy_dlls_command(bench_hypre)
 
 target_link_libraries(bench_hypre PUBLIC
         Alien::hypre_wrapper

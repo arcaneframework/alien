@@ -29,11 +29,13 @@ add_executable(move.gtest.mpi
         TestDoKDirectMatrixBuilder.cc
         TestMatrixMarket.cc
         )
+alien_copy_dlls_command(move.gtest.mpi)
 
 add_executable(move.gtest.seq main.cpp
         TestVectorBuilder.cc
         TestMatrixDirectBuilder.cc
         )
+alien_copy_dlls_command(move.gtest.seq)
 
 target_link_libraries(move.gtest.mpi PRIVATE
         GTest::GTest

@@ -21,13 +21,7 @@ add_executable(ref.gtest.mpi
         main.cpp
         TestIndexManager.cc
         )
-
-if (WIN32)
-  add_custom_command(TARGET ref.gtest.mpi POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:ref.gtest.mpi> $<TARGET_FILE_DIR:ref.gtest.mpi>
-    COMMAND_EXPAND_LISTS
-    )
-endif()
+alien_copy_dlls_command(ref.gtest.mpi)
 
 if (ALIEN_USE_LIBXML2)
     target_sources(ref.gtest.mpi PRIVATE TestImportExport.cc)
@@ -43,6 +37,7 @@ add_executable(ref.gtest.seq main.cpp
         TestVBlockMatrix.cc
         TestRedistributor.cc
         TestMVExpr.cc)
+alien_copy_dlls_command(ref.gtest.seq)
 
 IF (ALIEN_USE_SYCL)
     target_sources(ref.gtest.seq PRIVATE TestMVSYCL.cc)
