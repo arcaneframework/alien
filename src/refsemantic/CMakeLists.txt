@@ -118,7 +118,13 @@ endif (ALIEN_GENERATE_DOCUMENTATION)
 if (ALIEN_USE_LIBXML2)
     find_package(LibXml2 REQUIRED)
 
-    target_link_libraries(alien_semantic_ref PRIVATE arccon::LibXml2)
+    if (WIN32)
+      # NOTE GG: L'utilisation de 'LibXML2::LibXML2' devrait
+      # aussi fonctionner sous Linux.
+      target_link_libraries(alien_semantic_ref PRIVATE LibXml2::LibXml2)
+    else()
+      target_link_libraries(alien_semantic_ref PRIVATE arccon::LibXml2)
+    endif()
 endif ()
 
 if (ALIEN_USE_HDF5)
