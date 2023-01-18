@@ -143,6 +143,24 @@ if (ALIEN_GENERATE_DOCUMENTATION)
     set(DOXYGEN_GENERATE_XML YES)
 endif (ALIEN_GENERATE_DOCUMENTATION)
 
+# ----------------------------------------------------------------------------
+# Function to automatically add copying of needed DLLs for a target at post build
+
+find_path(_INTEL_LIBFABRIC_PATH NAMES "libfabric.dll" PATH_SUFFIXES bin)
+if (_INTEL_LIBFABRIC_PATH)
+  message (STATUS "Found 'libfabric.dll' in = '${INTEL_LIBFABRIC_PATH}'")
+  set(INTEL_LIBFABRIC_PATH "${_INTEL_LIBFABRIC_PATH}/libfabric.dll" CACHE PATH "Location of libfabric.dll" FORCE)
+endif()
+unset(_INTEL_LIBFABRIC_PATH)
+
+function(alien_copy_dlls_command target_name)
+  if (WIN32)
+    add_custom_command(TARGET ${target_name} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:${target_name}> ${INTEL_LIBFABRIC_PATH} $<TARGET_FILE_DIR:${target_name}>
+      COMMAND_EXPAND_LISTS
+      )
+  endif()
+endfunction()
 
 # ----------------------------------------------------------------------------
 # Configure installation layout.
