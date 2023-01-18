@@ -22,6 +22,8 @@
 #include <alien/core/backend/LinearSolver.h>
 #include <alien/core/backend/LinearAlgebra.h>
 
+#include <alien/hypre/export.h>
+
 namespace Alien::Hypre
 {
 class Matrix;
@@ -30,11 +32,11 @@ class Vector;
 
 class Options;
 
-extern IInternalLinearSolver<Matrix, Vector>* InternalLinearSolverFactory(const Options& options);
+extern ALIEN_HYPRE_EXPORT IInternalLinearSolver<Matrix, Vector>* InternalLinearSolverFactory(const Options& options);
 
-extern IInternalLinearSolver<Matrix, Vector>* InternalLinearSolverFactory();
+extern ALIEN_HYPRE_EXPORT IInternalLinearSolver<Matrix, Vector>* InternalLinearSolverFactory();
 
-extern IInternalLinearAlgebra<Matrix, Vector>* InternalLinearAlgebraFactory();
+extern ALIEN_HYPRE_EXPORT IInternalLinearAlgebra<Matrix, Vector>* InternalLinearAlgebraFactory();
 } // namespace Alien::Hypre
 
 namespace Alien

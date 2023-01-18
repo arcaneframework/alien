@@ -30,7 +30,7 @@
 
 namespace Alien::Hypre
 {
-class InternalLinearSolver : public IInternalLinearSolver<Matrix, Vector>
+class ALIEN_HYPRE_EXPORT InternalLinearSolver : public IInternalLinearSolver<Matrix, Vector>
 , public ObjectWithTrace
 {
  public:
