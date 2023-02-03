@@ -100,6 +100,7 @@ TEST(TestMVExpr, ExprEngine)
   }
 
   Alien::SimpleCSRLinearAlgebra alg;
+  Alien::SimpleCSRLinearAlgebraExpr alg_expr;
   // trace_mng->info()<<" NORME : "<<x.name()<<" = "<<alg.norm2(x) ;
   ASSERT_EQ(alg.norm2(x), std::sqrt(global_size));
   {
@@ -160,13 +161,13 @@ TEST(TestMVExpr, ExprEngine)
 
     trace_mng->info() << "B=lambda*A";
     B = lambda * A;
-    Real A_norme2 = alg.norm2(A);
-    Real B_norme2 = alg.norm2(B);
+    Real A_norme2 = alg_expr.norm2(A);
+    Real B_norme2 = alg_expr.norm2(B);
     ASSERT_EQ(B_norme2, lambda * A_norme2);
 
     trace_mng->info() << "C=A+B";
     C = A + B;
-    Real C_norme2 = alg.norm2(C);
+    Real C_norme2 = alg_expr.norm2(C);
     ASSERT_EQ(C_norme2, (lambda + 1) * A_norme2);
   }
 

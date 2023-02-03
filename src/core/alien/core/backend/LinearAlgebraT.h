@@ -79,16 +79,6 @@ LinearAlgebra<Tag, TagV>::norm2(const IVector& x) const
 /*---------------------------------------------------------------------------*/
 
 template <class Tag, class TagV>
-Arccore::Real
-LinearAlgebra<Tag, TagV>::norm2(const IMatrix& x) const
-{
-  const auto& mx = x.impl()->get<Tag>();
-  return m_algebra->norm2(mx);
-}
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-template <class Tag, class TagV>
 void LinearAlgebra<Tag, TagV>::mult(const IMatrix& a, const IVector& x, IVector& r) const
 {
   const auto& ma = a.impl()->get<Tag>();

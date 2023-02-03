@@ -117,16 +117,6 @@ Real SimpleCSRInternalLinearAlgebra::norm2(const CSRVector& vx) const
 
 /*---------------------------------------------------------------------------*/
 
-Real SimpleCSRInternalLinearAlgebra::norm2(const CSRMatrix& mx) const
-{
-#ifdef ALIEN_USE_PERF_TIMER
-  SentryType s(m_timer, "MATRIX-CSR-NORM2");
-#endif
-  return CBLASMPIKernel::matrix_nrm2(mx.distribution(), mx);
-}
-
-/*---------------------------------------------------------------------------*/
-
 void SimpleCSRInternalLinearAlgebra::mult(const CSRMatrix& ma,
                                           const CSRVector& vx,
                                           CSRVector& vr) const
@@ -300,6 +290,15 @@ Real SimpleCSRInternalLinearAlgebraExpr::norm2(const CSRVector& vx) const
   return CBLASMPIKernel::nrm2(vx.distribution(), vx);
 }
 
+/*---------------------------------------------------------------------------*/
+
+Real SimpleCSRInternalLinearAlgebraExpr::norm2(const CSRMatrix& mx) const
+{
+#ifdef ALIEN_USE_PERF_TIMER
+  SentryType s(m_timer, "MATRIX-CSR-NORM2");
+#endif
+  return CBLASMPIKernel::matrix_nrm2(mx.distribution(), mx);
+}
 /*---------------------------------------------------------------------------*/
 
 void SimpleCSRInternalLinearAlgebraExpr::mult(

@@ -99,13 +99,6 @@ class LinearAlgebra : public ILinearAlgebra
   Real norm2(const IVector& x) const;
 
   /*!
-   * \brief Compute L2 (Frobenous) norm of a matrix
-   * \param[in] x The matrix on which norm2 is computed
-   * \returns The norm2 of the matrix
-   */
-  Real norm2(const IMatrix& x) const;
-
-  /*!
    * \brief Compute a matrix vector product
    *
    * Compute the matrix-vector product a by x and store it in r : r = a * x
