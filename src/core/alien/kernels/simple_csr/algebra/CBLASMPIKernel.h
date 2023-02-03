@@ -103,7 +103,7 @@ class CBLASMPIKernel
   {
     typedef typename VectorT::ValueType ValueType;
     typename VectorT::ValueType value = cblas::nrm1(x.scalarizedLocalSize(),
-                                                   (ValueType*)x.getDataPtr(), 1);
+                                                    (ValueType*)x.getDataPtr(), 1);
     if (dist.isParallel()) {
       value = Arccore::MessagePassing::mpAllReduce(
       dist.parallelMng(), Arccore::MessagePassing::ReduceSum, value);
