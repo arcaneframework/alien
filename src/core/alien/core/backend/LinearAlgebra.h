@@ -104,7 +104,7 @@ class LinearAlgebra : public ILinearAlgebra
    * \returns The norm2 of the matrix
    */
   Real norm2(const IMatrix& x) const;
-  
+
   /*!
    * \brief Compute a matrix vector product
    *

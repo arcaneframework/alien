@@ -166,15 +166,14 @@ namespace MVExpr
     return std::move(result);
   }
 
-
   template <typename Tag>
   auto matrixAddT(Matrix const& a, Matrix const& b)
   {
     LinearAlgebraExpr<Tag> alg(a.distribution().parallelMng());
-    Matrix c(a.distribution()) ;
-    alg.copy(b,c) ;
-    alg.add(a,c);
-    return std::move(c) ;
+    Matrix c(a.distribution());
+    alg.copy(b, c);
+    alg.add(a, c);
+    return std::move(c);
   }
 
   //template <typename T>
@@ -184,11 +183,11 @@ namespace MVExpr
     std::cout << "\t\t MatrixAdd" << std::endl;
 #endif
 
-    Matrix c(a.distribution()) ;
+    Matrix c(a.distribution());
     SimpleCSRLinearAlgebraExpr alg;
-    alg.copy(b,c) ;
-    alg.add(a,c);
-    return std::move(c) ;
+    alg.copy(b, c);
+    alg.add(a, c);
+    return std::move(c);
   }
 
   template <typename T>
@@ -351,14 +350,13 @@ namespace MVExpr
       return value;
   }
 
-
   template <typename Tag, typename T>
   auto matrixScalT(T const& lambda, Matrix const& A)
   {
-    Matrix B(A.distribution()) ;
+    Matrix B(A.distribution());
     LinearAlgebraExpr<Tag> alg(A.distribution().parallelMng());
-    alg.copy(A,B) ;
-    alg.scal(lambda,B);
+    alg.copy(A, B);
+    alg.scal(lambda, B);
     return std::move(B);
   }
 
@@ -368,13 +366,12 @@ namespace MVExpr
 #ifdef DEBUG
     std::cout << "\t\t MatrixScal" << std::endl;
 #endif
-    Matrix B(A.distribution()) ;
+    Matrix B(A.distribution());
     SimpleCSRLinearAlgebraExpr alg;
-    alg.copy(A,B) ;
-    alg.scal(lambda,B);
+    alg.copy(A, B);
+    alg.scal(lambda, B);
     return std::move(B);
   }
-
 
   struct cpu_evaluator
   {
@@ -426,7 +423,6 @@ namespace MVExpr
       SimpleCSRVector<Real> const& csr_b = b.impl()->get<BackEnd::tag::simplecsr>();
       return vectorMult(lambda, csr_b.getArrayValues());
     }
-
 
     auto operator()(lazy::mult_tag, Real lambda, Matrix const& a)
     {
@@ -569,7 +565,7 @@ namespace MVExpr
 
     auto operator()(lazy::mult_tag, Real lambda, Matrix const& a)
     {
-      return matrixScalT<Tag,Real>(lambda, a);
+      return matrixScalT<Tag, Real>(lambda, a);
     }
 
     auto operator()(lazy::add_tag, Vector const& a, Vector const& b)
@@ -595,7 +591,6 @@ namespace MVExpr
     {
       return matrixAddT<Tag>(a, b);
     }
-
 
     auto operator()(lazy::minus_tag, Vector const& a, Vector const& b)
     {
@@ -934,7 +929,7 @@ template <typename E>
 Matrix&
 Matrix::operator=(E const& expr)
 {
-  *this = expr(MVExpr::cpu_evaluator()) ;
+  *this = expr(MVExpr::cpu_evaluator());
   return *this;
 }
 

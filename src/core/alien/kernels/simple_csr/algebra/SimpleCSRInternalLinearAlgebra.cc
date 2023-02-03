@@ -125,7 +125,6 @@ Real SimpleCSRInternalLinearAlgebra::norm2(const CSRMatrix& mx) const
   return CBLASMPIKernel::matrix_nrm2(mx.distribution(), mx);
 }
 
-
 /*---------------------------------------------------------------------------*/
 
 void SimpleCSRInternalLinearAlgebra::mult(const CSRMatrix& ma,
@@ -360,7 +359,7 @@ void SimpleCSRInternalLinearAlgebraExpr::copy(const CSRMatrix& ma, CSRMatrix& mr
 #ifdef ALIEN_USE_PERF_TIMER
   SentryType s(m_timer, "MATRIX-CSR-COPY");
 #endif
-  mr.copy(ma) ;
+  mr.copy(ma);
 }
 
 void SimpleCSRInternalLinearAlgebraExpr::add(const CSRMatrix& ma, CSRMatrix& mr) const

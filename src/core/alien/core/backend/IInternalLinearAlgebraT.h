@@ -88,7 +88,7 @@ class IInternalLinearAlgebra
    * \returns The norm2 of the matrix
    */
   virtual Real norm2(const Matrix& x) const = 0;
-  
+
   /*!
    * \brief Compute a matrix vector product
    *

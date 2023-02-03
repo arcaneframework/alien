@@ -125,7 +125,6 @@ class IInternalLinearAlgebraExpr
    */
   virtual void copy(const Vector& x, Vector& r) const = 0;
 
-
   /*!
    * \brief Copy a matrix in another one
    *
@@ -157,7 +156,6 @@ class IInternalLinearAlgebraExpr
    * \param[in,out] x The vector to be scaled
    */
   virtual void scal(Real alpha, Vector& x) const = 0;
-
 
   /*!
    * \brief Scale a matrix by a factor
