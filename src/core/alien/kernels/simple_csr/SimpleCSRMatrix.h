@@ -290,7 +290,7 @@ class SimpleCSRMatrix : public IMatrixImpl
     m_global_size = matrix.m_global_size;
     m_ghost_size = matrix.m_ghost_size;
     m_send_policy = matrix.m_send_policy;
-    m_recv_policy = matrix.m_recv_policy ;
+    m_recv_policy = matrix.m_recv_policy;
     m_nproc = matrix.m_nproc;
     m_myrank = matrix.m_myrank;
     m_parallel_mng = matrix.m_parallel_mng;

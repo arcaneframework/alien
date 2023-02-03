@@ -141,6 +141,7 @@ TEST(TestMVExpr, ExprEngine)
       for (Integer i = 0; i < local_size; ++i)
         writer[offset + i] = offset + i;
     }
+
     Real value1 = eval(dot(x, y));
     trace_mng->info() << " DOT(x,y) " << value1;
     ASSERT_EQ(value1, 45);
@@ -158,17 +159,17 @@ TEST(TestMVExpr, ExprEngine)
     ASSERT_EQ(value4, 9);
 
     trace_mng->info() << "B=lambda*A";
-    B = lambda * A ;
-    Real A_norme2 = alg.norm2(A) ;
-    Real B_norme2 = alg.norm2(B) ;
-    ASSERT_EQ(B_norme2, lambda*A_norme2);
+    B = lambda * A;
+    Real A_norme2 = alg.norm2(A);
+    Real B_norme2 = alg.norm2(B);
+    ASSERT_EQ(B_norme2, lambda * A_norme2);
 
     trace_mng->info() << "C=A+B";
-    C = A + B ;
-    Real C_norme2 = alg.norm2(C) ;
-    ASSERT_EQ(C_norme2, (lambda+1)*A_norme2);
-
+    C = A + B;
+    Real C_norme2 = alg.norm2(C);
+    ASSERT_EQ(C_norme2, (lambda + 1) * A_norme2);
   }
+
   ////////////////////////////////////////////////
   //
   // TESTS PIPELINE ENABLING ASYNCHRONISM
