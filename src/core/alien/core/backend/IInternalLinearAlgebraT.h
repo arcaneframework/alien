@@ -77,11 +77,18 @@ class IInternalLinearAlgebra
 
   /*!
    * \brief Compute L2 norm of a vector
-   * \param[in] x The vector on which norm0 is computed
+   * \param[in] x The vector on which norm2 is computed
    * \returns The norm2 of the vector
    */
   virtual Real norm2(const Vector& x) const = 0;
 
+  /*!
+   * \brief Compute L2 (Frobenous) norm of a matrix
+   * \param[in] x The matrix on which norm2 is computed
+   * \returns The norm2 of the matrix
+   */
+  virtual Real norm2(const Matrix& x) const = 0;
+  
   /*!
    * \brief Compute a matrix vector product
    *
