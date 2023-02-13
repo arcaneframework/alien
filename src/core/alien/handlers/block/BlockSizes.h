@@ -18,7 +18,7 @@ class IIndexManager;
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-class BlockSizes
+class ALIEN_EXPORT BlockSizes
 {
  public:
   typedef VMap<Alien::Integer, Alien::Integer> ValuePerBlock;

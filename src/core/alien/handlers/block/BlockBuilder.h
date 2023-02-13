@@ -18,7 +18,7 @@ class IIndexManager;
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-class BlockBuilder
+class ALIEN_EXPORT BlockBuilder
 {
  public:
   class SizeVector
