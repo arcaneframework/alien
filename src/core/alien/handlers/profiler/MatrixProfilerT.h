@@ -169,25 +169,15 @@ namespace Common
       auto& block_cols = profile.getBlockCols();
       auto kcol = profile.kcol();
       auto cols = profile.cols();
-<<<<<<< HEAD
-=======
       Integer offset = 0;
->>>>>>> dev-vblock
       for (Integer irow = 0; irow < m_local_size; ++irow) {
         block_row_offset[irow] = offset;
         auto row_blk_size = block_sizes->size(m_local_offset + irow);
         for (auto k = kcol[irow]; k < kcol[irow + 1]; ++k) {
-<<<<<<< HEAD
-          auto jcol = cols[k];
-          auto col_blk_size = block_sizes->size(jcol);
-          offset += row_blk_size * col_blk_size;
-          block_cols[k] = offset;
-=======
           block_cols[k] = offset;
           auto jcol = cols[k];
           auto col_blk_size = block_sizes->size(jcol);
           offset += row_blk_size * col_blk_size;
->>>>>>> dev-vblock
         }
       }
       block_row_offset[m_local_size] = offset;

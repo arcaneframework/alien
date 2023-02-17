@@ -79,12 +79,28 @@ class ALIEN_EXPORT SchurOp
   eErrorType _apply_schur(Integer block_size,
                           MatrixImpl& A,
                           VectorImpl& B,
+                          Integer p_block_size,
+                          MatrixImpl& pA,
+                          VectorImpl& pB) const;
+
+  eErrorType _apply_schur(Integer block_size,
+                          MatrixImpl& A,
+                          VectorImpl& B,
+                          VBlock const* p_vblock,
                           MatrixImpl& pA,
                           VectorImpl& pB) const;
 
   eErrorType _apply_schur(VBlock const* vblock,
                           MatrixImpl& A,
                           VectorImpl& B,
+                          Integer p_block_size,
+                          MatrixImpl& pA,
+                          VectorImpl& pB) const;
+
+  eErrorType _apply_schur(VBlock const* vblock,
+                          MatrixImpl& A,
+                          VectorImpl& B,
+                          VBlock const* p_vblock,
                           MatrixImpl& pA,
                           VectorImpl& pB) const;
 

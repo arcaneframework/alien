@@ -32,11 +32,8 @@
 #include <alien/core/block/VBlock.h>
 #include <alien/handlers/block/BlockBuilder.h>
 
-<<<<<<< HEAD
-=======
 #include <alien/expression/schur/SchurOp.h>
 
->>>>>>> dev-vblock
 #include <alien/ref/AlienRefSemantic.h>
 
 // Tests the default c'tor.
@@ -133,11 +130,8 @@ TEST(TestSchur, SchurEngine)
   Alien::VectorDistribution vdist(global_size, local_size, AlienTest::Environment::parallelMng());
 
   Alien::VBlockMatrix A(vblock, mdist);
-<<<<<<< HEAD
-=======
   Alien::VBlockVector b(vblock, vdist);
   Alien::VBlockVector x(vblock, vdist);
->>>>>>> dev-vblock
 
   {
     trace_mng->info() << "CREATE MATRIX PROFILE";
@@ -145,19 +139,6 @@ TEST(TestSchur, SchurEngine)
     for (Integer i = 0; i < cell1_local_size; ++i) {
       Integer row1 = allU1Index[i];
       profiler.addMatrixEntry(row1, row1);
-<<<<<<< HEAD
-      trace_mng->info() << "ADD MATRIX ENTRY D1: " << row1 << " " << row1;
-
-      Integer row2 = allU2Index[i];
-      profiler.addMatrixEntry(row2, row2);
-      trace_mng->info() << "ADD MATRIX ENTRY D2: " << row2 << " " << row2;
-
-      profiler.addMatrixEntry(row1, row2);
-      trace_mng->info() << "ADD MATRIX ENTRY D12: " << row1 << " " << row2;
-
-      profiler.addMatrixEntry(row2, row1);
-      trace_mng->info() << "ADD MATRIX ENTRY D21: " << row2 << " " << row1;
-=======
 
       Integer row2 = allU2Index[i];
       profiler.addMatrixEntry(row2, row2);
@@ -165,25 +146,16 @@ TEST(TestSchur, SchurEngine)
       profiler.addMatrixEntry(row1, row2);
 
       profiler.addMatrixEntry(row2, row1);
->>>>>>> dev-vblock
 
       if (i == 0) {
         if (comm_rank > 0) {
           Integer jcol = allU1Index[ghost_cell1_lid[0]];
           profiler.addMatrixEntry(row1, jcol);
-<<<<<<< HEAD
-          trace_mng->info() << "ADD MATRIX ENTRY OD1-1: " << row1 << " " << jcol;
-=======
->>>>>>> dev-vblock
         }
       }
       else {
         Integer jcol = allU1Index[i - 1];
         profiler.addMatrixEntry(row1, jcol);
-<<<<<<< HEAD
-        trace_mng->info() << "ADD MATRIX ENTRY OD1-1: " << row1 << " " << jcol;
-=======
->>>>>>> dev-vblock
       }
 
       if (i == cell1_local_size - 1) {
@@ -191,100 +163,55 @@ TEST(TestSchur, SchurEngine)
           Integer lid = comm_rank == 0 ? ghost_cell1_lid[0] : ghost_cell1_lid[1];
           Integer jcol = allU1Index[lid];
           profiler.addMatrixEntry(row1, jcol);
-<<<<<<< HEAD
-          trace_mng->info() << "ADD MATRIX ENTRY OD1+1: " << row1 << " " << jcol << " " << comm_rank;
-=======
->>>>>>> dev-vblock
         }
       }
       else {
         Integer jcol = allU1Index[i + 1];
         profiler.addMatrixEntry(row1, jcol);
-<<<<<<< HEAD
-        trace_mng->info() << "ADD MATRIX ENTRY OD1+1: " << row1 << " " << jcol << " " << comm_rank;
-=======
->>>>>>> dev-vblock
       }
 
       if (i == 0) {
         if (comm_rank > 0) {
           Integer jcol = allU2Index[ghost_cell2_lid[0]];
           profiler.addMatrixEntry(row2, jcol);
-<<<<<<< HEAD
-          trace_mng->info() << "ADD MATRIX ENTRY OD1-1: " << row2 << " " << jcol;
-=======
->>>>>>> dev-vblock
         }
       }
       else {
         Integer jcol = allU2Index[i - 1];
         profiler.addMatrixEntry(row2, jcol);
-<<<<<<< HEAD
-        trace_mng->info() << "ADD MATRIX ENTRYOD2-1 : " << row2 << " " << jcol;
-=======
->>>>>>> dev-vblock
       }
       if (i == cell2_local_size - 1) {
         if (comm_rank < comm_size - 1) {
           Integer lid = comm_rank == 0 ? ghost_cell2_lid[0] : ghost_cell2_lid[1];
           Integer jcol = allU2Index[lid];
           profiler.addMatrixEntry(row2, jcol);
-<<<<<<< HEAD
-          trace_mng->info() << "ADD MATRIX ENTRY OD1+1: " << row2 << " " << jcol << " " << comm_rank;
-=======
->>>>>>> dev-vblock
         }
       }
       else {
         Integer jcol = allU2Index[i + 1];
         profiler.addMatrixEntry(row2, jcol);
-<<<<<<< HEAD
-        trace_mng->info() << "ADD MATRIX ENTRY OD2+1: " << row2 << " " << jcol << " " << comm_rank;
-=======
->>>>>>> dev-vblock
       }
     }
   }
   {
-<<<<<<< HEAD
-    trace_mng->info() << "FILL MATRIX";
-=======
     trace_mng->info() << "FILL VBLOCK MATRIX";
->>>>>>> dev-vblock
     Alien::ProfiledVBlockMatrixBuilder builder(A, Alien::ProfiledVBlockMatrixBuilderOptions::eResetValues);
     for (Integer i = 0; i < cell1_local_size; ++i) {
       Integer row1 = allU1Index[i];
       auto row1_blk_size = vblock.size(row1);
-<<<<<<< HEAD
-      trace_mng->info() << "ROW1 index : " << row1 << " size : " << row1_blk_size;
-      UniqueArray2<Real> diag1(row1_blk_size, row1_blk_size);
-      diag1.fill(0);
-      for (int k = 0; k < row1_blk_size; ++k)
-        diag1[k][k] = 1.;
-=======
       UniqueArray2<Real> diag1(row1_blk_size, row1_blk_size);
       diag1.fill(-1. / (1 + i));
       for (int k = 0; k < row1_blk_size; ++k)
         diag1[k][k] = 1. + k;
->>>>>>> dev-vblock
       builder(row1, row1) = diag1;
 
       Integer row2 = allU2Index[i];
       auto row2_blk_size = vblock.size(row2);
-<<<<<<< HEAD
-      trace_mng->info() << "ROW2 index : " << row2 << " size : " << row2_blk_size;
-
-      UniqueArray2<Real> diag2(row2_blk_size, row2_blk_size);
-      diag2.fill(0);
-      for (int k = 0; k < row2_blk_size; ++k)
-        diag2[k][k] = 1.;
-=======
 
       UniqueArray2<Real> diag2(row2_blk_size, row2_blk_size);
       diag2.fill(-2. / (1 + i));
       for (int k = 0; k < row2_blk_size; ++k)
         diag2[k][k] = 1. + k;
->>>>>>> dev-vblock
       builder(row2, row2) = diag2;
 
       UniqueArray2<Real> off_diag12(row1_blk_size, row2_blk_size);
@@ -299,10 +226,6 @@ TEST(TestSchur, SchurEngine)
         if (comm_rank > 0) {
           Integer jcol = allU1Index[ghost_cell1_lid[0]];
           auto col_blk_size = vblock.size(jcol);
-<<<<<<< HEAD
-          trace_mng->info() << "COL1-1 index : " << jcol << " size : " << col_blk_size;
-=======
->>>>>>> dev-vblock
           UniqueArray2<Real> off_diag1(row1_blk_size, col_blk_size);
           off_diag1.fill(-0.01);
           builder(row1, jcol) += off_diag1;
@@ -311,10 +234,6 @@ TEST(TestSchur, SchurEngine)
       else {
         Integer jcol = allU1Index[i - 1];
         auto col_blk_size = vblock.size(jcol);
-<<<<<<< HEAD
-        trace_mng->info() << "COL1-1 index : " << jcol << " size : " << col_blk_size;
-=======
->>>>>>> dev-vblock
         UniqueArray2<Real> off_diag1(row1_blk_size, col_blk_size);
         off_diag1.fill(-0.01);
         builder(row1, jcol) += off_diag1;
@@ -325,10 +244,6 @@ TEST(TestSchur, SchurEngine)
           Integer lid = comm_rank == 0 ? ghost_cell1_lid[0] : ghost_cell1_lid[1];
           Integer jcol = allU1Index[lid];
           auto col_blk_size = vblock.size(jcol);
-<<<<<<< HEAD
-          trace_mng->info() << "COL1+1 index : " << jcol << " size : " << col_blk_size;
-=======
->>>>>>> dev-vblock
           UniqueArray2<Real> off_diag1(row1_blk_size, col_blk_size);
           off_diag1.fill(-0.01);
           builder(row1, jcol) += off_diag1;
@@ -337,10 +252,6 @@ TEST(TestSchur, SchurEngine)
       else {
         Integer jcol = allU1Index[i + 1];
         auto col_blk_size = vblock.size(jcol);
-<<<<<<< HEAD
-        trace_mng->info() << "COL1+1 index : " << jcol << " size : " << col_blk_size;
-=======
->>>>>>> dev-vblock
         UniqueArray2<Real> off_diag1(row1_blk_size, col_blk_size);
         off_diag1.fill(-0.01);
         builder(row1, jcol) += off_diag1;
@@ -350,10 +261,6 @@ TEST(TestSchur, SchurEngine)
         if (comm_rank > 0) {
           Integer jcol = allU2Index[ghost_cell2_lid[0]];
           auto col_blk_size = vblock.size(jcol);
-<<<<<<< HEAD
-          trace_mng->info() << "COL2-1 index : " << jcol << " size : " << col_blk_size;
-=======
->>>>>>> dev-vblock
           UniqueArray2<Real> off_diag2(row2_blk_size, col_blk_size);
           off_diag12.fill(-0.02);
           builder(row2, jcol) += off_diag2;
@@ -362,10 +269,6 @@ TEST(TestSchur, SchurEngine)
       else {
         Integer jcol = allU2Index[i - 1];
         auto col_blk_size = vblock.size(jcol);
-<<<<<<< HEAD
-        trace_mng->info() << "COL2-1 index : " << jcol << " size : " << col_blk_size;
-=======
->>>>>>> dev-vblock
         UniqueArray2<Real> off_diag2(row2_blk_size, col_blk_size);
         off_diag12.fill(-0.02);
         builder(row2, jcol) += off_diag2;
@@ -375,10 +278,6 @@ TEST(TestSchur, SchurEngine)
           Integer lid = comm_rank == 0 ? ghost_cell2_lid[0] : ghost_cell2_lid[1];
           Integer jcol = allU2Index[lid];
           auto col_blk_size = vblock.size(jcol);
-<<<<<<< HEAD
-          trace_mng->info() << "COL2+1 index : " << jcol << " size : " << col_blk_size;
-=======
->>>>>>> dev-vblock
           UniqueArray2<Real> off_diag2(row2_blk_size, col_blk_size);
           off_diag12.fill(-0.02);
           builder(row2, jcol) += off_diag2;
@@ -387,18 +286,12 @@ TEST(TestSchur, SchurEngine)
       else {
         Integer jcol = allU2Index[i + 1];
         auto col_blk_size = vblock.size(jcol);
-<<<<<<< HEAD
-        trace_mng->info() << "COL2+1 index : " << jcol << " size : " << col_blk_size;
-=======
->>>>>>> dev-vblock
         UniqueArray2<Real> off_diag2(row2_blk_size, col_blk_size);
         off_diag12.fill(-0.02);
         builder(row2, jcol) += off_diag2;
       }
     }
   }
-<<<<<<< HEAD
-=======
 
   //VBlock Vector Fill Step
   {
@@ -436,5 +329,4 @@ TEST(TestSchur, SchurEngine)
   auto error = op.computePrimarySystem(pA, pb);
 
   auto error2 = op.computeSolutionFromPrimaryUnknowns(px, x);
->>>>>>> dev-vblock
 }
