@@ -355,8 +355,8 @@ const VectorType& x_impl, VectorType& y_impl) const
   ConstArrayView<Integer> block_offsets =
   m_matrix_impl.getDistStructInfo().m_block_offsets;
   {
-    const Integer last = block_offsets.size() - 1;
-    x_impl.resize(block_offsets[last] + block_sizes[last]);
+    Integer total_size = m_matrix_impl.m_local_size + m_matrix_impl.m_ghost_size;
+    x_impl.resize(block_offsets[total_size]);
   }
 
   const ValueT* x_ptr = x_impl.getDataPtr();
@@ -368,10 +368,16 @@ const VectorType& x_impl, VectorType& y_impl) const
   ConstArrayView<Integer> block_cols =
   m_matrix_impl.m_matrix.getCSRProfile().getBlockCols();
 
-  SendRecvOp<Real> op(x_ptr, m_matrix_impl.m_matrix_dist_info.m_send_info,
-                      m_matrix_impl.m_send_policy, (ValueT*)x_ptr,
-                      m_matrix_impl.m_matrix_dist_info.m_recv_info, m_matrix_impl.m_recv_policy,
-                      m_matrix_impl.m_parallel_mng, m_matrix_impl.m_trace, block_sizes, block_offsets);
+  SendRecvOp<Real> op(x_ptr,
+                      m_matrix_impl.m_matrix_dist_info.m_send_info,
+                      m_matrix_impl.m_send_policy,
+                      (ValueT*)x_ptr,
+                      m_matrix_impl.m_matrix_dist_info.m_recv_info,
+                      m_matrix_impl.m_recv_policy,
+                      m_matrix_impl.m_parallel_mng,
+                      m_matrix_impl.m_trace,
+                      block_sizes,
+                      block_offsets);
 
   op.start();
 
