@@ -82,7 +82,7 @@ SchurOp::computePrimarySystem(IMatrix& pA, IVector& pB) const
       return _apply_schur(csr_A.vblock(),
                           csr_A,
                           csr_B,
-                          csr_A.block()->size(),
+                          csr_pA.block()->size(),
                           csr_pA,
                           csr_pB);
     else
@@ -143,6 +143,7 @@ SchurOp::_apply_schur(Integer block_size,
                       MatrixImpl& pA,
                       VectorImpl& pB) const
 {
+  return NoError;
 }
 
 SchurOp::eErrorType
