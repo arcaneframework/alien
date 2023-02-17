@@ -121,7 +121,11 @@ namespace Common
     if (col == -1)
       throw FatalErrorException(A_FUNCINFO, "Cannot add data on undefined column");
 #endif /* CHECKPROFILE_ON_FILLING */
+<<<<<<< HEAD
     const Integer bcols_offset = m_block_cols[col];
+=======
+    const Integer bcols_offset = m_block_cols[row_start + col];
+>>>>>>> dev-vblock
     Array2View<Real> block(&m_values[bcols_offset], row_block_size, col_block_size);
     for (Integer i = 0; i < row_block_size; ++i)
       for (Integer j = 0; j < col_block_size; ++j)
@@ -157,7 +161,11 @@ namespace Common
     if (col == -1)
       throw FatalErrorException(A_FUNCINFO, "Cannot add data on undefined column");
 #endif /* CHECKPROFILE_ON_FILLING */
+<<<<<<< HEAD
     const Integer bcols_offset = m_block_cols[col];
+=======
+    const Integer bcols_offset = m_block_cols[row_start + col];
+>>>>>>> dev-vblock
     Array2View<Real> block(&m_values[bcols_offset], row_block_size, col_block_size);
     for (Integer i = 0; i < row_block_size; ++i)
       for (Integer j = 0; j < col_block_size; ++j)
@@ -193,7 +201,11 @@ namespace Common
     if (col == -1)
       throw FatalErrorException(A_FUNCINFO, "Cannot set data on undefined column");
 #endif /* CHECKPROFILE_ON_FILLING */
+<<<<<<< HEAD
     const Integer bcols_offset = m_block_cols[col];
+=======
+    const Integer bcols_offset = m_block_cols[row_start + col];
+>>>>>>> dev-vblock
     Array2View<Real> block(&m_values[bcols_offset], row_block_size, col_block_size);
     for (Integer i = 0; i < row_block_size; ++i)
       for (Integer j = 0; j < col_block_size; ++j)

@@ -151,7 +151,17 @@ class SimpleCSRMatrix : public IMatrixImpl
 
   Integer getGhostSize() const { return m_ghost_size; }
 
-  Integer getAllocSize() const { return m_local_size + m_ghost_size; }
+  Integer getAllocSize() const
+  {
+    auto total_size = m_local_size + m_ghost_size;
+    if (block())
+      return total_size * block()->size();
+    else if (vblock()) {
+      return m_matrix_dist_info.m_block_offsets[total_size];
+    }
+    else
+      return total_size;
+  }
 
   IMessagePassingMng* getParallelMng()
   {
@@ -297,6 +307,23 @@ class SimpleCSRMatrix : public IMatrixImpl
     m_parallel_mng = matrix.m_parallel_mng;
     m_trace = matrix.m_trace;
     m_matrix.copy(matrix.m_matrix);
+    m_matrix_dist_info.copy(matrix.m_matrix_dist_info);
+  }
+
+  void copyProfile(SimpleCSRMatrix const& matrix)
+  {
+    m_is_parallel = matrix.m_is_parallel;
+    m_local_size = matrix.m_local_size;
+    m_local_offset = matrix.m_local_offset;
+    m_global_size = matrix.m_global_size;
+    m_ghost_size = matrix.m_ghost_size;
+    m_send_policy = matrix.m_send_policy;
+    m_recv_policy = matrix.m_recv_policy;
+    m_nproc = matrix.m_nproc;
+    m_myrank = matrix.m_myrank;
+    m_parallel_mng = matrix.m_parallel_mng;
+    m_trace = matrix.m_trace;
+    m_matrix.getCSRProfile().copy(matrix.m_matrix.getCSRProfile());
     m_matrix_dist_info.copy(matrix.m_matrix_dist_info);
   }
 

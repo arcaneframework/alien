@@ -136,6 +136,7 @@ struct CommInfo
   Arccore::UniqueArray<Arccore::Integer> m_rank_ids;
   Arccore::UniqueArray<Arccore::Integer> m_ids_offset;
   Arccore::UniqueArray<Arccore::Integer> m_block_ids_offset;
+  Arccore::UniqueArray<Arccore::Integer> m_block2d_ids_offset;
 
   void copy(const CommInfo& commInfo)
   {
@@ -194,7 +195,8 @@ class SendRecvOp : public IASynchOp
              IMessagePassingMng* mng,
              Arccore::ITraceMng* trace_mng,
              ConstArrayView<Integer> block_sizes,
-             ConstArrayView<Integer> block_offsets)
+             ConstArrayView<Integer> block_offsets,
+             bool block2d = false)
   : m_is_variable_block(true)
   , m_send_buffer(send_buffer)
   , m_send_info(send_info)
@@ -206,7 +208,15 @@ class SendRecvOp : public IASynchOp
   , m_trace(trace_mng)
   , m_block_sizes(block_sizes)
   , m_block_offsets(block_offsets)
-  {}
+  {
+
+    m_send_block_ids_offset = m_send_info.m_block_ids_offset;
+    m_recv_block_ids_offset = m_recv_info.m_block_ids_offset;
+    if (block2d) {
+      m_send_block_ids_offset = m_send_info.m_block2d_ids_offset;
+      m_recv_block_ids_offset = m_recv_info.m_block2d_ids_offset;
+    }
+  }
 
   void start(bool insitu = true)
   {
@@ -484,11 +494,12 @@ class SendRecvOp : public IASynchOp
   void _startBlock(bool insitu)
   {
     // alien_info([&] {cout() << "StartBlock "<<insitu<<" send pol"<<m_send_policy;});
+
     if (m_recv_policy == CommProperty::ASynch) {
       m_recv_request.resize(m_recv_info.m_num_neighbours);
       ValueT* rbuffer = nullptr;
       if (m_recv_info.m_ids.size() && !insitu) {
-        Integer size = m_recv_info.m_block_ids_offset[m_recv_info.m_num_neighbours] - m_recv_info.m_block_ids_offset[0];
+        Integer size = m_recv_block_ids_offset[m_recv_info.m_num_neighbours] - m_recv_block_ids_offset[0];
         m_rbuffer.resize(size);
         rbuffer = &m_rbuffer[0];
       }
@@ -497,8 +508,8 @@ class SendRecvOp : public IASynchOp
       // alien_info([&] {cout() << "RecvInfo Nb Neighb :
       // "<<m_recv_info.m_num_neighbours;}) ;
       for (Integer i = 0; i < m_recv_info.m_num_neighbours; ++i) {
-        Integer off = m_recv_info.m_block_ids_offset[i];
-        Integer size = m_recv_info.m_block_ids_offset[i + 1] - off;
+        Integer off = m_recv_block_ids_offset[i];
+        Integer size = m_recv_block_ids_offset[i + 1] - off;
         ValueT* ptr = rbuffer + off;
         Integer rank = m_recv_info.m_ranks[i];
         m_recv_request[i] = Arccore::MessagePassing::mpReceive(
@@ -510,7 +521,7 @@ class SendRecvOp : public IASynchOp
     ValueT const* sbuffer = m_send_buffer;
     if (m_send_info.m_ids.size()) {
       {
-        Integer size = m_send_info.m_block_ids_offset[m_send_info.m_num_neighbours] - m_send_info.m_block_ids_offset[0];
+        Integer size = m_send_block_ids_offset[m_send_info.m_num_neighbours] - m_send_block_ids_offset[0];
         m_sbuffer.resize(size);
       }
       Integer size = m_send_info.m_ids_offset[m_send_info.m_num_neighbours] - m_send_info.m_ids_offset[0];
@@ -529,8 +540,8 @@ class SendRecvOp : public IASynchOp
       sbuffer = &m_sbuffer[0];
     }
     for (Integer i = 0; i < m_send_info.m_num_neighbours; ++i) {
-      Integer off = m_send_info.m_block_ids_offset[i];
-      Integer size = m_send_info.m_block_ids_offset[i + 1] - off;
+      Integer off = m_send_block_ids_offset[i];
+      Integer size = m_send_block_ids_offset[i + 1] - off;
       ValueT const* ptr = sbuffer + off;
       Integer rank = m_send_info.m_ranks[i];
       if (m_send_policy == CommProperty::ASynch)
@@ -552,13 +563,13 @@ class SendRecvOp : public IASynchOp
       ValueT* rbuffer = m_recv_buffer;
       if (m_recv_info.m_ids.size() && !insitu) {
         Arccore::Integer size =
-        m_recv_info.m_block_ids_offset[m_recv_info.m_num_neighbours];
+        m_recv_block_ids_offset[m_recv_info.m_num_neighbours];
         m_rbuffer.resize(size);
         rbuffer = &m_rbuffer[0];
       }
       for (Integer i = 0; i < m_recv_info.m_num_neighbours; ++i) {
-        Integer off = m_recv_info.m_block_ids_offset[i];
-        Integer size = m_recv_info.m_block_ids_offset[i + 1] - off;
+        Integer off = m_recv_block_ids_offset[i];
+        Integer size = m_recv_block_ids_offset[i + 1] - off;
         ValueT* ptr = rbuffer + off;
         Integer rank = m_recv_info.m_ranks[i];
         Arccore::MessagePassing::mpReceive(
@@ -601,6 +612,8 @@ class SendRecvOp : public IASynchOp
   Arccore::UniqueArray<Arccore::MessagePassing::Request> m_send_request;
   Arccore::ConstArrayView<Arccore::Integer> m_block_sizes;
   Arccore::ConstArrayView<Arccore::Integer> m_block_offsets;
+  Arccore::ConstArrayView<Arccore::Integer> m_send_block_ids_offset;
+  Arccore::ConstArrayView<Arccore::Integer> m_recv_block_ids_offset;
 };
 
 } // namespace Alien::SimpleCSRInternal
