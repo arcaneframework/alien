@@ -18,10 +18,30 @@
 
 #pragma once
 
-#include <alien/AlienConfig.h>
+#include <map>
 
-#include <alien/ref/import_export/SystemInfo.h>
-#include <alien/ref/import_export/SystemReader.h>
-#include <alien/ref/import_export/SystemWriter.h>
+#include "SystemInfo.h"
+#include <alien/ref/AlienRefSemanticPrecomp.h>
+#include <arccore/base/ArccoreGlobal.h>
+#include <arccore/message_passing/IMessagePassingMng.h>
 
-#include <alien/ref/import_export/MatrixMarketSystemReader.h>
+namespace Alien
+{
+class Matrix;
+class Vector;
+struct Exporter;
+
+class ALIEN_REFSEMANTIC_EXPORT MatrixMarketSystemReader
+{
+ public:
+  MatrixMarketSystemReader(std::string const& filename);
+  virtual ~MatrixMarketSystemReader();
+
+  void read(Matrix& A);
+  void read(Vector& rhs);
+
+ private:
+  std::string m_filename;
+};
+
+} // namespace Alien

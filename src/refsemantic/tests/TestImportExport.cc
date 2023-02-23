@@ -143,3 +143,13 @@ TEST(TestImportExport, ExportSystem)
     writer.dump(A, b, x, sol_info);
   }
 }
+
+TEST(TestImportExport,ImportMatrixMarketMatrix)
+{
+
+}
+
+TEST(TestImportExport,ImportMatrixMarketRhs)
+{
+
+}

@@ -51,6 +51,7 @@ set(alien_refsemantic_public_header
         alien/ref/import_export/SystemReader.h
         alien/ref/import_export/SystemWriter.h
         alien/ref/import_export/MatrixMarketSystemWriter.h
+        alien/ref/import_export/MatrixMarketSystemReader.h
         alien/ref/import_export/HDF5Tools.h)
     
 add_library(alien_semantic_ref
@@ -99,6 +100,8 @@ add_library(alien_semantic_ref
         alien/ref/handlers/scalar/VectorWriter.h
         alien/ref/import_export/MatrixMarketSystemWriter.cc
         alien/ref/import_export/MatrixMarketSystemWriter.h
+        alien/ref/import_export/MatrixMarketSystemReader.cc
+        alien/ref/import_export/MatrixMarketSystemReader.h
         alien/ref/import_export/SystemInfo.h
         alien/ref/import_export/SystemReader.cc
         alien/ref/import_export/SystemReader.h
