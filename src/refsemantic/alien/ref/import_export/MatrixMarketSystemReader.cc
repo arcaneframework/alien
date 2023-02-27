@@ -19,44 +19,42 @@
 #include <alien/ref/import_export/MatrixMarketSystemReader.h>
 #include <alien/ref/handlers/scalar/DirectMatrixBuilder.h>
 #include <alien/ref/handlers/scalar/VectorWriter.h>
-#include <string>
 
 #include <alien/ref/data/scalar/Matrix.h>
 #include <alien/ref/data/scalar/Vector.h>
+
+#include <string>
+#include <fstream>
 
 #include <cstdio>
 
 namespace Alien
 {
 
-class StreamFILEReader
+class FStreamReader
 {
- private:
-  FILE* m_fdes = nullptr;
+private:
+  std::fstream *m_file_stream = nullptr;
   std::string m_line;
 
- public:
-  StreamFILEReader() = delete;
-  StreamFILEReader(const StreamFILEReader&) = delete;
-  StreamFILEReader& operator=(const StreamFILEReader&) = delete;
+public:
+  FStreamReader() = delete;
+  FStreamReader(const FStreamReader&) = delete;
+  FStreamReader& operator=(const FStreamReader&) = delete;
 
-  explicit StreamFILEReader(FILE* fdes)
-  : m_fdes(fdes)
+  FStreamReader(std::fstream* fdes)
+    :
+    m_file_stream(fdes)
   {}
 
   const char* line()
   {
-    char* line = nullptr;
-    std::size_t size = 0;
-    getline(&line, &size, m_fdes);
-    // TODO: find a way to directly read in m_line and avoid next copy
-    m_line = line;
-    std::free(line);
+    std::getline(*m_file_stream,m_line);
 
     return m_line.c_str();
   }
 
-  [[nodiscard]] const char* currentLine() const
+  const char* currentLine() const
   {
     return m_line.c_str();
   }
@@ -241,42 +239,28 @@ MatrixMarketSystemReader::~MatrixMarketSystemReader() = default;
 
 void MatrixMarketSystemReader::read(Matrix& A)
 {
-  FILE* fdes = fopen(m_filename.c_str(),"r");
+  std::fstream file_stream(m_filename,std::ios::in);
 
-  if(fdes == nullptr)
+  if(!file_stream.good())
   {
-    perror(m_filename.c_str());
     throw FatalErrorException(__PRETTY_FUNCTION__);
   }
 
-  StreamFILEReader reader(fdes);
-  loadMMMatrixFromReader<StreamFILEReader>(A,reader);
-
-  if(fclose(fdes)!=0)
-  {
-    perror(m_filename.c_str());
-    throw FatalErrorException(__PRETTY_FUNCTION__);
-  }
+  FStreamReader reader(&file_stream);
+  loadMMMatrixFromReader<FStreamReader>(A,reader);
 }
 
 void MatrixMarketSystemReader::read(Vector& rhs)
 {
-  FILE* fdes = fopen(m_filename.c_str(),"r");
+  std::fstream file_stream(m_filename,std::ios::in);
 
-  if(fdes == nullptr)
+  if(!file_stream.good())
   {
-    perror(m_filename.c_str());
     throw FatalErrorException(__PRETTY_FUNCTION__);
   }
 
-  StreamFILEReader reader(fdes);
-  loadMMRhsFromReader<StreamFILEReader>(rhs,reader);
-
-  if(fclose(fdes)!=0)
-  {
-    perror(m_filename.c_str());
-    throw FatalErrorException(__PRETTY_FUNCTION__);
-  }
+  FStreamReader reader(&file_stream);
+  loadMMRhsFromReader<FStreamReader>(rhs,reader);
 }
 
 } /* namespace Alien */
