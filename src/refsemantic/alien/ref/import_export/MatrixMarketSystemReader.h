@@ -29,12 +29,15 @@ namespace Alien
 {
 class Matrix;
 class Vector;
-struct Exporter;
 
 class ALIEN_REFSEMANTIC_EXPORT MatrixMarketSystemReader
 {
  public:
-  MatrixMarketSystemReader(std::string const& filename);
+  MatrixMarketSystemReader() = delete;
+  MatrixMarketSystemReader(MatrixMarketSystemReader const&) = delete;
+  MatrixMarketSystemReader(MatrixMarketSystemReader&&) = delete;
+
+  explicit MatrixMarketSystemReader(std::string const& filename);
   virtual ~MatrixMarketSystemReader();
 
   void read(Matrix& A);

@@ -62,6 +62,69 @@ class StreamFILEReader
   }
 };
 
+#if 0
+class LibArchiveReader
+{
+private:
+  const int m_buffer_size = 1024;
+
+  archive* m_archive = nullptr;
+  std::string m_line;
+  std::vector<char> m_buffer;
+  std::size_t m_pos = 0;
+
+public:
+  LibArchiveReader() = delete;
+  LibArchiveReader(const LibArchiveReader&) = delete;
+  LibArchiveReader& operator=(const LibArchiveReader&) = delete;
+
+  LibArchiveReader(archive *archive)
+    :
+    m_archive(archive),
+    m_buffer(m_buffer_size,0)
+  {
+    m_line.reserve(m_buffer_size);
+  }
+
+  const char* line()
+  {
+    la_ssize_t r = 1;
+
+    m_line.resize(0);
+
+    if(m_pos == 0)
+    {
+      r = archive_read_data(m_archive,m_buffer.data(),m_buffer.size());
+    }
+
+    while(r > 0)
+    {
+      for(auto i = m_pos;i < m_buffer_size;++i)
+      {
+        m_line.push_back(m_buffer[i]);
+        if(m_buffer[i] == '\n')
+        {
+          m_pos = i + 1;
+          //std::cout << m_line;
+          return m_line.c_str();
+        }
+      }
+      // end of line is not found so read next buffer;
+      r = archive_read_data(m_archive,m_buffer.data(),m_buffer.size());
+      m_pos = 0;
+    }
+
+    // end of file reached
+    return m_line.c_str();
+  }
+
+  const char* currentLine() const
+  {
+    return m_line.c_str();
+  }
+};
+#endif
+
 template<typename ReaderT>
 bool readMMHeaderFromReader(const std::string& mm_type,ReaderT& reader)
 {
@@ -119,6 +182,7 @@ void loadMMMatrixFromReader(Matrix& A,ReaderT& reader)
     DirectMatrixOptions::eSymmetric : DirectMatrixOptions::eUnSymmetric;
 
   DirectMatrixBuilder matrix_builder(A,DirectMatrixOptions::eResetAllocation,sym_flag);
+  matrix_builder.allocate();
 
   for(int i=0;i<nnz;++i)
   {
