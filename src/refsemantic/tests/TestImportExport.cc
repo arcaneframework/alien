@@ -225,7 +225,7 @@ TEST(TestImportExport,ImportMatrixMarketMatrix)
   reader.read(A);
 
   ASSERT_EQ(9,A.rowSpace().size());
-  ASSERT_EQ(9,A.rowSpace().size());
+  ASSERT_EQ(9,A.colSpace().size());
 
   const auto& A_csr = A.impl()->get<Alien::BackEnd::tag::simplecsr>();
 
@@ -235,5 +235,33 @@ TEST(TestImportExport,ImportMatrixMarketMatrix)
 
 TEST(TestImportExport,ImportMatrixMarketRhs)
 {
+  const std::string rhs =
+  "%%MatrixMarket matrix array real general\n"
+  "%-------------------------------------------------------------------------------\n"
+  "% Fake rhs for test\n"
+  "%-------------------------------------------------------------------------------\n"
+  "9 1\n"
+  ".75\n"
+  ".075027667114587\n"
+  ".0916389995520797\n"
+  ".0375138335572935\n"
+  ".0458194997760398\n"
+  ".137458499328119\n"
+  ".687569167786467\n"
+  ".0916389995520797\n"
+  ".0375138335572935\n";
+
+  {
+    std::fstream rhs_file_stream("vec_b.mtx",std::ios_base::out);
+    rhs_file_stream << rhs;
+  }
+
+  Alien::Vector vec;
+
+  Alien::MatrixMarketSystemReader reader("vec_b.mtx");
+
+  reader.read(vec);
+
+  ASSERT_EQ(9,vec.space().size());
 
 }
