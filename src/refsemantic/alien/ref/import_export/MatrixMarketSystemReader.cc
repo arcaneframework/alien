@@ -213,6 +213,11 @@ void loadMMRhsFromReader(Vector& rhs,ReaderT& reader)
     throw FatalErrorException(__PRETTY_FUNCTION__,"IOError");
   }
 
+  if(m > 1) // does not allow more than one vector
+  {
+    throw FatalErrorException(__PRETTY_FUNCTION__,"More than one vector not allowed");
+  }
+
   rhs = Vector(n,n,nullptr);
 
   VectorWriter vector_writer(rhs);
