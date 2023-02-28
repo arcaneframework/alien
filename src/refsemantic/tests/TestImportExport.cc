@@ -146,9 +146,9 @@ TEST(TestImportExport, ExportSystem)
   }
 }
 
-TEST(TestImportExport,ImportMatrixMarketMatrix)
+TEST(TestImportExport, ImportMatrixMarketMatrix)
 {
-  if(AlienTest::Environment::parallelMng()->commRank()==0) {
+  if (AlienTest::Environment::parallelMng()->commRank() == 0) {
     const std::string mat =
     "%%MatrixMarket matrix coordinate real general\n"
     "%-------------------------------------------------------------------------------\n"
@@ -236,9 +236,9 @@ TEST(TestImportExport,ImportMatrixMarketMatrix)
   }
 }
 
-TEST(TestImportExport,ImportMatrixMarketRhs)
+TEST(TestImportExport, ImportMatrixMarketRhs)
 {
-  if(AlienTest::Environment::parallelMng()->commRank()==0) {
+  if (AlienTest::Environment::parallelMng()->commRank() == 0) {
     const std::string rhs =
     "%%MatrixMarket matrix array real general\n"
     "%-------------------------------------------------------------------------------\n"
@@ -272,9 +272,9 @@ TEST(TestImportExport,ImportMatrixMarketRhs)
   }
 }
 
-TEST(TestImportExport,ImportSuiteSparseArchive)
+TEST(TestImportExport, ImportSuiteSparseArchive)
 {
-  if(AlienTest::Environment::parallelMng()->commRank()==0) {
+  if (AlienTest::Environment::parallelMng()->commRank() == 0) {
     const std::string mat =
     "%%MatrixMarket matrix coordinate real general\n"
     "%-------------------------------------------------------------------------------\n"
@@ -322,6 +322,7 @@ TEST(TestImportExport,ImportSuiteSparseArchive)
     ".3435885\n"
     ".7467878\n";
 
+    system("rm -rf b1_ss");
     system("mkdir b1_ss");
     system("pwd");
     {

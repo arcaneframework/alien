@@ -75,10 +75,9 @@ class LibArchiveReader
   LibArchiveReader(const LibArchiveReader&) = delete;
   LibArchiveReader& operator=(const LibArchiveReader&) = delete;
 
-  LibArchiveReader(archive *archive)
-  :
-  m_archive(archive),
-  m_buffer(m_buffer_size,0)
+  LibArchiveReader(archive* archive)
+  : m_archive(archive)
+  , m_buffer(m_buffer_size, 0)
   {
     m_line.reserve(m_buffer_size);
   }
@@ -89,25 +88,21 @@ class LibArchiveReader
 
     m_line.resize(0);
 
-    if(m_pos == 0)
-    {
-      r = archive_read_data(m_archive,m_buffer.data(),m_buffer.size());
+    if (m_pos == 0) {
+      r = archive_read_data(m_archive, m_buffer.data(), m_buffer.size());
     }
 
-    while(r > 0)
-    {
-      for(auto i = m_pos;i < m_buffer_size;++i)
-      {
+    while (r > 0) {
+      for (auto i = m_pos; i < m_buffer_size; ++i) {
         m_line.push_back(m_buffer[i]);
-        if(m_buffer[i] == '\n')
-        {
+        if (m_buffer[i] == '\n') {
           m_pos = i + 1;
           //std::cout << m_line;
           return m_line.c_str();
         }
       }
       // end of line is not found so read next buffer;
-      r = archive_read_data(m_archive,m_buffer.data(),m_buffer.size());
+      r = archive_read_data(m_archive, m_buffer.data(), m_buffer.size());
       m_pos = 0;
     }
 
@@ -145,7 +140,8 @@ bool readMMHeaderFromReader(const std::string& mm_type, ReaderT& reader)
   }
 
   // skip comments
-  while (reader.line()[0] == '%');
+  while (reader.line()[0] == '%')
+    ;
 
   return std::string(param4) == std::string("symmetric");
 }
@@ -217,4 +213,4 @@ void loadMMRhsFromReader(Vector& rhs, ReaderT& reader)
   }
 }
 
-}
+} // namespace Alien
