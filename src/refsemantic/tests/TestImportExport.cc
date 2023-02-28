@@ -272,6 +272,7 @@ TEST(TestImportExport, ImportMatrixMarketRhs)
   }
 }
 
+#ifdef ALIEN_USE_LIBARCHIVE
 TEST(TestImportExport, ImportSuiteSparseArchive)
 {
   if (AlienTest::Environment::parallelMng()->commRank() == 0) {
@@ -351,3 +352,4 @@ TEST(TestImportExport, ImportSuiteSparseArchive)
     system("rm b1_ss.tar.gz");
   }
 }
+#endif
