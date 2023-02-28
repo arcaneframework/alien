@@ -115,8 +115,6 @@ list(APPEND CMAKE_MODULE_PATH ${ARCCON_MODULE_PATH})
 
 find_package(Arccore REQUIRED)
 
-find_package(LibArchive REQUIRED)
-
 include(GNUInstallDirs)
 
 if (ALIEN_DEFAULT_OPTIONS)

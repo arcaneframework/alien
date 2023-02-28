@@ -60,6 +60,7 @@ class FStreamReader
   }
 };
 
+#ifdef ALIEN_USE_LIBARCHIVE
 class LibArchiveReader
 {
  private:
@@ -115,6 +116,7 @@ class LibArchiveReader
     return m_line.c_str();
   }
 };
+#endif
 
 template <typename ReaderT>
 bool readMMHeaderFromReader(const std::string& mm_type, ReaderT& reader)
