@@ -27,7 +27,9 @@
 #include <string>
 #include <fstream>
 #include <cstdio>
+#ifdef ALIEN_USE_LIBARCHIVE
 #include <archive.h>
+#endif
 
 namespace Alien
 {
