@@ -25,3 +25,4 @@
 #include <alien/ref/import_export/SystemWriter.h>
 
 #include <alien/ref/import_export/MatrixMarketSystemReader.h>
+#include <alien/ref/import_export/SuiteSparseArchiveSystemReader.h>

@@ -22,27 +22,29 @@
 #include <arccore/base/ArccoreGlobal.h>
 
 #include <string>
+#include <archive.h>
 
 namespace Alien
 {
 class Matrix;
 class Vector;
 
-class ALIEN_REFSEMANTIC_EXPORT MatrixMarketSystemReader
+class ALIEN_REFSEMANTIC_EXPORT SuiteSparseArchiveSystemReader
 {
  public:
-  MatrixMarketSystemReader() = delete;
-  MatrixMarketSystemReader(MatrixMarketSystemReader const&) = delete;
-  MatrixMarketSystemReader& operator=(MatrixMarketSystemReader const&) = delete;
+  SuiteSparseArchiveSystemReader() = delete;
+  SuiteSparseArchiveSystemReader(SuiteSparseArchiveSystemReader const&) = delete;
+  SuiteSparseArchiveSystemReader& operator=(SuiteSparseArchiveSystemReader const&) = delete;
 
-  explicit MatrixMarketSystemReader(std::string const& filename);
-  virtual ~MatrixMarketSystemReader();
+  explicit SuiteSparseArchiveSystemReader(std::string const& filename);
+  virtual ~SuiteSparseArchiveSystemReader();
 
   void read(Matrix& A);
   void read(Vector& rhs);
 
  private:
   std::string m_filename;
+  archive* m_archive = nullptr;
 };
 
 } // namespace Alien

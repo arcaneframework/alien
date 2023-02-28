@@ -52,6 +52,7 @@ set(alien_refsemantic_public_header
         alien/ref/import_export/SystemWriter.h
         alien/ref/import_export/MatrixMarketSystemWriter.h
         alien/ref/import_export/MatrixMarketSystemReader.h
+        alien/ref/import_export/SuiteSparseArchiveSystemReader.h
         alien/ref/import_export/HDF5Tools.h)
     
 add_library(alien_semantic_ref
@@ -102,6 +103,8 @@ add_library(alien_semantic_ref
         alien/ref/import_export/MatrixMarketSystemWriter.h
         alien/ref/import_export/MatrixMarketSystemReader.cc
         alien/ref/import_export/MatrixMarketSystemReader.h
+        alien/ref/import_export/SuiteSparseArchiveSystemReader.cc
+        alien/ref/import_export/SuiteSparseArchiveSystemReader.h
         alien/ref/import_export/SystemInfo.h
         alien/ref/import_export/SystemReader.cc
         alien/ref/import_export/SystemReader.h
@@ -135,6 +138,7 @@ target_sources(alien_semantic_ref PRIVATE
               )
 
 target_link_libraries(alien_semantic_ref PUBLIC alien_core)
+target_link_libraries(alien_semantic_ref PUBLIC archive)
 
 target_include_directories(alien_semantic_ref PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>

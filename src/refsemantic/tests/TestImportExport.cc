@@ -231,6 +231,7 @@ TEST(TestImportExport,ImportMatrixMarketMatrix)
 
   ASSERT_EQ(49,A_csr.getProfile().getNElems());
 
+  system("rm cage4.mtx");
 }
 
 TEST(TestImportExport,ImportMatrixMarketRhs)
@@ -264,4 +265,82 @@ TEST(TestImportExport,ImportMatrixMarketRhs)
 
   ASSERT_EQ(9,vec.space().size());
 
+  system("rm vec_b.mtx");
+}
+
+TEST(TestImportExport,ImportSuiteSparseArchive)
+{
+  const std::string mat =
+  "%%MatrixMarket matrix coordinate real general\n"
+  "%-------------------------------------------------------------------------------\n"
+  "% UF Sparse Matrix Collection, Tim Davis\n"
+  "% http://www.cise.ufl.edu/research/sparse/matrices/Grund/b1_ss\n"
+  "% name: Grund/b1_ss\n"
+  "% [Unsymmetric Matrix b1_ss, F. Grund, Dec 1994.]\n"
+  "% id: 449\n"
+  "% date: 1997\n"
+  "% author: F. Grund\n"
+  "% ed: F. Grund\n"
+  "% fields: title A b name id date author ed kind\n"
+  "% kind: chemical process simulation problem\n"
+  "%-------------------------------------------------------------------------------\n"
+  "7 7 15\n"
+  "5 1 -.03599942\n"
+  "6 1 -.0176371\n"
+  "7 1 -.007721779\n"
+  "1 2 1\n"
+  "2 2 -1\n"
+  "1 3 1\n"
+  "3 3 -1\n"
+  "1 4 1\n"
+  "4 4 -1\n"
+  "2 5 .45\n"
+  "5 5 1\n"
+  "3 6 .1\n"
+  "6 6 1\n"
+  "4 7 .45\n"
+  "7 7 1\n";
+
+  const std::string rhs =
+  "%%MatrixMarket matrix array real general\n"
+  "%-------------------------------------------------------------------------------\n"
+  "% UF Sparse Matrix Collection, Tim Davis\n"
+  "% http://www.cise.ufl.edu/research/sparse/matrices/Grund/b1_ss\n"
+  "% name: Grund/b1_ss : b matrix\n"
+  "%-------------------------------------------------------------------------------\n"
+  "7 1\n"
+  "-.0001\n"
+  ".1167\n"
+  "-.2333\n"
+  ".1167\n"
+  "-.4993128\n"
+  ".3435885\n"
+  ".7467878\n";
+
+  system("mkdir b1_ss");
+
+  {
+    std::fstream mat_file_stream("b1_ss/b1_ss.mtx", std::ios_base::out);
+    mat_file_stream << mat;
+    std::fstream rhs_file_stream("b1_ss/b1_ss_b.mtx", std::ios_base::out);
+    rhs_file_stream << rhs;
+  }
+
+  system("tar -zcf b1_ss.tar.gz b1_ss");
+  system("rm -r b1_ss");
+
+  Alien::SuiteSparseArchiveSystemReader archive_system_reader("b1_ss.tar.gz");
+
+  Alien::Matrix A;
+  Alien::Vector vec;
+
+  archive_system_reader.read(A);
+  archive_system_reader.read(vec);
+
+  ASSERT_EQ(7,A.rowSpace().size());
+  ASSERT_EQ(7,A.colSpace().size());
+
+  ASSERT_EQ(7,vec.space().size());
+
+  system("rm b1_ss.tar.gz");
 }
