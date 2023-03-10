@@ -30,7 +30,7 @@ namespace Alien
 class Matrix;
 class Vector;
 
-class SuiteSparseArchiveSystemReader
+class ALIEN_EXPORT SuiteSparseArchiveSystemReader
 {
  public:
   SuiteSparseArchiveSystemReader() = delete;

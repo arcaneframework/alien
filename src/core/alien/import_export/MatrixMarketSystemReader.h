@@ -26,7 +26,7 @@
 namespace Alien
 {
 
-class MatrixMarketSystemReader
+class ALIEN_EXPORT MatrixMarketSystemReader
 {
  public:
   MatrixMarketSystemReader() = delete;

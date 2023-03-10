@@ -17,7 +17,8 @@
 * SPDX-License-Identifier: Apache-2.0
 */
 #include <string>
+#include <alien/AlienExport.h>
 
-void createMMMatrixFile(std::string const& file_name);
-void createMMRhsFile(std::string const& file_name);
-void createSSArchive(std::string const& base_name);
+ALIEN_EXPORT void createMMMatrixFile(std::string const& file_name);
+ALIEN_EXPORT void createMMRhsFile(std::string const& file_name);
+ALIEN_EXPORT void createSSArchive(std::string const& base_name);
