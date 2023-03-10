@@ -34,7 +34,7 @@ class MatrixMarketSystemReader
   MatrixMarketSystemReader& operator=(MatrixMarketSystemReader const&) = delete;
 
   explicit MatrixMarketSystemReader(std::string const& filename);
-  virtual ~MatrixMarketSystemReader();
+  ~MatrixMarketSystemReader();
 
   template <typename MatrixT>
   void readMatrix(MatrixT& A);

@@ -38,7 +38,7 @@ class SuiteSparseArchiveSystemReader
   SuiteSparseArchiveSystemReader& operator=(SuiteSparseArchiveSystemReader const&) = delete;
 
   explicit SuiteSparseArchiveSystemReader(std::string const& filename);
-  virtual ~SuiteSparseArchiveSystemReader();
+  ~SuiteSparseArchiveSystemReader();
 
   template <typename MatrixT>
   void readMatrix(MatrixT& A);
