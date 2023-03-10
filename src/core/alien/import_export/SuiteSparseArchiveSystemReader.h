@@ -83,7 +83,7 @@ void SuiteSparseArchiveSystemReader::readMatrix(MatrixT& A)
   }
 
   LibArchiveReader reader(m_archive);
-  loadMMMatrixFromReader<MatrixT,LibArchiveReader>(A, reader);
+  loadMMMatrixFromReader<MatrixT, LibArchiveReader>(A, reader);
 
   r = archive_read_close(m_archive);
   if (r != ARCHIVE_OK) {
@@ -125,7 +125,7 @@ void SuiteSparseArchiveSystemReader::readVector(VectorT& rhs)
   if (vector_found) // vector is not always present
   {
     LibArchiveReader reader(m_archive);
-    loadMMRhsFromReader<VectorT,LibArchiveReader>(rhs, reader);
+    loadMMRhsFromReader<VectorT, LibArchiveReader>(rhs, reader);
   }
 
   r = archive_read_close(m_archive);

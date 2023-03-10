@@ -36,17 +36,17 @@ class MatrixMarketSystemReader
   explicit MatrixMarketSystemReader(std::string const& filename);
   virtual ~MatrixMarketSystemReader();
 
-  template<typename MatrixT>
+  template <typename MatrixT>
   void readMatrix(MatrixT& A);
 
-  template<typename VectorT>
+  template <typename VectorT>
   void readVector(VectorT& rhs);
 
  private:
   std::string m_filename;
 };
 
-template<typename MatrixT>
+template <typename MatrixT>
 void MatrixMarketSystemReader::readMatrix(MatrixT& A)
 {
   std::fstream file_stream(m_filename, std::ios::in);
@@ -56,10 +56,10 @@ void MatrixMarketSystemReader::readMatrix(MatrixT& A)
   }
 
   FStreamReader reader(&file_stream);
-  loadMMMatrixFromReader<MatrixT,FStreamReader>(A, reader);
+  loadMMMatrixFromReader<MatrixT, FStreamReader>(A, reader);
 }
 
-template<typename VectorT>
+template <typename VectorT>
 void MatrixMarketSystemReader::readVector(VectorT& rhs)
 {
   std::fstream file_stream(m_filename, std::ios::in);
@@ -69,7 +69,7 @@ void MatrixMarketSystemReader::readVector(VectorT& rhs)
   }
 
   FStreamReader reader(&file_stream);
-  loadMMRhsFromReader<VectorT,FStreamReader>(rhs, reader);
+  loadMMRhsFromReader<VectorT, FStreamReader>(rhs, reader);
 }
 
 } // namespace Alien

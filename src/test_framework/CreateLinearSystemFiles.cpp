@@ -167,15 +167,15 @@ void createSSArchive(std::string const& base_name)
   ".3435885\n"
   ".7467878\n";
 
-  system(("rm -rf "+base_name).c_str());
-  system(("mkdir "+base_name).c_str());
+  system(("rm -rf " + base_name).c_str());
+  system(("mkdir " + base_name).c_str());
   {
-    std::fstream mat_file_stream(base_name+"/"+base_name+".mtx", std::ios_base::out);
+    std::fstream mat_file_stream(base_name + "/" + base_name + ".mtx", std::ios_base::out);
     mat_file_stream << mat;
-    std::fstream rhs_file_stream(base_name+"/"+base_name+"_b.mtx", std::ios_base::out);
+    std::fstream rhs_file_stream(base_name + "/" + base_name + "_b.mtx", std::ios_base::out);
     rhs_file_stream << rhs;
   }
 
-  system(("tar -zcf "+base_name+".tar.gz "+base_name).c_str());
-  system(("rm -r "+base_name).c_str());
+  system(("tar -zcf " + base_name + ".tar.gz " + base_name).c_str());
+  system(("rm -r " + base_name).c_str());
 }

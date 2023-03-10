@@ -150,7 +150,7 @@ bool readMMHeaderFromReader(const std::string& mm_type, ReaderT& reader)
   return std::string(param4) == std::string("symmetric");
 }
 
-template <typename MatrixT,typename ReaderT>
+template <typename MatrixT, typename ReaderT>
 void loadMMMatrixFromReader(MatrixT& A, ReaderT& reader)
 {
   bool is_symmetric = readMMHeaderFromReader("coordinate", reader);
@@ -162,7 +162,7 @@ void loadMMMatrixFromReader(MatrixT& A, ReaderT& reader)
     throw FatalErrorException(__PRETTY_FUNCTION__, "IOError");
   }
 
-  Alien::MatrixDistribution dist(n,m,n,nullptr);
+  Alien::MatrixDistribution dist(n, m, n, nullptr);
 
   A = MatrixT(dist);
 
@@ -187,7 +187,7 @@ void loadMMMatrixFromReader(MatrixT& A, ReaderT& reader)
   }
 }
 
-template <typename VectorT,typename ReaderT>
+template <typename VectorT, typename ReaderT>
 void loadMMRhsFromReader(VectorT& rhs, ReaderT& reader)
 {
   readMMHeaderFromReader("array", reader);
@@ -204,11 +204,11 @@ void loadMMRhsFromReader(VectorT& rhs, ReaderT& reader)
     throw FatalErrorException(__PRETTY_FUNCTION__, "More than one vector not allowed");
   }
 
-  Alien::VectorDistribution dist(n,n,nullptr);
+  Alien::VectorDistribution dist(n, n, nullptr);
 
   rhs = VectorT(dist);
 
-  Common::VectorWriterT<double,Parameters<LocalIndexer>> vector_writer(rhs);
+  Common::VectorWriterT<double, Parameters<LocalIndexer>> vector_writer(rhs);
 
   for (int i = 0; i < n; ++i) {
     double val = 0;
