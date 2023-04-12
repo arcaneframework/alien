@@ -89,7 +89,9 @@ include(sanitizers)
 
 # First we try to use external arccon and arccore
 if (ALIENDEV_EMBEDDED)
-    cmake_policy(SET CMP0135 NEW)  # DOWNLOAD_EXTRACT_TIMESTAMP instead of archive timestamp
+    if (POLICY CMP0135)
+        cmake_policy(SET CMP0135 NEW)  # DOWNLOAD_EXTRACT_TIMESTAMP instead of archive timestamp
+    endif ()
     include(FetchContent)
 
     FetchContent_Declare(
