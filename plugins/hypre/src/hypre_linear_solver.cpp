@@ -37,10 +37,10 @@ void InternalLinearSolver::checkError(
 const Arccore::String& msg, int ierr, int skipError) const
 {
   if (ierr != 0 && (ierr & ~skipError) != 0) {
-    char hypre_error_msg[256];
-    HYPRE_DescribeError(ierr, hypre_error_msg);
-    alien_fatal([&] {
-      cout() << msg << " failed : " << hypre_error_msg << "[code=" << ierr << "]";
+    alien_fatal([this, msg, ierr] {
+      std::array<char, 256> hypre_error_msg;
+      HYPRE_DescribeError(ierr, hypre_error_msg.data());
+      cout() << msg << " failed : " << hypre_error_msg.data() << "[code=" << ierr << "]";
     });
   }
 }
@@ -68,22 +68,21 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   int (*precond_destroy_function)(HYPRE_Solver) = nullptr;
 
   auto comm = MPI_COMM_WORLD;
-  const auto* mpi_comm_mng = dynamic_cast<Arccore::MessagePassing::Mpi::MpiMessagePassingMng*>(
-  A.distribution().parallelMng());
-  if (mpi_comm_mng)
+  if (const auto* mpi_comm_mng = dynamic_cast<Arccore::MessagePassing::Mpi::MpiMessagePassingMng*>(
+      A.distribution().parallelMng())) {
     comm = *(mpi_comm_mng->getMPIComm());
-
+  }
   std::string precond_name = "undefined";
   switch (m_options.preconditioner()) {
-  case OptionTypes::NoPC:
+  case OptionTypes::ePreconditioner::NoPC:
     precond_name = "none";
     break;
-  case OptionTypes::DiagPC:
+  case OptionTypes::ePreconditioner::DiagPC:
     precond_name = "diag";
     precond_solve_function = HYPRE_ParCSRDiagScale;
     precond_setup_function = HYPRE_ParCSRDiagScaleSetup;
     break;
-  case OptionTypes::AMGPC:
+  case OptionTypes::ePreconditioner::AMGPC:
     precond_name = "amg";
     checkError("Hypre AMG preconditioner", HYPRE_BoomerAMGCreate(&preconditioner));
     precond_solve_function = HYPRE_BoomerAMGSolve;
@@ -94,11 +93,21 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
     HYPRE_BoomerAMGSetMaxIter(preconditioner, 1);
     HYPRE_BoomerAMGSetTol(preconditioner, 0.0);
 
-    HYPRE_BoomerAMGSetStrongThreshold(preconditioner, 0.5); // Better for 3d ?
+    switch (m_options.problemKind()) {
+    case Hypre::OptionTypes::eProblem::Geometric_2D:
+      HYPRE_BoomerAMGSetStrongThreshold(preconditioner, 0.25); // Better for 2d ?
+      break;
+    case Hypre::OptionTypes::eProblem::Geometric_3D:
+      HYPRE_BoomerAMGSetStrongThreshold(preconditioner, 0.5); // Better for 3d ?
+      break;
+    case Hypre::OptionTypes::eProblem::Default:
+      // do nothing
+      break;
+    }
 
-    // HYPRE_BoomerAMGSetPrintLevel(preconditioner, 1); /* print amg solution info */
+    // HYPRE_BoomerAMGSetPrintLevel(preconditioner, 1); // print amg solution info
 
-    //#ifdef ALIEN_HYPRE_DEVICE
+#ifdef ALIEN_HYPRE_DEVICE
     // GPU only support a subset of paramater values.
     // see https://hypre.readthedocs.io/en/latest/solvers-boomeramg.html#gpu-supported-options
     HYPRE_BoomerAMGSetRelaxType(preconditioner, 18); /* 3, 4, 6, 7, 18, 11, 12 */
@@ -109,9 +118,9 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
     HYPRE_BoomerAMGSetAggNumLevels(preconditioner, 5);
     HYPRE_BoomerAMGSetKeepTranspose(preconditioner, true); /* keep transpose to avoid SpMTV */
     HYPRE_BoomerAMGSetRAP2(preconditioner, false); /* RAP in two multiplications (default: FALSE) */
-    //#endif // ALIEN_HYPRE_DEVICE
+#endif // ALIEN_HYPRE_DEVICE
     break;
-  case OptionTypes::ParaSailsPC:
+  case OptionTypes::ePreconditioner::ParaSailsPC:
     precond_name = "parasails";
     checkError(
     "Hypre ParaSails preconditioner", HYPRE_ParaSailsCreate(comm, &preconditioner));
@@ -119,7 +128,7 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
     precond_setup_function = HYPRE_ParaSailsSetup;
     precond_destroy_function = HYPRE_ParaSailsDestroy;
     break;
-  case OptionTypes::EuclidPC:
+  case OptionTypes::ePreconditioner::EuclidPC:
     precond_name = "euclid";
     checkError("Hypre Euclid preconditioner", HYPRE_EuclidCreate(comm, &preconditioner));
     precond_solve_function = HYPRE_EuclidSolve;
@@ -127,7 +136,7 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
     precond_destroy_function = HYPRE_EuclidDestroy;
     break;
   default:
-    alien_fatal([&] { cout() << "Undefined Hypre preconditioner option"; });
+    alien_fatal([this] { cout() << "Undefined Hypre preconditioner option"; });
     break;
   }
 
@@ -149,7 +158,7 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
 
   std::string solver_name = "undefined";
   switch (m_options.solver()) {
-  case OptionTypes::AMG:
+  case OptionTypes::eSolver::AMG:
     solver_name = "amg";
     checkError("Hypre AMG solver", HYPRE_BoomerAMGCreate(&solver));
     if (output_level > 0)
@@ -164,7 +173,7 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
     HYPRE_BoomerAMGGetFinalRelativeResidualNorm;
     solver_destroy_function = HYPRE_BoomerAMGDestroy;
     break;
-  case OptionTypes::GMRES:
+  case OptionTypes::eSolver::GMRES:
     solver_name = "gmres";
     checkError("Hypre GMRES solver", HYPRE_ParCSRGMRESCreate(comm, &solver));
     checkError(
@@ -179,7 +188,7 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
     HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm;
     solver_destroy_function = HYPRE_ParCSRGMRESDestroy;
     break;
-  case OptionTypes::CG:
+  case OptionTypes::eSolver::CG:
     solver_name = "cg";
     checkError("Hypre CG solver", HYPRE_ParCSRPCGCreate(comm, &solver));
     checkError(
@@ -196,7 +205,7 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
     HYPRE_ParCSRPCGGetFinalRelativeResidualNorm;
     solver_destroy_function = HYPRE_ParCSRPCGDestroy;
     break;
-  case OptionTypes::BiCGStab:
+  case OptionTypes::eSolver::BiCGStab:
     solver_name = "bicgs";
     checkError("Hypre BiCGStab solver", HYPRE_ParCSRBiCGSTABCreate(comm, &solver));
     checkError("Hypre BiCGStab solver SetMaxIter",
@@ -211,7 +220,7 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
     HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm;
     solver_destroy_function = HYPRE_ParCSRBiCGSTABDestroy;
     break;
-  case OptionTypes::Hybrid:
+  case OptionTypes::eSolver::Hybrid:
     solver_name = "hybrid";
     checkError("Hypre Hybrid solver", HYPRE_ParCSRHybridCreate(&solver));
     // checkError("Hypre Hybrid solver
@@ -236,7 +245,7 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
     solver_destroy_function = HYPRE_ParCSRHybridDestroy;
     break;
   default:
-    alien_fatal([&] { cout() << "Undefined solver option"; });
+    alien_fatal([this] { cout() << "Undefined solver option"; });
     break;
   }
 
@@ -249,7 +258,7 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   }
   else {
     if (precond_solve_function) {
-      alien_fatal([&] {
+      alien_fatal([this, solver_name] {
         cout() << "Hypre " << solver_name << " solver cannot accept preconditioner";
       });
     }
@@ -281,18 +290,18 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   error = (*solver_solve_function)(solver, par_a, par_rhs, par_x);
   m_status.succeeded = (error == 0);
 
-  //if (m_status.succeeded) {
-  checkError("Hypre " + solver_name + " solver GetNumIterations",
-             (*solver_get_num_iterations_function)(solver, &m_status.iteration_count));
-  checkError("Hypre " + solver_name + " solver GetFinalResidual",
-             (*solver_get_final_relative_residual_function)(solver, &m_status.residual));
+  if (m_status.succeeded) {
+    checkError("Hypre " + solver_name + " solver GetNumIterations",
+               (*solver_get_num_iterations_function)(solver, &m_status.iteration_count));
+    checkError("Hypre " + solver_name + " solver GetFinalResidual",
+               (*solver_get_final_relative_residual_function)(solver, &m_status.residual));
 
-  m_status.succeeded = (m_status.iteration_count < max_it) || (m_status.succeeded == max_it && m_status.residual <= rtol);
-  //  }
-  //  else {
-  //    // Solver is not converged. Clear Hypre errors for subsequent calls.
-  //    HYPRE_ClearAllErrors();
-  //  }
+    m_status.succeeded = (m_status.iteration_count < max_it) || (m_status.succeeded == max_it && m_status.residual <= rtol);
+  }
+  else {
+    // Solver is not converged. Clear Hypre errors for subsequent calls.
+    HYPRE_ClearAllErrors();
+  }
 
   checkError(
   "Hypre " + solver_name + " solver Destroy", (*solver_destroy_function)(solver));
@@ -304,9 +313,9 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
   m_total_iter_num += m_status.iteration_count;
   tsolve = MPI_Wtime() - tsolve;
 
-  if (mpi_comm_mng && mpi_comm_mng->commRank() == 0) {
-    std::cerr << "on " << mpi_comm_mng->commSize() << " solve = " << tsolve << " s, iter = " << m_status.iteration_count << " and res = " << m_status.residual << std::endl;
-  }
+  //  if (mpi_comm_mng && mpi_comm_mng->commRank() == 0) {
+  //    std::cerr << "on " << mpi_comm_mng->commSize() << " solve = " << tsolve << " s, iter = " << m_status.iteration_count << " and res = " << m_status.residual << std::endl;
+  //  }
   m_total_solve_time += tsolve;
   return m_status.succeeded;
 }
