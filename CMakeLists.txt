@@ -94,12 +94,12 @@ if (ALIENDEV_EMBEDDED)
 
     FetchContent_Declare(
             Arccon
-            URL https://github.com/arcaneframework/framework/releases/download/arcane-v3.5.7.0/arccon-1.2.0.src.tar.gz
+            URL https://github.com/arcaneframework/framework/releases/download/arccon-v1.5.0/arccon-1.5.0.src.tar.gz
     )
 
     FetchContent_Declare(
             Arccore
-            URL https://github.com/arcaneframework/framework/releases/download/arccore-v2.0.11.0/arccore-2.0.11.0.src.tar.gz
+            URL https://github.com/arcaneframework/framework/releases/download/arccore-v2.2.0.0/arccore-2.2.0.0.src.tar.gz
     )
     set(FRAMEWORK_EXPORT_NAME AlienFrameworkTargets)
 
