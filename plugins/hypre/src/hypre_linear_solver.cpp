@@ -19,10 +19,7 @@
 #include "hypre_linear_solver.h"
 
 #include <HYPRE_parcsr_ls.h>
-#include <HYPRE_parcsr_mv.h>
-
-#include <_hypre_utilities.h>
-#include <_hypre_parcsr_mv.h>
+#include <HYPRE_krylov.h>
 
 namespace Alien
 {
@@ -194,7 +191,7 @@ bool InternalLinearSolver::solve(const Matrix& A, const Vector& b, Vector& x)
     checkError(
     "Hypre CG solver SetMaxIter", HYPRE_ParCSRPCGSetMaxIter(solver, max_it));
     checkError("Hypre CG explicit residual test", HYPRE_PCGSetRecomputeResidual(solver, true));
-    checkError("Hypre CG use two norm stopping criteria", HYPRE_PCGSetTwoNorm(solver, true));
+    checkError("Hypre CG use two norm stopping criteria", HYPRE_ParCSRPCGSetTwoNorm(solver, true));
     solver_set_print_level_function = HYPRE_ParCSRPCGSetPrintLevel;
     solver_set_tol_function = HYPRE_ParCSRPCGSetTol;
     solver_set_precond_function = HYPRE_ParCSRPCGSetPrecond;
