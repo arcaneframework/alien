@@ -31,15 +31,6 @@ class DoKLinearSolver;
 class DoKMatrix;
 class DoKVector;
 class Space;
-template <class Matrix, class Vector>
-class IInternalLinearAlgebra;
-template <class Matrix, class Vector>
-class IInternalLinearSolver;
-
-extern IInternalLinearAlgebra<DoKMatrix, DoKVector>* DoKLinearAlgebraFactory();
-
-extern IInternalLinearSolver<DoKMatrix, DoKVector>* DoKLinearSolverFactory(
-IMessagePassingMng* p_mng);
 
 /*---------------------------------------------------------------------------*/
 
@@ -52,15 +43,8 @@ namespace BackEnd::tag
 template <>
 struct AlgebraTraits<BackEnd::tag::DoK>
 {
-  typedef DoKMatrix matrix_type;
-  typedef DoKVector vector_type;
-  typedef IInternalLinearAlgebra<matrix_type, vector_type> algebra_type;
-  typedef IInternalLinearSolver<matrix_type, vector_type> solver_type;
-  static algebra_type* algebra_factory() { return DoKLinearAlgebraFactory(); }
-  static solver_type* solver_factory(IMessagePassingMng* p_mng)
-  {
-    return DoKLinearSolverFactory(p_mng);
-  }
+  using matrix_type = DoKMatrix;
+  using vector_type = DoKVector;
   static BackEndId name() { return "DoK"; }
 };
 
