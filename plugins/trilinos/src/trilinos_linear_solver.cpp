@@ -157,16 +157,16 @@ InternalLinearSolver::algebra() const
 }
 
 ALIEN_TRILINOS_EXPORT
-IInternalLinearSolver<Matrix, Vector>*
+std::unique_ptr<IInternalLinearSolver<Matrix, Vector>>
 InternalLinearSolverFactory(const Options& options)
 {
-  return new InternalLinearSolver(options);
+  return std::make_unique<InternalLinearSolver>(options);
 }
 
 ALIEN_TRILINOS_EXPORT
-IInternalLinearSolver<Matrix, Vector>*
+std::unique_ptr<IInternalLinearSolver<Matrix, Vector>>
 InternalLinearSolverFactory()
 {
-  return new InternalLinearSolver();
+  return std::make_unique<InternalLinearSolver>();
 }
 } // namespace Alien::Trilinos

@@ -164,9 +164,9 @@ void InternalLinearAlgebra::scal(Arccore::Real alpha, Vector& x) const
 }
 
 ALIEN_HYPRE_EXPORT
-IInternalLinearAlgebra<Hypre::Matrix, Hypre::Vector>*
+std::unique_ptr<IInternalLinearAlgebra<Hypre::Matrix, Hypre::Vector>>
 InternalLinearAlgebraFactory()
 {
-  return new Hypre::InternalLinearAlgebra();
+  return std::make_unique<Hypre::InternalLinearAlgebra>();
 }
 } // namespace Alien::Hypre

@@ -145,9 +145,9 @@ void InternalLinearAlgebra::scal(Arccore::Real alpha, Vector& x) const
 }
 
 ALIEN_TRILINOS_EXPORT
-IInternalLinearAlgebra<Trilinos::Matrix, Trilinos::Vector>*
+std::unique_ptr<IInternalLinearAlgebra<Trilinos::Matrix, Trilinos::Vector>>
 InternalLinearAlgebraFactory()
 {
-  return new Trilinos::InternalLinearAlgebra();
+  return std::make_unique<Trilinos::InternalLinearAlgebra>();
 }
 } // namespace Alien::Trilinos

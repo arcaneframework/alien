@@ -31,11 +31,11 @@ class Vector;
 
 class Options;
 
-extern IInternalLinearSolver<Matrix, Vector>* InternalLinearSolverFactory(const Options& options);
+extern std::unique_ptr<IInternalLinearSolver<Matrix, Vector>> InternalLinearSolverFactory(const Options& options);
 
-extern IInternalLinearSolver<Matrix, Vector>* InternalLinearSolverFactory();
+extern std::unique_ptr<IInternalLinearSolver<Matrix, Vector>> InternalLinearSolverFactory();
 
-extern IInternalLinearAlgebra<Matrix, Vector>* InternalLinearAlgebraFactory();
+extern std::unique_ptr<IInternalLinearAlgebra<Matrix, Vector>> InternalLinearAlgebraFactory();
 } // namespace Alien::Ginkgo
 
 namespace Alien::BackEnd::tag
@@ -58,19 +58,19 @@ struct AlgebraTraits<BackEnd::tag::ginkgo>
   using solver_type = IInternalLinearSolver<matrix_type, vector_type>;
 
   // factory to build algebra
-  static auto algebra_factory()
+  static std::unique_ptr<algebra_type> algebra_factory()
   {
     return Ginkgo::InternalLinearAlgebraFactory();
   }
 
   // factories to build solver
-  static auto solver_factory(const options_type& options)
+  static std::unique_ptr<solver_type> solver_factory(const options_type& options)
   {
     return Ginkgo::InternalLinearSolverFactory(options);
   }
 
   // factories to build default solver
-  static auto solver_factory() { return Ginkgo::InternalLinearSolverFactory(); }
+  static std::unique_ptr<solver_type> solver_factory() { return Ginkgo::InternalLinearSolverFactory(); }
 
   static BackEndId name() { return "ginkgo"; }
 };
