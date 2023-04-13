@@ -38,16 +38,16 @@ using namespace Arccore;
 template class ALIEN_EXPORT LinearAlgebra<BackEnd::tag::simplecsr>;
 template class ALIEN_EXPORT LinearAlgebraExpr<BackEnd::tag::simplecsr>;
 
-ALIEN_EXPORT IInternalLinearAlgebra<SimpleCSRMatrix<Real>, SimpleCSRVector<Real>>*
+ALIEN_EXPORT std::unique_ptr<IInternalLinearAlgebra<SimpleCSRMatrix<Real>, SimpleCSRVector<Real>>>
 SimpleCSRInternalLinearAlgebraFactory()
 {
-  return new SimpleCSRInternalLinearAlgebra();
+  return std::make_unique<SimpleCSRInternalLinearAlgebra>();
 }
 
-ALIEN_EXPORT IInternalLinearAlgebraExpr<SimpleCSRMatrix<Real>, SimpleCSRVector<Real>>*
+ALIEN_EXPORT std::unique_ptr<IInternalLinearAlgebraExpr<SimpleCSRMatrix<Real>, SimpleCSRVector<Real>>>
 SimpleCSRInternalLinearAlgebraExprFactory()
 {
-  return new SimpleCSRInternalLinearAlgebraExpr();
+  return std::make_unique<SimpleCSRInternalLinearAlgebraExpr>();
 }
 
 /*---------------------------------------------------------------------------*/
@@ -262,7 +262,7 @@ SimpleCSRInternalLinearAlgebraExpr::SimpleCSRInternalLinearAlgebraExpr()
 
 /*---------------------------------------------------------------------------*/
 
-SimpleCSRInternalLinearAlgebraExpr::~SimpleCSRInternalLinearAlgebraExpr() {}
+SimpleCSRInternalLinearAlgebraExpr::~SimpleCSRInternalLinearAlgebraExpr() = default;
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
