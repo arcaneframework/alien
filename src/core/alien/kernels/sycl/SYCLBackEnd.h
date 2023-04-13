@@ -57,8 +57,8 @@ struct SYCLBEllPackTraits
   // clang-format on
 };
 
-extern SYCLBEllPackTraits<Real>::AlgebraType* SYCLInternalLinearAlgebraFactory();
-extern SYCLBEllPackTraits<Real>::AlgebraExprType*
+extern std::unique_ptr<SYCLBEllPackTraits<Real>::AlgebraType> SYCLInternalLinearAlgebraFactory();
+extern std::unique_ptr<SYCLBEllPackTraits<Real>::AlgebraExprType>
 SYCLInternalLinearAlgebraExprFactory();
 
 /*---------------------------------------------------------------------------*/
@@ -82,12 +82,12 @@ struct AlgebraTraits<BackEnd::tag::sycl>
   typedef SYCLBEllPackTraits<Real>::AlgebraExprType algebra_expr_type;
   // clang-format on
 
-  static algebra_type* algebra_factory(
+  static std::unique_ptr<algebra_type> algebra_factory(
   IMessagePassingMng* p_mng ALIEN_UNUSED_PARAM = nullptr)
   {
     return SYCLInternalLinearAlgebraFactory();
   }
-  static algebra_expr_type* algebra_expr_factory(
+  static std::unique_ptr<algebra_expr_type> algebra_expr_factory(
   IMessagePassingMng* p_mng ALIEN_UNUSED_PARAM = nullptr)
   {
     return SYCLInternalLinearAlgebraExprFactory();

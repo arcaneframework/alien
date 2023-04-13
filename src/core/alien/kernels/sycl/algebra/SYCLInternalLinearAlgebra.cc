@@ -57,16 +57,16 @@ using namespace Arccore;
 template class ALIEN_EXPORT LinearAlgebra<BackEnd::tag::sycl>;
 template class ALIEN_EXPORT LinearAlgebraExpr<BackEnd::tag::sycl>;
 
-ALIEN_EXPORT IInternalLinearAlgebra<SYCLBEllPackMatrix<Real>, SYCLVector<Real>>*
+ALIEN_EXPORT std::unique_ptr<IInternalLinearAlgebra<SYCLBEllPackMatrix<Real>, SYCLVector<Real>>>
 SYCLInternalLinearAlgebraFactory()
 {
-  return new SYCLInternalLinearAlgebra();
+  return std::make_unique<SYCLInternalLinearAlgebra>();
 }
 
-ALIEN_EXPORT IInternalLinearAlgebraExpr<SYCLBEllPackMatrix<Real>, SYCLVector<Real>>*
+ALIEN_EXPORT std::unique_ptr<IInternalLinearAlgebraExpr<SYCLBEllPackMatrix<Real>, SYCLVector<Real>>>
 SYCLInternalLinearAlgebraExprFactory()
 {
-  return new SYCLInternalLinearAlgebraExpr();
+  return std::make_unique<SYCLInternalLinearAlgebraExpr>();
 }
 
 /*---------------------------------------------------------------------------*/
