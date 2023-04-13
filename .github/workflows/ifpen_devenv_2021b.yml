@@ -1,6 +1,8 @@
 name: IFPEN devenv 2021b
 
 on:
+  push:
+    branches: [ develop ]
   workflow_dispatch:
 
 env:
@@ -46,7 +48,7 @@ env:
   CT_OPTS: "--timeout 300 --output-on-failure"
 
 jobs:
-  build :
+  build:
     name: ${{matrix.config.name}}
     runs-on: ubuntu-latest
     timeout-minutes: 120
