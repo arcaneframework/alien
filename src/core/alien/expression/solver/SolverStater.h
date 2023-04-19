@@ -48,7 +48,6 @@ class BaseSolverStater
   virtual ~BaseSolverStater() {}
 
  public:
-
   static Real getVirtualTimeCounter() { return _getVirtualTime(); }
 
   static Real getRealTimeCounter() { return _getRealTime(); }
@@ -63,6 +62,7 @@ class BaseSolverStater
       m_start_counter = m_is_virtual ? BaseSolverStater::getVirtualTimeCounter()
                                      : BaseSolverStater::getRealTimeCounter();
     }
+
     virtual ~Sentry()
     {
       Real end_counter = m_is_virtual ? BaseSolverStater::getVirtualTimeCounter()
@@ -92,10 +92,9 @@ class BaseSolverStater
   Integer m_suspend_count;
   Real m_real_time; //!< 'wall clock' time for the lastest start or stop
   Real m_cpu_time; //!< 'cpu' time for the lastest start or stop
-
 };
 
-template<typename SolverT>
+template <typename SolverT>
 class SolverStater : public BaseSolverStater
 {
  public:
@@ -106,14 +105,13 @@ class SolverStater : public BaseSolverStater
   , m_solver(solver)
   {}
 
-
   /** Destructeur de la classe */
   virtual ~SolverStater() {}
 
  public:
   void reset()
   {
-    m_solver->getSolverStat().reset() ;
+    m_solver->getSolverStat().reset();
 
     m_state = eNone;
     m_suspend_count = 0;
@@ -132,7 +130,7 @@ class SolverStater : public BaseSolverStater
     _stopTimer();
     m_state = eNone;
 
-    auto& solver_stat = m_solver->getSolverStat() ;
+    auto& solver_stat = m_solver->getSolverStat();
     solver_stat.m_initialization_time += m_real_time;
     solver_stat.m_initialization_cpu_time += m_cpu_time;
   }
@@ -148,7 +146,7 @@ class SolverStater : public BaseSolverStater
   {
     ALIEN_ASSERT((m_state == ePrepare), ("Unexpected SolverStater state %d", m_state));
     _stopTimer();
-    auto& solver_stat = m_solver->getSolverStat() ;
+    auto& solver_stat = m_solver->getSolverStat();
     if (m_suspend_count == 0) {
       solver_stat.m_last_prepare_time = m_real_time;
       solver_stat.m_last_prepare_cpu_time = m_cpu_time;
@@ -167,7 +165,7 @@ class SolverStater : public BaseSolverStater
       suspendPrepareMeasure();
     ALIEN_ASSERT((m_suspend_count > 0), ("Unexpected suspend count"));
 
-    auto& solver_stat = m_solver->getSolverStat() ;
+    auto& solver_stat = m_solver->getSolverStat();
     solver_stat.m_last_prepare_time += m_real_time;
     solver_stat.m_last_prepare_cpu_time += m_cpu_time;
 
@@ -176,7 +174,6 @@ class SolverStater : public BaseSolverStater
     solver_stat.m_prepare_time += solver_stat.m_last_prepare_time;
     solver_stat.m_prepare_cpu_time += solver_stat.m_last_prepare_cpu_time;
   }
-
 
   void startSolveMeasure()
   {
@@ -190,8 +187,8 @@ class SolverStater : public BaseSolverStater
     ALIEN_ASSERT((m_state == eSolve), ("Unexpected SolverStater state %d", m_state));
     _stopTimer();
     m_state = eNone;
-    auto const& status = m_solver->getStatus() ;
-    auto& solver_stat = m_solver->getSolverStat() ;
+    auto const& status = m_solver->getStatus();
+    auto& solver_stat = m_solver->getSolverStat();
     solver_stat.m_last_solve_time = m_real_time;
     solver_stat.m_last_solve_cpu_time = m_cpu_time;
     solver_stat.m_solve_time += solver_stat.m_last_solve_time;
@@ -201,19 +198,17 @@ class SolverStater : public BaseSolverStater
     solver_stat.m_iteration_count += solver_stat.m_last_iteration_count;
   }
 
-
-
  private:
-  SolverT* m_solver = nullptr ;
+  SolverT* m_solver = nullptr;
 };
 
 /*---------------------------------------------------------------------------*/
-template<typename SolverT>
+template <typename SolverT>
 class SolverStatSentry
 {
  private:
   bool m_is_released = false;
-  SolverStater<SolverT> m_solver_stater ;
+  SolverStater<SolverT> m_solver_stater;
   BaseSolverStater::eStateType m_state = BaseSolverStater::eNone;
 
  public:

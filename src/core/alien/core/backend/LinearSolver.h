@@ -104,6 +104,7 @@ class LinearSolver : public ILinearSolver
    * \param[in] pm : new parallel mng
    */
   void updateParallelMng(Arccore::MessagePassing::IMessagePassingMng* pm);
+
   /*!
    * \brief Solve the linear system A * x = b
    * \param[in] A The matrix to invert
@@ -164,7 +165,7 @@ class LinearSolver : public ILinearSolver
  private:
   //! The linear solver kernel
   std::unique_ptr<KernelSolver> m_solver;
-  SolverStater<KernelSolver> m_stater ;
+  SolverStater<KernelSolver> m_stater;
 };
 
 /*---------------------------------------------------------------------------*/
