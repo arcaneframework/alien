@@ -35,6 +35,7 @@ namespace Alien
 class ALIEN_EXPORT SolverStat
 {
  public:
+  template<typename SolverT> friend class SolverStater ;
   /** Constructeur de la classe */
   SolverStat();
 
@@ -56,6 +57,8 @@ class ALIEN_EXPORT SolverStat
   Real lastPrepareCpuTime() const;
   Real lastSolveTime() const;
   Real lastSolveCpuTime() const;
+
+  void reset() ;
 
  public:
   void print(
