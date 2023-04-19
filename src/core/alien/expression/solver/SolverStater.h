@@ -28,7 +28,7 @@ namespace Alien
 {
 
 /*---------------------------------------------------------------------------*/
-class BaseSolverStater
+class ALIEN_EXPORT BaseSolverStater
 {
  public:
   typedef enum
