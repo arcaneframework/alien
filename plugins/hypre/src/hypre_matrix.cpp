@@ -62,13 +62,18 @@ namespace Alien::Hypre {
                 return ptr;
             }
 
-            ~ArccoreHypreBufferConverter() {
-#ifdef ALIEN_HYPRE_DEVICE
-                if (memory_location != HYPRE_MEMORY_HOST) {
-                  hypre_TFree(ptr, memory_location);
-                }
-#endif // ALIEN_HYPRE_DEVICE
+            ~ArccoreHypreBufferConverter()
+#ifndef ALIEN_HYPRE_DEVICE
+            = default;
+
+#else
+            {
+                            if (memory_location != HYPRE_MEMORY_HOST) {
+                              hypre_TFree(ptr, memory_location);
+                            }
             }
+#endif // ALIEN_HYPRE_DEVICE
+
 
         private:
             HypreType *ptr = nullptr;

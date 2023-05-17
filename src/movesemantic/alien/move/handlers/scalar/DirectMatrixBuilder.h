@@ -34,7 +34,7 @@ namespace Alien::Move {
 
     class ALIEN_MOVESEMANTIC_EXPORT DirectMatrixBuilder {
     public:
-        using MatrixElement = MatrixElementT <Common::DirectMatrixBuilder>;
+        using MatrixElement = MatrixElementT<Common::DirectMatrixBuilder>;
 
         DirectMatrixBuilder(MatrixData &&matrix, const Common::DirectMatrixBuilder::ResetFlag reset_flag,
                             const Common::DirectMatrixBuilder::SymmetricFlag symmetric_flag = Common::DirectMatrixBuilder::SymmetricFlag::eSymmetric)

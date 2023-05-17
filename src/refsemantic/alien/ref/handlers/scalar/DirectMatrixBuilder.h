@@ -94,7 +94,6 @@ namespace Alien {
             return m_builder->stats(ids);
         }
 
-
     private:
         std::unique_ptr<Alien::Common::DirectMatrixBuilder> m_builder;
     };
