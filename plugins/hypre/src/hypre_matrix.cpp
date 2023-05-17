@@ -37,142 +37,150 @@ using HypreId = HYPRE_BigInt;
 using HypreId = HYPRE_Int;
 #endif
 
-namespace Alien::Hypre
-{
+namespace Alien::Hypre {
 
-namespace
-{
-  template <typename HypreType>
-  class ArccoreHypreBufferConverter
-  {
-   public:
-    template <typename ArccoreArray> explicit ArccoreHypreBufferConverter(ArccoreArray array)
-    : ptr(array.data())
-    {
-      assert(sizeof(typename ArccoreArray::value_type) == sizeof(HypreType));
+    namespace {
+        template<typename HypreType>
+        class ArccoreHypreBufferConverter {
+        public:
+            template<typename ArccoreArray>
+            explicit ArccoreHypreBufferConverter(ArccoreArray array)
+                    : ptr(array.data()) {
+                assert(sizeof(typename ArccoreArray::value_type) == sizeof(HypreType));
 #ifdef ALIEN_HYPRE_DEVICE
-      HYPRE_MemoryLocation memory_location;
-      HYPRE_GetMemoryLocation(&memory_location);
-      if (memory_location != HYPRE_MEMORY_HOST) {
-        // Must copy data from host to device
-        ptr = hypre_CTAlloc(HypreType, array.size(), memory_location);
-        hypre_TMemcpy(ptr, array.data(), HypreType, array.size(), memory_location, HYPRE_MEMORY_HOST);
-      }
+                HYPRE_MemoryLocation memory_location;
+                HYPRE_GetMemoryLocation(&memory_location);
+                if (memory_location != HYPRE_MEMORY_HOST) {
+                  // Must copy data from host to device
+                  ptr = hypre_CTAlloc(HypreType, array.size(), memory_location);
+                  hypre_TMemcpy(ptr, array.data(), HypreType, array.size(), memory_location, HYPRE_MEMORY_HOST);
+                }
 #endif // ALIEN_HYPRE_DEVICE
+            }
+
+            HypreType *get() {
+                return ptr;
+            }
+
+            ~ArccoreHypreBufferConverter() {
+#ifdef ALIEN_HYPRE_DEVICE
+                if (memory_location != HYPRE_MEMORY_HOST) {
+                  hypre_TFree(ptr, memory_location);
+                }
+#endif // ALIEN_HYPRE_DEVICE
+            }
+
+        private:
+            HypreType *ptr = nullptr;
+#ifdef ALIEN_HYPRE_DEVICE
+            HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
+#endif // ALIEN_HYPRE_DEVICE
+        };
+
+    } // namespace
+
+    Matrix::Matrix(const MultiMatrixImpl *multi_impl)
+            : IMatrixImpl(multi_impl, AlgebraTraits<BackEnd::tag::hypre>::name()) {
+        auto const *pm = dynamic_cast<Arccore::MessagePassing::Mpi::MpiMessagePassingMng *>(multi_impl->distribution().parallelMng());
+        m_comm = pm ? (*pm->getMPIComm()) : MPI_COMM_WORLD;
+
+        hypre_init_if_needed(m_comm);
+        const auto &row_space = multi_impl->rowSpace();
+        if (const auto &col_space = multi_impl->colSpace(); row_space.size() != col_space.size())
+            throw Arccore::FatalErrorException("Hypre matrix must be square");
+
+        init();
     }
 
-    HypreType* get()
-    {
-      return ptr;
+    Matrix::~Matrix() {
+        if (m_hypre)
+            HYPRE_IJMatrixDestroy(m_hypre);
     }
 
-    ~ArccoreHypreBufferConverter()
-    {
-#ifdef ALIEN_HYPRE_DEVICE
-      if (memory_location != HYPRE_MEMORY_HOST) {
-        hypre_TFree(ptr, memory_location);
-      }
-#endif // ALIEN_HYPRE_DEVICE
+    void Matrix::init() {
+        auto ilower = this->distribution().rowOffset();
+        auto iupper = ilower + this->distribution().localRowSize() - 1;
+        auto ierr = HYPRE_IJMatrixCreate(m_comm, ilower, iupper, ilower, iupper, &m_hypre);
+        ierr |= HYPRE_IJMatrixSetObjectType(m_hypre, HYPRE_PARCSR);
+        ierr |= HYPRE_IJMatrixInitialize(m_hypre);
+
+        if (ierr) {
+            throw Arccore::FatalErrorException(A_FUNCINFO, "Hypre Initialisation failed");
+        }
     }
 
-   private:
-    HypreType* ptr = nullptr;
-#ifdef ALIEN_HYPRE_DEVICE
-    HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
-#endif // ALIEN_HYPRE_DEVICE
-  };
+    void Matrix::setProfile(Arccore::ConstArrayView<int> row_sizes) {
+        if (m_hypre)
+            HYPRE_IJMatrixDestroy(m_hypre);
 
-} // namespace
+        init();
+        if (HYPRE_IJMatrixSetRowSizes(m_hypre, row_sizes.data())) {
+            throw Arccore::FatalErrorException(A_FUNCINFO, "Hypre set profile failed");
+        }
+    }
 
-Matrix::Matrix(const MultiMatrixImpl* multi_impl)
-: IMatrixImpl(multi_impl, AlgebraTraits<BackEnd::tag::hypre>::name())
-{
-  auto const* pm = dynamic_cast<Arccore::MessagePassing::Mpi::MpiMessagePassingMng*>(multi_impl->distribution().parallelMng());
-  m_comm = pm ? (*pm->getMPIComm()) : MPI_COMM_WORLD;
+    void Matrix::assemble() {
+        auto ierr = HYPRE_IJMatrixAssemble(m_hypre);
 
-  hypre_init_if_needed(m_comm);
-  const auto& row_space = multi_impl->rowSpace();
-  const auto& col_space = multi_impl->colSpace();
-  if (row_space.size() != col_space.size())
-    throw Arccore::FatalErrorException("Hypre matrix must be square");
+        if (ierr) {
+            throw Arccore::FatalErrorException(A_FUNCINFO, "Hypre assembling failed");
+        }
+    }
 
-  init();
-}
+    void Matrix::setRowValues(int row, Arccore::ConstArrayView<int> cols, Arccore::ConstArrayView<double> values) {
+        int one = 1;
+        auto rows = ArrayView<int>(1, &row);
+        auto ncols = ArrayView<int>(1, &one);
 
-Matrix::~Matrix()
-{
-  if (m_hypre)
-    HYPRE_IJMatrixDestroy(m_hypre);
-}
+        return insertRowsValues(rows, ncols, cols, values, true);
+    }
 
-void Matrix::init()
-{
-  auto ilower = this->distribution().rowOffset();
-  auto iupper = ilower + this->distribution().localRowSize() - 1;
-  auto ierr = HYPRE_IJMatrixCreate(m_comm, ilower, iupper, ilower, iupper, &m_hypre);
-  ierr |= HYPRE_IJMatrixSetObjectType(m_hypre, HYPRE_PARCSR);
-  ierr |= HYPRE_IJMatrixInitialize(m_hypre);
+    void Matrix::insertRowsValues(Arccore::ConstArrayView<int> rows, Arccore::ArrayView<int> ncols,
+                                  Arccore::ConstArrayView<int> cols,
+                                  Arccore::ConstArrayView<double> values, bool set) {
+        // First, check parameters consistency
+        if (rows.size() != ncols.size()) {
+            throw Arccore::FatalErrorException(A_FUNCINFO, "rows and n_cols should have the same size");
+        }
+        if (cols.size() != values.size()) {
+            throw Arccore::FatalErrorException(A_FUNCINFO, "cols and values should have the same size");
+        }
+        if (auto g_size = std::accumulate(ncols.begin(), ncols.end(), 0); g_size != cols.size()) {
+            throw Arccore::FatalErrorException(A_FUNCINFO, "Sum(ncols) != cols.size()");
+        }
 
-  if (ierr) {
-    throw Arccore::FatalErrorException(A_FUNCINFO, "Hypre Initialisation failed");
-  }
-}
+        // Second, create hypre data accessor
+        auto hypre_cols = ArccoreHypreBufferConverter<const HypreId>(cols);
+        auto hypre_values = ArccoreHypreBufferConverter<const HYPRE_Real>(values);
+        auto hypre_ncols = ArccoreHypreBufferConverter<HYPRE_Int>(ncols);
+        auto hypre_rows = ArccoreHypreBufferConverter<const HypreId>(rows);
 
-void Matrix::setProfile(Arccore::ConstArrayView<int> row_sizes)
-{
-  if (m_hypre)
-    HYPRE_IJMatrixDestroy(m_hypre);
+        // Third call hypre.
+        auto hypre_insert = [&](auto inserter) {
+            return inserter(m_hypre, rows.size(), hypre_ncols.get(), hypre_rows.get(), hypre_cols.get(),
+                            hypre_values.get());
+        };
 
-  init();
-  if (HYPRE_IJMatrixSetRowSizes(m_hypre, row_sizes.data())) {
-    throw Arccore::FatalErrorException(A_FUNCINFO, "Hypre set profile failed");
-  }
-}
+        int ierr = 0;
 
-void Matrix::assemble()
-{
-  auto ierr = HYPRE_IJMatrixAssemble(m_hypre);
+        if (set) {
+            ierr = hypre_insert(HYPRE_IJMatrixSetValues);
+        } else {
+            ierr = hypre_insert(HYPRE_IJMatrixAddToValues);
+        }
 
-  if (ierr) {
-    throw Arccore::FatalErrorException(A_FUNCINFO, "Hypre assembling failed");
-  }
-}
+        if (ierr) {
+            auto msg = Arccore::String::format("Cannot set Hypre Matrix Values");
+            throw Arccore::FatalErrorException(A_FUNCINFO, msg);
+        }
+    }
 
-void Matrix::setRowValues(int row, Arccore::ConstArrayView<int> cols, Arccore::ConstArrayView<double> values)
-{
-  int one = 1;
-  auto rows = ArrayView<int>(1, &row);
-  auto ncols = ArrayView<int>(1, &one);
+    void Matrix::addRowValues(int row, Arccore::ConstArrayView<int> cols, Arccore::ConstArrayView<double> values) {
+        int one = 1;
+        auto rows = ArrayView<int>(1, &row);
+        auto ncols = ArrayView<int>(1, &one);
 
-  return setRowsValues(rows, ncols, cols, values);
-}
-
-void Matrix::setRowsValues(Arccore::ConstArrayView<int> rows, Arccore::ArrayView<int> ncols, Arccore::ConstArrayView<int> cols, Arccore::ConstArrayView<double> values)
-{
-  // First, check parameters consistency
-  if (rows.size() != ncols.size()) {
-    throw Arccore::FatalErrorException(A_FUNCINFO, "rows and n_cols should have the same size");
-  }
-  if (cols.size() != values.size()) {
-    throw Arccore::FatalErrorException(A_FUNCINFO, "cols and values should have the same size");
-  }
-  if (auto g_size = std::accumulate(ncols.begin(), ncols.end(), 0); g_size != cols.size()) {
-    throw Arccore::FatalErrorException(A_FUNCINFO, "Sum(ncols) != cols.size()");
-  }
-
-  // Second, create hypre data accessor
-  auto hypre_cols = ArccoreHypreBufferConverter<const HypreId>(cols);
-  auto hypre_values = ArccoreHypreBufferConverter<const HYPRE_Real>(values);
-  auto hypre_ncols = ArccoreHypreBufferConverter<HYPRE_Int>(ncols);
-  auto hypre_rows = ArccoreHypreBufferConverter<const HypreId>(rows);
-
-  // Third call hypre.
-  auto ierr = HYPRE_IJMatrixSetValues(m_hypre, rows.size(), hypre_ncols.get(), hypre_rows.get(), hypre_cols.get(), hypre_values.get());
-
-  if (ierr) {
-    auto msg = Arccore::String::format("Cannot set Hypre Matrix Values");
-    throw Arccore::FatalErrorException(A_FUNCINFO, msg);
-  }
-}
+        return insertRowsValues(rows, ncols, cols, values, false);
+    }
 
 } // namespace Alien::Hypre
