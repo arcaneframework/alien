@@ -31,165 +31,164 @@
 #define USE_VMAP
 
 #ifdef USE_VMAP
+
 #include <alien/utils/VMap.h>
+
 #endif /* USE_VMAP */
 
-namespace Arccore
-{
-class ITraceMng;
-namespace MessagePassing
-{
-  class IMessagePassingMng;
-}
+namespace Arccore {
+    class ITraceMng;
+    namespace MessagePassing {
+        class IMessagePassingMng;
+    }
 } // namespace Arccore
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-namespace Alien
-{
+namespace Alien {
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-template <typename Scalar>
-class SimpleCSRMatrix;
+    template<typename Scalar>
+    class SimpleCSRMatrix;
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-struct DirectMatrixOptions
-{
-  enum ResetFlag
-  {
-    eNoReset,
-    eResetValues,
-    eResetProfile,
-    eResetAllocation
-  };
-  enum ReserveFlag
-  {
-    eResetReservation,
-    eExtendReservation
-  };
-  enum SymmetricFlag
-  {
-    eSymmetric,
-    eUnSymmetric
-  };
-};
+    struct DirectMatrixOptions {
+        enum ResetFlag {
+            eNoReset,
+            eResetValues,
+            eResetProfile,
+            eResetAllocation
+        };
+        enum ReserveFlag {
+            eResetReservation,
+            eExtendReservation
+        };
+        enum SymmetricFlag {
+            eSymmetric,
+            eUnSymmetric
+        };
+    };
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-namespace Common
-{
+    namespace Common {
 
-  /*---------------------------------------------------------------------------*/
-  /*---------------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------------*/
 
-  class ALIEN_EXPORT DirectMatrixBuilder
-  {
-   public:
-    using ResetFlag = DirectMatrixOptions::ResetFlag;
-    using ReserveFlag = DirectMatrixOptions::ReserveFlag;
-    using SymmetricFlag = DirectMatrixOptions::SymmetricFlag;
+        class ALIEN_EXPORT DirectMatrixBuilder {
+        public:
+            using ResetFlag = DirectMatrixOptions::ResetFlag;
+            using ReserveFlag = DirectMatrixOptions::ReserveFlag;
+            using SymmetricFlag = DirectMatrixOptions::SymmetricFlag;
 
-   public:
-    using MatrixElement = MatrixElementT<DirectMatrixBuilder>;
+        public:
+            using MatrixElement = MatrixElementT<DirectMatrixBuilder>;
 
-   public:
-    DirectMatrixBuilder(IMatrix& matrix, ResetFlag reset_flag,
-                        SymmetricFlag symmetric_flag = SymmetricFlag::eSymmetric);
+        public:
+            DirectMatrixBuilder(IMatrix &matrix, ResetFlag reset_flag,
+                                SymmetricFlag symmetric_flag = SymmetricFlag::eSymmetric);
 
-    virtual ~DirectMatrixBuilder();
+            virtual ~DirectMatrixBuilder();
 
-    DirectMatrixBuilder(DirectMatrixBuilder&) = delete;
-    DirectMatrixBuilder(DirectMatrixBuilder&&) = delete;
-    DirectMatrixBuilder& operator=(const DirectMatrixBuilder&) = delete;
-    DirectMatrixBuilder& operator=(DirectMatrixBuilder&&) = delete;
+            DirectMatrixBuilder(DirectMatrixBuilder &) = delete;
 
-   public:
-    MatrixElement operator()(const Integer iIndex, const Integer jIndex)
-    {
-      return MatrixElement(iIndex, jIndex, *this);
-    }
+            DirectMatrixBuilder(DirectMatrixBuilder &&) = delete;
 
-    void reserve(Arccore::Integer n, ReserveFlag flag = ReserveFlag::eResetReservation);
+            DirectMatrixBuilder &operator=(const DirectMatrixBuilder &) = delete;
 
-    void reserve(Arccore::ConstArrayView<Arccore::Integer> indices, Arccore::Integer n,
-                 ReserveFlag flag = ReserveFlag::eResetReservation);
+            DirectMatrixBuilder &operator=(DirectMatrixBuilder &&) = delete;
 
-    void allocate();
+        public:
+            MatrixElement operator()(const Integer iIndex, const Integer jIndex) {
+                return MatrixElement(iIndex, jIndex, *this);
+            }
 
-    void addData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value);
+            void reserve(Arccore::Integer n, ReserveFlag flag = ReserveFlag::eResetReservation);
 
-    void addData(Arccore::Integer iIndex, Arccore::Real factor,
-                 Arccore::ConstArrayView<Arccore::Integer> jIndexes,
-                 Arccore::ConstArrayView<Arccore::Real> jValues);
+            void reserve(Arccore::ConstArrayView<Arccore::Integer> indices, Arccore::Integer n,
+                         ReserveFlag flag = ReserveFlag::eResetReservation);
 
-    void setData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value);
+            void allocate();
 
-    void setData(Arccore::Integer iIndex, Arccore::Real factor,
-                 Arccore::ConstArrayView<Arccore::Integer> jIndexes,
-                 Arccore::ConstArrayView<Arccore::Real> jValues);
+            void addData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value);
 
-    void finalize();
+            void addData(Arccore::Integer iIndex, Arccore::Real factor,
+                         Arccore::ConstArrayView<Arccore::Integer> jIndexes,
+                         Arccore::ConstArrayView<Arccore::Real> jValues);
 
-    void squeeze();
+            void setData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value);
 
-    [[nodiscard]] Arccore::String stats() const;
-    [[nodiscard]] Arccore::String stats(Arccore::IntegerConstArrayView ids) const;
+            void setData(Arccore::Integer iIndex, Arccore::Real factor,
+                         Arccore::ConstArrayView<Arccore::Integer> jIndexes,
+                         Arccore::ConstArrayView<Arccore::Real> jValues);
 
-   protected:
-    IMatrix& m_matrix;
+            void finalize();
 
-    SimpleCSRMatrix<Real>* m_matrix_impl;
+            void squeeze();
 
-    Integer m_local_offset, m_global_size, m_local_size;
-    Integer m_col_global_size;
-    ArrayView<Integer> m_row_starts;
-    ArrayView<Integer> m_cols;
-    ArrayView<Real> m_values;
-    UniqueArray<Integer> m_row_sizes;
+            [[nodiscard]] Arccore::String stats() const;
 
-    ResetFlag m_reset_flag;
-    bool m_allocated;
-    bool m_finalized;
-    bool m_symmetric_profile;
+            [[nodiscard]] Arccore::String stats(Arccore::IntegerConstArrayView ids) const;
 
-    Integer m_nproc;
-    IMessagePassingMng* m_parallel_mng;
-    ITraceMng* m_trace;
+        protected:
+            IMatrix &m_matrix;
+
+            SimpleCSRMatrix<Real> *m_matrix_impl;
+
+            Integer m_local_offset, m_global_size, m_local_size;
+            Integer m_col_global_size;
+            ArrayView<Integer> m_row_starts;
+            ArrayView<Integer> m_cols;
+            ArrayView<Real> m_values;
+            UniqueArray<Integer> m_row_sizes;
+
+            ResetFlag m_reset_flag;
+            bool m_allocated;
+            bool m_finalized;
+            bool m_symmetric_profile;
+
+            Integer m_nproc;
+            IMessagePassingMng *m_parallel_mng;
+            ITraceMng *m_trace;
 
 #ifdef USE_VMAP
-    typedef VMap<Integer, Real> ColValueData;
+            typedef VMap<Integer, Real> ColValueData;
 #else /* USE_VMAP */
-    typedef std::map<Integer, Real> ColValueData;
+            typedef std::map<Integer, Real> ColValueData;
 #endif /* USE_VMAP */
-    typedef std::map<Integer, ColValueData> ExtraRows;
-    ExtraRows m_extras;
+            typedef std::map<Integer, ColValueData> ExtraRows;
+            ExtraRows m_extras;
 
-   private:
-    void computeProfile(Arccore::ConstArrayView<Arccore::Integer> sizes);
-    void updateProfile(Arccore::UniqueArray<Arccore::Integer>& row_starts,
-                       Arccore::UniqueArray<Arccore::Integer>& cols,
-                       Arccore::UniqueArray<Arccore::Real>& values);
+        private:
+            void computeProfile(Arccore::ConstArrayView<Arccore::Integer> sizes);
 
-    class IndexEnumerator;
-    class FullEnumerator;
+            void updateProfile(Arccore::UniqueArray<Arccore::Integer> &row_starts,
+                               Arccore::UniqueArray<Arccore::Integer> &cols,
+                               Arccore::UniqueArray<Arccore::Real> &values);
 
-    template <typename Enumerator>
-    void _stats(std::ostream& o, const Enumerator& e) const;
+            class IndexEnumerator;
 
-    void _startTimer() {}
-    void _stopTimer() {}
-  };
+            class FullEnumerator;
 
-  /*---------------------------------------------------------------------------*/
-  /*---------------------------------------------------------------------------*/
+            template<typename Enumerator>
+            void _stats(std::ostream &o, const Enumerator &e) const;
 
-} // namespace Common
+            void _startTimer() {}
+
+            void _stopTimer() {}
+        };
+
+        /*---------------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------------*/
+
+    } // namespace Common
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/

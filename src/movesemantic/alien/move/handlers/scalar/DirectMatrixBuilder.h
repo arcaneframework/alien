@@ -22,39 +22,91 @@
 #include <alien/utils/MoveObject.h>
 
 #include <alien/move/data/MatrixData.h>
+#include <alien/data/utils/MatrixElement.h>
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-namespace Alien::Move
-{
+namespace Alien::Move {
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-class DirectMatrixBuilder : protected MoveObject<MatrixData>
-, public Common::DirectMatrixBuilder
-{
- public:
-  using Common::DirectMatrixBuilder::ReserveFlag;
-  using Common::DirectMatrixBuilder::ResetFlag;
-  using Common::DirectMatrixBuilder::SymmetricFlag;
+    class ALIEN_MOVESEMANTIC_EXPORT DirectMatrixBuilder {
+    public:
+        using MatrixElement = MatrixElementT <Common::DirectMatrixBuilder>;
 
-  DirectMatrixBuilder(MatrixData&& matrix, const ResetFlag reset_flag,
-                      const SymmetricFlag symmetric_flag = SymmetricFlag::eSymmetric)
-  : MoveObject<MatrixData>(std::move(matrix))
-  , Common::DirectMatrixBuilder(reference(), reset_flag, symmetric_flag)
-  {}
+        DirectMatrixBuilder(MatrixData &&matrix, const Common::DirectMatrixBuilder::ResetFlag reset_flag,
+                            const Common::DirectMatrixBuilder::SymmetricFlag symmetric_flag = Common::DirectMatrixBuilder::SymmetricFlag::eSymmetric)
+                : m_data(std::move(matrix)) {
+            m_builder = std::make_unique<Alien::Common::DirectMatrixBuilder>(m_data, reset_flag, symmetric_flag);
+        }
 
-  virtual ~DirectMatrixBuilder() = default;
+        MatrixElement operator()(const Integer iIndex, const Integer jIndex) {
+            return MatrixElement(iIndex, jIndex, *m_builder.get());
+        }
 
-  MatrixData&& release()
-  {
-    finalize();
+        void reserve(Arccore::Integer n,
+                     Common::DirectMatrixBuilder::ReserveFlag flag = Common::DirectMatrixBuilder::ReserveFlag::eResetReservation) {
+            m_builder->reserve(n, flag);
+        }
 
-    return MoveObject<MatrixData>::release();
-  }
-};
+        void reserve(Arccore::ConstArrayView<Arccore::Integer> indices, Arccore::Integer n,
+                     Common::DirectMatrixBuilder::ReserveFlag flag = Common::DirectMatrixBuilder::ReserveFlag::eResetReservation) {
+            m_builder->reserve(indices, n, flag);
+        }
+
+        void allocate() {
+            m_builder->allocate();
+        }
+
+        void addData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value) {
+            m_builder->addData(iIndex, jIndex, value);
+        }
+
+        void addData(Arccore::Integer iIndex, Arccore::Real factor,
+                     Arccore::ConstArrayView<Arccore::Integer> jIndexes,
+                     Arccore::ConstArrayView<Arccore::Real> jValues) {
+            m_builder->addData(iIndex, factor, jIndexes, jValues);
+        }
+
+        void setData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value) {
+            m_builder->setData(iIndex, jIndex, value);
+        }
+
+        void setData(Arccore::Integer iIndex, Arccore::Real factor,
+                     Arccore::ConstArrayView<Arccore::Integer> jIndexes,
+                     Arccore::ConstArrayView<Arccore::Real> jValues) {
+            m_builder->setData(iIndex, factor, jIndexes, jValues);
+        }
+
+        void finalize() {
+            m_builder->finalize();
+        }
+
+        void squeeze() {
+            m_builder->squeeze();
+        }
+
+        [[nodiscard]] Arccore::String stats() const {
+            return m_builder->stats();
+        }
+
+        [[nodiscard]] Arccore::String stats(Arccore::IntegerConstArrayView ids) const {
+            return m_builder->stats(ids);
+        }
+
+        MatrixData &&release() {
+            m_builder->finalize();
+            m_builder.reset(nullptr);
+
+            return std::move(m_data);
+        }
+
+    private:
+        MatrixData m_data;
+        std::unique_ptr<Alien::Common::DirectMatrixBuilder> m_builder;
+    };
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
