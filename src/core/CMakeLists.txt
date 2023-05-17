@@ -22,10 +22,10 @@ add_subdirectory(alien/kernels/redistributor)
 add_subdirectory(alien/kernels/simple_csr)
 add_subdirectory(alien/index_manager)
 
-IF(ALIEN_USE_SYCL)
-  find_package(hipSYCL CONFIG REQUIRED)
-  add_subdirectory(alien/kernels/sycl)
-endif()
+IF (ALIEN_USE_SYCL)
+    find_package(hipSYCL CONFIG REQUIRED)
+    add_subdirectory(alien/kernels/sycl)
+endif ()
 
 set(alien_core_list
         alien/Alien.h
@@ -111,8 +111,8 @@ set(alien_core_list
         alien/handlers/profiler/BaseMatrixProfiler.cc
         alien/handlers/profiler/BaseMatrixProfiler.h
         alien/handlers/profiler/MatrixProfilerT.h
-        alien/handlers/scalar/BaseDirectMatrixBuilder.cc
-        alien/handlers/scalar/BaseDirectMatrixBuilder.h
+        alien/handlers/scalar/IDirectMatrixBuilder.h
+        alien/handlers/scalar/MatrixBuilderFactory.cpp
         alien/handlers/scalar/BaseProfiledMatrixBuilder.cc
         alien/handlers/scalar/BaseProfiledMatrixBuilder.h
         alien/handlers/scalar/BaseVectorReader.cc
@@ -127,25 +127,25 @@ set(alien_core_list
         )
 
 if (LibArchive_FOUND)
-   list(APPEND alien_core_list
-           alien/import_export/SuiteSparseArchiveSystemReader.cc
-           alien/import_export/SuiteSparseArchiveSystemReader.h)
+    list(APPEND alien_core_list
+            alien/import_export/SuiteSparseArchiveSystemReader.cc
+            alien/import_export/SuiteSparseArchiveSystemReader.h)
 endif ()
 
 add_library(alien_core ${alien_core_list})
 
 target_link_libraries(alien_core PUBLIC alien_utils alien_data)
 target_link_libraries(alien_core PUBLIC
-                      alien_kernel_dok
-                      alien_kernel_composite
-                      alien_kernel_redistributor
-                      alien_kernel_simplecsr)
+        alien_kernel_dok
+        alien_kernel_composite
+        alien_kernel_redistributor
+        alien_kernel_simplecsr)
 
 
 target_link_libraries(alien_core PUBLIC alien_index_manager)
 
-if(LibArchive_FOUND)
-  target_link_libraries(alien_core PUBLIC archive)
+if (LibArchive_FOUND)
+    target_link_libraries(alien_core PUBLIC archive)
 endif ()
 
 set_property(TARGET alien_core PROPERTY CXX_STANDARD 17)
@@ -154,30 +154,30 @@ message(STATUS "Using AVX Simd instructions ? -> ${ALIEN_WANT_AVX}")
 message(STATUS "Using AVX2 Simd instructions ? -> ${ALIEN_WANT_AVX2}")
 message(STATUS "Using AVX512 Simd instructions ? -> ${ALIEN_WANT_AVX512}")
 
-if(CMAKE_COMPILER_IS_GNUCXX OR (CMAKE_CXX_COMPILER_ID STREQUAL Clang))
-  if(ALIEN_WANT_AVX)
-    target_compile_options(alien_core INTERFACE -mavx)
-  endif()
-  if(ALIEN_WANT_AVX2)
-    target_compile_options(alien_core INTERFACE -mavx -mfma)
-  endif()
-  if(ALIEN_WANT_AVX512)
-    target_compile_options(alien_core INTERFACE -mavx512f -mavx512cd)
-  endif()
-endif()
+if (CMAKE_COMPILER_IS_GNUCXX OR (CMAKE_CXX_COMPILER_ID STREQUAL Clang))
+    if (ALIEN_WANT_AVX)
+        target_compile_options(alien_core INTERFACE -mavx)
+    endif ()
+    if (ALIEN_WANT_AVX2)
+        target_compile_options(alien_core INTERFACE -mavx -mfma)
+    endif ()
+    if (ALIEN_WANT_AVX512)
+        target_compile_options(alien_core INTERFACE -mavx512f -mavx512cd)
+    endif ()
+endif ()
 
-IF(ALIEN_USE_SYCL)
-  target_link_libraries(alien_core PUBLIC alien_kernel_sycl)
-  target_compile_options(alien_core PRIVATE "--gcc-toolchain=${GCCCORE_ROOT}")
-  add_sycl_to_target(TARGET alien_core)
-ENDIF()
+IF (ALIEN_USE_SYCL)
+    target_link_libraries(alien_core PUBLIC alien_kernel_sycl)
+    target_compile_options(alien_core PRIVATE "--gcc-toolchain=${GCCCORE_ROOT}")
+    add_sycl_to_target(TARGET alien_core)
+ENDIF ()
 
 
 target_link_libraries(alien_core PUBLIC
-                      Arccore::arccore_trace
-                      Arccore::arccore_collections
-                      Arccore::arccore_base
-                      Arccore::arccore_message_passing_mpi)
+        Arccore::arccore_trace
+        Arccore::arccore_collections
+        Arccore::arccore_base
+        Arccore::arccore_message_passing_mpi)
 
 find_package(Boost COMPONENTS program_options REQUIRED)
 

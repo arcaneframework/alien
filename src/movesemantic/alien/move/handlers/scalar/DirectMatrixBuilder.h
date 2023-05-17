@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <alien/handlers/scalar/BaseDirectMatrixBuilder.h>
+#include <alien/handlers/scalar/IDirectMatrixBuilder.h>
 #include <alien/utils/MoveObject.h>
 
 #include <alien/move/data/MatrixData.h>
@@ -27,86 +27,106 @@
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-namespace Alien::Move {
+namespace Alien::Move
+{
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-    class ALIEN_MOVESEMANTIC_EXPORT DirectMatrixBuilder {
-    public:
-        using MatrixElement = MatrixElementT<Common::DirectMatrixBuilder>;
+class ALIEN_MOVESEMANTIC_EXPORT DirectMatrixBuilder
+{
+ public:
+  using ResetFlag = DirectMatrixOptions::ResetFlag;
+  using ReserveFlag = DirectMatrixOptions::ReserveFlag;
+  using SymmetricFlag = DirectMatrixOptions::SymmetricFlag;
 
-        DirectMatrixBuilder(MatrixData &&matrix, const Common::DirectMatrixBuilder::ResetFlag reset_flag,
-                            const Common::DirectMatrixBuilder::SymmetricFlag symmetric_flag = Common::DirectMatrixBuilder::SymmetricFlag::eSymmetric)
-                : m_data(std::move(matrix)) {
-            m_builder = std::make_unique<Alien::Common::DirectMatrixBuilder>(m_data, reset_flag, symmetric_flag);
-        }
+  using MatrixElement = MatrixElementT<DirectMatrixBuilder>;
 
-        MatrixElement operator()(const Integer iIndex, const Integer jIndex) {
-            return MatrixElement(iIndex, jIndex, *m_builder.get());
-        }
+  DirectMatrixBuilder(MatrixData&& matrix, const ResetFlag reset_flag,
+                      const SymmetricFlag symmetric_flag = SymmetricFlag::eSymmetric)
+  : m_data(std::move(matrix))
+  {
+    m_builder = Common::directMatrixBuilderFactory(m_data, reset_flag, symmetric_flag);
+  }
 
-        void reserve(Arccore::Integer n,
-                     Common::DirectMatrixBuilder::ReserveFlag flag = Common::DirectMatrixBuilder::ReserveFlag::eResetReservation) {
-            m_builder->reserve(n, flag);
-        }
+  MatrixElement operator()(const Integer iIndex, const Integer jIndex)
+  {
+    return MatrixElement(iIndex, jIndex, *this);
+  }
 
-        void reserve(Arccore::ConstArrayView<Arccore::Integer> indices, Arccore::Integer n,
-                     Common::DirectMatrixBuilder::ReserveFlag flag = Common::DirectMatrixBuilder::ReserveFlag::eResetReservation) {
-            m_builder->reserve(indices, n, flag);
-        }
+  void reserve(Arccore::Integer n,
+               ReserveFlag flag = ReserveFlag::eResetReservation)
+  {
+    m_builder->reserve(n, flag);
+  }
 
-        void allocate() {
-            m_builder->allocate();
-        }
+  void reserve(Arccore::ConstArrayView<Arccore::Integer> indices, Arccore::Integer n,
+               ReserveFlag flag = ReserveFlag::eResetReservation)
+  {
+    m_builder->reserve(indices, n, flag);
+  }
 
-        void addData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value) {
-            m_builder->addData(iIndex, jIndex, value);
-        }
+  void allocate()
+  {
+    m_builder->allocate();
+  }
 
-        void addData(Arccore::Integer iIndex, Arccore::Real factor,
-                     Arccore::ConstArrayView<Arccore::Integer> jIndexes,
-                     Arccore::ConstArrayView<Arccore::Real> jValues) {
-            m_builder->addData(iIndex, factor, jIndexes, jValues);
-        }
+  void addData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value)
+  {
+    m_builder->addData(iIndex, jIndex, value);
+  }
 
-        void setData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value) {
-            m_builder->setData(iIndex, jIndex, value);
-        }
+  void addData(Arccore::Integer iIndex, Arccore::Real factor,
+               Arccore::ConstArrayView<Arccore::Integer> jIndexes,
+               Arccore::ConstArrayView<Arccore::Real> jValues)
+  {
+    m_builder->addData(iIndex, factor, jIndexes, jValues);
+  }
 
-        void setData(Arccore::Integer iIndex, Arccore::Real factor,
-                     Arccore::ConstArrayView<Arccore::Integer> jIndexes,
-                     Arccore::ConstArrayView<Arccore::Real> jValues) {
-            m_builder->setData(iIndex, factor, jIndexes, jValues);
-        }
+  void setData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value)
+  {
+    m_builder->setData(iIndex, jIndex, value);
+  }
 
-        void finalize() {
-            m_builder->finalize();
-        }
+  void setData(Arccore::Integer iIndex, Arccore::Real factor,
+               Arccore::ConstArrayView<Arccore::Integer> jIndexes,
+               Arccore::ConstArrayView<Arccore::Real> jValues)
+  {
+    m_builder->setData(iIndex, factor, jIndexes, jValues);
+  }
 
-        void squeeze() {
-            m_builder->squeeze();
-        }
+  void finalize()
+  {
+    m_builder->finalize();
+  }
 
-        [[nodiscard]] Arccore::String stats() const {
-            return m_builder->stats();
-        }
+  void squeeze()
+  {
+    m_builder->squeeze();
+  }
 
-        [[nodiscard]] Arccore::String stats(Arccore::IntegerConstArrayView ids) const {
-            return m_builder->stats(ids);
-        }
+  [[nodiscard]] Arccore::String stats() const
+  {
+    return m_builder->stats();
+  }
 
-        MatrixData &&release() {
-            m_builder->finalize();
-            m_builder.reset(nullptr);
+  [[nodiscard]] Arccore::String stats(Arccore::IntegerConstArrayView ids) const
+  {
+    return m_builder->stats(ids);
+  }
 
-            return std::move(m_data);
-        }
+  MatrixData&& release()
+  {
+    m_builder->finalize();
+    m_builder.reset(nullptr);
 
-    private:
-        MatrixData m_data;
-        std::unique_ptr<Alien::Common::DirectMatrixBuilder> m_builder;
-    };
+    return std::move(m_data);
+  }
+
+ private:
+  MatrixData m_data;
+  std::unique_ptr<Alien::Common::IDirectMatrixBuilder> m_builder;
+};
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/

@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <alien/handlers/scalar/BaseDirectMatrixBuilder.h>
+#include <alien/handlers/scalar/IDirectMatrixBuilder.h>
 
 #include <alien/ref/data/scalar/Matrix.h>
 #include <alien/data/utils/MatrixElement.h>
@@ -26,77 +26,96 @@
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-namespace Alien {
+namespace Alien
+{
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-    class DirectMatrixBuilder {
-    public:
-        using MatrixElement = MatrixElementT<Common::DirectMatrixBuilder>;
+class DirectMatrixBuilder
+{
+ public:
+  using ResetFlag = DirectMatrixOptions::ResetFlag;
+  using ReserveFlag = DirectMatrixOptions::ReserveFlag;
+  using SymmetricFlag = DirectMatrixOptions::SymmetricFlag;
 
-        DirectMatrixBuilder(Matrix &matrix, const Common::DirectMatrixBuilder::ResetFlag reset_flag,
-                            const Common::DirectMatrixBuilder::SymmetricFlag symmetric_flag = Common::DirectMatrixBuilder::SymmetricFlag::eSymmetric) {
-            m_builder = std::make_unique<Alien::Common::DirectMatrixBuilder>(matrix, reset_flag, symmetric_flag);
-        }
+  using MatrixElement = MatrixElementT<Common::IDirectMatrixBuilder>;
 
-        MatrixElement operator()(const Integer iIndex, const Integer jIndex) {
-            return MatrixElement(iIndex, jIndex, *m_builder.get());
-        }
+  DirectMatrixBuilder(Matrix& matrix, const ResetFlag reset_flag,
+                      const SymmetricFlag symmetric_flag = SymmetricFlag::eSymmetric)
+  {
+    m_builder = Common::directMatrixBuilderFactory(matrix, reset_flag, symmetric_flag);
+  }
 
-        void reserve(Arccore::Integer n,
-                     Common::DirectMatrixBuilder::ReserveFlag flag = Common::DirectMatrixBuilder::ReserveFlag::eResetReservation) {
-            m_builder->reserve(n, flag);
-        }
+  MatrixElement operator()(const Integer iIndex, const Integer jIndex)
+  {
+    return MatrixElement(iIndex, jIndex, *m_builder.get());
+  }
 
-        void reserve(Arccore::ConstArrayView<Arccore::Integer> indices, Arccore::Integer n,
-                     Common::DirectMatrixBuilder::ReserveFlag flag = Common::DirectMatrixBuilder::ReserveFlag::eResetReservation) {
-            m_builder->reserve(indices, n, flag);
-        }
+  void reserve(Arccore::Integer n,
+               ReserveFlag flag = ReserveFlag::eResetReservation)
+  {
+    m_builder->reserve(n, flag);
+  }
 
-        void allocate() {
-            m_builder->allocate();
-        }
+  void reserve(Arccore::ConstArrayView<Arccore::Integer> indices, Arccore::Integer n,
+               ReserveFlag flag = ReserveFlag::eResetReservation)
+  {
+    m_builder->reserve(indices, n, flag);
+  }
 
-        void addData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value) {
-            m_builder->addData(iIndex, jIndex, value);
-        }
+  void allocate()
+  {
+    m_builder->allocate();
+  }
 
-        void addData(Arccore::Integer iIndex, Arccore::Real factor,
-                     Arccore::ConstArrayView<Arccore::Integer> jIndexes,
-                     Arccore::ConstArrayView<Arccore::Real> jValues) {
-            m_builder->addData(iIndex, factor, jIndexes, jValues);
-        }
+  void addData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value)
+  {
+    m_builder->addData(iIndex, jIndex, value);
+  }
 
-        void setData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value) {
-            m_builder->setData(iIndex, jIndex, value);
-        }
+  void addData(Arccore::Integer iIndex, Arccore::Real factor,
+               Arccore::ConstArrayView<Arccore::Integer> jIndexes,
+               Arccore::ConstArrayView<Arccore::Real> jValues)
+  {
+    m_builder->addData(iIndex, factor, jIndexes, jValues);
+  }
 
-        void setData(Arccore::Integer iIndex, Arccore::Real factor,
-                     Arccore::ConstArrayView<Arccore::Integer> jIndexes,
-                     Arccore::ConstArrayView<Arccore::Real> jValues) {
-            m_builder->setData(iIndex, factor, jIndexes, jValues);
-        }
+  void setData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value)
+  {
+    m_builder->setData(iIndex, jIndex, value);
+  }
 
-        void finalize() {
-            m_builder->finalize();
-        }
+  void setData(Arccore::Integer iIndex, Arccore::Real factor,
+               Arccore::ConstArrayView<Arccore::Integer> jIndexes,
+               Arccore::ConstArrayView<Arccore::Real> jValues)
+  {
+    m_builder->setData(iIndex, factor, jIndexes, jValues);
+  }
 
-        void squeeze() {
-            m_builder->squeeze();
-        }
+  void finalize()
+  {
+    m_builder->finalize();
+  }
 
-        [[nodiscard]] Arccore::String stats() const {
-            return m_builder->stats();
-        }
+  void squeeze()
+  {
+    m_builder->squeeze();
+  }
 
-        [[nodiscard]] Arccore::String stats(Arccore::IntegerConstArrayView ids) const {
-            return m_builder->stats(ids);
-        }
+  [[nodiscard]] Arccore::String stats() const
+  {
+    return m_builder->stats();
+  }
 
-    private:
-        std::unique_ptr<Alien::Common::DirectMatrixBuilder> m_builder;
-    };
+  [[nodiscard]] Arccore::String stats(Arccore::IntegerConstArrayView ids) const
+  {
+    return m_builder->stats(ids);
+  }
+
+ private:
+  std::unique_ptr<Alien::Common::IDirectMatrixBuilder> m_builder;
+};
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/

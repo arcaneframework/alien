@@ -31,6 +31,8 @@ add_library(alien_kernel_simplecsr OBJECT
         SimpleCSRMatrix.h
         SimpleCSRVector.cc
         SimpleCSRVector.h
+        SimpleCSRDirectMatrixBuilder.cpp
+        SimpleCSRDirectMatrixBuilder.h
         redistribution/SimpleCSRDistributorImpl.h
         redistribution/SimpleCSRDistributorImpl.cc
         redistribution/SimpleCSRDistributor.h

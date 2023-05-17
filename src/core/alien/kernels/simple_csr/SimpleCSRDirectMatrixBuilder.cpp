@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 IFPEN-CEA
+ * Copyright 2023 IFPEN-CEA
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * SPDX-License-Identifier: Apache-2.0
+ *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "BaseDirectMatrixBuilder.h"
+//
+// Created by chevalierc on 17/05/23.
+//
+
+#include "SimpleCSRDirectMatrixBuilder.h"
 
 #include <iomanip>
 #include <limits>
@@ -62,9 +66,9 @@ namespace Common
   /*---------------------------------------------------------------------------*/
   /*---------------------------------------------------------------------------*/
 
-  DirectMatrixBuilder::DirectMatrixBuilder(IMatrix& matrix,
-                                           const DirectMatrixOptions::ResetFlag reset_flag,
-                                           const DirectMatrixOptions::SymmetricFlag symmetric_flag)
+  SimpleCSRDirectMatrixBuilder::SimpleCSRDirectMatrixBuilder(IMatrix& matrix,
+                                                             const DirectMatrixOptions::ResetFlag reset_flag,
+                                                             const DirectMatrixOptions::SymmetricFlag symmetric_flag)
   : m_matrix(matrix)
   , m_matrix_impl(nullptr)
   , m_row_starts()
@@ -118,7 +122,7 @@ namespace Common
 
   /*---------------------------------------------------------------------------*/
 
-  DirectMatrixBuilder::~DirectMatrixBuilder()
+  SimpleCSRDirectMatrixBuilder::~SimpleCSRDirectMatrixBuilder()
   {
     if (!m_finalized) {
       finalize();
@@ -127,7 +131,7 @@ namespace Common
 
   /*---------------------------------------------------------------------------*/
 
-  void DirectMatrixBuilder::reserve(
+  void SimpleCSRDirectMatrixBuilder::reserve(
   Integer n, const DirectMatrixOptions::ReserveFlag flag)
   {
     ALIEN_ASSERT((!m_allocated), ("Cannot reserve already allocated matrix"));
@@ -146,7 +150,7 @@ namespace Common
 
   /*---------------------------------------------------------------------------*/
 
-  void DirectMatrixBuilder::reserve(
+  void SimpleCSRDirectMatrixBuilder::reserve(
   const ConstArrayView<Integer> indices, Integer n, const ReserveFlag flag)
   {
     ALIEN_ASSERT((!m_allocated), ("Cannot reserve already allocated matrix"));
@@ -166,7 +170,7 @@ namespace Common
 
   /*---------------------------------------------------------------------------*/
 
-  void DirectMatrixBuilder::allocate()
+  void SimpleCSRDirectMatrixBuilder::allocate()
   {
     _startTimer();
     ALIEN_ASSERT((!m_allocated), ("Cannot allocate already allocated matrix"));
@@ -231,7 +235,7 @@ namespace Common
 
   /*---------------------------------------------------------------------------*/
 
-  void DirectMatrixBuilder::addData(
+  void SimpleCSRDirectMatrixBuilder::addData(
   const Integer iIndex, const Integer jIndex, const Real value)
   {
     _startTimer();
@@ -263,8 +267,8 @@ namespace Common
 
   /*---------------------------------------------------------------------------*/
 
-  void DirectMatrixBuilder::addData(const Integer iIndex, const Real factor,
-                                    ConstArrayView<Integer> jIndexes, ConstArrayView<Real> jValues)
+  void SimpleCSRDirectMatrixBuilder::addData(const Integer iIndex, const Real factor,
+                                             ConstArrayView<Integer> jIndexes, ConstArrayView<Real> jValues)
   {
     _startTimer();
     ALIEN_ASSERT((m_allocated), ("Not allocated matrix"));
@@ -307,7 +311,7 @@ namespace Common
 
   /*---------------------------------------------------------------------------*/
 
-  void DirectMatrixBuilder::setData(
+  void SimpleCSRDirectMatrixBuilder::setData(
   const Integer iIndex, const Integer jIndex, const Real value)
   {
     _startTimer();
@@ -339,8 +343,8 @@ namespace Common
 
   /*---------------------------------------------------------------------------*/
 
-  void DirectMatrixBuilder::setData(const Integer iIndex, const Real factor,
-                                    ConstArrayView<Integer> jIndexes, ConstArrayView<Real> jValues)
+  void SimpleCSRDirectMatrixBuilder::setData(const Integer iIndex, const Real factor,
+                                             ConstArrayView<Integer> jIndexes, ConstArrayView<Real> jValues)
   {
     _startTimer();
     ALIEN_ASSERT((m_allocated), ("Not allocated matrix"));
@@ -383,7 +387,7 @@ namespace Common
 
   /*---------------------------------------------------------------------------*/
 
-  void DirectMatrixBuilder::finalize()
+  void SimpleCSRDirectMatrixBuilder::finalize()
   {
     if (m_finalized)
       return;
@@ -394,7 +398,7 @@ namespace Common
 
   /*---------------------------------------------------------------------------*/
 
-  class DirectMatrixBuilder::IndexEnumerator
+  class SimpleCSRDirectMatrixBuilder::IndexEnumerator
   {
    public:
     class Finder
@@ -435,7 +439,7 @@ namespace Common
 
   /*---------------------------------------------------------------------------*/
 
-  class DirectMatrixBuilder::FullEnumerator
+  class SimpleCSRDirectMatrixBuilder::FullEnumerator
   {
    public:
     class Finder
@@ -468,7 +472,7 @@ namespace Common
 
   /*---------------------------------------------------------------------------*/
 
-  String DirectMatrixBuilder::stats() const
+  String SimpleCSRDirectMatrixBuilder::stats() const
   {
     std::ostringstream oss;
     _stats(oss, FullEnumerator(m_local_size));
@@ -477,7 +481,7 @@ namespace Common
 
   /*---------------------------------------------------------------------------*/
 
-  String DirectMatrixBuilder::stats(ConstArrayView<Integer> ids) const
+  String SimpleCSRDirectMatrixBuilder::stats(ConstArrayView<Integer> ids) const
   {
     std::ostringstream oss;
     _stats(oss, IndexEnumerator(ids, m_local_offset));
@@ -486,7 +490,7 @@ namespace Common
 
   /*---------------------------------------------------------------------------*/
 
-  void DirectMatrixBuilder::squeeze()
+  void SimpleCSRDirectMatrixBuilder::squeeze()
   {
     bool need_squeeze = false;
 
@@ -582,7 +586,7 @@ namespace Common
 
   /*---------------------------------------------------------------------------*/
 
-  void DirectMatrixBuilder::computeProfile(const ConstArrayView<Integer> sizes)
+  void SimpleCSRDirectMatrixBuilder::computeProfile(const ConstArrayView<Integer> sizes)
   {
     UniqueArray<Integer> m_offset;
     m_offset.resize(m_nproc + 1);
@@ -621,8 +625,8 @@ namespace Common
 
   /*---------------------------------------------------------------------------*/
 
-  void DirectMatrixBuilder::updateProfile(UniqueArray<Integer>& row_starts,
-                                          UniqueArray<Integer>& cols, UniqueArray<Real>& values)
+  void SimpleCSRDirectMatrixBuilder::updateProfile(UniqueArray<Integer>& row_starts,
+                                                   UniqueArray<Integer>& cols, UniqueArray<Real>& values)
   {
     SimpleCSRInternal::CSRStructInfo& profile = m_matrix_impl->internal().getCSRProfile();
     profile.getRowOffset().copy(row_starts);
@@ -653,7 +657,7 @@ namespace Common
   /*---------------------------------------------------------------------------*/
 
   template <typename Enumerator>
-  void DirectMatrixBuilder::_stats(std::ostream& o, const Enumerator& e) const
+  void SimpleCSRDirectMatrixBuilder::_stats(std::ostream& o, const Enumerator& e) const
   {
     bool need_squeeze = false;
     Integer total_used_data = 0;

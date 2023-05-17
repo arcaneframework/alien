@@ -33,7 +33,7 @@ namespace Common
 {
 
   /*!
-   * Use DoKMatrix to implement DirectMatrixBuilder.
+   * Use DoKMatrix to implement IDirectMatrixBuilder.
    *
    * This data structure is not compressed like CSR, allowing easy insertion of values.
    */
