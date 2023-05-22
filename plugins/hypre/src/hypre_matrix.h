@@ -22,47 +22,49 @@
 
 #include <HYPRE_IJ_mv.h>
 
-namespace Alien::Hypre {
-    class Matrix : public IMatrixImpl {
-    public:
-        explicit Matrix(const MultiMatrixImpl *multi_impl);
+namespace Alien::Hypre
+{
+class Matrix : public IMatrixImpl
+{
+ public:
+  explicit Matrix(const MultiMatrixImpl* multi_impl);
 
-        ~Matrix() override;
+  ~Matrix() override;
 
-        void setProfile(Arccore::ConstArrayView<int> row_sizes);
+  void setProfile(Arccore::ConstArrayView<int> row_sizes);
 
-        void setRowValues(int row,
-                          Arccore::ConstArrayView<int> cols,
-                          Arccore::ConstArrayView<double> values);
+  void setRowValues(int row,
+                    Arccore::ConstArrayView<int> cols,
+                    Arccore::ConstArrayView<double> values);
 
-        void addRowValues(int row,
-                          Arccore::ConstArrayView<int> cols,
-                          Arccore::ConstArrayView<double> values);
+  void addRowValues(int row,
+                    Arccore::ConstArrayView<int> cols,
+                    Arccore::ConstArrayView<double> values);
 
-        //! Fill several partial rows at the same time.
-        //! Function strongly mimic `HYPRE_IJMatrixSetValues` semantic.
-        //!
-        //! \param rows     array of row ids
-        //! \param ncols    array of numbers of columns for each row id
-        //! \param cols     array of column ids
-        //! \param values   array of values
-        //!
-        //! `rows` and `ncols` should have the same size.
-        //! `cols` and `values` should have the same size.
-        //! For Hypre to use OpenMP threads for set values, rows values must be unique.
-        void insertRowsValues(Arccore::ConstArrayView<int> rows, Arccore::ArrayView<int> ncols,
-                              Arccore::ConstArrayView<int> cols,
-                              Arccore::ConstArrayView<double> values, bool set = true);
+  //! Fill several partial rows at the same time.
+  //! Function strongly mimic `HYPRE_IJMatrixSetValues` semantic.
+  //!
+  //! \param rows     array of row ids
+  //! \param ncols    array of numbers of columns for each row id
+  //! \param cols     array of column ids
+  //! \param values   array of values
+  //!
+  //! `rows` and `ncols` should have the same size.
+  //! `cols` and `values` should have the same size.
+  //! For Hypre to use OpenMP threads for set values, rows values must be unique.
+  void insertRowsValues(Arccore::ConstArrayView<int> rows, Arccore::ArrayView<int> ncols,
+                        Arccore::ConstArrayView<int> cols,
+                        Arccore::ConstArrayView<double> values, bool set = true);
 
-        void assemble();
+  void assemble();
 
-        HYPRE_IJMatrix internal() const { return m_hypre; }
+  HYPRE_IJMatrix internal() const { return m_hypre; }
 
-    private:
-        void init();
+ private:
+  void init();
 
-        HYPRE_IJMatrix m_hypre = nullptr;
-        MPI_Comm m_comm;
-    };
+  HYPRE_IJMatrix m_hypre = nullptr;
+  MPI_Comm m_comm;
+};
 
 } // namespace Alien::Hypre

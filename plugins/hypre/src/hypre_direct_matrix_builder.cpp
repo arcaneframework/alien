@@ -25,44 +25,54 @@
 #include <alien/core/impl/MultiMatrixImpl.h>
 #include <alien/hypre/backend.h>
 
-namespace Alien::Hypre {
-    HypreDirectMatrixBuilder::HypreDirectMatrixBuilder(Alien::IMatrix &matrix,
-                                                       Hypre::HypreDirectMatrixBuilder::ResetFlag reset_flag,
-                                                       Hypre::HypreDirectMatrixBuilder::SymmetricFlag symmetric_flag)
-            : m_matrix(matrix) {
+namespace Alien::Hypre
+{
+HypreDirectMatrixBuilder::HypreDirectMatrixBuilder(Alien::IMatrix& matrix,
+                                                   Hypre::HypreDirectMatrixBuilder::ResetFlag reset_flag,
+                                                   Hypre::HypreDirectMatrixBuilder::SymmetricFlag symmetric_flag)
+: m_matrix(matrix)
+{
 
-        m_matrix.impl()->lock();
-        m_matrix_impl = &m_matrix.impl()->get<BackEnd::tag::hypre>(true);
-    }
+  m_matrix.impl()->lock();
+  m_matrix_impl = &m_matrix.impl()->get<BackEnd::tag::hypre>(true);
+}
 
-    void HypreDirectMatrixBuilder::finalize() {
-        m_matrix_impl->assemble();
-        m_matrix.impl()->unlock();
-    }
+void HypreDirectMatrixBuilder::finalize()
+{
+  m_matrix_impl->assemble();
+  m_matrix.impl()->unlock();
+}
 
-    void HypreDirectMatrixBuilder::setData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value) {
-        m_matrix_impl->setRowValues(iIndex, ConstArrayView<Integer>(1, &jIndex), ConstArrayView<Real>(1, &value));
-    }
+void HypreDirectMatrixBuilder::setData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value)
+{
+  m_matrix_impl->setRowValues(iIndex, ConstArrayView<Integer>(1, &jIndex), ConstArrayView<Real>(1, &value));
+}
 
-    void HypreDirectMatrixBuilder::setData(Arccore::Integer iIndex, Arccore::Real factor,
-                                           Arccore::ConstArrayView<Arccore::Integer> jIndexes,
-                                           Arccore::ConstArrayView<Arccore::Real> jValues) {
-        if (factor != 1.0) { throw FatalErrorException("Scaling is not supported"); }
+void HypreDirectMatrixBuilder::setData(Arccore::Integer iIndex, Arccore::Real factor,
+                                       Arccore::ConstArrayView<Arccore::Integer> jIndexes,
+                                       Arccore::ConstArrayView<Arccore::Real> jValues)
+{
+  if (factor != 1.0) {
+    throw FatalErrorException("Scaling is not supported");
+  }
 
-        m_matrix_impl->setRowValues(iIndex, jIndexes, jValues);
-    }
+  m_matrix_impl->setRowValues(iIndex, jIndexes, jValues);
+}
 
-    void HypreDirectMatrixBuilder::addData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value) {
-        m_matrix_impl->addRowValues(iIndex, ConstArrayView<Integer>(1, &jIndex), ConstArrayView<Real>(1, &value));
-    }
+void HypreDirectMatrixBuilder::addData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value)
+{
+  m_matrix_impl->addRowValues(iIndex, ConstArrayView<Integer>(1, &jIndex), ConstArrayView<Real>(1, &value));
+}
 
-    void HypreDirectMatrixBuilder::addData(Arccore::Integer iIndex, Arccore::Real factor,
-                                           Arccore::ConstArrayView<Arccore::Integer> jIndexes,
-                                           Arccore::ConstArrayView<Arccore::Real> jValues) {
-        if (factor != 1.0) { throw FatalErrorException("Scaling is not supported"); }
+void HypreDirectMatrixBuilder::addData(Arccore::Integer iIndex, Arccore::Real factor,
+                                       Arccore::ConstArrayView<Arccore::Integer> jIndexes,
+                                       Arccore::ConstArrayView<Arccore::Real> jValues)
+{
+  if (factor != 1.0) {
+    throw FatalErrorException("Scaling is not supported");
+  }
 
-        m_matrix_impl->addRowValues(iIndex, jIndexes, jValues);
-    }
+  m_matrix_impl->addRowValues(iIndex, jIndexes, jValues);
+}
 
-
-};
+}; // namespace Alien::Hypre

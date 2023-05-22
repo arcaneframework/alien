@@ -31,110 +31,125 @@
 
 #include "hypre_matrix.h"
 
-namespace Alien {
-    struct DirectMatrixOptions {
-        enum ResetFlag {
-            eNoReset,
-            eResetValues,
-            eResetProfile,
-            eResetAllocation
-        };
-        enum ReserveFlag {
-            eResetReservation,
-            eExtendReservation
-        };
-        enum SymmetricFlag {
-            eSymmetric,
-            eUnSymmetric
-        };
-    };
+namespace Alien
+{
+struct DirectMatrixOptions
+{
+  enum ResetFlag
+  {
+    eNoReset,
+    eResetValues,
+    eResetProfile,
+    eResetAllocation
+  };
+  enum ReserveFlag
+  {
+    eResetReservation,
+    eExtendReservation
+  };
+  enum SymmetricFlag
+  {
+    eSymmetric,
+    eUnSymmetric
+  };
+};
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-    namespace Hypre {
+namespace Hypre
+{
 
-        /*---------------------------------------------------------------------------*/
-        /*---------------------------------------------------------------------------*/
+  /*---------------------------------------------------------------------------*/
+  /*---------------------------------------------------------------------------*/
 
-        class ALIEN_EXPORT HypreDirectMatrixBuilder {
-        public:
-            using ResetFlag = DirectMatrixOptions::ResetFlag;
-            using ReserveFlag = DirectMatrixOptions::ReserveFlag;
-            using SymmetricFlag = DirectMatrixOptions::SymmetricFlag;
+  class ALIEN_EXPORT HypreDirectMatrixBuilder
+  {
+   public:
+    using ResetFlag = DirectMatrixOptions::ResetFlag;
+    using ReserveFlag = DirectMatrixOptions::ReserveFlag;
+    using SymmetricFlag = DirectMatrixOptions::SymmetricFlag;
 
-            using MatrixElement = MatrixElementT<HypreDirectMatrixBuilder>;
+    using MatrixElement = MatrixElementT<HypreDirectMatrixBuilder>;
 
-            HypreDirectMatrixBuilder(IMatrix &matrix, ResetFlag reset_flag,
-                                     SymmetricFlag symmetric_flag = SymmetricFlag::eSymmetric);
+    HypreDirectMatrixBuilder(IMatrix& matrix, ResetFlag reset_flag,
+                             SymmetricFlag symmetric_flag = SymmetricFlag::eSymmetric);
 
-            virtual ~HypreDirectMatrixBuilder() {
-                finalize();
-            }
+    virtual ~HypreDirectMatrixBuilder()
+    {
+      finalize();
+    }
 
-            HypreDirectMatrixBuilder(HypreDirectMatrixBuilder &) = delete;
+    HypreDirectMatrixBuilder(HypreDirectMatrixBuilder&) = delete;
 
-            HypreDirectMatrixBuilder(HypreDirectMatrixBuilder &&) = delete;
+    HypreDirectMatrixBuilder(HypreDirectMatrixBuilder&&) = delete;
 
-            HypreDirectMatrixBuilder &operator=(const HypreDirectMatrixBuilder &) = delete;
+    HypreDirectMatrixBuilder& operator=(const HypreDirectMatrixBuilder&) = delete;
 
-            HypreDirectMatrixBuilder &operator=(HypreDirectMatrixBuilder &&) = delete;
+    HypreDirectMatrixBuilder& operator=(HypreDirectMatrixBuilder&&) = delete;
 
-            MatrixElement operator()(const Integer iIndex, const Integer jIndex) {
-                return {iIndex, jIndex, *this};
-            }
+    MatrixElement operator()(const Integer iIndex, const Integer jIndex)
+    {
+      return { iIndex, jIndex, *this };
+    }
 
-            void reserve(Arccore::Integer n, ReserveFlag flag = ReserveFlag::eResetReservation) {
-                // Nothing yet
-            }
+    void reserve(Arccore::Integer n, ReserveFlag flag = ReserveFlag::eResetReservation)
+    {
+      // Nothing yet
+    }
 
-            void reserve(Arccore::ConstArrayView<Arccore::Integer> indices, Arccore::Integer n,
-                         ReserveFlag flag = ReserveFlag::eResetReservation) {
-                // Nothing yet
-            }
+    void reserve(Arccore::ConstArrayView<Arccore::Integer> indices, Arccore::Integer n,
+                 ReserveFlag flag = ReserveFlag::eResetReservation)
+    {
+      // Nothing yet
+    }
 
-            void allocate() {
-                // Nothing yet
-            }
+    void allocate()
+    {
+      // Nothing yet
+    }
 
-            void addData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value);
+    void addData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value);
 
-            void addData(Arccore::Integer iIndex, Arccore::Real factor,
-                         Arccore::ConstArrayView<Arccore::Integer> jIndexes,
-                         Arccore::ConstArrayView<Arccore::Real> jValues);
+    void addData(Arccore::Integer iIndex, Arccore::Real factor,
+                 Arccore::ConstArrayView<Arccore::Integer> jIndexes,
+                 Arccore::ConstArrayView<Arccore::Real> jValues);
 
-            void setData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value);
+    void setData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value);
 
-            void setData(Arccore::Integer iIndex, Arccore::Real factor,
-                         Arccore::ConstArrayView<Arccore::Integer> jIndexes,
-                         Arccore::ConstArrayView<Arccore::Real> jValues);
+    void setData(Arccore::Integer iIndex, Arccore::Real factor,
+                 Arccore::ConstArrayView<Arccore::Integer> jIndexes,
+                 Arccore::ConstArrayView<Arccore::Real> jValues);
 
-            void finalize();
+    void finalize();
 
-            void squeeze() {
-                // do nothing
-            }
+    void squeeze()
+    {
+      // do nothing
+    }
 
-            [[nodiscard]] Arccore::String stats() const {
-                // Do nothing
-                return {""};
-            }
+    [[nodiscard]] Arccore::String stats() const
+    {
+      // Do nothing
+      return { "" };
+    }
 
-            [[nodiscard]] Arccore::String stats(Arccore::IntegerConstArrayView ids) const {
-                // Do nothing
-                return {""};
-            }
+    [[nodiscard]] Arccore::String stats(Arccore::IntegerConstArrayView ids) const
+    {
+      // Do nothing
+      return { "" };
+    }
 
-        private:
-            IMatrix &m_matrix;
+   private:
+    IMatrix& m_matrix;
 
-            Matrix *m_matrix_impl;
-        };
+    Matrix* m_matrix_impl;
+  };
 
-        /*---------------------------------------------------------------------------*/
-        /*---------------------------------------------------------------------------*/
+  /*---------------------------------------------------------------------------*/
+  /*---------------------------------------------------------------------------*/
 
-    } // namespace Hypre
+} // namespace Hypre
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
