@@ -47,7 +47,7 @@ class ALIEN_MOVESEMANTIC_EXPORT DirectMatrixBuilder
                       const SymmetricFlag symmetric_flag = SymmetricFlag::eSymmetric)
   : m_data(std::move(matrix))
   {
-    m_builder = Common::MatrixBuilderFactory::get("simplecsr").value()(m_data, reset_flag, symmetric_flag);
+    m_builder = Common::MatrixBuilderFactory::getDefault()(m_data, reset_flag, symmetric_flag);
   }
 
   MatrixElement operator()(const Integer iIndex, const Integer jIndex)

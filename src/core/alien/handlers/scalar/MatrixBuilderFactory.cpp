@@ -34,6 +34,9 @@ ALIEN_EXPORT std::unique_ptr<Alien::Common::IDirectMatrixBuilder> directMatrixBu
 
 MatrixBuilderFactory::MatrixBuilderFactory(BackEndId backend, MatrixBuilderFactory::Factory f)
 {
+  if (m_default_backend.empty()) {
+    m_default_backend = backend;
+  }
   m_db.insert({ backend, f });
 }
 

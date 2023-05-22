@@ -52,10 +52,23 @@ namespace Common
 
     MatrixBuilderFactory(BackEndId backend, Factory f);
 
+    MatrixBuilderFactory() {}
+
     static std::optional<Factory> get(BackEndId backend);
+
+    static Factory getDefault()
+    {
+      return get(m_default_backend).value();
+    }
+
+    void setDefault(BackEndId backEndId)
+    {
+      m_default_backend = backEndId;
+    }
 
    private:
     static inline std::unordered_map<Alien::BackEndId, Factory> m_db = {};
+    static inline Alien::BackEndId m_default_backend = {};
   };
 } // namespace Common
 } // namespace Alien
