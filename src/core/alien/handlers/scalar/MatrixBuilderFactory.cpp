@@ -20,16 +20,32 @@
 // Created by chevalierc on 17/05/23.
 //
 
-#include <memory>
-#include "IDirectMatrixBuilder.h"
-
 #include <alien/kernels/simple_csr/SimpleCSRDirectMatrixBuilder.h>
+#include "MatrixBuilderFactory.h"
 
 namespace Alien::Common
 {
+
 ALIEN_EXPORT std::unique_ptr<Alien::Common::IDirectMatrixBuilder> directMatrixBuilderFactory(IMatrix& matrix, DirectMatrixOptions::ResetFlag reset_flag,
                                                                                              DirectMatrixOptions::SymmetricFlag symmetric_flag)
 {
   return std::make_unique<SimpleCSRDirectMatrixBuilder>(matrix, reset_flag, symmetric_flag);
 }
+
+MatrixBuilderFactory::MatrixBuilderFactory(BackEndId backend, MatrixBuilderFactory::Factory f)
+{
+  m_db.insert({ backend, f });
+}
+
+std::optional<MatrixBuilderFactory::Factory> MatrixBuilderFactory::get(BackEndId backend)
+{
+  if (auto res = m_db.find(backend); res != m_db.end()) {
+    return std::make_optional<Factory>(res->second);
+  }
+  else {
+    return std::nullopt;
+  }
+}
+
 } // namespace Alien::Common
+// namespace Alien::Common

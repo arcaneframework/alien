@@ -29,30 +29,11 @@
 #include <arccore/trace/ITraceMng.h>
 #include <arccore/message_passing/IMessagePassingMng.h>
 
+#include <alien/handlers/scalar/IDirectMatrixBuilder.h>
 #include "hypre_matrix.h"
 
 namespace Alien
 {
-struct DirectMatrixOptions
-{
-  enum ResetFlag
-  {
-    eNoReset,
-    eResetValues,
-    eResetProfile,
-    eResetAllocation
-  };
-  enum ReserveFlag
-  {
-    eResetReservation,
-    eExtendReservation
-  };
-  enum SymmetricFlag
-  {
-    eSymmetric,
-    eUnSymmetric
-  };
-};
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
@@ -63,7 +44,7 @@ namespace Hypre
   /*---------------------------------------------------------------------------*/
   /*---------------------------------------------------------------------------*/
 
-  class ALIEN_EXPORT HypreDirectMatrixBuilder
+  class ALIEN_EXPORT HypreDirectMatrixBuilder : public Alien::Common::IDirectMatrixBuilder
   {
    public:
     using ResetFlag = DirectMatrixOptions::ResetFlag;
@@ -88,53 +69,48 @@ namespace Hypre
 
     HypreDirectMatrixBuilder& operator=(HypreDirectMatrixBuilder&&) = delete;
 
-    MatrixElement operator()(const Integer iIndex, const Integer jIndex)
-    {
-      return { iIndex, jIndex, *this };
-    }
-
-    void reserve(Arccore::Integer n, ReserveFlag flag = ReserveFlag::eResetReservation)
+    void reserve(Arccore::Integer n, ReserveFlag flag = ReserveFlag::eResetReservation) override
     {
       // Nothing yet
     }
 
     void reserve(Arccore::ConstArrayView<Arccore::Integer> indices, Arccore::Integer n,
-                 ReserveFlag flag = ReserveFlag::eResetReservation)
+                 ReserveFlag flag = ReserveFlag::eResetReservation) override
     {
       // Nothing yet
     }
 
-    void allocate()
+    void allocate() override
     {
       // Nothing yet
     }
 
-    void addData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value);
+    void addData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value) override;
 
     void addData(Arccore::Integer iIndex, Arccore::Real factor,
                  Arccore::ConstArrayView<Arccore::Integer> jIndexes,
-                 Arccore::ConstArrayView<Arccore::Real> jValues);
+                 Arccore::ConstArrayView<Arccore::Real> jValues) override;
 
-    void setData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value);
+    void setData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value) override;
 
     void setData(Arccore::Integer iIndex, Arccore::Real factor,
                  Arccore::ConstArrayView<Arccore::Integer> jIndexes,
-                 Arccore::ConstArrayView<Arccore::Real> jValues);
+                 Arccore::ConstArrayView<Arccore::Real> jValues) override;
 
-    void finalize();
+    void finalize() override;
 
-    void squeeze()
+    void squeeze() override
     {
       // do nothing
     }
 
-    [[nodiscard]] Arccore::String stats() const
+    [[nodiscard]] Arccore::String stats() const override
     {
       // Do nothing
       return { "" };
     }
 
-    [[nodiscard]] Arccore::String stats(Arccore::IntegerConstArrayView ids) const
+    [[nodiscard]] Arccore::String stats(Arccore::IntegerConstArrayView ids) const override
     {
       // Do nothing
       return { "" };

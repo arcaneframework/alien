@@ -113,6 +113,7 @@ set(alien_core_list
         alien/handlers/profiler/MatrixProfilerT.h
         alien/handlers/scalar/IDirectMatrixBuilder.h
         alien/handlers/scalar/MatrixBuilderFactory.cpp
+        alien/handlers/scalar/MatrixBuilderFactory.h
         alien/handlers/scalar/BaseProfiledMatrixBuilder.cc
         alien/handlers/scalar/BaseProfiledMatrixBuilder.h
         alien/handlers/scalar/BaseVectorReader.cc
@@ -124,7 +125,7 @@ set(alien_core_list
         alien/import_export/MatrixMarketSystemReader.h
         alien/import_export/MatrixMarketSystemReader.cc
         alien/import_export/Reader.h
-        )
+)
 
 if (LibArchive_FOUND)
     list(APPEND alien_core_list
@@ -195,17 +196,17 @@ target_link_libraries(alien_core PUBLIC alien_headers)
 install(DIRECTORY alien
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         FILES_MATCHING PATTERN "*.h"
-        )
+)
 
 install(TARGETS alien_core EXPORT ${ALIEN_EXPORT_TARGET}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        )
+)
 
 install(TARGETS alien_headers EXPORT ${ALIEN_EXPORT_TARGET}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        )
+)
 
 install(
         FILES ${CMAKE_CURRENT_BINARY_DIR}/alien/AlienExport.h

@@ -21,8 +21,11 @@
 //
 
 #include "hypre_direct_matrix_builder.h"
+#include "alien/hypre/export.h"
 
 #include <alien/core/impl/MultiMatrixImpl.h>
+#include <alien/handlers/scalar/MatrixBuilderFactory.h>
+
 #include <alien/hypre/backend.h>
 
 namespace Alien::Hypre
@@ -74,5 +77,8 @@ void HypreDirectMatrixBuilder::addData(Arccore::Integer iIndex, Arccore::Real fa
 
   m_matrix_impl->addRowValues(iIndex, jIndexes, jValues);
 }
+
+const ALIEN_HYPRE_EXPORT Alien::Common::MatrixBuilderFactory hypre_builder_register(
+AlgebraTraits<BackEnd::tag::hypre>::name(), [](IMatrix& matrix, DirectMatrixOptions::ResetFlag reset, DirectMatrixOptions::SymmetricFlag symmetry) { return std::make_unique<HypreDirectMatrixBuilder>(matrix, reset, symmetry); });
 
 }; // namespace Alien::Hypre

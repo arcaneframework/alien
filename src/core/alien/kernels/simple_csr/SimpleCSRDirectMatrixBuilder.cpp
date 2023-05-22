@@ -21,6 +21,7 @@
 //
 
 #include "SimpleCSRDirectMatrixBuilder.h"
+#include "alien/handlers/scalar/MatrixBuilderFactory.h"
 
 #include <iomanip>
 #include <limits>
@@ -723,6 +724,9 @@ namespace Common
       << max_reserved_data << "\n"
       << "Need squeeze optimization      = " << std::boolalpha << need_squeeze << "\n";
   }
+
+  const ALIEN_EXPORT Alien::Common::MatrixBuilderFactory hypre_builder_register(
+  AlgebraTraits<BackEnd::tag::simplecsr>::name(), [](IMatrix& matrix, DirectMatrixOptions::ResetFlag reset, DirectMatrixOptions::SymmetricFlag symmetry) { return std::make_unique<SimpleCSRDirectMatrixBuilder>(matrix, reset, symmetry); });
 
   /*---------------------------------------------------------------------------*/
   /*---------------------------------------------------------------------------*/
