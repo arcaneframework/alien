@@ -50,10 +50,8 @@ class SimpleLinearProblemFixtureMove : public ::testing::Test
     int gsize = dist.globalRowSize();
 
     {
-      Alien::Common::MatrixBuilderFactory b_factory;
-      b_factory.setDefault(Alien::AlgebraTraits<Alien::BackEnd::tag::hypre>::name());
       Alien::Move::DirectMatrixBuilder builder(
-      std::move(m_matrix), Alien::DirectMatrixOptions::eResetAllocation);
+      std::move(m_matrix), Alien::DirectMatrixOptions::eResetAllocation, Alien::DirectMatrixOptions::eSymmetric, std::make_optional<Alien::BackEndId>(Alien::AlgebraTraits<Alien::BackEnd::tag::hypre>::name()));
       builder.reserve(3); // Réservation de 3 coefficients par ligne
       builder.allocate(); // Allocation de l'espace mémoire réservé
 

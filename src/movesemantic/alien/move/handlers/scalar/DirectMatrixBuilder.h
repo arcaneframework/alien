@@ -44,10 +44,14 @@ class ALIEN_MOVESEMANTIC_EXPORT DirectMatrixBuilder
   using MatrixElement = MatrixElementT<DirectMatrixBuilder>;
 
   DirectMatrixBuilder(MatrixData&& matrix, const ResetFlag reset_flag,
-                      const SymmetricFlag symmetric_flag = SymmetricFlag::eSymmetric)
+                      const SymmetricFlag symmetric_flag = SymmetricFlag::eSymmetric, std::optional<BackEndId> backend = std::nullopt)
   : m_data(std::move(matrix))
   {
-    m_builder = Common::MatrixBuilderFactory::getDefault()(m_data, reset_flag, symmetric_flag);
+    auto factory = Common::MatrixBuilderFactory::getDefault();
+    if (backend.has_value()) {
+      factory = Common::MatrixBuilderFactory::get(backend.value()).value_or(factory);
+    }
+    m_builder = factory(m_data, reset_flag, symmetric_flag);
   }
 
   MatrixElement operator()(const Integer iIndex, const Integer jIndex)
