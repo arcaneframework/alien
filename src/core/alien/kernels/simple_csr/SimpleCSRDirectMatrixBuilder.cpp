@@ -725,7 +725,7 @@ namespace Common
       << "Need squeeze optimization      = " << std::boolalpha << need_squeeze << "\n";
   }
 
-  const ALIEN_EXPORT Alien::Common::MatrixBuilderFactory hypre_builder_register(
+  const ALIEN_EXPORT Alien::Common::MatrixBuilderFactory simplecsr_builder_register(
   AlgebraTraits<BackEnd::tag::simplecsr>::name(), [](IMatrix& matrix, DirectMatrixOptions::ResetFlag reset, DirectMatrixOptions::SymmetricFlag symmetry) { return std::make_unique<SimpleCSRDirectMatrixBuilder>(matrix, reset, symmetry); });
 
   /*---------------------------------------------------------------------------*/

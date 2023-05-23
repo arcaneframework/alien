@@ -23,6 +23,8 @@
 
 #include <optional>
 
+#include <alien/handlers/scalar/IDirectMatrixBuilder.h>
+
 namespace Alien
 {
 // Forward declarations.
@@ -37,7 +39,7 @@ namespace Common
    *
    * This data structure is not compressed like CSR, allowing easy insertion of values.
    */
-  class ALIEN_EXPORT BaseDoKDirectMatrixBuilder
+  class ALIEN_EXPORT BaseDoKDirectMatrixBuilder : public IDirectMatrixBuilder
   {
    public:
     /*!
@@ -46,7 +48,7 @@ namespace Common
      */
     // FIXME: This should be implemented with move-semantic.
     explicit BaseDoKDirectMatrixBuilder(IMatrix& self);
-    ~BaseDoKDirectMatrixBuilder();
+    ~BaseDoKDirectMatrixBuilder() override;
 
     /*!
      * Add a contribution to a non-zero. Will create the non-zero if needed.
@@ -77,6 +79,43 @@ namespace Common
      * @return if successful.
      */
     bool assemble();
+
+    void reserve(Arccore::Integer n, ReserveFlag flag) override;
+    void reserve(Arccore::ConstArrayView<Arccore::Integer> indices, Arccore::Integer n, ReserveFlag flag) override;
+    void allocate() override;
+
+    void addData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value) override
+    {
+      contribute(iIndex, jIndex, value);
+    }
+
+    void addData(Arccore::Integer iIndex, Arccore::Real factor, Arccore::ConstArrayView<Arccore::Integer> jIndexes, Arccore::ConstArrayView<Arccore::Real> jValues) override
+    {
+      for (auto offset = 0; offset < jIndexes.length(); offset++) {
+        contribute(iIndex, jIndexes[offset], jValues[offset] * factor);
+      }
+    }
+
+    void setData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value) override
+    {
+      setNNZ(iIndex, jIndex, value);
+    }
+    void setData(Arccore::Integer iIndex, Arccore::Real factor, Arccore::ConstArrayView<Arccore::Integer> jIndexes, Arccore::ConstArrayView<Arccore::Real> jValues) override
+    {
+      for (auto offset = 0; offset < jIndexes.length(); offset++) {
+        setNNZ(iIndex, jIndexes[offset], jValues[offset] * factor);
+      }
+    }
+
+    void finalize() override
+    {
+      assemble();
+    }
+
+    void squeeze() override {}
+
+    String stats() const override;
+    String stats(Arccore::IntegerConstArrayView ids) const override;
 
    private:
     //! Convenience reference to multi-repr manager.
