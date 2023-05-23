@@ -91,6 +91,8 @@ namespace Common
     [[nodiscard]] virtual Arccore::String stats() const = 0;
 
     [[nodiscard]] virtual Arccore::String stats(Arccore::IntegerConstArrayView ids) const = 0;
+
+    virtual std::optional<Arccore::Real> contribute(Arccore::Integer row, Arccore::Integer col, Arccore::Real value) = 0;
   };
 
   /*---------------------------------------------------------------------------*/

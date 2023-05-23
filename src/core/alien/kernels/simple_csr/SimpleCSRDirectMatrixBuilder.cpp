@@ -236,7 +236,7 @@ namespace Common
 
   /*---------------------------------------------------------------------------*/
 
-  void SimpleCSRDirectMatrixBuilder::addData(
+  std::optional<double> SimpleCSRDirectMatrixBuilder::contribute(
   const Integer iIndex, const Integer jIndex, const Real value)
   {
     _startTimer();
@@ -244,14 +244,15 @@ namespace Common
 
     // skip dead zone
     if (iIndex == -1 or jIndex == -1)
-      return;
+      return std::nullopt;
     const Integer local_row = iIndex - m_local_offset;
-#ifdef CHECKPROFILE_ON_FILLING
+
     if (local_row < 0 or local_row >= m_local_size)
-      throw FatalErrorException("Cannot add data on undefined row");
-#endif /* CHECKPROFILE_ON_FILLING */
+      return std::nullopt;
+
     if (jIndex < -1 or jIndex >= m_col_global_size)
-      throw FatalErrorException("column index undefined");
+      return std::nullopt;
+
     const Integer row_start = m_row_starts[local_row];
     Integer& row_size = m_row_sizes[local_row];
     Integer row_capacity = m_row_starts[local_row + 1] - row_start;
@@ -259,11 +260,15 @@ namespace Common
     Real* found_value = intrusive_vmap_insert(jIndex, hint_pos, row_size, row_capacity,
                                               m_cols.unguardedBasePointer() + row_start,
                                               m_values.unguardedBasePointer() + row_start);
-    if (found_value)
-      *found_value += value;
-    else // Manage extra data storage
-      m_extras[local_row][jIndex] += value;
+    auto res = value;
+    if (found_value) {
+      res = (*found_value += value);
+    }
+    else { // Manage extra data storage
+      res = (m_extras[local_row][jIndex] += value);
+    }
     _stopTimer();
+    return { res };
   }
 
   /*---------------------------------------------------------------------------*/

@@ -103,7 +103,14 @@ namespace Common
 
     void allocate() override;
 
-    void addData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value) override;
+    void addData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value) override
+    {
+      if (!contribute(iIndex, jIndex, value).has_value()) {
+#ifdef CHECKPROFILE_ON_FILLING
+        hrow FatalErrorException(std::format("Cannot add ({}, {})", iIndex, jIndex);
+#endif
+      }
+    }
 
     void addData(Arccore::Integer iIndex, Arccore::Real factor,
                  Arccore::ConstArrayView<Arccore::Integer> jIndexes,
@@ -122,6 +129,8 @@ namespace Common
     [[nodiscard]] Arccore::String stats() const override;
 
     [[nodiscard]] Arccore::String stats(Arccore::IntegerConstArrayView ids) const override;
+
+    std::optional<double> contribute(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value) override;
 
    protected:
     IMatrix& m_matrix;

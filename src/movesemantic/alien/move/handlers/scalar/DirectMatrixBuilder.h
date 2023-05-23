@@ -128,6 +128,15 @@ class ALIEN_MOVESEMANTIC_EXPORT DirectMatrixBuilder
     return std::move(m_data);
   }
 
+  std::optional<Arccore::Real> contribute(Arccore::Integer row, Arccore::Integer col, Arccore::Real value)
+  {
+    if (!m_builder) {
+      return std::nullopt;
+    }
+
+    return m_builder->contribute(row, col, value);
+  }
+
  private:
   MatrixData m_data;
   std::unique_ptr<Alien::Common::IDirectMatrixBuilder> m_builder;

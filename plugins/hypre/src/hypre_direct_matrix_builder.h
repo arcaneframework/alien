@@ -115,6 +115,11 @@ namespace Hypre
       // Do nothing
       return { "" };
     }
+    std::optional<Arccore::Real> contribute(Arccore::Integer row, Arccore::Integer col, Arccore::Real value) override
+    {
+      addData(row, col, value);
+      return { value };
+    }
 
    private:
     IMatrix& m_matrix;
