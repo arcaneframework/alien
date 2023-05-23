@@ -23,9 +23,8 @@
 #include <alien/distribution/VectorDistribution.h>
 
 #include <alien/move/data/MatrixData.h>
-#include <alien/move/handlers/scalar/DoKDirectMatrixBuilder.h>
-#include <alien/move/data/VectorData.h>
-#include <alien/move/handlers/scalar/VectorWriter.h>
+#include <alien/move/handlers/scalar/DirectMatrixBuilder.h>
+#include <alien/kernels/dok/DoKBackEnd.h>
 #include <alien/move/handlers/scalar/VectorReader.h>
 
 #include <Environment.h>
@@ -42,7 +41,7 @@ TEST(TestDoKDirectMatrixBuilder, Fill)
   ASSERT_EQ(A.rowSpace(), row_space);
   ASSERT_EQ(A.colSpace(), col_space);
   {
-    auto builder = Alien::Move::DoKDirectMatrixBuilder(std::move(A));
+    Alien::Move::DirectMatrixBuilder builder(std::move(A), Alien::DirectMatrixOptions::eResetValues, Alien::DirectMatrixOptions::eSymmetric, std::make_optional<Alien::BackEndId>(Alien::AlgebraTraits<Alien::BackEnd::tag::DoK>::name()));
 
     // With DokDirectMatrixBuilder, this code is valid for all ranks.
     // We can fill non-local non-zeros.
