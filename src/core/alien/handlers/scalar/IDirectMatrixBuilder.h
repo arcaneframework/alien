@@ -20,6 +20,8 @@
 #ifndef ALIEN_COMMON_BUILDER_SCALAR_DIRECTMATRIXBUILDER_H
 #define ALIEN_COMMON_BUILDER_SCALAR_DIRECTMATRIXBUILDER_H
 
+#include <optional>
+
 #include <arccore/base/BaseTypes.h>
 
 #include <alien/data/IMatrix.h>
@@ -61,10 +63,8 @@ namespace Common
    public:
     using ReserveFlag = DirectMatrixOptions::ReserveFlag;
 
-   public:
     virtual ~IDirectMatrixBuilder() = default;
 
-   public:
     virtual void reserve(Arccore::Integer n, ReserveFlag flag) = 0;
 
     virtual void reserve(Arccore::ConstArrayView<Arccore::Integer> indices, Arccore::Integer n,
