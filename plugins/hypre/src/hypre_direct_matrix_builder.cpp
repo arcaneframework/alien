@@ -32,12 +32,14 @@ namespace Alien::Hypre
 {
 HypreDirectMatrixBuilder::HypreDirectMatrixBuilder(Alien::IMatrix& matrix,
                                                    Hypre::HypreDirectMatrixBuilder::ResetFlag reset_flag,
-                                                   Hypre::HypreDirectMatrixBuilder::SymmetricFlag symmetric_flag)
+                                                   [[maybe_unused]] Hypre::HypreDirectMatrixBuilder::SymmetricFlag symmetric_flag)
 : m_matrix(matrix)
 {
 
   m_matrix.impl()->lock();
   m_matrix_impl = &m_matrix.impl()->get<BackEnd::tag::hypre>(true);
+
+  m_matrix_impl->init(reset_flag);
 }
 
 void HypreDirectMatrixBuilder::finalize()

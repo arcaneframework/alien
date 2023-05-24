@@ -108,13 +108,32 @@ Matrix::~Matrix()
     HYPRE_IJMatrixDestroy(m_hypre);
 }
 
-void Matrix::init()
+void Matrix::init(DirectMatrixOptions::ResetFlag reset_flag)
 {
-  auto ilower = this->distribution().rowOffset();
-  auto iupper = ilower + this->distribution().localRowSize() - 1;
-  auto ierr = HYPRE_IJMatrixCreate(m_comm, ilower, iupper, ilower, iupper, &m_hypre);
-  ierr |= HYPRE_IJMatrixSetObjectType(m_hypre, HYPRE_PARCSR);
-  ierr |= HYPRE_IJMatrixInitialize(m_hypre);
+  HYPRE_Int ierr = 0;
+
+  switch (reset_flag) {
+  case DirectMatrixOptions::eNoReset:
+    break;
+  case DirectMatrixOptions::eResetValues:
+    ierr |= HYPRE_IJMatrixSetConstantValues(m_hypre, 0);
+    break;
+  case DirectMatrixOptions::eResetProfile:
+    ierr |= HYPRE_IJMatrixInitialize(m_hypre);
+    break;
+  case DirectMatrixOptions::eResetAllocation:
+    if (m_hypre) {
+      HYPRE_IJMatrixDestroy(m_hypre);
+      m_hypre = nullptr;
+    }
+    auto ilower = this->distribution().rowOffset();
+    auto iupper = ilower + this->distribution().localRowSize() - 1;
+
+    ierr |= HYPRE_IJMatrixCreate(m_comm, ilower, iupper, ilower, iupper, &m_hypre);
+    ierr |= HYPRE_IJMatrixSetObjectType(m_hypre, HYPRE_PARCSR);
+    ierr |= HYPRE_IJMatrixInitialize(m_hypre);
+    break;
+  }
 
   if (ierr) {
     throw Arccore::FatalErrorException(A_FUNCINFO, "Hypre Initialisation failed");
@@ -123,9 +142,10 @@ void Matrix::init()
 
 void Matrix::setProfile(Arccore::ConstArrayView<int> row_sizes)
 {
-  if (m_hypre)
+  if (m_hypre) {
     HYPRE_IJMatrixDestroy(m_hypre);
-
+    m_hypre = nullptr;
+  }
   init();
   if (HYPRE_IJMatrixSetRowSizes(m_hypre, row_sizes.data())) {
     throw Arccore::FatalErrorException(A_FUNCINFO, "Hypre set profile failed");

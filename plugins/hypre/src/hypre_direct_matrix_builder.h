@@ -44,7 +44,7 @@ namespace Hypre
   /*---------------------------------------------------------------------------*/
   /*---------------------------------------------------------------------------*/
 
-  class ALIEN_EXPORT HypreDirectMatrixBuilder : public Alien::Common::IDirectMatrixBuilder
+  class ALIEN_EXPORT HypreDirectMatrixBuilder final : public Alien::Common::IDirectMatrixBuilder
   {
    public:
     using ResetFlag = DirectMatrixOptions::ResetFlag;
@@ -53,10 +53,10 @@ namespace Hypre
 
     using MatrixElement = MatrixElementT<HypreDirectMatrixBuilder>;
 
-    HypreDirectMatrixBuilder(IMatrix& matrix, ResetFlag reset_flag,
-                             SymmetricFlag symmetric_flag = SymmetricFlag::eSymmetric);
+    HypreDirectMatrixBuilder(IMatrix& matrix, [[maybe_unused]] ResetFlag reset_flag,
+                             [[maybe_unused]] SymmetricFlag symmetric_flag = SymmetricFlag::eSymmetric);
 
-    virtual ~HypreDirectMatrixBuilder()
+    ~HypreDirectMatrixBuilder() override
     {
       finalize();
     }

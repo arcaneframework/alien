@@ -21,6 +21,7 @@
 #include <alien/core/impl/IMatrixImpl.h>
 
 #include <HYPRE_IJ_mv.h>
+#include "alien/handlers/scalar/IDirectMatrixBuilder.h"
 
 namespace Alien::Hypre
 {
@@ -60,9 +61,9 @@ class Matrix : public IMatrixImpl
 
   HYPRE_IJMatrix internal() const { return m_hypre; }
 
- private:
-  void init();
+  void init(DirectMatrixOptions::ResetFlag reset_flag = DirectMatrixOptions::ResetFlag::eResetAllocation);
 
+ private:
   HYPRE_IJMatrix m_hypre = nullptr;
   MPI_Comm m_comm;
 };
