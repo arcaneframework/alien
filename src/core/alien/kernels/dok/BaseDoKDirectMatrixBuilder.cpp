@@ -28,11 +28,33 @@
 namespace Alien::Common
 {
 
-BaseDoKDirectMatrixBuilder::BaseDoKDirectMatrixBuilder(Alien::IMatrix& self)
+BaseDoKDirectMatrixBuilder::BaseDoKDirectMatrixBuilder(Alien::IMatrix& self, DirectMatrixOptions::ResetFlag reset_flag)
 : m_matrix(self)
 {
   m_matrix.impl()->lock();
+
+  switch (reset_flag) {
+  case DirectMatrixOptions::eResetProfile:
+  case DirectMatrixOptions::eResetAllocation:
+    m_matrix.impl()->release<BackEnd::tag::DoK>();
+    break;
+  default:
+    // Nothing to do
+    break;
+  }
+
   m_impl = &m_matrix.impl()->get<BackEnd::tag::DoK>(true);
+
+  switch (reset_flag) {
+  case DirectMatrixOptions::eNoReset:
+    break;
+  case DirectMatrixOptions::eResetValues:
+    m_impl->fill(0);
+    break;
+  default:
+    // Nothing to do
+    break;
+  }
 }
 
 BaseDoKDirectMatrixBuilder::~BaseDoKDirectMatrixBuilder()
@@ -42,13 +64,13 @@ BaseDoKDirectMatrixBuilder::~BaseDoKDirectMatrixBuilder()
 
 std::optional<Real> BaseDoKDirectMatrixBuilder::contribute(Arccore::Integer row, Arccore::Integer col, Arccore::Real value)
 {
-  return std::optional<Real>(m_impl->addNNZ(row, col, value));
+  return { m_impl->addNNZ(row, col, value) };
 }
 
 std::optional<Real> BaseDoKDirectMatrixBuilder::setNNZ(Arccore::Integer row, Arccore::Integer col, Arccore::Real value)
 {
   m_impl->setNNZ(row, col, value);
-  return std::optional<Real>(value);
+  return { value };
 }
 
 bool BaseDoKDirectMatrixBuilder::assemble()
@@ -58,29 +80,7 @@ bool BaseDoKDirectMatrixBuilder::assemble()
   return true;
 }
 
-void BaseDoKDirectMatrixBuilder::reserve(Arccore::Integer n, IDirectMatrixBuilder::ReserveFlag flag)
-{
-}
-
-void BaseDoKDirectMatrixBuilder::reserve(Arccore::ConstArrayView<Arccore::Integer> indices, Arccore::Integer n, IDirectMatrixBuilder::ReserveFlag flag)
-{
-}
-
-void BaseDoKDirectMatrixBuilder::allocate()
-{
-}
-
-String BaseDoKDirectMatrixBuilder::stats() const
-{
-  return Arccore::String();
-}
-
-String BaseDoKDirectMatrixBuilder::stats(Arccore::IntegerConstArrayView ids) const
-{
-  return Arccore::String();
-}
-
 const ALIEN_EXPORT Alien::Common::MatrixBuilderFactory dok_builder_register(
-AlgebraTraits<BackEnd::tag::DoK>::name(), [](IMatrix& matrix, DirectMatrixOptions::ResetFlag reset, DirectMatrixOptions::SymmetricFlag symmetry) { return std::make_unique<BaseDoKDirectMatrixBuilder>(matrix); });
+AlgebraTraits<BackEnd::tag::DoK>::name(), [](IMatrix& matrix, DirectMatrixOptions::ResetFlag reset, [[maybe_unused]] DirectMatrixOptions::SymmetricFlag symmetry) { return std::make_unique<BaseDoKDirectMatrixBuilder>(matrix, reset); });
 
 } // namespace Alien::Common

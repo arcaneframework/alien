@@ -38,19 +38,19 @@ namespace Alien
 class DoKMatrix : public IMatrixImpl
 {
  public:
-  typedef Real ValueType;
+  using ValueType = Real;
 
- public:
   explicit DoKMatrix(const MultiMatrixImpl* multi_impl = nullptr)
   : IMatrixImpl(multi_impl, "DoK")
-  , m_data()
   {}
 
   DoKMatrix(const DoKMatrix&) = delete;
 
   ~DoKMatrix() override = default;
 
-  void clear() override {}
+  void clear() override
+  { // Nothing to do
+  }
 
   //! Set value of a matrix element, creating it if it does not exist yet.
   //! \param row id of the row in the matrix
@@ -73,6 +73,11 @@ class DoKMatrix : public IMatrixImpl
   {
     m_need_update = true;
     return m_data.add(row, col, value);
+  }
+
+  void fill(Real value)
+  {
+    m_data.fill(value);
   }
 
   //! Dispatch matrix elements
@@ -103,10 +108,9 @@ class DoKMatrix : public IMatrixImpl
     m_data.compact();
     m_need_update = false;
   }
-
- private:
+  
   // TODO remove mutable !
-  mutable DoKLocalMatrixT<ValueType> m_data;
+  mutable DoKLocalMatrixT<ValueType> m_data = {};
   bool m_need_update = true;
 };
 

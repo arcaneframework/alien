@@ -47,7 +47,7 @@ namespace Common
      * @param self the multi-representation handler. It is locked during the life of this object.
      */
     // FIXME: This should be implemented with move-semantic.
-    explicit BaseDoKDirectMatrixBuilder(IMatrix& self);
+    BaseDoKDirectMatrixBuilder(IMatrix& self, DirectMatrixOptions::ResetFlag reset);
     ~BaseDoKDirectMatrixBuilder() override;
 
     /*!
@@ -59,7 +59,7 @@ namespace Common
      * @param value of the contribution
      * @return a value if insertion is ok
      */
-    std::optional<Real> contribute(Integer row, Integer col, Real value);
+    std::optional<Real> contribute(Integer row, Integer col, Real value) override;
 
     /*!
      * Set a value to a non-zero. Will create the non-zero if needed.
@@ -80,9 +80,20 @@ namespace Common
      */
     bool assemble();
 
-    void reserve(Arccore::Integer n, ReserveFlag flag) override;
-    void reserve(Arccore::ConstArrayView<Arccore::Integer> indices, Arccore::Integer n, ReserveFlag flag) override;
-    void allocate() override;
+    void reserve([[maybe_unused]] Arccore::Integer n, [[maybe_unused]] ReserveFlag flag) override
+    {
+      // Nothing to do
+    }
+
+    void reserve([[maybe_unused]] Arccore::ConstArrayView<Arccore::Integer> indices, [[maybe_unused]] Arccore::Integer n, [[maybe_unused]] ReserveFlag flag) override
+    {
+      // Nothing to do
+    }
+
+    void allocate() override
+    {
+      // Nothing to do
+    }
 
     void addData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value) override
     {
@@ -112,10 +123,20 @@ namespace Common
       assemble();
     }
 
-    void squeeze() override {}
+    void squeeze() override
+    {
+      // Nothing to do
+    }
 
-    String stats() const override;
-    String stats(Arccore::IntegerConstArrayView ids) const override;
+    String stats() const override
+    {
+      return {};
+    }
+
+    String stats([[maybe_unused]] Arccore::IntegerConstArrayView ids) const override
+    {
+      return {};
+    }
 
    private:
     //! Convenience reference to multi-repr manager.
