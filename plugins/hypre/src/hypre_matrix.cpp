@@ -116,6 +116,7 @@ void Matrix::init(DirectMatrixOptions::ResetFlag reset_flag)
   case DirectMatrixOptions::eNoReset:
     break;
   case DirectMatrixOptions::eResetValues:
+    assemble();
     ierr |= HYPRE_IJMatrixSetConstantValues(m_hypre, 0);
     break;
   case DirectMatrixOptions::eResetProfile:
