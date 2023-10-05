@@ -1,0 +1,14 @@
+{
+        "max-iter" : "500",
+        "tol" : "1.e-6",
+        "stop-criteria" : "RB",
+        "solver" : "CG",
+        "preconditioner" : "Chebyshev",
+        "poly-order" : "3",
+        "poly-factor" : "0.5",
+        "poly-factor-iter" : "10",
+        "complex-opt" : {
+          "sopt" : "100",
+          "eopt" : "EOpt1"
+          }
+}

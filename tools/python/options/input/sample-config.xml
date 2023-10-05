@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<service name="SampleLinearSolver" version="1.0">
+  <description>Service de solveur MTL</description>
+  <options>
+    <simple name="max-iteration-num" type="integer" default="1000">
+      <description>Maximal number of iterations</description>
+    </simple>
+    <simple name="stop-criteria-value" type="real" default="1e-6">
+      <description>Expected accuracy</description>
+    </simple>
+    <enumeration name="solver" type="SampleOptionTypes::eSolver" default="BiCGStab">
+      <description>Solveur type</description>
+      <enumvalue name="GMRES" genvalue="MTLOptionTypes::GMRES">
+        <description>GMRES Solver</description>
+      </enumvalue>
+      <enumvalue name="BiCGStab" genvalue="SampleOptionTypes::BiCGStab">
+        <description>BiCGStab Solver</description>
+      </enumvalue>
+      <enumvalue name="CG" genvalue="SampleOptionTypes::CG">
+        <description>Conjugate gradient solver</description>
+      </enumvalue>
+      <enumvalue name="QR" genvalue="SampleOptionTypes::QR">
+        <description>QR Solver</description>
+      </enumvalue>
+      <enumvalue name="LU" genvalue="SampleOptionTypes::LU">
+        <description>QR Solver</description>
+      </enumvalue>
+    </enumeration>
+    <enumeration name="preconditioner" type="SampleOptionTypes::ePreconditioner" default="ILU0">
+      <description>type def preconditionnement</description>
+      <enumvalue name="None" genvalue="SampleOptionTypes::NonePC">
+        <description>Id preconditioner</description>
+      </enumvalue>
+      <enumvalue name="Diag" genvalue="SampleOptionTypes::DiagPC">
+        <description>Diagonal preconditioner</description>
+      </enumvalue>
+      <enumvalue name="ILU0" genvalue="SampleOptionTypes::ILU0PC">
+        <description>0th order ILU preconditioner</description>
+      </enumvalue>
+      <enumvalue name="ILUT" genvalue="SampleOptionTypes::ILUTPC">
+        <description>Thresholded ILU preconditioner</description>
+      </enumvalue>
+      <enumvalue name="SSOR" genvalue="SampleOptionTypes::SSORPC">
+        <description>SSOR preconditioner</description>
+      </enumvalue>
+    </enumeration>
+    <simple name="verbose" type="bool" default="false">
+      <description>Verbosity flag</description>
+    </simple>
+
+    <simple name="output-level" type="integer" default="0">
+      <description>Output level</description>
+    </simple>
+
+    <simple name="sopt" type="real" minOccurs="0">
+      <description>simple real option</description>
+    </simple>
+
+    <complex name="complex-opt">
+      <description>Complex option niv1</description>
+      <simple name="sopt" type="integer">
+        <description>Simple integer option</description>
+      </simple>
+      <enumeration name="eopt" type="SampleOptionTypes::eOpt" default="EOpt0">
+        <description>Simple integer option</description>
+        <enumvalue name="EOpt0" genvalue="SampleOptionTypes::EOpt0">
+          <description>EOpt0</description>
+        </enumvalue>
+        <enumvalue name="EOpt1" genvalue="SampleOptionTypes::EOpt1">
+          <description>EOpt1</description>
+        </enumvalue>
+      </enumeration>
+      <complex name="copt">
+        <description>Complex option niv2</description>
+        <simple name="sopt" type="real">
+          <description>Simple real option</description>
+        </simple>
+      </complex>
+    </complex>
+    
+  </options>
+</service>

@@ -15,9 +15,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
 include(LoadAlienTest)
+include(LoadAlienOptionsConfigGenerator)
 
 find_package(MPI REQUIRED)
 find_package(GTest REQUIRED)
+
+configure_file(Sample.xml Sample.xml COPYONLY)
+configure_file(Sample.json Sample.json COPYONLY)
 
 # tests with GTest
 
@@ -37,6 +41,15 @@ add_executable(core.gtest.mpi main.cpp
         TestVBlockBuilder.cc
         )
 
+IF(ALIEN_GENERATE_OPTIONSCONFIG)
+    target_sources(core.gtest.seq PRIVATE TestOptionsConfig.cc)
+
+    generateOptionsConfig(core.gtest.seq
+                          Sample.config
+                          INSTALL_GENERATED_FILES
+                         )
+endif()
+
 target_link_libraries(core.gtest.seq
         PUBLIC GTest::GTest
         PUBLIC Alien::alien_core
@@ -44,12 +57,24 @@ target_link_libraries(core.gtest.seq
         arcconpkg_MPI
         )
 
+if (ALIEN_USE_LIBXML2)
+    find_package(LibXml2 REQUIRED)
+
+    target_link_libraries(core.gtest.seq PRIVATE arccon::LibXml2)
+endif ()
+
+if(ALIEN_USE_JSON)
+    find_package(Boost COMPONENTS system)
+    target_compile_definitions(core.gtest.seq PRIVATE ALIEN_USE_BOOST_PROPERTY_TREE)
+    target_link_libraries(core.gtest.seq PRIVATE Boost::system)
+endif()
+
 target_link_libraries(core.gtest.mpi
-        PUBLIC GTest::GTest
-        PUBLIC Alien::alien_core
-        alien_test_framework
-        arcconpkg_MPI
-        )
+    PUBLIC GTest::GTest
+    PUBLIC Alien::alien_core
+    alien_test_framework
+    arcconpkg_MPI
+    )
 
 if (ALIEN_EXPAND_TESTS)
     gtest_discover_tests(core.gtest.seq TEST_PREFIX "core." TEST_SUFFIX ".seq" TEST_LIST core-seq DISCOVERY_TIMEOUT 10)
