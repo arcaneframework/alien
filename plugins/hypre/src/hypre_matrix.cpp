@@ -111,6 +111,8 @@ Matrix::~Matrix()
 void Matrix::init(DirectMatrixOptions::ResetFlag reset_flag)
 {
   HYPRE_Int ierr = 0;
+  // Clear all Hypre error for this session
+  HYPRE_ClearAllErrors();
 
   switch (reset_flag) {
   case DirectMatrixOptions::eNoReset:

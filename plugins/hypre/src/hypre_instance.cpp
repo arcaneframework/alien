@@ -31,8 +31,11 @@ class AlienHypreInstance
  public:
   static void init_if_needed(MPI_Comm comm)
   {
-    if (hypre_initialized)
+    if (hypre_initialized) {
+      // Clear all Hypre error for this session
+      HYPRE_ClearAllErrors();
       return;
+    }
 
     bind_devices(comm);
 
@@ -41,8 +44,10 @@ class AlienHypreInstance
 #endif
 
     hypre_initialized = true;
+    HYPRE_ClearAllErrors();
 
     setup_devices();
+    HYPRE_ClearAllErrors();
   }
 
   static void bind_devices([[maybe_unused]] MPI_Comm comm)
