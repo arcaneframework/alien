@@ -108,7 +108,7 @@ class DoKMatrix : public IMatrixImpl
     m_data.compact();
     m_need_update = false;
   }
-  
+
   // TODO remove mutable !
   mutable DoKLocalMatrixT<ValueType> m_data = {};
   bool m_need_update = true;
