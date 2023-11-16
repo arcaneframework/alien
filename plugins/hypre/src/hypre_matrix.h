@@ -21,6 +21,7 @@
 #include <alien/core/impl/IMatrixImpl.h>
 
 #include <HYPRE_IJ_mv.h>
+#include "alien/handlers/scalar/IDirectMatrixBuilder.h"
 
 namespace Alien::Hypre
 {
@@ -37,6 +38,10 @@ class Matrix : public IMatrixImpl
                     Arccore::ConstArrayView<int> cols,
                     Arccore::ConstArrayView<double> values);
 
+  void addRowValues(int row,
+                    Arccore::ConstArrayView<int> cols,
+                    Arccore::ConstArrayView<double> values);
+
   //! Fill several partial rows at the same time.
   //! Function strongly mimic `HYPRE_IJMatrixSetValues` semantic.
   //!
@@ -48,18 +53,17 @@ class Matrix : public IMatrixImpl
   //! `rows` and `ncols` should have the same size.
   //! `cols` and `values` should have the same size.
   //! For Hypre to use OpenMP threads for set values, rows values must be unique.
-  void setRowsValues(Arccore::ConstArrayView<int> rows,
-                     Arccore::ArrayView<int> ncols,
-                     Arccore::ConstArrayView<int> cols,
-                     Arccore::ConstArrayView<double> values);
+  void insertRowsValues(Arccore::ConstArrayView<int> rows, Arccore::ArrayView<int> ncols,
+                        Arccore::ConstArrayView<int> cols,
+                        Arccore::ConstArrayView<double> values, bool set = true);
 
   void assemble();
 
   HYPRE_IJMatrix internal() const { return m_hypre; }
 
- private:
-  void init();
+  void init(DirectMatrixOptions::ResetFlag reset_flag = DirectMatrixOptions::ResetFlag::eResetAllocation);
 
+ private:
   HYPRE_IJMatrix m_hypre = nullptr;
   MPI_Comm m_comm;
 };

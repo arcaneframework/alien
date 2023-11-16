@@ -55,7 +55,7 @@
 #include "handlers/scalar/BaseVectorWriter.h"
 
 #include "handlers/profiler/BaseMatrixProfiler.h"
-#include "handlers/scalar/BaseDirectMatrixBuilder.h"
+#include "handlers/scalar/IDirectMatrixBuilder.h"
 #include "handlers/scalar/BaseProfiledMatrixBuilder.h"
 
 #include "functional/Cast.h"

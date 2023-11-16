@@ -52,6 +52,8 @@ add_library(hypre_wrapper
         src/hypre_linear_solver.cpp
         src/hypre_instance.h
         src/hypre_instance.cpp
+        src/hypre_direct_matrix_builder.cpp
+        src/hypre_direct_matrix_builder.h
         src/converters/hypre_to_simplecsr_vector.cpp
         src/converters/simplecsr_to_hypre_vector.cpp
         src/converters/simplecsr_to_hypre_matrix.cpp
@@ -72,7 +74,7 @@ endif ()
 
 target_link_libraries(hypre_wrapper PUBLIC
         Alien::alien_core
-        )
+)
 
 target_link_libraries(hypre_wrapper PRIVATE
         MPI::MPI_CXX
@@ -81,13 +83,13 @@ target_link_libraries(hypre_wrapper PRIVATE
         Arccore::arccore_base
         Arccore::arccore_message_passing_mpi
         arccon::Hypre
-        )
+)
 
 target_include_directories(hypre_wrapper PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-        )
+)
 
 add_library(Alien::hypre_wrapper ALIAS hypre_wrapper)
 
@@ -96,7 +98,7 @@ include(GenerateExportHeader)
 generate_export_header(hypre_wrapper
         BASE_NAME ALIEN_HYPRE
         EXPORT_FILE_NAME include/alien/hypre/export.h
-        )
+)
 
 # Examples
 set(ALIEN_BENCHMARK ON)
@@ -117,12 +119,12 @@ set(ALIENHYPRE_EXPORT_TARGET ${PROJECT_NAME}Targets)
 
 install(DIRECTORY include/alien/hypre
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/alien
-        )
+)
 
 install(TARGETS hypre_wrapper EXPORT ${ALIENHYPRE_EXPORT_TARGET}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        )
+)
 
 install(
         FILES ${CMAKE_CURRENT_BINARY_DIR}/include/alien/hypre/export.h

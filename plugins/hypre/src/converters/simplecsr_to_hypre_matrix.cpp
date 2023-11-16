@@ -47,7 +47,8 @@ class SimpleCSR_to_Hypre_MatrixConverter final : public Alien::IMatrixConverter
 
   void _build(const Alien::SimpleCSRMatrix<Arccore::Real>& sourceImpl, Alien::Hypre::Matrix& targetImpl) const;
 
-  void _buildBlock(const Alien::SimpleCSRMatrix<Arccore::Real>& sourceImpl, Alien::Hypre::Matrix& targetImpl) const;
+  void
+  _buildBlock(const Alien::SimpleCSRMatrix<Arccore::Real>& sourceImpl, Alien::Hypre::Matrix& targetImpl) const;
 };
 
 void SimpleCSR_to_Hypre_MatrixConverter::convert(const IMatrixImpl* sourceImpl, IMatrixImpl* targetImpl) const
@@ -90,7 +91,7 @@ void SimpleCSR_to_Hypre_MatrixConverter::_build(const Alien::SimpleCSRMatrix<Arc
   auto cols = profile.getCols();
 
   // understand why values and cols can have different sizes !
-  targetImpl.setRowsValues(rows, ncols, cols, values.subConstView(0, cols.size()));
+  targetImpl.insertRowsValues(rows, ncols, cols, values.subConstView(0, cols.size()), true);
 
   targetImpl.assemble();
 }

@@ -23,6 +23,8 @@
 
 #include <optional>
 
+#include <alien/handlers/scalar/IDirectMatrixBuilder.h>
+
 namespace Alien
 {
 // Forward declarations.
@@ -33,11 +35,11 @@ namespace Common
 {
 
   /*!
-   * Use DoKMatrix to implement DirectMatrixBuilder.
+   * Use DoKMatrix to implement IDirectMatrixBuilder.
    *
    * This data structure is not compressed like CSR, allowing easy insertion of values.
    */
-  class ALIEN_EXPORT BaseDoKDirectMatrixBuilder
+  class ALIEN_EXPORT BaseDoKDirectMatrixBuilder : public IDirectMatrixBuilder
   {
    public:
     /*!
@@ -45,8 +47,8 @@ namespace Common
      * @param self the multi-representation handler. It is locked during the life of this object.
      */
     // FIXME: This should be implemented with move-semantic.
-    explicit BaseDoKDirectMatrixBuilder(IMatrix& self);
-    ~BaseDoKDirectMatrixBuilder();
+    BaseDoKDirectMatrixBuilder(IMatrix& self, DirectMatrixOptions::ResetFlag reset);
+    ~BaseDoKDirectMatrixBuilder() override;
 
     /*!
      * Add a contribution to a non-zero. Will create the non-zero if needed.
@@ -57,7 +59,7 @@ namespace Common
      * @param value of the contribution
      * @return a value if insertion is ok
      */
-    std::optional<Real> contribute(Integer row, Integer col, Real value);
+    std::optional<Real> contribute(Integer row, Integer col, Real value) override;
 
     /*!
      * Set a value to a non-zero. Will create the non-zero if needed.
@@ -77,6 +79,64 @@ namespace Common
      * @return if successful.
      */
     bool assemble();
+
+    void reserve([[maybe_unused]] Arccore::Integer n, [[maybe_unused]] ReserveFlag flag) override
+    {
+      // Nothing to do
+    }
+
+    void reserve([[maybe_unused]] Arccore::ConstArrayView<Arccore::Integer> indices, [[maybe_unused]] Arccore::Integer n, [[maybe_unused]] ReserveFlag flag) override
+    {
+      // Nothing to do
+    }
+
+    void allocate() override
+    {
+      // Nothing to do
+    }
+
+    void addData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value) override
+    {
+      contribute(iIndex, jIndex, value);
+    }
+
+    void addData(Arccore::Integer iIndex, Arccore::Real factor, Arccore::ConstArrayView<Arccore::Integer> jIndexes, Arccore::ConstArrayView<Arccore::Real> jValues) override
+    {
+      for (auto offset = 0; offset < jIndexes.length(); offset++) {
+        contribute(iIndex, jIndexes[offset], jValues[offset] * factor);
+      }
+    }
+
+    void setData(Arccore::Integer iIndex, Arccore::Integer jIndex, Arccore::Real value) override
+    {
+      setNNZ(iIndex, jIndex, value);
+    }
+    void setData(Arccore::Integer iIndex, Arccore::Real factor, Arccore::ConstArrayView<Arccore::Integer> jIndexes, Arccore::ConstArrayView<Arccore::Real> jValues) override
+    {
+      for (auto offset = 0; offset < jIndexes.length(); offset++) {
+        setNNZ(iIndex, jIndexes[offset], jValues[offset] * factor);
+      }
+    }
+
+    void finalize() override
+    {
+      assemble();
+    }
+
+    void squeeze() override
+    {
+      // Nothing to do
+    }
+
+    String stats() const override
+    {
+      return {};
+    }
+
+    String stats([[maybe_unused]] Arccore::IntegerConstArrayView ids) const override
+    {
+      return {};
+    }
 
    private:
     //! Convenience reference to multi-repr manager.

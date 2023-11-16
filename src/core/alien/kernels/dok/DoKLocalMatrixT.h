@@ -34,9 +34,6 @@ class DoKLocalMatrixT
 {
  public:
   DoKLocalMatrixT()
-  : m_indexer(new DoKLocalMatrixIndexer())
-  , m_offset(0)
-  , m_values()
   {}
 
   virtual ~DoKLocalMatrixT() = default;
@@ -87,14 +84,14 @@ class DoKLocalMatrixT
     UniqueArray<ILocalMatrixIndexer::Renumbering> perm(m_offset);
     m_r_indexer.reset(m_indexer->sort(perm));
     UniqueArray<NNZValue> old_vals = m_values;
-    for (auto curr : perm) {
-      m_values[curr.second] = old_vals[curr.first];
+    for (auto [old_id, new_id] : perm) {
+      m_values[new_id] = old_vals[old_id];
     }
   }
 
-  IReverseIndexer* getReverseIndexer() const { return m_r_indexer.get(); }
+  [[nodiscard]] IReverseIndexer* getReverseIndexer() const { return m_r_indexer.get(); }
 
-  ILocalMatrixIndexer* getIndexer() const { return m_indexer.get(); }
+  [[nodiscard]] ILocalMatrixIndexer* getIndexer() const { return m_indexer.get(); }
 
   ConstArrayView<NNZValue> getValues() const { return m_values; }
 
@@ -115,6 +112,11 @@ class DoKLocalMatrixT
     }
   }
 
+  void fill(Real value)
+  {
+    m_values.fill(value);
+  }
+
  private:
   void _reallocate(Integer size = 0)
   {
@@ -132,10 +134,9 @@ class DoKLocalMatrixT
     return offset;
   }
 
- private:
-  std::unique_ptr<ILocalMatrixIndexer> m_indexer;
-  ILocalMatrixIndexer::Offset m_offset;
-  UniqueArray<NNZValue> m_values;
+  std::unique_ptr<ILocalMatrixIndexer> m_indexer = std::make_unique<DoKLocalMatrixIndexer>();
+  ILocalMatrixIndexer::Offset m_offset = 0;
+  UniqueArray<NNZValue> m_values = {};
   std::unique_ptr<IReverseIndexer> m_r_indexer;
 };
 

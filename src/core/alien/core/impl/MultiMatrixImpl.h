@@ -62,7 +62,8 @@ namespace Alien
  * While requesting a matrix in a specific format, if the up to date matrix is not in that
  * specific format, the up-to-date matrix will be converted, provided a converter exists.
  */
-class ALIEN_EXPORT MultiMatrixImpl : public TimestampMng
+class ALIEN_EXPORT MultiMatrixImpl
+: public TimestampMng
 , public UserFeatureMng
 , public ObjectWithTrace
 , public ObjectWithLock
@@ -72,11 +73,11 @@ class ALIEN_EXPORT MultiMatrixImpl : public TimestampMng
   MultiMatrixImpl();
 
   /*!
-   * \brief Constructor
-   * \param[in] row_space The row space of the matrix
-   * \param[in] col_space The column space of the matrix
-   * \param[in] dist The distribution of the matrix
-   */
+         * \brief Constructor
+         * \param[in] row_space The row space of the matrix
+         * \param[in] col_space The column space of the matrix
+         * \param[in] dist The distribution of the matrix
+         */
   MultiMatrixImpl(std::shared_ptr<ISpace> row_space, std::shared_ptr<ISpace> col_space,
                   std::shared_ptr<MatrixDistribution> dist);
 
@@ -85,125 +86,125 @@ class ALIEN_EXPORT MultiMatrixImpl : public TimestampMng
 
  protected:
   /*!
-   * \brief Copy constructor
-   * \param[in] impl The MultiMatrixImpl to copy
-   */
+         * \brief Copy constructor
+         * \param[in] impl The MultiMatrixImpl to copy
+         */
   MultiMatrixImpl(const MultiMatrixImpl& impl);
 
  public:
   /*!
-   * \brief Set uniform block information
-   * \param[in] block_size The size of the blocks
-   */
+         * \brief Set uniform block information
+         * \param[in] block_size The size of the blocks
+         */
   void setBlockInfos(Arccore::Integer block_size);
 
   /*!
-   * \brief Set uniform block information
-   * \param[in] blocks The block data
-   */
+         * \brief Set uniform block information
+         * \param[in] blocks The block data
+         */
   void setBlockInfos(const Block* blocks);
 
   /*!
-   * \brief Set variable block information
-   * \param[in] blocks The block data
-   */
+         * \brief Set variable block information
+         * \param[in] blocks The block data
+         */
   void setBlockInfos(const VBlock* blocks);
 
   /*!
-   * \brief Set variable row block information
-   * \param[in] blocks The row block data
-   */
+         * \brief Set variable row block information
+         * \param[in] blocks The row block data
+         */
   void setRowBlockInfos(const VBlock* blocks);
 
   /*!
-   * \brief Set variable col block information
-   * \param[in] blocks The col block data
-   */
+         * \brief Set variable col block information
+         * \param[in] blocks The col block data
+         */
   void setColBlockInfos(const VBlock* blocks);
 
   //! Free resources
   void free();
+
   //! Clear resources
   void clear();
 
   /*!
-   * \brief Get the row space associated to the matrix
-   * \returns The row space
-   */
-  const ISpace& rowSpace() const { return *m_row_space.get(); }
+         * \brief Get the row space associated to the matrix
+         * \returns The row space
+         */
+  const ISpace& rowSpace() const { return *m_row_space; }
 
   /*!
-   * \brief Get the col space associated to the matrix
-   * \returns The col space
-   */
-  const ISpace& colSpace() const { return *m_col_space.get(); }
+         * \brief Get the col space associated to the matrix
+         * \returns The col space
+         */
+  const ISpace& colSpace() const { return *m_col_space; }
 
   /*!
-   * \brief Get the matrix distribution
-   * \returns The matrix distribution
-   */
-  const MatrixDistribution& distribution() const { return *m_distribution.get(); }
+         * \brief Get the matrix distribution
+         * \returns The matrix distribution
+         */
+  const MatrixDistribution& distribution() const { return *m_distribution; }
 
   /*!
-   * \brief Get uniform block datas
-   * \returns The matrix block data, or a nullptr if the matrix is scalar or has variable
-   * blocks
-   */
+         * \brief Get uniform block datas
+         * \returns The matrix block data, or a nullptr if the matrix is scalar or has variable
+         * blocks
+         */
   const Block* block() const;
 
   /*!
-   * \brief Get variable block datas
-   * \returns The matrix block data, or a nullptr if the matrix is scalar or has uniform
-   * blocks
-   */
+         * \brief Get variable block datas
+         * \returns The matrix block data, or a nullptr if the matrix is scalar or has uniform
+         * blocks
+         */
   const VBlock* vblock() const;
 
   /*!
-   * \brief Get variable row block datas
-   * \returns The matrix row block data, or a nullptr if the matrix is scalar or has
-   * uniform blocks
-   */
+         * \brief Get variable row block datas
+         * \returns The matrix row block data, or a nullptr if the matrix is scalar or has
+         * uniform blocks
+         */
   const VBlock* rowBlock() const;
 
   /*!
-   * \brief Get variable col block datas
-   * \returns The matrix col block data, or a nullptr if the matrix is scalar or has
-   * uniform blocks
-   */
+         * \brief Get variable col block datas
+         * \returns The matrix col block data, or a nullptr if the matrix is scalar or has
+         * uniform blocks
+         */
   const VBlock* colBlock() const;
 
- public:
   /*!
-   * \brief Get a specific matrix implementation
-   *
-   * Might induce a conversion, depending on the up to date and requested  matrix
-   * implementation
-   *
-   * \returns The up to date matrix in the requested implementation
-   */
+         * \brief Get a specific matrix implementation
+         *
+         * Might induce a conversion, depending on the up to date and requested  matrix
+         * implementation
+         *
+         * \returns The up to date matrix in the requested implementation
+         */
   template <typename tag>
   const typename AlgebraTraits<tag>::matrix_type& get() const;
 
   /*!
-   * \brief Get a specific matrix implementation
-   *
-   * Might induce a conversion, depending on the up to date and requested  matrix
-   * implementation
-   *
-   * \param[in] update_stamp Whether or not the timestamp should be increased or not
-   * \returns The up to date matrix in the requested implementation
-   */
+         * \brief Get a specific matrix implementation
+         *
+         * Might induce a conversion, depending on the up to date and requested  matrix
+         * implementation
+         *
+         * \param[in] update_stamp Whether or not the timestamp should be increased or not
+         * \returns The up to date matrix in the requested implementation
+         */
   template <typename tag>
-  typename AlgebraTraits<tag>::matrix_type& get(const bool update_stamp);
+  typename AlgebraTraits<tag>::matrix_type& get(bool update_stamp);
 
   //! Release a matrix implementation
   template <typename tag>
   void release() const;
 
   /*!
-   * \brief Clone this object
-   * \return A clone of this object
-   */
+         * \brief Clone this object
+         * \return A clone of this object
+         */
   MultiMatrixImpl* clone() const;
 
   // TOCHECK : should be removed or not ?
@@ -214,25 +215,25 @@ class ALIEN_EXPORT MultiMatrixImpl : public TimestampMng
 
  private:
   /*!
-   * \brief Get a specific matrix implementation
-   * \param[in] backend The id of the specific implementation
-   * \returns The matrix in the requested format
-   */
+         * \brief Get a specific matrix implementation
+         * \param[in] backend The id of the specific implementation
+         * \returns The matrix in the requested format
+         */
   template <typename matrix_type>
   IMatrixImpl*& getImpl(BackEndId backend) const;
 
   /*!
-   * \brief Update a matrix implementation
-   * \param[in] target The targeted implementation
-   */
+         * \brief Update a matrix implementation
+         * \param[in] target The targeted implementation
+         */
   void updateImpl(IMatrixImpl* target) const;
 
  protected:
   /*!
-   * \brief Insert a matrix implementation in the multi matrix container
-   * \param[in] backend The implementation backend id
-   * \param[in] m The matrix to insert
-   */
+         * \brief Insert a matrix implementation in the multi matrix container
+         * \param[in] backend The implementation backend id
+         * \param[in] m The matrix to insert
+         */
   template <typename matrix_type>
   void insert(BackEndId backend, matrix_type* m);
 
@@ -244,7 +245,7 @@ class ALIEN_EXPORT MultiMatrixImpl : public TimestampMng
   //! The matrix distribution
   std::shared_ptr<MatrixDistribution> m_distribution;
   //! The type of the matrix container
-  typedef std::map<BackEndId, IMatrixImpl*> MultiMatrixImplMap;
+  using MultiMatrixImplMap = std::map<BackEndId, IMatrixImpl*>;
   //! The matrices container
   mutable MultiMatrixImplMap m_impls2;
   //! The uniform block datas
@@ -265,7 +266,7 @@ MultiMatrixImpl::get() const
   // TOCHECK : to be removed or not ?
   //  ALIEN_ASSERT(!m_row_space.isNull(), ("Null row space matrix access"));
   //  ALIEN_ASSERT(!m_col_space.isNull(), ("Null col space matrix access"));
-  typedef typename AlgebraTraits<tag>::matrix_type matrix_type;
+  using matrix_type = typename AlgebraTraits<tag>::matrix_type;
   IMatrixImpl*& impl2 = getImpl<matrix_type>(AlgebraTraits<tag>::name());
   ALIEN_ASSERT(
   (impl2->backend() == AlgebraTraits<tag>::name()), ("Inconsistent backend"));
@@ -283,7 +284,7 @@ MultiMatrixImpl::get(const bool update_stamp)
   // TOCHECK : to be removed or not ?
   //  ALIEN_ASSERT(!m_row_space.isNull(), ("Null row space matrix access"));
   //  ALIEN_ASSERT(!m_col_space.isNull(), ("Null col space matrix access"));
-  typedef typename AlgebraTraits<tag>::matrix_type matrix_type;
+  using matrix_type = typename AlgebraTraits<tag>::matrix_type;
   IMatrixImpl*& impl2 = getImpl<matrix_type>(AlgebraTraits<tag>::name());
   ALIEN_ASSERT(
   (impl2->backend() == AlgebraTraits<tag>::name()), ("Inconsistent backend"));
@@ -331,7 +332,7 @@ template <typename matrix_type>
 void MultiMatrixImpl::insert(BackEndId backend, matrix_type* m)
 {
   if (m_impls2.find(backend) != m_impls2.end()) {
-    alien_fatal([&] { cout() << "try to insert already inserted value"; });
+    alien_fatal([this] { cout() << "try to insert already inserted value"; });
   }
   m_impls2[backend] = m;
 }

@@ -20,7 +20,7 @@
 
 #include <alien/data/IMatrix.h>
 #include <alien/data/IVector.h>
-#include <alien/handlers/scalar/BaseDirectMatrixBuilder.h>
+#include <alien/handlers/scalar/IDirectMatrixBuilder.h>
 #include <alien/handlers/scalar/BaseVectorWriter.h>
 
 #include <vector>
@@ -168,8 +168,8 @@ void loadMMMatrixFromReader(MatrixT& A, ReaderT& reader)
 
   DirectMatrixOptions::SymmetricFlag sym_flag = is_symmetric ? DirectMatrixOptions::eSymmetric : DirectMatrixOptions::eUnSymmetric;
 
-  Common::DirectMatrixBuilder matrix_builder(A, DirectMatrixOptions::eResetAllocation, sym_flag);
-  matrix_builder.allocate();
+  auto matrix_builder = Common::directMatrixBuilderFactory(A, DirectMatrixOptions::eResetAllocation, sym_flag);
+  matrix_builder->allocate();
 
   for (int i = 0; i < nnz; ++i) {
     int li = 0;
@@ -183,7 +183,7 @@ void loadMMMatrixFromReader(MatrixT& A, ReaderT& reader)
     li--;
     ci--;
 
-    matrix_builder.addData(li, ci, val);
+    matrix_builder->addData(li, ci, val);
   }
 }
 

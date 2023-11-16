@@ -28,7 +28,6 @@ set(alien_semantic_public_header
         alien/move/handlers/sub_matrix/Extraction.h
         alien/move/data/MatrixData.h
         alien/move/data/VectorData.h
-        alien/move/handlers/scalar/DoKDirectMatrixBuilder.h
         alien/move/data/Redistribution.h)
 
 add_library(alien_semantic_move
@@ -38,7 +37,7 @@ add_library(alien_semantic_move
         alien/move/data/VectorData.cc
         alien/move/impl/MatrixMarketReader.cc
         alien/move/data/Redistribution.cpp
-        )
+)
 
 if (ALIEN_GENERATE_DOCUMENTATION)
     set(DOXYGEN_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
@@ -46,7 +45,7 @@ if (ALIEN_GENERATE_DOCUMENTATION)
             ${alien_semantic_public_header}
             USE_STAMP_FILE
             COMMENT "Generate API-documents for Alien."
-            )
+    )
 endif (ALIEN_GENERATE_DOCUMENTATION)
 
 target_link_libraries(alien_semantic_move PUBLIC alien_core)
@@ -61,7 +60,7 @@ generate_export_header(alien_semantic_move
         EXPORT_MACRO_NAME ALIEN_MOVESEMANTIC_EXPORT
         EXPORT_FILE_NAME alien/move/AlienMoveSemanticExport.h
         STATIC_DEFINE ${PROJECT_NAME}_BUILT_AS_STATIC
-        )
+)
 
 install(TARGETS alien_semantic_move
         EXPORT ${ALIEN_EXPORT_TARGET}
@@ -75,7 +74,7 @@ enable_sanitizers(alien_semantic_move)
 install(DIRECTORY alien/move
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/alien
         FILES_MATCHING PATTERN "*.h"
-        )
+)
 
 install(
         FILES ${CMAKE_CURRENT_BINARY_DIR}/alien/move/AlienMoveSemanticExport.h

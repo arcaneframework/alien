@@ -33,7 +33,7 @@ include(GNUInstallDirs)
 
 install(TARGETS bench_hypre EXPORT Alien
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        )
+)
 
 if (ALIEN_UNIT_TESTS)
 

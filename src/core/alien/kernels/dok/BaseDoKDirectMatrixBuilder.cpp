@@ -23,37 +23,64 @@
 
 #include "DoKBackEnd.h"
 #include "DoKMatrixT.h"
+#include "alien/handlers/scalar/MatrixBuilderFactory.h"
 
-namespace Alien
+namespace Alien::Common
 {
 
-Common::BaseDoKDirectMatrixBuilder::BaseDoKDirectMatrixBuilder(Alien::IMatrix& self)
+BaseDoKDirectMatrixBuilder::BaseDoKDirectMatrixBuilder(Alien::IMatrix& self, DirectMatrixOptions::ResetFlag reset_flag)
 : m_matrix(self)
 {
   m_matrix.impl()->lock();
+
+  switch (reset_flag) {
+  case DirectMatrixOptions::eResetProfile:
+  case DirectMatrixOptions::eResetAllocation:
+    m_matrix.impl()->release<BackEnd::tag::DoK>();
+    break;
+  default:
+    // Nothing to do
+    break;
+  }
+
   m_impl = &m_matrix.impl()->get<BackEnd::tag::DoK>(true);
+
+  switch (reset_flag) {
+  case DirectMatrixOptions::eNoReset:
+    break;
+  case DirectMatrixOptions::eResetValues:
+    m_impl->fill(0);
+    break;
+  default:
+    // Nothing to do
+    break;
+  }
 }
 
-Common::BaseDoKDirectMatrixBuilder::~BaseDoKDirectMatrixBuilder()
+BaseDoKDirectMatrixBuilder::~BaseDoKDirectMatrixBuilder()
 {
   assemble();
 }
 
-std::optional<Real> Common::BaseDoKDirectMatrixBuilder::contribute(Arccore::Integer row, Arccore::Integer col, Arccore::Real value)
+std::optional<Real> BaseDoKDirectMatrixBuilder::contribute(Arccore::Integer row, Arccore::Integer col, Arccore::Real value)
 {
-  return std::optional<Real>(m_impl->addNNZ(row, col, value));
+  return { m_impl->addNNZ(row, col, value) };
 }
 
-std::optional<Real> Common::BaseDoKDirectMatrixBuilder::setNNZ(Arccore::Integer row, Arccore::Integer col, Arccore::Real value)
+std::optional<Real> BaseDoKDirectMatrixBuilder::setNNZ(Arccore::Integer row, Arccore::Integer col, Arccore::Real value)
 {
   m_impl->setNNZ(row, col, value);
-  return std::optional<Real>(value);
+  return { value };
 }
 
-bool Common::BaseDoKDirectMatrixBuilder::assemble()
+bool BaseDoKDirectMatrixBuilder::assemble()
 {
   m_impl->assemble();
   m_matrix.impl()->unlock();
   return true;
 }
-} // namespace Alien
+
+const ALIEN_EXPORT Alien::Common::MatrixBuilderFactory dok_builder_register(
+AlgebraTraits<BackEnd::tag::DoK>::name(), [](IMatrix& matrix, DirectMatrixOptions::ResetFlag reset, [[maybe_unused]] DirectMatrixOptions::SymmetricFlag symmetry) { return std::make_unique<BaseDoKDirectMatrixBuilder>(matrix, reset); });
+
+} // namespace Alien::Common

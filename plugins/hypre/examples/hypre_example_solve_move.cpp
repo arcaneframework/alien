@@ -54,7 +54,7 @@ int test()
 
   tm->info() << "build matrix with direct matrix builder";
   {
-    Alien::Move::DirectMatrixBuilder builder(std::move(A), Alien::DirectMatrixOptions::eResetValues);
+    Alien::Move::DirectMatrixBuilder builder(std::move(A), Alien::DirectMatrixOptions::eResetProfile, Alien::DirectMatrixOptions::eSymmetric, std::make_optional<Alien::BackEndId>(Alien::AlgebraTraits<Alien::BackEnd::tag::hypre>::name()));
     builder.reserve(3); // Réservation de 3 coefficients par ligne
     builder.allocate(); // Allocation de l'espace mémoire réservé
 
@@ -131,6 +131,20 @@ int test()
   }
 
   tm->info() << " => ||r|| = " << norm;
+
+  // Try to change matrix values
+  {
+    Alien::Move::DirectMatrixBuilder builder(std::move(A), Alien::DirectMatrixOptions::eResetValues, Alien::DirectMatrixOptions::eSymmetric, std::make_optional<Alien::BackEndId>(Alien::AlgebraTraits<Alien::BackEnd::tag::hypre>::name()));
+
+    for (int irow = offset; irow < offset + lsize; ++irow) {
+      builder(irow, irow) = 4.;
+      if (irow - 1 >= 0)
+        builder(irow, irow - 1) = -2.;
+      if (irow + 1 < gsize)
+        builder(irow, irow + 1) = -2.;
+    }
+    A = builder.release();
+  }
 
   tm->info() << " ";
   tm->info() << "... example finished !!!";

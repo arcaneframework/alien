@@ -28,7 +28,7 @@
 #include <alien/distribution/VectorDistribution.h>
 
 #include <alien/move/data/MatrixData.h>
-#include <alien/move/handlers/scalar/DoKDirectMatrixBuilder.h>
+#include <alien/move/handlers/scalar/DirectMatrixBuilder.h>
 #include <alien/move/data/VectorData.h>
 #include <alien/kernels/dok/DoKVector.h>
 #include <alien/kernels/dok/DoKBackEnd.h>
@@ -133,7 +133,7 @@ namespace
     return std::make_optional(out);
   }
 
-  bool readValues(std::istream& fstream, DoKDirectMatrixBuilder& builder, bool symmetric, size_t start, size_t stop)
+  bool readValues(std::istream& fstream, DirectMatrixBuilder& builder, bool symmetric, size_t start, size_t stop)
   {
     for (size_t i = 0; i < start; ++i) {
       fstream.ignore(4096, '\n');
@@ -186,7 +186,7 @@ readFromMatrixMarket(Arccore::MessagePassing::IMessagePassingMng* pm, const std:
   if (!desc) {
     throw Arccore::FatalErrorException("readFromMatrixMarket", "Invalid header");
   }
-  DoKDirectMatrixBuilder builder(createMatrixData(desc.value(), pm));
+  DirectMatrixBuilder builder(createMatrixData(desc.value(), pm), Alien::DirectMatrixOptions::eResetValues, Alien::DirectMatrixOptions::eSymmetric, std::make_optional<Alien::BackEndId>(Alien::AlgebraTraits<Alien::BackEnd::tag::DoK>::name()));
 
   auto [nnz_start, nnz_stop] = partition(desc.value().n_nnz, pm);
   readValues(stream, builder, desc->symmetric, nnz_start, nnz_stop);
