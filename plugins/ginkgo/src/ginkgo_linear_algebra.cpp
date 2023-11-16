@@ -155,9 +155,9 @@ void InternalLinearAlgebra::scal(Arccore::Real alpha, Vector& x) const
 }
 
 ALIEN_GINKGO_EXPORT
-IInternalLinearAlgebra<Ginkgo::Matrix, Ginkgo::Vector>*
+std::unique_ptr<IInternalLinearAlgebra<Ginkgo::Matrix, Ginkgo::Vector>>
 InternalLinearAlgebraFactory()
 {
-  return new Ginkgo::InternalLinearAlgebra();
+  return std::make_unique<Ginkgo::InternalLinearAlgebra>();
 }
 } // namespace Alien::Ginkgo

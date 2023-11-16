@@ -152,9 +152,9 @@ void InternalLinearAlgebra::scal(Arccore::Real alpha, Vector& x) const
 }
 
 ALIEN_PETSC_EXPORT
-IInternalLinearAlgebra<PETSc::Matrix, PETSc::Vector>*
+std::unique_ptr<IInternalLinearAlgebra<PETSc::Matrix, PETSc::Vector>>
 InternalLinearAlgebraFactory()
 {
-  return new PETSc::InternalLinearAlgebra();
+  return std::make_unique<PETSc::InternalLinearAlgebra>();
 }
 } // namespace Alien::PETSc

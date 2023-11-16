@@ -149,28 +149,28 @@ class SYCLInternalLinearAlgebraExpr
 
  public:
   // IInternalLinearAlgebra interface.
-  Real norm0(const Vector& x) const;
-  Real norm1(const Vector& x) const;
-  Real norm2(const Vector& x) const;
-  void mult(const Matrix& a, const Vector& x, Vector& r) const;
-  void axpy(Real alpha, const Vector& x, Vector& r) const;
-  void aypx(Real alpha, Vector& y, const Vector& x) const;
-  void copy(const Vector& x, Vector& r) const;
-  Real dot(const Vector& x, const Vector& y) const;
-  void scal(Real alpha, Vector& x) const;
-  void diagonal(const Matrix& a, Vector& x) const;
-  void reciprocal(Vector& x) const;
-  void pointwiseMult(const Vector& x, const Vector& y, Vector& w) const;
+  Real norm0(const Vector& x) const override;
+  Real norm1(const Vector& x) const override;
+  Real norm2(const Vector& x) const override;
+  void mult(const Matrix& a, const Vector& x, Vector& r) const override;
+  void axpy(Real alpha, const Vector& x, Vector& r) const override;
+  void aypx(Real alpha, Vector& y, const Vector& x) const override;
+  void copy(const Vector& x, Vector& r) const override;
+  Real dot(const Vector& x, const Vector& y) const override;
+  void scal(Real alpha, Vector& x) const override;
+  void diagonal(const Matrix& a, Vector& x) const override;
+  void reciprocal(Vector& x) const override;
+  void pointwiseMult(const Vector& x, const Vector& y, Vector& w) const override;
 
   // IInternalLinearAlgebra interface.
 
-  void mult(const Matrix& a, const UniqueArray<Real>& x, UniqueArray<Real>& r) const;
-  void axpy(Real alpha, UniqueArray<Real> const& x, UniqueArray<Real>& r) const;
-  void aypx(Real alpha, UniqueArray<Real>& y, UniqueArray<Real> const& x) const;
-  void copy(const UniqueArray<Real>& x, UniqueArray<Real>& r) const;
-  Real dot(Integer local_size, const UniqueArray<Real>& x, const UniqueArray<Real>& y) const;
+  void mult(const Matrix& a, const UniqueArray<Real>& x, UniqueArray<Real>& r) const override;
+  void axpy(Real alpha, UniqueArray<Real> const& x, UniqueArray<Real>& r) const override;
+  void aypx(Real alpha, UniqueArray<Real>& y, UniqueArray<Real> const& x) const override;
+  void copy(const UniqueArray<Real>& x, UniqueArray<Real>& r) const override;
+  Real dot(Integer local_size, const UniqueArray<Real>& x, const UniqueArray<Real>& y) const override;
 
-  void scal(Real alpha, UniqueArray<Real>& x) const;
+  void scal(Real alpha, UniqueArray<Real>& x) const override;
 
  private:
   std::unique_ptr<SYCLInternal::KernelInternal> m_internal;

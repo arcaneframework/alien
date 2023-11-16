@@ -47,14 +47,14 @@ class SimpleCSRVector;
 template <typename T>
 struct SimpleCSRTraits
 {
-  typedef SimpleCSRMatrix<T> MatrixType;
-  typedef SimpleCSRVector<T> VectorType;
-  typedef IInternalLinearAlgebra<MatrixType, VectorType> AlgebraType;
-  typedef IInternalLinearAlgebraExpr<MatrixType, VectorType> AlgebraExprType;
+  using MatrixType = SimpleCSRMatrix<T>;
+  using VectorType = SimpleCSRVector<T>;
+  using AlgebraType = IInternalLinearAlgebra<MatrixType, VectorType>;
+  using AlgebraExprType = IInternalLinearAlgebraExpr<MatrixType, VectorType>;
 };
 
-extern SimpleCSRTraits<Real>::AlgebraType* SimpleCSRInternalLinearAlgebraFactory();
-extern SimpleCSRTraits<Real>::AlgebraExprType*
+extern std::unique_ptr<SimpleCSRTraits<Real>::AlgebraType> SimpleCSRInternalLinearAlgebraFactory();
+extern std::unique_ptr<SimpleCSRTraits<Real>::AlgebraExprType>
 SimpleCSRInternalLinearAlgebraExprFactory();
 
 /*---------------------------------------------------------------------------*/
@@ -72,19 +72,19 @@ template <>
 struct AlgebraTraits<BackEnd::tag::simplecsr>
 {
   // clang-format off
-  typedef Real                                   value_type;
-  typedef SimpleCSRTraits<Real>::MatrixType      matrix_type;
-  typedef SimpleCSRTraits<Real>::VectorType      vector_type;
-  typedef SimpleCSRTraits<Real>::AlgebraType     algebra_type;
-  typedef SimpleCSRTraits<Real>::AlgebraExprType algebra_expr_type;
+  using value_type = Real;
+  using matrix_type = SimpleCSRTraits<Real>::MatrixType;
+  using vector_type = SimpleCSRTraits<Real>::VectorType;
+  using algebra_type = SimpleCSRTraits<Real>::AlgebraType;
+  using algebra_expr_type = SimpleCSRTraits<Real>::AlgebraExprType;
   // clang-format off
   
-  static algebra_type* algebra_factory(
+  static std::unique_ptr<algebra_type> algebra_factory(
   IMessagePassingMng* p_mng ALIEN_UNUSED_PARAM = nullptr)
   {
     return SimpleCSRInternalLinearAlgebraFactory();
   }
-  static algebra_expr_type* algebra_expr_factory(
+  static std::unique_ptr<algebra_expr_type> algebra_expr_factory(
   IMessagePassingMng* p_mng ALIEN_UNUSED_PARAM = nullptr)
   {
     return SimpleCSRInternalLinearAlgebraExprFactory();
