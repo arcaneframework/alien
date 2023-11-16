@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## 1.1.5
+
 **News:**
 
 - \[move\]: parallel matrix-market reader
