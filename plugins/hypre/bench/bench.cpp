@@ -70,7 +70,7 @@ int test(const Alien::Hypre::OptionTypes::eSolver& solv, const Alien::Hypre::Opt
       if (hypre_pm && hypre_pm->commRank() == 0) {
         tm->info() << "Running Hypre on a reduced communicator of size = " << hypre_pm->commSize() << " scattered : " << scattered;
       }
-      auto solution = bench.solveWithRedistribution(&solver, hypre_pm);
+      auto local_solution = bench.solveWithRedistribution(&solver, hypre_pm);
       delete hypre_pm;
     }
   }
@@ -84,9 +84,9 @@ int main(int argc, char** argv)
   MPI_Init(&argc, &argv);
 
   if (argc != 5 && argc != 1) {
-    std::cerr << "Usage : ./bench_Hypre [solver] [preconditioner] [matrix] [vector] \n"
+    std::cerr << "Usage : ./bench_Hypre solver preconditioner matrix vector \n"
               << "  - solver : (CG|GMRES|BICG|BICGSTAB) \n"
-              << "  - preconditioner : (Jacobi|NoPC) \n"
+              << "  - preconditioner : (Jacobi|NoPC|AMG) \n"
               << "  - MTX matrix file \n"
               << "  - optional MTX vector file \n";
     return -1;
@@ -126,7 +126,7 @@ int main(int argc, char** argv)
     }
     else {
       std::cerr << "Unrecognized preconditioner : " << argv[2] << "\n"
-                << "  - preconditioner list : (Jacobi|NoPC) \n";
+                << "  - preconditioner list : (Jacobi|NoPC|AMG) \n";
       return -1;
     }
 

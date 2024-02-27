@@ -84,6 +84,14 @@ Alien::Move::VectorData LinearBench::_solve(Alien::Move::MatrixData&& linop, Ali
   // solve
   solver->solve(linop, rhs, x);
 
+  if (auto parallel_mng = linop.distribution().parallelMng(); parallel_mng->commRank() == 0) {
+    auto const& status = solver->getStatus();
+    std::cout << "Solver stats (on " << parallel_mng->commSize() << "): " << std::endl
+              << "Converged: " << status.succeeded
+              << " in " << status.iteration_count
+              << " with residual " << status.residual
+              << std::endl;
+  }
   return x;
 }
 
